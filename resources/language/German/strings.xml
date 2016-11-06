@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+<string id="32000">Allgemien</string>
+<string id="30002">Konfigurationsmanager öffnen</string> 
+<string id="32003">NFO's anlegen (In Kürze):</string>
+<string id="32004">Medien Speicherort:</string>
+<string id="30310">Stream-Limit pro Konfiguration:</string>
+<string id="34022">Veraltete Streams erneuern(empfohlen):</string>
+<string id="32007">Youtube Inhalte in eigenem Ordner anlegen:</string>
+<string id="30305">Youtube/RSS Miniaturansichten (In Kürze):</string>
+<string id="32100">Service:</string>
+<string id="32001">Automatische Aktualisierung:</string>
+<string id="32002">Update alle (Stunde/n):</string>
+<string id="32006">Startverzögerung (Sekunden):</string>
+<string id="32005">Aktiv bei Wiedergabe von Inhalten:</string>
+<string id="34009">Datenbank scannen wenn fertig:</string>
+<string id="34010">Datenbank bereinigen wenn fertig:</string>
+<string id="34002">Medien Speicherort immer bereinigen(löscht alle Dateien im Ordner):</string>
+<string id="34023">Interne Stream Referenz nutzen:</string>
+<string id="34024">Streams sortieren nach:</string>
+</strings>
+
+
+
