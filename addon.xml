@@ -36,15 +36,15 @@
     <language></language>
     <platform>all</platform>
     <license>GNU GENERAL PUBLIC LICENSE. Version 3</license>
-    <forum></forum>
+    <forum>https://www.kodinerds.net/index.php/Thread/53307-Beta-Version-OSMOSIS-Streams-zur-DB-hinzuf%C3%BCgen/?postID=328166#post327429</forum>
     <website></website>
     <email></email>
-    <source></source>
+    <source>https://github.com/stereodruid/OSMOSIS</source>
     <news></news>
     <assets>
         <icon>icon.png</icon>
         <fanart>fanart.jpg</fanart>
-        <screenshot></screenshot>
+        <screenshot>fanart.jpg</screenshot>
     </assets>
     </extension>
 </addon>
