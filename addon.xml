@@ -18,9 +18,9 @@
         <import addon="script.module.metahandler" version="2.9.0"/>
         <import addon="script.module.pyxbmct" version="1.1" />
         <import addon="service.watchdog" version="0.9.7"/>
-    <!--  --> 
+    <!--
         <import addon="script.module.pydevd" version="4.4.0" optional="true"/>
-        <import addon="script.module.pydevd-master" version="4.4.0" optional="true"/>  
+        <import addon="script.module.pydevd-master" version="4.4.0" optional="true"/>   -->  
     </requires>
     <extension point="xbmc.python.pluginsource" library="default.py">
     <provides>video</provides>
@@ -30,18 +30,18 @@
     <summary lang="en_gb">Library Strm Generator</summary>
     <description lang="en_gb">Generate Strms from Kodi Plugins, UPNP, Youtube, and RSS Sources.</description>
     <disclaimer lang="en_gb"></disclaimer>
-    <language></language>
+    <language>English\German</language>
     <platform>all</platform>
     <license>GNU GENERAL PUBLIC LICENSE. Version 3</license>
-    <forum></forum>
+    <forum>https://www.kodinerds.net/index.php/Thread/53307-Beta-Version-OSMOSIS-Streams-zur-DB-hinzuf%C3%BCgen/?postID=328166#post327429</forum>
     <website></website>
     <email></email>
-    <source></source>
+    <source>https://github.com/stereodruid/OSMOSIS</source>
     <news></news>
     <assets>
         <icon>icon.png</icon>
         <fanart>fanart.jpg</fanart>
-        <screenshot></screenshot>
+        <screenshot>fanart.jpg</screenshot>
     </assets>
     </extension>
 </addon>
