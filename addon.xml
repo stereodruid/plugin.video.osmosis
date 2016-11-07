@@ -29,7 +29,7 @@
     <extension point="xbmc.service" library="service.py" start="startup"/>
     <extension point="xbmc.addon.metadata">
     <summary lang="en_gb">Library Strm Generator</summary>
-    <description lang="en_gb">Generate Strms from Kodi Plugins, UPNP, Youtube, and RSS Sources.</description>
+    <description lang="en_gb">Generate Strms from  Kodi Plugins, UPNP, Youtube, and RSS Sources.</description>
     <disclaimer lang="en_gb"></disclaimer>
     <language>English\German</language>
     <platform>all</platform>
