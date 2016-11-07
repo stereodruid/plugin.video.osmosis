@@ -3,10 +3,13 @@
 ###Für eine deutsche anleitung und Beschreibung, bitte Kodinerds.net besuchen:
 http://www.kodinerds.net/index.php/Thread/53307-Beta-Version-OSMOSIS-Streams-zur-DB-hinzuf%C3%BCgen/
 
-# Version .0.1.3
+# Version .0.1.4
+Cahnged project name and id.
+
+### Version .0.1.3
 Some fixes.
 
-### Version .0.1.2b
+### Version .0.1.2a
 Important fix, make a Update!
 Otherwise you cant add searched content to your lib.
 
