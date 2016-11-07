@@ -4,7 +4,7 @@
 http://www.kodinerds.net/index.php/Thread/53307-Beta-Version-OSMOSIS-Streams-zur-DB-hinzuf%C3%BCgen/
 
 # Version .0.1.4
-Cahnged project name and id.
+Cahnged project name and id. 
 
 ### Version .0.1.3
 Some fixes.
