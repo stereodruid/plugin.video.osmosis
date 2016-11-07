@@ -19,7 +19,7 @@ Open OSMOSIS >> select "Remove Media" >> select items to be removed(mullti selec
 
 ###.0.1.1a Audio strms
 Now OSMOSIS is creating NFO-Files for strms, containing audio streams.
-To get library support, you have to add the audio strms as "Music Video"
+To get library support, you have to add the audio strms as "Music Video" 
 
 ###.0.1.1
 Support for Amazon Prime Music,
