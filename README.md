@@ -1,6 +1,6 @@
 ##Early version should be considered unstable. 
 
-###Für eine deutsche anleitung und Beschreibung, bitte Kodinerds.net besuchen:
+###Für eine deutsche anleitung und Beschreibung, bitte Kodinerds.net besuchen: 
 http://www.kodinerds.net/index.php/Thread/53307-Beta-Version-OSMOSIS-Streams-zur-DB-hinzuf%C3%BCgen/
 
 # Version .0.1.4
