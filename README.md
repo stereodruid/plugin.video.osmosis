@@ -1,5 +1,9 @@
 ##Early version should be considered unstable. 
 
+###
+Kodinerds.net Repo:
+https://github.com/kodinerds/repo/raw/master/repository.kodinerds.zip
+
 ###Für eine deutsche anleitung und Beschreibung, bitte Kodinerds.net besuchen: 
 http://www.kodinerds.net/index.php/Thread/53307-Beta-Version-OSMOSIS-Streams-zur-DB-hinzuf%C3%BCgen/
 
@@ -39,7 +43,7 @@ Now the strm files are located at the path you can configure in OSMOSIS's settin
 
 After creating strm you will find your stuff in TV, Cinema, TV-Shows, or Others folder, now add this folder to your KODI library and set the content type, done.
 
-### Tested Providers:
+### Tested Providers on OS Libreelec Kodi 16.1:
 YouTube,
 Vimeo,
 AmazonPrime(KODI 17 only), 
