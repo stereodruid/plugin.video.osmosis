@@ -64,30 +64,31 @@ if __name__ == "__main__":
             return thelist
     
     thelist = readSettings2()
-    # ToDo: if xbmcvfs.exists(SETTINGS2_LOC):    
+    
     def strm_update():
-        pDialog = xbmcgui.DialogProgressBG()
-        pDialog.create(ADDON_NAME, "Updating")
-        #xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%(ADDON_NAME, "Starting Update", time, represent))
-        try:
-            
-            j = 100 / len(thelist)
-            
-            for i in range(len(thelist)):
-                    type ,name, url = ((thelist[i]).strip().split('|', 2))
-                    #time.sleep(2) # delays for 2 seconds just to make sure Hodor can read the message 
-                    pDialog.update(j, ADDON_NAME + " Update: " + name) 
-                    try:
-                         default.fillPluginItems(url, strm=True, strm_name=name, strm_type=type, showtitle=name)
-                    except:#
-                        pass
-                    
-                    j = j + 100 / len(thelist)
-            pDialog.update(100, ADDON_NAME + " Update: Done") 
-            pDialog.close()
-            xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%(ADDON_NAME, "Next update in: " + Automatic_Update_Time , time, represent))
-        except:
-            pass
+        if xbmcvfs.exists(SETTINGS2_LOC):
+            pDialog = xbmcgui.DialogProgressBG()
+            pDialog.create(ADDON_NAME, "Updating")
+            #xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%(ADDON_NAME, "Starting Update", time, represent))
+            try:
+                
+                j = 100 / len(thelist)
+                
+                for i in range(len(thelist)):
+                        type ,name, url = ((thelist[i]).strip().split('|', 2))
+                        #time.sleep(2) # delays for 2 seconds just to make sure Hodor can read the message 
+                        pDialog.update(j, ADDON_NAME + " Update: " + name) 
+                        try:
+                             default.fillPluginItems(url, strm=True, strm_name=name, strm_type=type, showtitle=name)
+                        except:#
+                            pass
+                        
+                        j = j + 100 / len(thelist)
+                pDialog.update(100, ADDON_NAME + " Update: Done") 
+                pDialog.close()
+                xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%(ADDON_NAME, "Next update in: " + Automatic_Update_Time , time, represent))
+            except:
+                pass
 
     if Automatic_Update == "true":      
         strm_update()

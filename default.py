@@ -24,9 +24,10 @@ import random
 import pyxbmct
 import string
 import os, sys, re, traceback
-# have to be here otherwise you get errors like: UnicodeDecodeError: 'ascii' codec can't decode byte 0xc3 in position 15: ordinal not in range(128) 
-reload(sys)  
-sys.setdefaultencoding('utf8')
+
+# reload(sys)  
+# sys.setdefaultencoding('utf8')
+
 import xbmc
 REMOTE_DBG = True
 
@@ -96,9 +97,7 @@ def cleanLabels(text, format=''):
                          '\xc3\x9c' : 'Ue', 'xc3\xbc' : 'ue', '\xc3\x9f' : 'ss'}  
     replacements = ((u"[]", u''), (u"[UPPERCASE]", u''),
                    (u"[/UPPERCASE]", u''), (u"[LOWERCASE]", u''),
-                   (u"[/LOWERCASE]", u''), (u"(de)", u" german"),
-                   (u"(en)", u" english"), (u"(TVshow)", u""),
-                   (u"[B]", u''), (u"[/B]", u''),
+                   (u"[/LOWERCASE]", u''),(u"[B]", u''), (u"[/B]", u''),
                    (u"[I]", u''), (u"[/I]", u''),
                    (u'[D]', u''), (u'[F]', u''),
                    (u"[CR]", u''), (u"[HD]", u''),
@@ -128,6 +127,7 @@ def cleanLabels(text, format=''):
         text = text
         
     text = uni(text.strip())
+    text = text.encode("utf-8")
     return text
 
 def cleanStrms(text, format=''):
@@ -196,11 +196,15 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         episodes = re.search('"episode" *: *(.*?),', f)
         seasons = re.search('"season" *: *(.*?),', f)
         showtitles = re.search('"showtitle" *: *"(.*?)",', f)
+
+        dictReplacements = {"'(\\d+)'" : '', '()' : '', 'Kinofilme' : '', '  ' : ' ',"(de)":" german",
+                            "(en)":" english", "(TVshow)":"",'Movies' : '', 'Filme' : '', 
+                            'Movie' : '', "'.'" : ' '}
         
-        dictReplacements = {"'(\\d+)'" : '', '()' : '', 'Kinofilme' : '', '  ' : ' ',
-                            'Movies' : '', 'Filme' : '', 'Movie' : '', "'.'" : ' ', '\xc3\x84' : 'Ae',
-                            '\xc3\xa4' : 'ae', '\xc3\x96' : 'Oe', '\xc3\xb6' : 'oe',
-                            '\xc3\x9c' : 'Ue', 'xc3\xbc' : 'ue', '\xc3\x9f' : 'ss'}
+        
+#         , '\xc3\x84' : 'Ae',
+#                             '\xc3\xa4' : 'ae', '\xc3\x96' : 'Oe', '\xc3\xb6' : 'oe',
+#                             '\xc3\x9c' : 'Ue', 'xc3\xbc' : 'ue', '\xc3\x9f' : 'ss'}
         
         if filetypes and labels and files:
             filetype = filetypes.group(1)
@@ -244,12 +248,9 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
                 
             if strm_type in ['TV-Shows']:
                 if showtitle and season and episode:
-#                     if showtitle == "":
-#                         showtitle = strm_name
                     path = os.path.join('TV-Shows', showtitle)    
                     filename = 's' + season + 'e' + episode
                     addon_log(utils.multiple_reSub(path.rstrip(), dictReplacements) + " - " + utils.multiple_reSub(filename.rstrip(), dictReplacements))
-  
                 else:
                     path = os.path.join('Other', strm_name)
                     filename = strm_name + ' - ' + label
@@ -438,9 +439,12 @@ def updateStream(strm_Fullpath, replace_text):
             newF.write(replace_text)        
     
 def makeSTRM(filepath, filename, url):
+    filepath = filepath.decode("utf-8")
+    filename = filename.decode("utf-8")
+    
     addon_log('makeSTRM')
     filepath = os.path.join(STRM_LOC, filepath)
-
+    
     if not xbmcvfs.exists(filepath): 
         xbmcvfs.mkdirs(filepath)
     fullpath = os.path.join(filepath, filename + '.strm')
