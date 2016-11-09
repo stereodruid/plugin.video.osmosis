@@ -8,6 +8,9 @@ http://www.kodinerds.net/index.php/Thread/53307-Beta-Version-OSMOSIS-Streams-zur
 
 ![alt tag](https://github.com/stereodruid/OSMOSIS/blob/master/icon.png)
 
+# Version .0.1.7
+Some other fixes
+
 # Version .0.1.6
 Decoding error fix for ÄÜÖ,
 Fix for YouTube Playlists adding as TV,
