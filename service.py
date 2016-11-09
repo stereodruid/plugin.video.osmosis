@@ -64,7 +64,7 @@ if __name__ == "__main__":
             return thelist
     
     thelist = readSettings2()
-    
+    # ToDo: if xbmcvfs.exists(SETTINGS2_LOC):    
     def strm_update():
         pDialog = xbmcgui.DialogProgressBG()
         pDialog.create(ADDON_NAME, "Updating")
