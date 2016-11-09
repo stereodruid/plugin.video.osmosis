@@ -33,7 +33,7 @@
 	<summary lang="de">Library Strm Generator</summary>
     <description lang="de">Generate Strms from Kodi Plugins, UPNP, Youtube, and RSS Sources.</description>
     <disclaimer lang="de"></disclaimer>
-    <language> </language>
+    <language></language>
     <platform>all</platform>
     <license>GNU GENERAL PUBLIC LICENSE. Version 3</license>
     <forum>https://www.kodinerds.net/index.php/Thread/53307-Beta-Version-OSMOSIS-Streams-zur-DB-hinzuf%C3%BCgen/?postID=328166#post327429</forum>
