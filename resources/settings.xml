@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
     <category label="32000">
-        <setting label="32004" type="folder" id="STRM_LOC" source="auto" default="special://userdata/plugin.video.osmosis/strms" />   
+        <setting label="32004" type="folder" id="STRM_LOC" source="auto" default="special://userdata/addon_data/plugin.video.osmosis/strms"/>   
         <setting label="32003" type="bool" id="Write_NFOS" default="false" />
         <setting label="34022" type="bool" id="Update_Strms" default="true"/>
         <setting label="34023" type="enum" id="Link_Type" values="OSMOSIS|Original Plugin" default="0"/>
