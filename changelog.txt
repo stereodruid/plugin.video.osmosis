@@ -1,3 +1,11 @@
+#.0.1.6
++ Decoding error fix for ÄÜÖ
++ Fix for YouTube Playlists adding as TV
++ Some other fixes
+
+#.0.1.5
++ Some fixes
+
 #.0.1.4
 + Renaming Project to OSMOSIS
 
