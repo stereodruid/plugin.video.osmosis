@@ -8,7 +8,10 @@ http://www.kodinerds.net/index.php/Thread/53307-Beta-Version-OSMOSIS-Streams-zur
 
 ![alt tag](https://github.com/stereodruid/OSMOSIS/blob/master/icon.png)
 
-# Version .0.1.4
+# Version .0.1.5
+Some fixes
+
+### Version .0.1.4
 Cahnged project name and id. 
 
 ### Version .0.1.3
