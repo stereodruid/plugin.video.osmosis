@@ -233,14 +233,14 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             thumbnail = removeNonAscii(thumbnails.group(1))
             fanart = removeNonAscii(fanarts.group(1))
             
-            if addon.getSetting('Link_Type') == '0':
+            if addon.getSetting('Link_Type') == '0': 
                 link = sys.argv[0] + "?url=" + urllib.quote_plus(file) + "&mode=" + str(10) + "&name=" + urllib.quote_plus(label) + "&fanart=" + urllib.quote_plus(fanart)
             else:
                 link = file
             
             if strm_type in ['TV']:
                 path = os.path.join('TV', strm_name)
-                filename = strm_name + ' - ' + label
+                filename = label
                 
             if strm_type in ['Cinema']:
                 path = os.path.join('Cinema', strm_name)
