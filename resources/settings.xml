@@ -7,7 +7,7 @@
         <setting label="34023" type="enum" id="Link_Type" values="OSMOSIS|Original Plugin" default="0"/>
         <setting label="34024" type="enum" id="Path_Type" values="Type|Plugin" default="0"/>
         <setting label="32001" type="bool" id="Automatic_Update" default="true" />
-        <setting label="32002" type="select" id="Automatic_Update_Time" subsetting="true" visible="eq(-1,true)" values="0.1|0.2|0.5|1.0|3.0|6.0|12.0|24.0|48.0|72.0" default="2.0" option="float"/>
+        <setting label="32002" type="select" id="Automatic_Update_Time" subsetting="true" visible="eq(-1,true)" values="1.0|3.0|6.0|12.0|24.0|48.0|72.0" default="6.0" option="float"/>
         <setting label="32006" type="enum" id="Automatic_Update_Delay" subsetting="true" visible="eq(-2,true)" values="0|5|10|15|20"  default="1"/>
         <setting label="32005" type="bool" id="Automatic_Update_Run" subsetting="false" visible="eq(-3,true)" default="false"/>
         <setting label="34009" type="bool" id="Automatic_Update_Folder" subsetting="true" visible="eq(-4,true)" default="false" />
