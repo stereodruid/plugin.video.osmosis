@@ -25,11 +25,12 @@ import pyxbmct
 import string
 import os, sys, re, traceback
 
-# reload(sys)  
-# sys.setdefaultencoding('utf8')
-
 import xbmc
+
+# Debug option pydevd:
 REMOTE_DBG = True
+#import pydevd
+#pydevd.settrace(stdoutToServer=True, stderrToServer=True)
 
 import xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
 import SimpleDownloader as downloader
@@ -39,8 +40,6 @@ except:
     import simplejson as json
 
 from BeautifulSoup import BeautifulStoneSoup, BeautifulSoup, BeautifulSOAP
-#import pydevd
-#pydevd.settrace(stdoutToServer=True, stderrToServer=True)
 
 addnon_id = 'plugin.video.osmosis'
 addon = xbmcaddon.Addon(addnon_id)
@@ -93,8 +92,8 @@ def cleanLabels(text, format=''):
     text = uni(text)
     dictresub = {'\[COLOR (.+?)\]' : '', '\[/COLOR\]' : '', '\[COLOR=(.+?)\]' : '', '\[color (.+?)\]': '',
                  '\[/color\]': '', '\[Color=(.+?)\]': '', '\[/Color\]': ''} 
-    ascciReplacements = {'\xc3\x84' : 'Ae', '\xc3\xa4' : 'ae', '\xc3\x96' : 'Oe', '\xc3\xb6' : 'oe',
-                         '\xc3\x9c' : 'Ue', 'xc3\xbc' : 'ue', '\xc3\x9f' : 'ss'}  
+#     ascciReplacements = {'\xc3\x84' : 'Ae', '\xc3\xa4' : 'ae', '\xc3\x96' : 'Oe', '\xc3\xb6' : 'oe',
+#                          '\xc3\x9c' : 'Ue', 'xc3\xbc' : 'ue', '\xc3\x9f' : 'ss'}  
     replacements = ((u"[]", u''), (u"[UPPERCASE]", u''),
                    (u"[/UPPERCASE]", u''), (u"[LOWERCASE]", u''),
                    (u"[/LOWERCASE]", u''),(u"[B]", u''), (u"[/B]", u''),
@@ -113,7 +112,7 @@ def cleanLabels(text, format=''):
                    (u"//", u'/'), (u'plugin.video.', u''),
                    (u'plugin.audio.', u''))
 
-    text = utils.multiple_reSub(text.rstrip(), ascciReplacements)
+#   text = utils.multiple_reSub(text.rstrip(), ascciReplacements)
     text = utils.multiple_reSub(text, dictresub)
     text = utils.multiple_replace(text, *replacements)
     text = re.sub('[\/:*?<>|!@#$/:]', '', text)
@@ -163,7 +162,7 @@ def sendJSON(command):
         data = xbmc.executeJSONRPC(uni(command))
     except UnicodeEncodeError:
         data = xbmc.executeJSONRPC(ascii(command))
-    return uni(data)
+    return data #uni(data)
            
 def requestItem(file, fletype='video'):
     addon_log("requestItem") 

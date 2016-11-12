@@ -1,4 +1,4 @@
-# Copyright (C) 2016 stereodruid(J.Gina)
+# Copyright (C) 2016 stereodruid(J.G.)
 #
 #
 # This file is part of OSMOSIS
@@ -56,12 +56,14 @@ time = 10000 #in miliseconds
    
 if __name__ == "__main__":
     def readSettings2(purge=False):
-        # try:
-        if xbmcvfs.exists(SETTINGS2_LOC):
-            fle = open(SETTINGS2_LOC, "r")
-            thelist = fle.readlines()
-            fle.close()
-            return thelist
+        try:
+            if xbmcvfs.exists(SETTINGS2_LOC):
+                fle = open(SETTINGS2_LOC, "r")
+                thelist = fle.readlines()
+                fle.close()
+                return thelist
+        except:
+            pass
     
     thelist = readSettings2()
     
@@ -104,7 +106,7 @@ if __name__ == "__main__":
             Automatic_Update_Time = REAL_SETTINGS.getSetting('Automatic_Update_Time') 
             Automatic_Update_Run = REAL_SETTINGS.getSetting('Automatic_Update_Run')
             toseconds = toseconds + 0.020
-            if (toseconds >= Automatic_Update_Time):
+            if (toseconds >= float(Automatic_Update_Time)):
                 strm_update()
                 toseconds = 0.0
            
