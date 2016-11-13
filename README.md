@@ -8,7 +8,11 @@ http://www.kodinerds.net/index.php/Thread/53307-Beta-Version-OSMOSIS-Streams-zur
 
 ![alt tag](https://github.com/stereodruid/OSMOSIS/blob/master/icon.png)
 
-# Version .0.2.0
+# Version .0.2.1
++ New Funktions: Language selection after selectin "create_strms"
++ Fix for unstable folder structure.
+
+### Version .0.2.0
 + Remove files and folders for removed items in settings2.xml
 + Fix for update function full hours
 
