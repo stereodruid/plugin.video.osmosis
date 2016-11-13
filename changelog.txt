@@ -1,3 +1,7 @@
+#.0.2.0
++ Remove files and folders for removed items in settings2.xml
++ Fix for update function full hours
+
 #.0.1.9
 + Fix for update loop
 
