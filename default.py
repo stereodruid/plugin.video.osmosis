@@ -197,8 +197,8 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         seasons = re.search('"season" *: *(.*?),', f)
         showtitles = re.search('"showtitle" *: *"(.*?)",', f)
 
-        dictReplacements = {"'(\\d+)'" : '', '()' : '', 'Kinofilme' : '', '  ' : ' ',"(de)":" german",
-                            "(en)":" english", "(TVshow)":"",'Movies' : '', 'Filme' : '', 
+        dictReplacements = {"'(\\d+)'" : '', '()' : '', 'Kinofilme' : '', '  ' : ' ',"(de)":"",
+                            "(en)":"", "(TVshow)":"",'Movies' : '', 'Filme' : '', 
                             'Movie' : '', "'.'" : ' '}
         
         
@@ -215,7 +215,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
                     showtitle = strm_name
                 elif showtitles.group(1) != "" and showtitle == 'None':
                     showtitle = utils.multiple_reSub((showtitles.group(1)).rstrip(), dictReplacements)
-                showtitle = utils.multiple_reSub(showtitle.rstrip(), dictReplacements)           
+                #showtitle = utils.multiple_reSub(showtitle.rstrip(), dictReplacements)           
             if (seasons) != None:
                 season = (seasons.group(1))
             else:
@@ -238,17 +238,17 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             else:
                 link = file
             
-            if strm_type in ['TV']:
-                path = os.path.join('TV', strm_name)
+            if strm_type.find('TV'):
+                path = os.path.join(strm_type, strm_name)
                 filename = label
                 
-            if strm_type in ['Cinema']:
-                path = os.path.join('Cinema', strm_name)
+            if strm_type.find('Cinema'):
+                path = os.path.join(strm_type, strm_name)
                 filename = utils.multiple_reSub(label.rstrip(), dictReplacements)
                 
-            if strm_type in ['TV-Shows']:
+            if strm_type.find('TV-Shows') != -1:
                 if showtitle and season and episode:
-                    path = os.path.join('TV-Shows', showtitle)    
+                    path = os.path.join(strm_type, showtitle)    
                     filename = 's' + season + 'e' + episode
                     addon_log(utils.multiple_reSub(path.rstrip(), dictReplacements) + " - " + utils.multiple_reSub(filename.rstrip(), dictReplacements))
                 else:
@@ -256,7 +256,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
                     filename = strm_name + ' - ' + label
             
             if strm_type in ['Audio-Album']:
-                path = os.path.join('Albums', strm_name)
+                path = os.path.join(strm_type, strm_name)
                 try:
                     album = re.search('"album" *: *"(.*?)",', f).group(1)
                     try:
@@ -538,7 +538,7 @@ def getType():
     if url.find('plugin.audio') != -1:
         Types = ['Audio-Album', 'Audio-Single', 'Other']
     else:
-        Types = ['TV', 'Cinema', 'TV-Shows', 'Episodes', 'Movies', 'Audio-Album', 'Audio-Single', 'Other']
+        Types = ['TV(en)', 'Cinema(en)', 'TV-Shows(en)', 'Movies(en)','TV(de)', 'Cinema(de)', 'TV-Shows(de)', 'Movies(de)', 'Other']
         
     select = selectDialog(Types)
     if select >= 0:
