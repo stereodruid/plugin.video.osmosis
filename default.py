@@ -24,7 +24,7 @@ import random
 import pyxbmct
 import string
 import os, sys, re, traceback
-
+import shutil
 import xbmc
 
 # Debug option pydevd:
@@ -48,6 +48,7 @@ ADDON_NAME = addon.getAddonInfo('name')
 REAL_SETTINGS = xbmcaddon.Addon(id=addnon_id)
 ADDON_SETTINGS = REAL_SETTINGS.getAddonInfo('profile')
 SETTINGS2_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'settings2.xml'))
+STRM_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'STRM_LOC'))
 profile = xbmc.translatePath(addon.getAddonInfo('profile').decode('utf-8'))
 home = xbmc.translatePath(addon.getAddonInfo('path').decode('utf-8'))
 favorites = os.path.join(profile, 'favorites')
@@ -449,7 +450,10 @@ def makeSTRM(filepath, filename, url):
     fullpath = os.path.join(filepath, filename + '.strm')
     if xbmcvfs.exists(fullpath):
         if addon.getSetting('Clear_Strms') == 'true':
-           x = ''  # xbmcvfs.delete(fullpath)
+            try:
+                xbmcvfs.delete(fullpath)
+            except:
+                pass
         else:
             return fullpath
     else:
@@ -504,7 +508,14 @@ def writeSettings2(url, name, type='Other'):
 def isSettings2(url, type='Other'):
     addon_log('isSettings2')
     # parse settings2 for url return bool if found
-    
+def delNotInSettings2(delList, thelist):
+    for i in delList:
+        try:
+            print "remove folder: %s" % (thelist[i]).strip().split('|')[1].format(i)
+            shutil.rmtree( STRM_LOC + (thelist[i]).strip().split('|')[0].format(i) + "\\" + (thelist[i]).strip().split('|')[1].format(i) , ignore_errors=True)
+        except OSError:
+                print "Unable to remove folder: %s" % (thelist[i]).strip().split('|')[1].format(i)
+       
 def removeSettings2(item_remove):
     addon_log('Removing items')
     thelist = []
@@ -515,6 +526,7 @@ def removeSettings2(item_remove):
         thelist = fle.readlines()
         fle.close()
         del fle
+        delNotInSettings2(item_remove, thelist)
         thelist = [i for j, i in enumerate(thelist) if j not in item_remove]
         
         fle = open(thefile, "w")

@@ -6,6 +6,7 @@
     <string id="32004">Strm Folder</string>
     <string id="30310">Strm Limit Per Configuration</string>
     <string id="34022">Update old strms before generating new ones</string>
+    <string id="34025">Delete old strms before generating new ones</string>
     <string id="32007">Sort Youtube into is own folder</string>
     <string id="30305">Download Youtube/RSS Thumbs (ComingSoon)</string>
     <string id="32100">Service</string>

@@ -64,7 +64,7 @@ if __name__ == "__main__":
                 return thelist
         except:
             pass
-    
+                
     thelist = readSettings2()
     
     def strm_update():
@@ -103,10 +103,10 @@ if __name__ == "__main__":
             break  
         Automatic_Update_Run = REAL_SETTINGS.getSetting('Automatic_Update_Run')
         if Automatic_Update == "true":
-            Automatic_Update_Time = REAL_SETTINGS.getSetting('Automatic_Update_Time') 
+            Automatic_Update_Time = REAL_SETTINGS.getSetting('Automatic_Update_Time')
             Automatic_Update_Run = REAL_SETTINGS.getSetting('Automatic_Update_Run')
-            toseconds = toseconds + 0.020
-            if (toseconds >= float(Automatic_Update_Time)):
+            toseconds = toseconds + 10.0
+            if (toseconds >= float(Automatic_Update_Time) * 60 * 60):
                 strm_update()
                 toseconds = 0.0
            
