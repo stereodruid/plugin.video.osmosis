@@ -88,7 +88,7 @@ if __name__ == "__main__":
                         j = j + 100 / len(thelist)
                 pDialog.update(100, ADDON_NAME + " Update: Done") 
                 pDialog.close()
-                xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%(ADDON_NAME, "Next update in: " + Automatic_Update_Time , time, represent))
+                xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%(ADDON_NAME, "Next update in: " + Automatic_Update_Time + "h" , time, represent))
             except:
                 pass
 
