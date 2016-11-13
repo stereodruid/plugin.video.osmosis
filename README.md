@@ -8,7 +8,11 @@ http://www.kodinerds.net/index.php/Thread/53307-Beta-Version-OSMOSIS-Streams-zur
 
 ![alt tag](https://github.com/stereodruid/OSMOSIS/blob/master/icon.png)
 
-# Version .0.1.9
+# Version .0.2.0
++ Remove files and folders for removed items in settings2.xml
++ Fix for update function full hours
+
+### Version .0.1.9
 Fix for update loop
 
 ### How to use
