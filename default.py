@@ -196,26 +196,24 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         episodes = re.search('"episode" *: *(.*?),', f)
         seasons = re.search('"season" *: *(.*?),', f)
         showtitles = re.search('"showtitle" *: *"(.*?)",', f)
-
-        dictReplacements = {"'(\\d+)'" : '', '()' : '', 'Kinofilme' : '', '  ' : ' ',"(de)":"",
-                            "(en)":"", "(TVshow)":"",'Movies' : '', 'Filme' : '', 
-                            'Movie' : '', "'.'" : ' '}
         
-        
-#         , '\xc3\x84' : 'Ae',
-#                             '\xc3\xa4' : 'ae', '\xc3\x96' : 'Oe', '\xc3\xb6' : 'oe',
-#                             '\xc3\x9c' : 'Ue', 'xc3\xbc' : 'ue', '\xc3\x9f' : 'ss'}
+        dictReplacements = {"'(\\d+)'" : '', '()' : '', 'Kinofilme' : '', '  ' : ' ','(de)':'',
+                            '(en)':'', "(TVshow)":"",'Movies' : '', 'Filme' : '', 
+                            'Movie' : '', "'.'" : ' ', '()' : ''}
+        replacexx = ((u"(de)", u''), (u"(en)", u''))
         
         if filetypes and labels and files:
             filetype = filetypes.group(1)
             label = cleanLabels(labels.group(1))
             file = (files.group(1).replace("\\\\", "\\"))
+            strm_name = str(utils.multiple_reSub(strm_name.rstrip(), dictReplacements))
+            strm_name = str(utils.multiple_replace(strm_name, *replacexx))
             if showtitles != None:
                 if showtitle == 'None':
                     showtitle = strm_name
                 elif showtitles.group(1) != "" and showtitle == 'None':
-                    showtitle = utils.multiple_reSub((showtitles.group(1)).rstrip(), dictReplacements)
-                #showtitle = utils.multiple_reSub(showtitle.rstrip(), dictReplacements)           
+                    showtitle = utils.multiple_reSub((showtitles.group(1)).rstrip(), dictReplacements) 
+                showtitle = str(utils.multiple_replace(showtitle, *replacexx))       
             if (seasons) != None:
                 season = (seasons.group(1))
             else:
@@ -448,20 +446,20 @@ def makeSTRM(filepath, filename, url):
     if not xbmcvfs.exists(filepath): 
         xbmcvfs.mkdirs(filepath)
     fullpath = os.path.join(filepath, filename + '.strm')
-    if xbmcvfs.exists(fullpath):
-        if addon.getSetting('Clear_Strms') == 'true':
-            try:
-                xbmcvfs.delete(fullpath)
-            except:
-                pass
-        else:
-            return fullpath
-    else:
-        fle = open(fullpath, "w")
-        fle.write("%s" % url)
-        fle.close()
-        del fle
-        return fullpath
+#     if xbmcvfs.exists(fullpath):
+#         if addon.getSetting('Clear_Strms') == 'true':
+#             try:
+#                 x=1#xbmcvfs.delete(fullpath)
+#             except:
+#                 pass
+#         else:
+#             return fullpath
+#     else:
+    fle = open(fullpath, "w")
+    fle.write("%s" % url)
+    fle.close()
+    del fle
+    return fullpath
 
         
 def writeSTRM(path, file, url):
