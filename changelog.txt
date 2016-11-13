@@ -1,4 +1,7 @@
 #.0.2.1
++ Fix
+
+#.0.2.1
 + New Funktions: Language selection after selectin "create_strms"
 + Fix for unstable folder structure.
 
