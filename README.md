@@ -5,9 +5,9 @@ http://www.kodinerds.net/index.php/Thread/53307-Beta-Version-OSMOSIS-Streams-zur
 
 ![alt tag](https://github.com/stereodruid/OSMOSIS/blob/master/icon.png)
 
-# Version .0.2.3
+# Version .0.2.4
 + Bug fixing.
-
++ Last build before RC1
 ### How to use
 ####Note, single streams(one movie), is not supported yet, select whole section instead like "Most Viewed"(containing all the most viewed movies in it). 
 
