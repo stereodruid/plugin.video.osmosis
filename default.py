@@ -197,17 +197,17 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         seasons = re.search('"season" *: *(.*?),', f)
         showtitles = re.search('"showtitle" *: *"(.*?)",', f)
         
-        dictReplacements = {"'(\\d+)'" : '', '()' : '', 'Kinofilme' : '', '  ' : ' ','(de)':'',
-                            '(en)':'', "(TVshow)":"",'Movies' : '', 'Filme' : '', 
+        dictReplacements = {"'\(\\d+\)'" : '', '()' : '', 'Kinofilme' : '', '  ' : ' ','\(de\)':'',
+                            '\(en)\)':'', "\(TVshow\)":"",'Movies' : '', 'Filme' : '', 
                             'Movie' : '', "'.'" : ' ', '()' : ''}
-        replacexx = ((u"(de)", u''), (u"(en)", u''))
+
         
         if filetypes and labels and files:
             filetype = filetypes.group(1)
             label = cleanLabels(labels.group(1))
             file = (files.group(1).replace("\\\\", "\\"))
             strm_name = str(utils.multiple_reSub(strm_name.rstrip(), dictReplacements))
-            strm_name = str(utils.multiple_replace(strm_name, *replacexx))
+
             if showtitles != None:
                 if showtitle == 'None':
                     showtitle = strm_name
