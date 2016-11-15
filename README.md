@@ -1,8 +1,5 @@
 ##Early version should be considered unstable. 
 
-Kodi repo source:
-https://github.com/kodinerds/repo/raw/master/repository.kodinerds.zip
-
 Support forum(German): 
 http://www.kodinerds.net/index.php/Thread/53307-Beta-Version-OSMOSIS-Streams-zur-DB-hinzuf%C3%BCgen/
 
