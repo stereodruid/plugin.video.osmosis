@@ -199,9 +199,8 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         
         dictReplacements = {"'\(\\d+\)'" : '', '()' : '', 'Kinofilme' : '', '  ' : ' ','\(de\)':'',
                             '\(en)\)':'', "\(TVshow\)":"",'Movies' : '', 'Filme' : '', 
-                            'Movie' : '', "'.'" : ' ', '()' : ''}
-
-        
+                            'Movie' : '', "'.'" : ' ', '\(\)' : ''}
+  
         if filetypes and labels and files:
             filetype = filetypes.group(1)
             label = cleanLabels(labels.group(1))
