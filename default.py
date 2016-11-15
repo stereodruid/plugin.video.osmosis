@@ -14,7 +14,7 @@
 # along with OSMOSIS.  If not, see <http://www.gnu.org/licenses/>.
 
 # -*- coding: utf-8 -*-
-import urllib, urllib2, cookielib, requests
+import urllib, urllib2, cookielib, requests 
 from datetime import datetime
 from datetime import timedelta
 import time, datetime
@@ -198,7 +198,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         showtitles = re.search('"showtitle" *: *"(.*?)",', f)
         
         dictReplacements = {"'\(\\d+\)'" : '', '()' : '', 'Kinofilme' : '', '  ' : ' ','\(de\)':'',
-                            '\(en)\)':'', "\(TVshow\)":"",'Movies' : '', 'Filme' : '', 
+                            '\(en\)':'', "\(TVshow\)":"",'Movies' : '', 'Filme' : '', 
                             'Movie' : '', "'.'" : ' ', '\(\)' : ''}
   
         if filetypes and labels and files:
@@ -212,7 +212,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
                     showtitle = strm_name
                 elif showtitles.group(1) != "" and showtitle == 'None':
                     showtitle = utils.multiple_reSub((showtitles.group(1)).rstrip(), dictReplacements) 
-                showtitle = str(utils.multiple_replace(showtitle, *replacexx))       
+       
             if (seasons) != None:
                 season = (seasons.group(1))
             else:
