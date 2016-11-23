@@ -22,8 +22,13 @@
 import os
 from modules import create
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
+<<<<<<< HEAD
 # import pydevd
 # pydevd.settrace(stdoutToServer=True, stderrToServer=True)
+=======
+#import pydevd
+#pydevd.settrace(stdoutToServer=True, stderrToServer=True)
+>>>>>>> 23c461b0ae85e494d6c36c3a0396c1554b6698c5
 
 global thelist
 thelist = None
