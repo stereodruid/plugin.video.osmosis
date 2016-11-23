@@ -116,11 +116,13 @@ def writeMediaList(url, name, cType='Other'):
     thefile = xbmc.translatePath(os.path.join(profile, 'MediaList.xml'))
     theentry = '|'.join([cType, name.decode("utf-8"), url]) + '\n'
         
-    if xbmcvfs.exists(thefile):
+    if not xbmcvfs.exists(thefile):
+        open(thefile, 'a').close()
+    else:
         fle = codecs.open(thefile, "r", 'UTF-8')
         thelist = fle.readlines()
         fle.close()
-        del fle
+        del fle     
     if theentry not in thelist:
         thelist.append(theentry)
     else:

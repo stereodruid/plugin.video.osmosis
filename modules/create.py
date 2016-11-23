@@ -275,7 +275,51 @@ def addMovies(contentList, strm_name='', strm_type='Other', pagesToGet=2):
         fileSys.writeSTRM(stringUtils.cleanStrms((i[0].rstrip("."))), stringUtils.cleanStrms(i[1].rstrip(".")) , i[2])
      
     return movieList    
-    
+
+def addSeriess(contentList, strm_name='', strm_type='Other', pagesToGet=2):
+    serieList = []
+    pagesDone = 0
+    file=''
+
+    while pagesDone < pagesToGet:
+
+        for detailInfo in contentList:
+            files = re.search('"file" *: *"(.*?)",', detailInfo)
+            filetypes = re.search('"filetype" *: *"(.*?)",', detailInfo)
+            labels = re.search('"label" *: *"(.*?)",', detailInfo)
+            thumbnails = re.search('"thumbnail" *: *"(.*?)",', detailInfo)
+            fanarts = re.search('"fanart" *: *"(.*?)",', detailInfo)
+            descriptions = re.search('"description" *: *"(.*?)",', detailInfo)
+            
+            if filetypes and labels and files:
+                filetype = filetypes.group(1)
+                label = (stringUtils.cleanLabels(labels.group(1)))
+                file = (files.group(1).replace("\\\\", "\\"))
+                
+                if fanarts:
+                    fanart = fanarts.group(1)
+                else:
+                    fanart = ''
+                 
+                if addon.getSetting('Link_Type') == '0': 
+                    link = sys.argv[0] + "?url=" + urllib.quote_plus(file) + "&mode=" + str(10) + "&name=" + urllib.quote_plus(label) + "&fanart=" + urllib.quote_plus(fanart)
+                else:
+                    link = file
+                
+                if label and strm_name and label:
+                    label = str(utils.multiple_reSub(label.rstrip(), dictReplacements))
+                    serieList.append([os.path.join(strm_type + "\\\\" + strm_name, label), str(utils.multiple_reSub(label.rstrip(), dictReplacements)), link])
+        
+        pagesDone += 1
+        if filetype != 'file' and pagesDone < pagesToGet:
+            contentList = stringUtils.uni(jsonUtils.requestList(file, 'video'))
+        else:
+            pagesDone = pagesToGet
+    # Write strms for all values in serieList
+    for i in serieList:
+        fileSys.writeSTRM(stringUtils.cleanStrms((i[0].rstrip("."))), stringUtils.cleanStrms(i[1].rstrip(".")) , i[2])
+     
+    return serieList    
 
 def getData(url, fanart):
     utils.addon_log('getData, url = ' + cType)

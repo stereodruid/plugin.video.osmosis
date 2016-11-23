@@ -1,4 +1,10 @@
-﻿#.0.3.1 RC1
+﻿#.0.3.2 RC2
++ Code cleaning part2
++ Added new methods addMovies and addSeries
++ Movie strms are created in their own folder now 
++ Some fixes
+
+#.0.3.1 RC1
 + Code cleaning part1
 + Some fixes
 
