@@ -235,8 +235,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', pagesToGet=2):
     movieList = []
     pagesDone = 0
     file=''
-    # if par.startswith('?url=plugin://plugin.video.osmosis/')
-            # url = par.split('?url=')[1]
+
     while pagesDone < pagesToGet:
 
         for detailInfo in contentList:
@@ -267,7 +266,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', pagesToGet=2):
                     movieList.append([os.path.join(strm_type + "\\\\" + strm_name, label), str(utils.multiple_reSub(label.rstrip(), dictReplacements)), link])
         
         pagesDone += 1
-        if filetype == 'directory' and pagesDone < pagesToGet:
+        if filetype != 'file' and pagesDone < pagesToGet:
             contentList = stringUtils.uni(jsonUtils.requestList(file, 'video'))
         else:
             pagesDone = pagesToGet
