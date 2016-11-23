@@ -1,7 +1,5 @@
 # Copyright (C) 2016 stereodruid(J.Gina)
-#
-#
-# This file is part of OSMOSIS
+# This file is part of OSMOSIS 
 #
 # OSMOSIS is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
