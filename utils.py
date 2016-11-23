@@ -16,20 +16,21 @@
 # You should have received a copy of the GNU General Public License
 # along with OSMOSIS.  If not, see <http://www.gnu.org/licenses/>.
 
-import re
-import sys
-import os
-reload(sys)  
-sys.setdefaultencoding('utf8')
-import random
-import string
-import xml.etree.ElementTree as ET
-from os.path import basename, splitext
-from os import getcwd
 from glob import glob
+from os import getcwd
+import os
+from os.path import basename, splitext
+import random
+import re
+import string
+import sys
+from modules import stringUtils
 import xbmc
-REMOTE_DBG = True
 import xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
+import xml.etree.ElementTree as ET
+
+
+REMOTE_DBG = True
 addon = xbmcaddon.Addon('plugin.video.osmosis')
 addon_version = addon.getAddonInfo('version')
 ADDON_NAME = addon.getAddonInfo('name')
@@ -56,7 +57,7 @@ STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
 # History:
 #		0 - init 
 def replacer(*key_values):
-    replace_dict = uni(dict(key_values))
+    replace_dict = stringUtils.uni(dict(key_values))
     replacement_function = lambda match: replace_dict[match.group(0)]
     pattern = re.compile("|".join([re.escape(k) for k, v in key_values]), re.M)
     return lambda string: pattern.sub(replacement_function, string)
@@ -70,7 +71,7 @@ def replacer(*key_values):
 # History:
 #		0 - init 
 def multiple_replace(string, *key_values):
-    return replacer(*key_values)(string)
+    return replacer(*key_values)(string.decode('utf-8').rstrip())
 
 #***************************************************************************************
 # Python Header 
@@ -85,19 +86,8 @@ def multiple_replace(string, *key_values):
 def multiple_reSub(text, dic):
     for i, j in dic.iteritems():
         text = re.sub(i, j, text)
-    return text
+    return text.rstrip().decode('utf-8')
 
-def ascii(string):
-    if isinstance(string, basestring):
-        if isinstance(string, unicode):
-           string = string.encode('ascii', 'ignore')
-    return string
-
-def uni(string):
-    if isinstance(string, basestring):
-        if isinstance(string, unicode):
-           string = string.encode('utf-8', 'ignore' )
-    return string
 def createSongNFO(filepath, filename , strm_ty='type',artists='none', albums='no album', titls='title', typese='types'):    
     #create .nfo xml file
     filepath = os.path.join(STRM_LOC, filepath)  
@@ -118,4 +108,33 @@ def createSongNFO(filepath, filename , strm_ty='type',artists='none', albums='no
         root.append(xalbum)
         s = ET.tostring(root)
         nfo.write(s)
-        nfo.close() 
+        nfo.close()
+def addon_log(string):
+    # if debug == 'true':
+    xbmc.log("[plugin.video.osmosis-%s]: %s" % (addon_version, string))
+
+def get_params():
+    try:    
+        addon_log('get_params')
+        param = []
+        paramstring = sys.argv[2]
+        addon_log('paramstring = ' + paramstring)
+        if len(paramstring) >= 2:
+            params = sys.argv[2]
+            cleanedparams = params.replace('?', '')
+            if (params[len(params) - 1] == '/'):
+                params = params[0:len(params) - 2]
+            pairsofparams = cleanedparams.split('&')
+            param = {}
+            for i in range(len(pairsofparams)):
+                splitparams = {}
+                splitparams = pairsofparams[i].split('=')
+                if (len(splitparams)) == 2:
+                    param[splitparams[0]] = splitparams[1]
+        addon_log('param = ' + str(param))
+        return param
+    except:
+        pass
+
+def getCommunitySources(browse=False):
+    addon_log('getCommunitySources')
