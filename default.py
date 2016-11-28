@@ -28,8 +28,8 @@ import utils
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin
 # Debug option pydevd:
 # REMOTE_DBG = True
-#import pydevd
-#pydevd.settrace(stdoutToServer=True, stderrToServer=True)
+# import pydevd
+# pydevd.settrace(stdoutToServer=True, stderrToServer=True)
 
 addnon_id = 'plugin.video.osmosis'
 addon = xbmcaddon.Addon(addnon_id)#
@@ -101,7 +101,10 @@ if __name__ == "__main__":
     titl = None
     cType = None
    
-    
+#     try:
+#         markName = urllib.unquote_plus(params["url"]).decode('utf-8').split('|')[1]
+#     except:
+#         pass
     try:
         url = urllib.unquote_plus(params["url"]).decode('utf-8')
     except:
@@ -169,10 +172,32 @@ if __name__ == "__main__":
     elif mode == 5:
         create.removeItemsFromMediaList('list') 
     elif mode == 10:
+        meta = ""
+        # Split url to get tags
+        purl = url.split('|')[0]
         utils.addon_log("setResolvedUrl")
         item = xbmcgui.ListItem(path=url)
+        # Gest infos from selectet media
+        sPatToItem = xbmc.getInfoLabel("ListItem.path")
+        sTitle = xbmc.getInfoLabel("ListItem.title")
+        sShowTitle = xbmc.getInfoLabel("ListItem.TVShowTitle")
+        sEpisode = xbmc.getInfoLabel("ListItem.episode")
+        sSeason = xbmc.getInfoLabel("ListItem.season")
+        sYear = xbmc.getInfoLabel("ListItem.year")
+        sDBID = xbmc.getInfoLabel("ListItem.DBID")
+        sDuration = xbmc.getInfoLabel("ListItem.Duration")
+        
         try:
+            # Exec play process
             xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
+            # Wait until the media is started in player
+            while meta.find("video") == -1:
+                meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
+            # Set watched status   
+            if xbmc.getInfoLabel("ListItem.path").find("TV-Show") != -1:
+                guiTools.markSeries(sPatToItem,sShowTitle,sEpisode,sSeason,sYear,sDBID,sDuration)
+            elif xbmc.getInfoLabel("ListItem.path").find("Cinema") != -1:
+                guiTools.markMovie(sPatToItem,sTitle,sYear,sDBID,sDuration)
         except:
             pass 
     elif mode == 100:

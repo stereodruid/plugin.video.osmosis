@@ -271,9 +271,9 @@ def addMovies(contentList, strm_name='', strm_type='Other', pagesToGet=2):
         else:
             pagesDone = pagesToGet
     # Write strms for all values in movieList
-    for i in movieList:
-        fileSys.writeSTRM(stringUtils.cleanStrms((i[0].rstrip("."))), stringUtils.cleanStrms(i[1].rstrip(".")) , i[2])
-     
+    for i in movieList:   # path,name,url(+name)
+        fileSys.writeSTRM(stringUtils.cleanStrms((i[0].rstrip("."))), stringUtils.cleanStrms(i[1].rstrip(".")) , i[2] + "|" + i[1])
+    
     return movieList    
 
 def addSeriess(contentList, strm_name='', strm_type='Other', pagesToGet=2):

@@ -28,7 +28,8 @@ import utils
 import pyxbmct
 import xbmc
 import xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
-
+import unicodedata
+from modules import stringUtils
 # Debug option pydevd:
 REMOTE_DBG = True
 #import pydevd
@@ -143,6 +144,44 @@ def selectDialog(list, header=ADDON_NAME, autoclose=0):
         return select
 
 # Functions not in usee yet:
+
+#Before executing the code below we need to know the movie original title (string variable originaltitle) and the year (string variable year). They can be obtained from the infolabels of the listitem. The code filters the database for items with the same original title and the same year, year-1 and year+1 to avoid errors identifying the media.
+def markMovie(sPatToItem,sTitle,sYear,sDBID,sDuration):
+    if xbmc.getCondVisibility('Library.HasContent(Movies)'):
+        print("Check if movie exists in library when marking as watched")
+        meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "title", "operator": "is", "value": "%s"}, {"field": "title", "operator": "is", "value": "%s"}, {"field": "title", "operator": "is", "value": "%s"}]}, "properties" : ["file"]}, "id": 1}')
+        meta = stringUtils.uni(meta)#(meta, 'utf-8', errors='ignore')
+        meta = json.loads(meta)
+        meta = meta['result']['movies']
+        #originaltitle = infolabels["originaltitle"]
+        cleaned_title= re.sub('[^-a-zA-Z0-9_.()\\\/ ]+', '',  'name') #originaltitle)
+        try:
+            meta = [i for i in meta if cleaned_title in i['file']][0]
+        except:
+            pass
+        xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetMovieDetails", "params": {"movieid" : %s, "playcount" : 1 }, "id": 1 }' % str(meta['movieid']))   
+#Before executing the code below we need to know the tvshow originaltitle (var originaltitle), the episode and season (season and episode vars - both strings). They can be obtained from the infolabels of the listitem
+def markSeries(sPatToItem,sShowTitle,sEpisode,sSeason,sYear,sDBID,sDuration):
+    try:
+        showID = (json.loads(xbmc.executeJSONRPC('{"jsonrpc":"2.0","method":"VideoLibrary.GetTVShows","id":1,"params":{"filter":{"field":"title", "operator":"is","value":"' + sShowTitle +'" }}}'))['result']['tvshows'])[0].values()[0]
+        episID = (json.loads(xbmc.executeJSONRPC('{"jsonrpc":"2.0","method":"VideoLibrary.GetEpisodes","id":1,"params":{"filter":{"field":"season", "operator":"is","value":"' + sSeason + '"}, "filter":{"field":"episode", "operator":"is","value":"' + sEpisode + '"},"properties":["episode","file"],"tvshowid":' + str(showID) + ',"sort":{"order":"descending","method": "episode" }}}'))['result']['episodes'])[0].values()[1]
+        
+        if xbmc.getCondVisibility('Library.HasContent(TVShows)'):
+            xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : ' + str(episID) + ', "playcount" : 1 }, "id": 1 }')
+    except:
+        pass
+  
+            
+#             cleaned_title= re.sub('[^-a-zA-Z0-9_.()\\\/ ]+', '',  xbmc.getInfoLabel("ListItem.title"))
+#             season = str('%0.2d' %(int(xbmc.getInfoLabel("ListItem.season")))) 
+#             episode = str('%0.2d' %(int(xbmc.getInfoLabel("ListItem.episode"))))
+#             meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["title", "plot", "votes", "rating", "writer", "firstaired", "playcount", "runtime", "director", "productioncode", "season", "episode", "originaltitle", "showtitle", "lastplayed", "fanart", "thumbnail", "file", "resume", "tvshowid", "dateadded", "uniqueid"]}, "id": 1}' % (season, episode))
+#             #meta = unicode(meta, 'utf-8', errors='ignore')
+#             meta = json.loads(meta)
+#             meta = meta['result']['episodes']
+#             meta = [i for i in meta if cleaned_title in i['file']][0]
+#             xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % str(meta['episodeid'])) 
+        
 
 def handle_wait(time_to_wait, header, title):
     dlg = xbmcgui.DialogProgress()

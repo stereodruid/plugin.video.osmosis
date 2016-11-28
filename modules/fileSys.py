@@ -135,9 +135,6 @@ def writeMediaList(url, name, cType='Other'):
             else:
                 output_file.write(linje.strip())
 
-#     except Exception :
-#         utils.addon_log("writeMediaList, Failed " + str(Exception))
-
 def removeMediaList(Item_remove, replacements):
     utils.addon_log('Removing items')
     thelist = []
