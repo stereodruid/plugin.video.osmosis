@@ -38,6 +38,8 @@ ADDON_NAME = addon.getAddonInfo('name')
 REAL_SETTINGS = xbmcaddon.Addon(id=addnon_id)
 ADDON_SETTINGS = REAL_SETTINGS.getAddonInfo('profile')
 MediaList_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'MediaList.xml'))
+PAGINGTVshows = REAL_SETTINGS.getSetting('paging_tvshows')
+PAGINGMovies = REAL_SETTINGS.getSetting('paging_movies')
 STRM_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'STRM_LOC'))
 profile = xbmc.translatePath(addon.getAddonInfo('profile').decode('utf-8'))
 home = xbmc.translatePath(addon.getAddonInfo('path').decode('utf-8'))
@@ -201,11 +203,12 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             if strm_type in ['Other']:
                 path = os.path.join('Other', strm_name)
                 filename =str(strm_name + ' - ' + label)
-            
-            utils.addon_log(str(path + ' ' + filename))                  
+                
+                                  
             if filetype == 'file':
                 if strm:
                     if strm_type == 'Audio-Album':
+                        utils.addon_log(str(path + ' ' + filename))
                         utils.createSongNFO(stringUtils.cleanStrms((path.rstrip("."))), stringUtils.cleanStrms(filename.rstrip(".")), strm_ty=strm_type, artists=artist,albums=album , titls=titl, typese=types) 
                     # xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%(path + " - " + filename, " writing...",5000,""))
                     fileSys.writeSTRM(stringUtils.cleanStrms((path.rstrip("."))), stringUtils.cleanStrms(filename.rstrip(".")) , link)
@@ -231,12 +234,12 @@ def removeItemsFromMediaList(action='list'):
     xbmcgui.Dialog().notification("Finished deleting:", "{0}".format(str(dialog.selectedLabels)))
     del dialog
 
-def addMovies(contentList, strm_name='', strm_type='Other', pagesToGet=2):
+def addMovies(contentList, strm_name='', strm_type='Other'):
     movieList = []
     pagesDone = 0
     file=''
 
-    while pagesDone < pagesToGet:
+    while pagesDone < int(PAGINGMovies):
 
         for detailInfo in contentList:
             files = re.search('"file" *: *"(.*?)",', detailInfo)
@@ -266,22 +269,22 @@ def addMovies(contentList, strm_name='', strm_type='Other', pagesToGet=2):
                     movieList.append([os.path.join(strm_type + "\\\\" + strm_name, label), str(utils.multiple_reSub(label.rstrip(), dictReplacements)), link])
         
         pagesDone += 1
-        if filetype != 'file' and pagesDone < pagesToGet:
+        if filetype != 'file' and pagesDone < int(PAGINGMovies):
             contentList = stringUtils.uni(jsonUtils.requestList(file, 'video'))
         else:
-            pagesDone = pagesToGet
+            pagesDone = int(PAGINGMovies)
     # Write strms for all values in movieList
     for i in movieList:   # path,name,url(+name)
         fileSys.writeSTRM(stringUtils.cleanStrms((i[0].rstrip("."))), stringUtils.cleanStrms(i[1].rstrip(".")) , i[2] + "|" + i[1])
     
     return movieList    
 
-def addSeriess(contentList, strm_name='', strm_type='Other', pagesToGet=2):
+def addSeriess(contentList, strm_name='', strm_type='Other'):
     serieList = []
     pagesDone = 0
     file=''
 
-    while pagesDone < pagesToGet:
+    while pagesDone < int(PAGINGTVshows):
 
         for detailInfo in contentList:
             files = re.search('"file" *: *"(.*?)",', detailInfo)
@@ -311,10 +314,10 @@ def addSeriess(contentList, strm_name='', strm_type='Other', pagesToGet=2):
                     serieList.append([os.path.join(strm_type + "\\\\" + strm_name, label), str(utils.multiple_reSub(label.rstrip(), dictReplacements)), link])
         
         pagesDone += 1
-        if filetype != 'file' and pagesDone < pagesToGet:
+        if filetype != 'file' and pagesDone < int(PAGINGTVshows):
             contentList = stringUtils.uni(jsonUtils.requestList(file, 'video'))
         else:
-            pagesDone = pagesToGet
+            pagesDone = int(PAGINGTVshows)
     # Write strms for all values in serieList
     for i in serieList:
         fileSys.writeSTRM(stringUtils.cleanStrms((i[0].rstrip("."))), stringUtils.cleanStrms(i[1].rstrip(".")) , i[2])

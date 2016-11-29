@@ -115,10 +115,11 @@ def writeMediaList(url, name, cType='Other'):
     utils.addon_log('writeMediaList')
     thelist = []
     thefile = xbmc.translatePath(os.path.join(profile, 'MediaList.xml'))
-    theentry = '|'.join([cType, name.decode("utf-8"), url]) + '\n' 
+    theentry = '|'.join([cType, name.decode("utf-8"), url]) + '\n'  
     
     if not xbmcvfs.exists(profile): 
-        xbmcvfs.mkdirs(profile)   
+        xbmcvfs.mkdirs(profile)
+    if not xbmcvfs.exists(thefile):
         open(thefile, 'a').close()
     
     fle = codecs.open(thefile, "r", 'UTF-8')
