@@ -11,10 +11,13 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
+
 import os
-import xbmcgui
-import xbmcaddon
+
 import pyxbmct.addonwindow as pyxbmct
+import xbmcaddon
+import xbmcgui
+
 
 _addon = xbmcaddon.Addon()
 _path = _addon.getAddonInfo("path")
@@ -71,7 +74,7 @@ class MultiChoiceDialog(pyxbmct.AddonDialogWindow):
         self.selected = [index for index in xrange(self.listing.size())
                                 if self.listing.getListItem(index).getLabel2() == "checked"]
         for i in self.selected:
-             self.selectedLabels.append(self.listing.getListItem(i).getLabel())
+            self.selectedLabels.append(self.listing.getListItem(i).getLabel())
         super(MultiChoiceDialog, self).close()
 
     def close(self):

@@ -1,3 +1,21 @@
+﻿#.0.3.5 RC
++ Code cleaning part3
++ Added new methods markSeries and markMovies as watched
++ Some fixes
+
+#.0.3.2 RC1
++ Code cleaning part2
++ Added new methods addMovies and addSeries
++ Movie strms are created in their own folder now 
++ Some fixes
+
+#.0.3.1 RC1
++ Code cleaning part1
++ Some fixes
+
+#.0.1.9
++ Fix for update loop
+
 #.0.2.4
 + Bug fixing
 + Last build before RC 1

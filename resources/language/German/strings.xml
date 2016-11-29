@@ -9,9 +9,12 @@
 <string id="34025">Lösche veraltete Streams:</string>
 <string id="32007">Youtube Inhalte in eigenem Ordner anlegen:</string>
 <string id="30305">Youtube/RSS Miniaturansichten (In Kürze):</string>
+<string id="32050">Anzahl der Seiten aus Kategorie (Serien)(In Kürze) </string>
+<string id="32052">Anzahl der Seiten aus Kategorie (Filme)</string>
 <string id="32100">Service:</string>
 <string id="32001">Automatische Aktualisierung:</string>
 <string id="32002">Update alle (Stunde/n):</string>
+<string id="32051">Force Update at: </string>
 <string id="32006">Startverzögerung (Sekunden):</string>
 <string id="32005">Aktiv bei Wiedergabe von Inhalten:</string>
 <string id="34009">Datenbank scannen wenn fertig:</string>
