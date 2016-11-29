@@ -100,7 +100,7 @@ if __name__ == "__main__":
             Automatic_Update_Run = REAL_SETTINGS.getSetting('Automatic_Update_Run')
             Timed_Update_Run = REAL_SETTINGS.getSetting('update_time')
             toseconds = toseconds + 10.0
-            if ((toseconds >= float(Automatic_Update_Time) * 60 * 60) or (time.strftime("%H:%M") == Timed_Update_Run and Timed_Update_Run != "0:00" )):
+            if ((toseconds >= float(Automatic_Update_Time) * 60 * 60) or (time.strftime("%H:%M") == Timed_Update_Run)):
                 strm_update()
                 toseconds = 0.0
                 monitor.waitForAbort(60)
