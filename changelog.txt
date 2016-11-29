@@ -1,4 +1,9 @@
-﻿#.0.3.5 RC
+#.0.3.6 BETA
++ Option to set pages to get from categories(Addon settings)
++ Option to set time for updates(Addon settings)
++ Fixes
+
+#.0.3.5 RC
 + Code cleaning part3
 + Added new methods markSeries and markMovies as watched
 + Some fixes
