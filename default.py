@@ -15,8 +15,6 @@
 
 # -*- coding: utf-8 -*-
 import os, sys
-reload(sys)
-sys.setdefaultencoding("utf-8")
 import urllib
 
 import SimpleDownloader as downloader 
@@ -24,18 +22,26 @@ from modules import create
 from modules import fileSys
 from modules import guiTools
 from modules import urlUtils
+
 import utils
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin
-# Debug option pydevd:
-# REMOTE_DBG = True
+ 
 # import pydevd
 # pydevd.settrace(stdoutToServer=True, stderrToServer=True)
+
+reload(sys)
+sys.setdefaultencoding("utf-8")
+
+#from modules import createNFO
+# Debug option pydevd:
+
+
 
 addnon_id = 'plugin.video.osmosis'
 addon = xbmcaddon.Addon(addnon_id)#
 addon_version = addon.getAddonInfo('version')
 ADDON_NAME = addon.getAddonInfo('name')
-REAL_SETTINGS = xbmcaddon.Addon(id=addnon_id)#
+REAL_SETTINGS = xbmcaddon.Addon(id=addnon_id)# 
 ADDON_SETTINGS = REAL_SETTINGS.getAddonInfo('profile')
 MediaList_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'MediaList.xml'))#
 STRM_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'STRM_LOC'))#
@@ -147,7 +153,7 @@ if __name__ == "__main__":
     if not url is None:
         utils.addon_log("URL: " + str(url)) #.encode('utf-8')))
         utils.addon_log("Name: " + str(name))
-    
+    #createNFO.setNamePath(STRM_LOC + "\\TV-Shows(de)", 'The Walking Dead', STRM_LOC) 
     if mode == None:
         utils.addon_log("getSources")
         guiTools.getSources()

@@ -19,10 +19,11 @@ import os, re
 
 from BeautifulSoup import BeautifulStoneSoup, BeautifulSoup, BeautifulSOAP
 import SimpleDownloader as downloader
+from modules import stringUtils
 import pyxbmct
 import utils
-from modules import stringUtils
 import xbmc, xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
+
 
 try:
     import json

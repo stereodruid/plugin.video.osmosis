@@ -21,15 +21,18 @@ import random
 import shutil
 import string
 import time, datetime
+import unicodedata
 import urllib, urllib2, cookielib, requests
+
 from BeautifulSoup import BeautifulStoneSoup, BeautifulSoup, BeautifulSOAP
 import SimpleDownloader as downloader
-import utils
+from modules import stringUtils
 import pyxbmct
+import utils
 import xbmc
 import xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
-import unicodedata
-from modules import stringUtils
+
+
 # Debug option pydevd:
 REMOTE_DBG = True
 #import pydevd
@@ -129,10 +132,10 @@ def getSources():
 
 def getType(url):
     if url.find('plugin.audio') != -1:
-        Types = ['Audio-Album', 'Audio-Single', 'Other']
+        Types = ['YouTube Video','Audio-Album', 'Audio-Single', 'Other']
     else:
-        Types = ['TV', 'Cinema', 'TV-Shows', 'Movies', 'Other']
-    lang = ['(en)', '(de)','(sp)','(sp)', 'Other']  
+        Types = ['TV', 'Cinema', 'TV-Shows', 'Shows-Collection', 'YouTube Music', 'Other']
+    lang = ['(en)', '(de)','(sp)','(tr)', 'Other']  
     selectType = selectDialog(Types)
     selectLang = selectDialog(lang)
     if selectType and selectLang >= 0:
@@ -143,8 +146,6 @@ def selectDialog(list, header=ADDON_NAME, autoclose=0):
         select = xbmcgui.Dialog().select(header, list, autoclose)
         return select
 
-# Functions not in usee yet:
-
 #Before executing the code below we need to know the movie original title (string variable originaltitle) and the year (string variable year). They can be obtained from the infolabels of the listitem. The code filters the database for items with the same original title and the same year, year-1 and year+1 to avoid errors identifying the media.
 def markMovie(sPatToItem,sTitle,sYear,sDBID,sDuration):
     if xbmc.getCondVisibility('Library.HasContent(Movies)'):
@@ -153,14 +154,14 @@ def markMovie(sPatToItem,sTitle,sYear,sDBID,sDuration):
         meta = stringUtils.uni(meta)#(meta, 'utf-8', errors='ignore')
         meta = json.loads(meta)
         meta = meta['result']['movies']
-        #originaltitle = infolabels["originaltitle"]
+
         cleaned_title= re.sub('[^-a-zA-Z0-9_.()\\\/ ]+', '',  'name') #originaltitle)
         try:
             meta = [i for i in meta if cleaned_title in i['file']][0]
         except:
             pass
         xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetMovieDetails", "params": {"movieid" : %s, "playcount" : 1 }, "id": 1 }' % str(meta['movieid']))   
-#Before executing the code below we need to know the tvshow originaltitle (var originaltitle), the episode and season (season and episode vars - both strings). They can be obtained from the infolabels of the listitem
+
 def markSeries(sPatToItem,sShowTitle,sEpisode,sSeason,sYear,sDBID,sDuration):
     try:
         showID = (json.loads(xbmc.executeJSONRPC('{"jsonrpc":"2.0","method":"VideoLibrary.GetTVShows","id":1,"params":{"filter":{"field":"title", "operator":"is","value":"' + sShowTitle +'" }}}'))['result']['tvshows'])[0].values()[0]
@@ -170,19 +171,7 @@ def markSeries(sPatToItem,sShowTitle,sEpisode,sSeason,sYear,sDBID,sDuration):
             xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : ' + str(episID) + ', "playcount" : 1 }, "id": 1 }')
     except:
         pass
-  
-            
-#             cleaned_title= re.sub('[^-a-zA-Z0-9_.()\\\/ ]+', '',  xbmc.getInfoLabel("ListItem.title"))
-#             season = str('%0.2d' %(int(xbmc.getInfoLabel("ListItem.season")))) 
-#             episode = str('%0.2d' %(int(xbmc.getInfoLabel("ListItem.episode"))))
-#             meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["title", "plot", "votes", "rating", "writer", "firstaired", "playcount", "runtime", "director", "productioncode", "season", "episode", "originaltitle", "showtitle", "lastplayed", "fanart", "thumbnail", "file", "resume", "tvshowid", "dateadded", "uniqueid"]}, "id": 1}' % (season, episode))
-#             #meta = unicode(meta, 'utf-8', errors='ignore')
-#             meta = json.loads(meta)
-#             meta = meta['result']['episodes']
-#             meta = [i for i in meta if cleaned_title in i['file']][0]
-#             xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % str(meta['episodeid'])) 
-        
-
+# Functions not in usee yet:
 def handle_wait(time_to_wait, header, title):
     dlg = xbmcgui.DialogProgress()
     dlg.create("OSMOSIS", header)

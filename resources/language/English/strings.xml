@@ -9,9 +9,12 @@
     <string id="34025">Delete old strms before generating new ones</string>
     <string id="32007">Sort Youtube into is own folder</string>
     <string id="30305">Download Youtube/RSS Thumbs (ComingSoon)</string>
+    <string id="32050">Paging depth for TV-Shows(ComingSoon)</string>
+    <string id="32052">Paging depth for Movies</string>
     <string id="32100">Service</string>
     <string id="32001">Automatic Update</string>
     <string id="32002">Update Every (Hours)</string>
+    <string id="32051">Force Update at(0:0 to disable): </string>
     <string id="32006">Startup Delay (Seconds)</string>
     <string id="32005">Run During Playback</string>
     <string id="34009">Run Library Scan when finished</string>
