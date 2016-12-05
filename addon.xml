@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/Future-RC1
 <addon id="plugin.video.osmosis" name="OSMOSIS" version="0.3.6" provider-name="Stereodruid">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
