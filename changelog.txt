@@ -1,4 +1,8 @@
-﻿#.0.3.7 RC
+﻿#.0.3.8 RC
++ Code cleaning part5
++ Some fixes
+
+#.0.3.7 RC
 + Code cleaning part4
 + Added new methods addTVShows, getEpisodes and getTVShowsFromList
 + Some fixes

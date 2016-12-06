@@ -232,7 +232,7 @@ def addMovies(contentList, strm_name='', strm_type='Other'):
     movieList = []
     pagesDone = 0
     file=''
-    
+
     while pagesDone < int(PAGINGMovies):
 
         for detailInfo in contentList:
@@ -275,13 +275,21 @@ def addMovies(contentList, strm_name='', strm_type='Other'):
     
     return movieList    
 def getTVShowFromList(showList, strm_name='', strm_type='Other'):
+    strm_type = strm_type.replace('Shows-Collection', 'TV-Shows')
     for detailInfo in showList:
         filetypes = re.search('"filetype" *: *"(.*?)",', detailInfo)
         if filetypes:
             filetype = filetypes.group(1)
             files = re.search('"file" *: *"(.*?)",', detailInfo)
+            episodes = re.search('"episode" *: *(.*?),', detailInfo)
+            seasons = re.search('"season" *: *(.*?),', detailInfo)
+            showtitles = re.search('"showtitle" *: *"(.*?)",', detailInfo)
+            
             if filetype != 'file':
-                addTVShows(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name="", strm_type=strm_type)
+                if showtitles and seasons == "-1" and episodes == "-1":
+                    getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name, strm_type)
+                else:
+                    addTVShows(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name="", strm_type=strm_type)
         
 def addTVShows(contentList, strm_name='', strm_type='Other'):
     showsList = []
@@ -298,7 +306,9 @@ def addTVShows(contentList, strm_name='', strm_type='Other'):
             files = re.search('"file" *: *"(.*?)",', detailInfo)            
                 
             if filetype != 'file':
-                getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name, strm_type)              
+                getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name, strm_type)
+            else:              
+                getEpisodes(detailInfo, strm_name, strm_type)              
 #         pagesDone += 1
 #         
 #         if filetype != 'file' and pagesDone < int(PAGINGMovies) and is_multi:
@@ -308,7 +318,12 @@ def addTVShows(contentList, strm_name='', strm_type='Other'):
     return showsList    
 def getEpisodes(episodesListRaw, strm_name, strm_type):
     episodesList = []
+    typeChange = []
     try:
+        if type(episodesListRaw) is unicode:
+            typeChange.append(episodesListRaw)
+            episodesListRaw = typeChange
+            
         for detailInfo in episodesListRaw:
             files = re.search('"file" *: *"(.*?)",', detailInfo)            
             filetypes = re.search('"filetype" *: *"(.*?)",', detailInfo)
