@@ -54,9 +54,11 @@ source_file = os.path.join(home, 'source_file')
 functions_dir = profile
 downloader = downloader.SimpleDownloader()
 debug = addon.getSetting('debug')
-dictReplacements = {"'\(\\d+\)'" : '', '()' : '', 'Kinofilme' : '', '  ' : ' ','\(de\)':'',
-                    '\(en\)':'', "\(TVshow\)":"",'Movies' : '', 'Filme' : '', 
-                    'Movie' : '', "'.'" : ' ', '\(\)' : ''}
+dictReplacements = {"'\(\\d+\)'" : '', '()' : '', 'Kinofilme' : '', 
+                    '  ' : ' ','\(de\)':'','\(en\)':'', 
+                    "\(TVshow\)":"",'Movies' : '', 'Filme' : '', 
+                    'Movie' : '', "'.'" : ' ', '\(\)' : '',
+                     ":": ' ', "-": ' ','"?"': '','"':''}
 
 if os.path.exists(favorites) == True:
     FAV = open(favorites).read()
@@ -258,7 +260,7 @@ def addMovies(contentList, strm_name='', strm_type='Other'):
                     else:
                         link = file
                     
-                    if label and strm_name and label:
+                    if label and strm_name and label:                        
                         label = str(utils.multiple_reSub(label.rstrip(), dictReplacements))
                         movieList.append([os.path.join(strm_type + "\\\\" + strm_name, label), str(utils.multiple_reSub(label.rstrip(), dictReplacements)), link])
             except:
@@ -364,8 +366,9 @@ def getEpisodes(episodesListRaw, strm_name, strm_type):
                         link = sys.argv[0] + "?url=" + urllib.quote_plus(file) + "&mode=" + str(10) + "&name=" + urllib.quote_plus(label) + "&fanart=" + urllib.quote_plus(fanart)
                     else:
                         link = file
-                       
-                    episodesList.append([os.path.join(strm_type + "\\" + (utils.multiple_reSub((showtitle), dictReplacements))), str('s' + season), str('e'+episode), link])
+#                     if showtitle.find('10-8:') != -1:
+#                         x= showtitle
+                    episodesList.append([os.path.join(strm_type + "\\" + (utils.multiple_reSub(showtitle, dictReplacements))), str('s' + season), str('e'+episode), link])
     except IOError as (errno, strerror):
         print "I/O error({0}): {1}".format(errno, strerror)
     except ValueError:

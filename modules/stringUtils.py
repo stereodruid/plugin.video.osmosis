@@ -127,7 +127,13 @@ def cleanStrms(text, formater=''):
     else:
         text = text
     return text
-    
+
+def multiRstrip(text):
+    replaceRstrip = {'.', ',', '-', '_', ' ', '#', '+', '+', '`', '&', '%', '!', '?'}
+    for i in replaceRstrip:
+        text.rstrip(i)
+    return text
+            
 def asciis(string):
     if isinstance(string, basestring):
         if isinstance(string, unicode):

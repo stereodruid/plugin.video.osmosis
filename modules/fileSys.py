@@ -78,7 +78,7 @@ def writeSTRM(path, file, url):
     makeSTRM(path, file, url)
     
 def makeSTRM(filepath, filename, url):
-    filepath = filepath.decode("utf-8").rstrip(".")
+    filepath = stringUtils.multiRstrip(filepath.decode("utf-8"))
     filename = filename.decode("utf-8")
     
     utils.addon_log('makeSTRM')
@@ -86,7 +86,8 @@ def makeSTRM(filepath, filename, url):
     
     if not xbmcvfs.exists(filepath): 
         xbmcvfs.mkdirs(filepath)
-    fullpath = os.path.join(filepath, filename + '.strm')
+    fullpath = xbmc.translatePath(os.path.join(filepath, filename + '.strm'))
+
     if xbmcvfs.exists(fullpath):
         if addon.getSetting('Clear_Strms') == 'true':
             x = 0 #xbmcvfs.delete(fullpath)
@@ -130,11 +131,12 @@ def writeMediaList(url, name, cType='Other'):
     thelist = fle.readlines()
     fle.close()
     del fle
-         
-    if theentry not in thelist:
+    for i in thelist:
+        if i.split('|',2)[1] == name:
+            thelist = stringUtils.replaceStringElem(thelist, theentry, theentry)
+            existInList = True     
+    if existInList != True:
         thelist.append(theentry)
-    else:
-        thelist = stringUtils.replaceStringElem(thelist, theentry, theentry)
         
     with open(thefile.decode("utf-8"), 'w') as output_file: 
         for linje in thelist:
