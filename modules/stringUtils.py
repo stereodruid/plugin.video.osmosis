@@ -129,7 +129,7 @@ def cleanStrms(text, formater=''):
     return text
 
 def multiRstrip(text):
-    replaceRstrip = {'.', ',', '-', '_', ' ', '#', '+', '+', '`', '&', '%', '!', '?'}
+    replaceRstrip = ['.', ',', '-', '_', ' ', '#', '+', '`', '&', '%', '!', '?']
     for i in replaceRstrip:
         text.rstrip(i)
     return text
