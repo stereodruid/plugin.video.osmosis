@@ -98,14 +98,18 @@ if __name__ == "__main__":
             # Abort was requested while waiting. We should exit
             break  
         Automatic_Update_Run = REAL_SETTINGS.getSetting('Automatic_Update_Run')
+                    
         if Automatic_Update == "true":
             Automatic_Update_Time = REAL_SETTINGS.getSetting('Automatic_Update_Time')
             Automatic_Update_Run = REAL_SETTINGS.getSetting('Automatic_Update_Run')
             Timed_Update_Run = REAL_SETTINGS.getSetting('update_time')
             toseconds = toseconds + 10.0
-            if ((toseconds >= float(Automatic_Update_Time) * 60 * 60) or (time.strftime("%H:%M") == Timed_Update_Run and Timed_Update_Run != "0:00" )):
+            if ((toseconds >= float(Automatic_Update_Time) * 60 * 60)):
                 strm_update()
                 toseconds = 0.0
                 monitor.waitForAbort(60)
+        elif (time.strftime("%H:%M") == Timed_Update_Run and Timed_Update_Run != "0:00" ):
+            strm_update()
+            monitor.waitForAbort(60)
            
         # Sleep/wait for abort for 10 secondsds

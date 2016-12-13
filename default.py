@@ -193,17 +193,27 @@ if __name__ == "__main__":
         sDBID = xbmc.getInfoLabel("ListItem.DBID")
         sDuration = xbmc.getInfoLabel("ListItem.Duration")
         
+        
+        
         try:
             # Exec play process
             xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
             # Wait until the media is started in player
             while meta.find("video") == -1:
                 meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
+                
+            tvShowTitle = xbmc.getInfoLabel("VideoPlayer.TVShowTitle")
+            movieTitle = xbmc.getInfoLabel("VideoPlayer.Title")
+            movieBIBID = xbmc.getInfoLabel("VideoPlayer.DBID")
+            duration = xbmc.getInfoLabel("VideoPlayer.Duration")
+            season = xbmc.getInfoLabel("VideoPlayer.Season")
+            episode = xbmc.getInfoLabel("VideoPlayer.Episode")
+            playedTime = xbmc.getInfoLabel("VideoPlayer.Time")
             # Set watched status   
-            if xbmc.getInfoLabel("ListItem.path").find("TV-Show") != -1:
-                guiTools.markSeries(sPatToItem,sShowTitle,sEpisode,sSeason,sYear,sDBID,sDuration)
-            elif xbmc.getInfoLabel("ListItem.path").find("Cinema") != -1:
-                guiTools.markMovie(sPatToItem,sTitle,sYear,sDBID,sDuration)
+            if tvShowTitle != "":
+                guiTools.markSeries(sPatToItem,tvShowTitle,episode,season,sYear,movieBIBID,duration)
+            else:
+                guiTools.markMovie(sPatToItem,movieTitle,sYear,movieBIBID,duration)
         except:
             pass 
     elif mode == 100:

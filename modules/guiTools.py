@@ -164,9 +164,9 @@ def markMovie(sPatToItem,sTitle,sYear,sDBID,sDuration):
 
 def markSeries(sPatToItem,sShowTitle,sEpisode,sSeason,sYear,sDBID,sDuration):
     try:
-        showID = (json.loads(xbmc.executeJSONRPC('{"jsonrpc":"2.0","method":"VideoLibrary.GetTVShows","id":1,"params":{"filter":{"field":"title", "operator":"is","value":"' + sShowTitle +'" }}}'))['result']['tvshows'])[0].values()[0]
+        showID = (json.loads(xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows",  "id": "libTvShows"}'))['result']['tvshows'])[0].values()[0]        
         episID = (json.loads(xbmc.executeJSONRPC('{"jsonrpc":"2.0","method":"VideoLibrary.GetEpisodes","id":1,"params":{"filter":{"field":"season", "operator":"is","value":"' + sSeason + '"}, "filter":{"field":"episode", "operator":"is","value":"' + sEpisode + '"},"properties":["episode","file"],"tvshowid":' + str(showID) + ',"sort":{"order":"descending","method": "episode" }}}'))['result']['episodes'])[0].values()[1]
-        
+
         if xbmc.getCondVisibility('Library.HasContent(TVShows)'):
             xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : ' + str(episID) + ', "playcount" : 1 }, "id": 1 }')
     except:

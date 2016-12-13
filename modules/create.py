@@ -262,7 +262,7 @@ def addMovies(contentList, strm_name='', strm_type='Other'):
                     
                     if label and strm_name and label:                        
                         label = str(utils.multiple_reSub(label.rstrip(), dictReplacements))
-                        movieList.append([os.path.join(strm_type + "\\\\" + strm_name, label), str(utils.multiple_reSub(label.rstrip(), dictReplacements)), link])
+                        movieList.append([os.path.join(strm_type, strm_name, label), str(utils.multiple_reSub(label.rstrip(), dictReplacements)), link])
             except:
                 pass
         
@@ -368,7 +368,7 @@ def getEpisodes(episodesListRaw, strm_name, strm_type):
                         link = file
 #                     if showtitle.find('10-8:') != -1:
 #                         x= showtitle
-                    episodesList.append([os.path.join(strm_type + "\\" + (utils.multiple_reSub(showtitle, dictReplacements))), str('s' + season), str('e'+episode), link])
+                    episodesList.append([os.path.join(xbmc.translatePath(strm_type + "//" + (utils.multiple_reSub(showtitle, dictReplacements)))), str('s' + season), str('e'+episode), link])
     except IOError as (errno, strerror):
         print "I/O error({0}): {1}".format(errno, strerror)
     except ValueError:
