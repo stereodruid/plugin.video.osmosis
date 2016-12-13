@@ -1,43 +1,5 @@
 #!/usr/bin/python
 """Add a tvshow.nfo containing a TVDB url to a torrent data directory.
-
-This script will attempt to get a valid tv show name from a torrent
-name, search thetvdb.com for the show, and add a tvshow.nfo file to
-the directory containing the URL to the show page on thetvdb.
-
-This script was created so I can structure my TV show library how I want,
-and still get XBMC to correctly scrape the shows.
-
-Here's my structure:
-
-dump/
-  tv/
-    release_name1/release_name.r*
-    release_name2/release_name.r*
-
-This is impossible with vanilla XBMC, as the directory name is ALWAYS
-taken to be the show name by the scraper.  As scene release names will
-not be accepted as show names by theTvDb, the scraper doesn't work.  I
-want everything to be automated - I don't want to create directories on
-my own to satisfy XBMC.  I don't want to rename things - that will break
-torrent seeding.  I don't want to copy data to both seed and rename -
-what a waste of space!
-
-With this script, it's fully automated.  Make this executable, and add
-something to your torrent client to run this script whenever a torrent
-is finished.  For example, in rTorrent:
-
-    system.method.set_key = event.download.finished,add_tvshow_nfo,"execute=/bin/create_tvshow_nfo.py,$d.get_custom1=,$d.get_name="
-
-custom1 is set when I set up my watch directories:
-    schedule = watch_directory_6,5,5,"load_start=/dump/torrents/tv/*.torrent,d.set_custom1=/dump/tv"
-
-There's some configurable options below, and be sure to edit _is_tv_show() if you know how - it will cut
-down on requests to thetvdb.com.  Enjoy.
-
-p.s. You might also want to check out
-http://forum.xbmc.org/showthread.php?tid=51614
-
 """
 
 import os
