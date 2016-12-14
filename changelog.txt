@@ -1,4 +1,16 @@
-﻿#.0.3.8 RC
+﻿#.0.4.1 RC
+New Funktion: Watched status for Movies and TV-Shows
+New Funktion: Timed update for your content
++ Some fixes
+
+#.0.4.0 RC
++ Some fixes
+
+#.0.3.9 RC
++ New Function: Shows-Collection
++ Some fixes
+
+#.0.3.8 RC
 + Code cleaning part5
 + Some fixes
 

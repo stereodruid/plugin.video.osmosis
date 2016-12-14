@@ -26,22 +26,17 @@
     <extension point="xbmc.addon.metadata">
     <summary lang="en">Generates Strm files form streams that can be scraped to the library</summary>
     <description lang="en">Generate Strm files from Kodi Plugins, UPNP, Youtube, and RSS Sources, that can be scraped to the library.
-		v0.3.8 Special thanks goes to Kodinerds.net users:
-		Tester: 1, Tester: 2, Tester: 3</description>
+		v0.4.1 Special thanks goes to Kodinerds.net users:
+		Testers: breaksrmine, XsupergurkeX, Sagorian, EpicFail80, hansjuergense, MicTie</description>
     <disclaimer lang="en"></disclaimer>
 	<summary lang="de">
 		Erstellt Strm-Dateien die mit einem Scraper zur Datenbank hinzugefügt werden können.
 	</summary>
     <description lang="de">
-    	Erstellt Strm-Dateien Kodi-Plugins, UPNP, Youtube, and RSS Sourcen, die mit einem Scraper zur Datenbank hinzugefügt werden können.
-    	Unterstützte Formate: Serien, Filme, Rss-Sources und UPNP Quellen
-
-		v0.3.8 Special thanks goes to Kodinerds.net users:
-		- Tester: 1
-		- Tester: 2
-		- Tester: 3
-		- Tester: 4
-		- Tester: 5
+    	Erstellt Strm-Dateien Kodi-Plugins, UPNP, Youtube, and RSS Sourcen, die mit einem Scraper zur Datenbank hinzugefügt werden können. 
+    	Unterstützte Formate: Serien, Filme, Rss-Sources und UPNP Quellen.
+		Vielen Dank an Kodinerds.net und speziell an die Mitglieder​:
+		Tester: breaksrmine, XsupergurkeX, Sagorian, EpicFail80, hansjuergense, MicTie
     </description>
     <disclaimer lang="de"></disclaimer>
     <language></language>

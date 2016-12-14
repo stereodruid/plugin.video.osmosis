@@ -16,6 +16,7 @@
 # -*- coding: utf-8 -*-
 import os, sys
 import urllib
+import time
 
 import SimpleDownloader as downloader 
 from modules import create
@@ -25,15 +26,16 @@ from modules import urlUtils
 
 import utils
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin
- 
-# import pydevd
-# pydevd.settrace(stdoutToServer=True, stderrToServer=True)
+# Debug option pydevd:
+if False:
+    import pydevd
+    pydevd.settrace(stdoutToServer=True, stderrToServer=True)
 
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
 #from modules import createNFO
-# Debug option pydevd:
+
 
 
 
@@ -186,34 +188,18 @@ if __name__ == "__main__":
         # Gest infos from selectet media
         sPatToItem = xbmc.getInfoLabel("ListItem.path")
         sTitle = xbmc.getInfoLabel("ListItem.title")
-        sShowTitle = xbmc.getInfoLabel("ListItem.TVShowTitle")
-        sEpisode = xbmc.getInfoLabel("ListItem.episode")
-        sSeason = xbmc.getInfoLabel("ListItem.season")
-        sYear = xbmc.getInfoLabel("ListItem.year")
-        sDBID = xbmc.getInfoLabel("ListItem.DBID")
-        sDuration = xbmc.getInfoLabel("ListItem.Duration")
-        
-        
-        
+
         try:
             # Exec play process
             xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
             # Wait until the media is started in player
             while meta.find("video") == -1:
                 meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
-                
-            tvShowTitle = xbmc.getInfoLabel("VideoPlayer.TVShowTitle")
-            movieTitle = xbmc.getInfoLabel("VideoPlayer.Title")
-            movieBIBID = xbmc.getInfoLabel("VideoPlayer.DBID")
-            duration = xbmc.getInfoLabel("VideoPlayer.Duration")
-            season = xbmc.getInfoLabel("VideoPlayer.Season")
-            episode = xbmc.getInfoLabel("VideoPlayer.Episode")
-            playedTime = xbmc.getInfoLabel("VideoPlayer.Time")
-            # Set watched status   
-            if tvShowTitle != "":
-                guiTools.markSeries(sPatToItem,tvShowTitle,episode,season,sYear,movieBIBID,duration)
+            time.sleep(2)
+            if xbmc.getInfoLabel("VideoPlayer.TVShowTitle") != "":
+                guiTools.markSeries(xbmc.getInfoLabel("VideoPlayer.TVShowTitle"),xbmc.getInfoLabel("VideoPlayer.Episode"),xbmc.getInfoLabel("VideoPlayer.Season"))
             else:
-                guiTools.markMovie(sPatToItem,movieTitle,sYear,movieBIBID,duration)
+                guiTools.markMovie(xbmc.getInfoLabel("VideoPlayer.Title"))
         except:
             pass 
     elif mode == 100:

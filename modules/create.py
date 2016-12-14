@@ -58,7 +58,7 @@ dictReplacements = {"'\(\\d+\)'" : '', '()' : '', 'Kinofilme' : '',
                     '  ' : ' ','\(de\)':'','\(en\)':'', 
                     "\(TVshow\)":"",'Movies' : '', 'Filme' : '', 
                     'Movie' : '', "'.'" : ' ', '\(\)' : '',
-                     ":": ' ', "-": ' ','"?"': '','"':''}
+                     ":": ' ','"?"': '','"':''}
 
 if os.path.exists(favorites) == True:
     FAV = open(favorites).read()

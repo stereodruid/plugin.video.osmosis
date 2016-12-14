@@ -20,14 +20,13 @@
 # -*- coding: utf-8 -*-
 import os
 import time
-
 from modules import create
-
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
 
-# import pydevd
-# pydevd.settrace(stdoutToServer=True, stderrToServer=True)
-
+# Debug option pydevd:
+if False:
+    import pydevd
+    pydevd.settrace(stdoutToServer=True, stderrToServer=True)
 
 global thelist
 thelist = None
@@ -70,8 +69,6 @@ if __name__ == "__main__":
         if xbmcvfs.exists(MediaList_LOC) and len(thelist) > 0:
             pDialog = xbmcgui.DialogProgressBG()
             pDialog.create(ADDON_NAME, "Updating")
-            # xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%(ADDON_NAME, "Starting Update", time, represent))
-                
             j = 100 / len(thelist)
                 
             for i in range(len(thelist)):
@@ -84,6 +81,7 @@ if __name__ == "__main__":
                         pass
                         
                     j = j + 100 / len(thelist)
+                    
             pDialog.update(100, ADDON_NAME + " Update: Done") 
             pDialog.close()
             xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (ADDON_NAME, "Next update in: " + Automatic_Update_Time , itime, represent))
@@ -100,15 +98,16 @@ if __name__ == "__main__":
         Automatic_Update_Run = REAL_SETTINGS.getSetting('Automatic_Update_Run')
         Timed_Update_Run = REAL_SETTINGS.getSetting('update_time')           
         if Automatic_Update == "true":
+            Timed_Update_Run = "0:00"
             Automatic_Update_Time = REAL_SETTINGS.getSetting('Automatic_Update_Time')
             Automatic_Update_Run = REAL_SETTINGS.getSetting('Automatic_Update_Run')
-            
             toseconds = toseconds + 10.0
+            
             if ((toseconds >= float(Automatic_Update_Time) * 60 * 60)):
                 strm_update()
                 toseconds = 0.0
                 monitor.waitForAbort(60)
-        elif (time.strftime("%H:%M") == Timed_Update_Run and Timed_Update_Run != "0:00" ):
+        elif (time.strftime("%H:%M") == Timed_Update_Run) and Timed_Update_Run != "0:00":
             strm_update()
             monitor.waitForAbort(60)
            
