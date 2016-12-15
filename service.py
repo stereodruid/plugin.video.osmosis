@@ -110,5 +110,3 @@ if __name__ == "__main__":
         elif (time.strftime("%H:%M") == Timed_Update_Run) and Timed_Update_Run != "0:00":
             strm_update()
             monitor.waitForAbort(60)
-           
-        # Sleep/wait for abort for 10 secondsds
