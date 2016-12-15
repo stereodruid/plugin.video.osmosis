@@ -15,27 +15,35 @@
 
 # -*- coding: utf-8 -*-
 import os, sys
-reload(sys)
-sys.setdefaultencoding("utf-8")
 import urllib
+import time
 
 import SimpleDownloader as downloader 
 from modules import create
 from modules import fileSys
 from modules import guiTools
 from modules import urlUtils
+
 import utils
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin
 # Debug option pydevd:
-# REMOTE_DBG = True
-# import pydevd
-# pydevd.settrace(stdoutToServer=True, stderrToServer=True)
+if False:
+    import pydevd
+    pydevd.settrace(stdoutToServer=True, stderrToServer=True)
+
+reload(sys)
+sys.setdefaultencoding("utf-8")
+
+#from modules import createNFO
+
+
+
 
 addnon_id = 'plugin.video.osmosis'
 addon = xbmcaddon.Addon(addnon_id)#
 addon_version = addon.getAddonInfo('version')
 ADDON_NAME = addon.getAddonInfo('name')
-REAL_SETTINGS = xbmcaddon.Addon(id=addnon_id)#
+REAL_SETTINGS = xbmcaddon.Addon(id=addnon_id)# 
 ADDON_SETTINGS = REAL_SETTINGS.getAddonInfo('profile')
 MediaList_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'MediaList.xml'))#
 STRM_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'STRM_LOC'))#
@@ -147,7 +155,7 @@ if __name__ == "__main__":
     if not url is None:
         utils.addon_log("URL: " + str(url)) #.encode('utf-8')))
         utils.addon_log("Name: " + str(name))
-    
+    #createNFO.setNamePath(STRM_LOC + "\\TV-Shows(de)", 'The Walking Dead', STRM_LOC) 
     if mode == None:
         utils.addon_log("getSources")
         guiTools.getSources()
@@ -180,24 +188,18 @@ if __name__ == "__main__":
         # Gest infos from selectet media
         sPatToItem = xbmc.getInfoLabel("ListItem.path")
         sTitle = xbmc.getInfoLabel("ListItem.title")
-        sShowTitle = xbmc.getInfoLabel("ListItem.TVShowTitle")
-        sEpisode = xbmc.getInfoLabel("ListItem.episode")
-        sSeason = xbmc.getInfoLabel("ListItem.season")
-        sYear = xbmc.getInfoLabel("ListItem.year")
-        sDBID = xbmc.getInfoLabel("ListItem.DBID")
-        sDuration = xbmc.getInfoLabel("ListItem.Duration")
-        
+
         try:
             # Exec play process
             xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
             # Wait until the media is started in player
             while meta.find("video") == -1:
                 meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
-            # Set watched status   
-            if xbmc.getInfoLabel("ListItem.path").find("TV-Show") != -1:
-                guiTools.markSeries(sPatToItem,sShowTitle,sEpisode,sSeason,sYear,sDBID,sDuration)
-            elif xbmc.getInfoLabel("ListItem.path").find("Cinema") != -1:
-                guiTools.markMovie(sPatToItem,sTitle,sYear,sDBID,sDuration)
+            time.sleep(2)
+            if xbmc.getInfoLabel("VideoPlayer.TVShowTitle") != "":
+                guiTools.markSeries(xbmc.getInfoLabel("VideoPlayer.TVShowTitle"),xbmc.getInfoLabel("VideoPlayer.Episode"),xbmc.getInfoLabel("VideoPlayer.Season"))
+            else:
+                guiTools.markMovie(xbmc.getInfoLabel("VideoPlayer.Title"))
         except:
             pass 
     elif mode == 100:

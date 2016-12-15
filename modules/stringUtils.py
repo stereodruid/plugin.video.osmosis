@@ -26,6 +26,7 @@ import utils
 import xbmc
 import xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
 
+
 try:
     import json
 except:
@@ -96,7 +97,7 @@ def cleanLabels(text, formater=''):
                    (u"\n", u""), (u"\r", u""),
                    (u"\t", u""), (u"\ ", u''),
                    (u"/ ", u''), (u"\\", u'/'),
-                   (u"//", u'/'), (u'plugin.video.', u''),
+                   (u"//", u'/'), (u'plugin.video.', u''),(u':', u''),
                    (u'plugin.audio.', u''))
 
     text = utils.multiple_reSub(text, dictresub)
@@ -126,7 +127,13 @@ def cleanStrms(text, formater=''):
     else:
         text = text
     return text
-    
+
+def multiRstrip(text):
+    replaceRstrip = ['.', ',', '-', '_', ' ', '#', '+', '`', '&', '%', '!', '?']
+    for i in replaceRstrip:
+        text.rstrip(i)
+    return text
+            
 def asciis(string):
     if isinstance(string, basestring):
         if isinstance(string, unicode):

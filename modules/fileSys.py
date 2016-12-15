@@ -78,7 +78,7 @@ def writeSTRM(path, file, url):
     makeSTRM(path, file, url)
     
 def makeSTRM(filepath, filename, url):
-    filepath = filepath.decode("utf-8").rstrip(".")
+    filepath = stringUtils.multiRstrip(filepath.decode("utf-8"))
     filename = filename.decode("utf-8")
     
     utils.addon_log('makeSTRM')
@@ -86,14 +86,19 @@ def makeSTRM(filepath, filename, url):
     
     if not xbmcvfs.exists(filepath): 
         xbmcvfs.mkdirs(filepath)
-    fullpath = os.path.join(filepath, filename + '.strm')
+    fullpath = xbmc.translatePath(os.path.join(filepath, filename + '.strm'))
+
     if xbmcvfs.exists(fullpath):
         if addon.getSetting('Clear_Strms') == 'true':
             x = 0 #xbmcvfs.delete(fullpath)
         else:
             return fullpath
     else:
-        fle = open(fullpath, "w")
+        try:
+            fle = open(fullpath.encode("utf-8"), "w")
+        except:
+            fle = open(fullpath.decode("utf-8"), "w")
+            pass
         fle.write("%s" % url)
         fle.close()
         del fle
@@ -113,6 +118,7 @@ def updateStream(strm_Fullpath, replace_text):
                
 def writeMediaList(url, name, cType='Other'):
     utils.addon_log('writeMediaList')
+    existInList = False
     thelist = []
     thefile = xbmc.translatePath(os.path.join(profile, 'MediaList.xml'))
     theentry = '|'.join([cType, name.decode("utf-8"), url]) + '\n'  
@@ -126,11 +132,14 @@ def writeMediaList(url, name, cType='Other'):
     thelist = fle.readlines()
     fle.close()
     del fle
-         
-    if theentry not in thelist:
+    
+    if len(thelist) > 0:
+        for i in thelist:
+            if i.split('|',2)[1] == name:
+                thelist = stringUtils.replaceStringElem(thelist, theentry, theentry)
+                existInList = True     
+    if existInList != True:
         thelist.append(theentry)
-    else:
-        thelist = stringUtils.replaceStringElem(thelist, theentry, theentry)
         
     with open(thefile.decode("utf-8"), 'w') as output_file: 
         for linje in thelist:

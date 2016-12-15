@@ -18,13 +18,15 @@
 
 
 # -*- coding: utf-8 -*-
- 
 import os
 import time
 from modules import create
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
-# import pydevd
-# pydevd.settrace(stdoutToServer=True, stderrToServer=True)
+
+# Debug option pydevd:
+if False:
+    import pydevd
+    pydevd.settrace(stdoutToServer=True, stderrToServer=True)
 
 global thelist
 thelist = None
@@ -60,15 +62,13 @@ if __name__ == "__main__":
                 return thelist
         except:
             pass
-                
-    thelist = readMediaList()
+    if xbmcvfs.exists(MediaList_LOC):           
+        thelist = readMediaList()
     
     def strm_update():
-        if xbmcvfs.exists(MediaList_LOC):
+        if xbmcvfs.exists(MediaList_LOC) and len(thelist) > 0:
             pDialog = xbmcgui.DialogProgressBG()
             pDialog.create(ADDON_NAME, "Updating")
-            # xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%(ADDON_NAME, "Starting Update", time, represent))
-                
             j = 100 / len(thelist)
                 
             for i in range(len(thelist)):
@@ -76,11 +76,12 @@ if __name__ == "__main__":
                     # time.sleep(2) # delays for 2 seconds just to make sure Hodor can read the message 
                     pDialog.update(j, ADDON_NAME + " Update: " + name.decode('utf-8')) 
                     try:
-                        create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType, showtitle=name)
+                        create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
                     except:  #
                         pass
                         
                     j = j + 100 / len(thelist)
+                    
             pDialog.update(100, ADDON_NAME + " Update: Done") 
             pDialog.close()
             xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (ADDON_NAME, "Next update in: " + Automatic_Update_Time , itime, represent))
@@ -95,14 +96,17 @@ if __name__ == "__main__":
             # Abort was requested while waiting. We should exit
             break  
         Automatic_Update_Run = REAL_SETTINGS.getSetting('Automatic_Update_Run')
+        Timed_Update_Run = REAL_SETTINGS.getSetting('update_time')           
         if Automatic_Update == "true":
+            Timed_Update_Run = "0:00"
             Automatic_Update_Time = REAL_SETTINGS.getSetting('Automatic_Update_Time')
             Automatic_Update_Run = REAL_SETTINGS.getSetting('Automatic_Update_Run')
-            Timed_Update_Run = REAL_SETTINGS.getSetting('update_time')
             toseconds = toseconds + 10.0
-            if ((toseconds >= float(Automatic_Update_Time) * 60 * 60) or (time.strftime("%H:%M") == Timed_Update_Run)):
+            
+            if ((toseconds >= float(Automatic_Update_Time) * 60 * 60)):
                 strm_update()
                 toseconds = 0.0
                 monitor.waitForAbort(60)
-           
-        # Sleep/wait for abort for 10 secondsds
+        elif (time.strftime("%H:%M") == Timed_Update_Run) and Timed_Update_Run != "0:00":
+            strm_update()
+            monitor.waitForAbort(60)
