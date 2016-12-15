@@ -1,6 +1,0 @@
-{
-  "name": "OSMOSIS :::: KODI-Addon",
-  "tagline": "Kodi add-on to add streams to library",
-  "body": "# plugin.video.osmosis\r\nKodi add-on to add streams to library\r\n\r\n##Early version should be considered unstable. \r\n\r\nSupport forum(German): \r\nhttp://www.kodinerds.net/index.php/Thread/53307-Beta-Version-OSMOSIS-Streams-zur-DB-hinzuf%C3%BCgen/\r\n\r\n![alt tag](https://github.com/stereodruid/OSMOSIS/blob/master/icon.png)\r\n\r\n# Version .0.2.4\r\n+ Bug fixing.\r\n+ Last build before RC1\r\n### How to use\r\n####Note, single streams(one movie), is not supported yet, select whole section instead like \"Most Viewed\"(containing all the most viewed movies in it). \r\n\r\nAdd a TV-Show example: \r\nOpen OSMOSIS  > select video option > navigate in to your video addon > search for a TV-Show>\r\nSelect the TV-Show, do not open, just select! > open context menu on selected > select \"create strm\" > select \"TV-Shows\". \r\n\r\nNow the strm files are located at the path you can configure in OSMOSIS's settings default is: \"userdata\\addon_data\\plugin.video.osmosis/strm\" \r\n\r\nAfter creating strm you will find your stuff in TV, Cinema, TV-Shows, or Others folder, now add this folder to your KODI library and set the content type, done.\r\n\r\n",
-  "note": "Don't delete this file! It's used internally to help with page regeneration."
-}
