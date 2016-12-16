@@ -138,7 +138,7 @@ def getType(url):
     lang = ['(en)', '(de)','(sp)','(tr)', 'Other']  
     selectType = selectDialog(Types)
     selectLang = selectDialog(lang)
-    if selectType and selectLang >= 0:
+    if selectType >= 0 and selectLang >= 0:
         return Types[selectType]+ lang[selectLang]
 
 def selectDialog(list, header=ADDON_NAME, autoclose=0):
