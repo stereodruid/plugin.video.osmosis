@@ -1,4 +1,7 @@
-﻿#.0.4.1 RC
+#.0.4.2 RC
++ Some fixes
+
+#.0.4.1 RC
 New Funktion: Watched status for Movies and TV-Shows
 New Funktion: Timed update for your content
 + Some fixes
