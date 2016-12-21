@@ -31,6 +31,14 @@ from modules import dialoge
 from modules import jsonUtils
 from modules import stringUtils
 
+this = sys.modules[__name__]  
+this.renamed = False
+
+def initialize_Renamed():
+    if (this.renamed is False):
+        this.renamed  = True  # no global needed
+    else:
+        this.renamed = False 
 
 addnon_id = 'plugin.video.osmosis'
 addon = xbmcaddon.Addon(addnon_id)
@@ -59,6 +67,7 @@ dictReplacements = {"'\(\\d+\)'" : '', '()' : '', 'Kinofilme' : '',
                     "\(TVshow\)":"",'Movies' : '', 'Filme' : '', 
                     'Movie' : '', "'.'" : ' ', '\(\)' : '',
                      ":": ' ','"?"': '','"':''}
+global isRenamde
 
 if os.path.exists(favorites) == True:
     FAV = open(favorites).read()
@@ -100,9 +109,12 @@ def fillPlugins(cType='video'):
                 fanart = fanarts.group(1) #stringUtils.removeNonAscii(fanarts.group(1))
                 guiTools.addDir(name, 'plugin://' + path, 101, thumbnail, fanart, description, cType, 'date', 'credits')
 
-def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None'):
+def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None', iRenamed=False):
+    
     utils.addon_log('fillPluginItems')
-
+    
+    if iRenamed:
+        initialize_Renamed()
     if not file_type:
         detail = stringUtils.uni(jsonUtils.requestList(url, media_type))
         listLength = len(detail)
@@ -289,7 +301,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other'):
             
             if filetype != 'file':
                 if showtitles and seasons == "-1" and episodes == "-1":
-                    getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name, strm_type)
+                    getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name, strm_type, Renamed)
                 else:
                     addTVShows(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name="", strm_type=strm_type)
         
@@ -366,9 +378,11 @@ def getEpisodes(episodesListRaw, strm_name, strm_type):
                         link = sys.argv[0] + "?url=" + urllib.quote_plus(file) + "&mode=" + str(10) + "&name=" + urllib.quote_plus(label) + "&fanart=" + urllib.quote_plus(fanart)
                     else:
                         link = file
-#                     if showtitle.find('10-8:') != -1:
-#                         x= showtitle
+#                   
+                    if this.renamed:
+                        showtitle = strm_name
                     episodesList.append([os.path.join(xbmc.translatePath(strm_type + "//" + (utils.multiple_reSub(showtitle, dictReplacements)))), str('s' + season), str('e'+episode), link])
+
     except IOError as (errno, strerror):
         print "I/O error({0}): {1}".format(errno, strerror)
     except ValueError:
@@ -376,10 +390,11 @@ def getEpisodes(episodesListRaw, strm_name, strm_type):
     except:
         print "Unexpected error:", sys.exc_info()[0]
         raise
-            
+
     for i in episodesList:
         fileSys.writeSTRM(stringUtils.cleanStrms((i[0].rstrip("."))), stringUtils.cleanStrms(i[1].rstrip(".")) + stringUtils.cleanStrms(i[2].rstrip(".")) , i[3])
-    
+        if this.renamed:
+            initialize_Renamed()
     return episodesList
     
 def getData(url, fanart):
