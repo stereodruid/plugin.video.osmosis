@@ -45,7 +45,7 @@ STRM_LOC = REAL_SETTINGS.getSetting('STRM_LOC')
 Path_Type = REAL_SETTINGS.getSetting('Path_Type')
 Clear_Strms = REAL_SETTINGS.getSetting('Clear_Strms') == 'true'
 Automatic_Update_Time = REAL_SETTINGS.getSetting('Automatic_Update_Time') 
-Automatic_Update = REAL_SETTINGS.getSetting('Automatic_Update')
+Updat_at_startup = REAL_SETTINGS.getSetting('Updat_at_startup')
 Automatic_Update_Delay = REAL_SETTINGS.getSetting('Automatic_Update_Delay')
 Automatic_Update_Run = REAL_SETTINGS.getSetting('Automatic_Update_Run')
 represent = os.path.join(ADDON_PATH, 'representerIcon.png')
@@ -84,9 +84,9 @@ if __name__ == "__main__":
                     
             pDialog.update(100, ADDON_NAME + " Update: Done") 
             pDialog.close()
-            xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (ADDON_NAME, "Next update in: " + Automatic_Update_Time , itime, represent))
+            xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (ADDON_NAME, "Next update in: " + Automatic_Update_Time + "h" , itime, represent))
 
-    if Automatic_Update == "true":      
+    if Updat_at_startup == "true":      
         strm_update()
         
     monitor = xbmc.Monitor()
@@ -97,7 +97,7 @@ if __name__ == "__main__":
             break  
         Automatic_Update_Run = REAL_SETTINGS.getSetting('Automatic_Update_Run')
         Timed_Update_Run = REAL_SETTINGS.getSetting('update_time')           
-        if Automatic_Update == "true":
+        if Automatic_Update_Run == "true":
             Timed_Update_Run = "0:00"
             Automatic_Update_Time = REAL_SETTINGS.getSetting('Automatic_Update_Time')
             Automatic_Update_Run = REAL_SETTINGS.getSetting('Automatic_Update_Run')

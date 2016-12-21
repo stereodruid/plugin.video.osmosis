@@ -131,13 +131,15 @@ def getSources():
     #ToDo Add label
 
 def getType(url):
+    
     if url.find('plugin.audio') != -1:
         Types = ['YouTube Video','Audio-Album', 'Audio-Single', 'Other']
     else:
         Types = ['Cinema', 'TV-Shows', 'Shows-Collection', 'YouTube Music', 'VTS-Movie structure','Other']
-    lang = ['(en)', '(de)','(sp)','(tr)', 'Other']  
-    selectType = selectDialog(Types)
-    selectLang = selectDialog(lang)
+    lang = ['(en)', '(de)','(sp)','(tr)', 'Other']
+
+    selectType = selectDialog(Types, header ='Select category')
+    selectLang = selectDialog(lang, header ='Select language tag')
     if selectType >= 0 and selectLang >= 0:
         return Types[selectType]+ lang[selectLang]
 
@@ -145,7 +147,10 @@ def selectDialog(list, header=ADDON_NAME, autoclose=0):
     if len(list) > 0:
         select = xbmcgui.Dialog().select(header, list, autoclose)
         return select
-
+def editDialog(nameToChange):
+        dialog = xbmcgui.Dialog()
+        select = dialog.input(nameToChange, type=xbmcgui.INPUT_ALPHANUM)
+        return select
 #Before executing the code below we need to know the movie original title (string variable originaltitle) and the year (string variable year). They can be obtained from the infolabels of the listitem. The code filters the database for items with the same original title and the same year, year-1 and year+1 to avoid errors identifying the media.
 def markMovie(sTitle):
     if xbmc.getCondVisibility('Library.HasContent(Movies)'):

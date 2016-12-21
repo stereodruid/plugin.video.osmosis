@@ -28,7 +28,7 @@ import utils
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin
 # Debug option pydevd:
 if False:
-    import pydevd
+    import pydevd 
     pydevd.settrace(stdoutToServer=True, stderrToServer=True)
 
 reload(sys)
@@ -217,10 +217,18 @@ if __name__ == "__main__":
         
     elif mode == 200:
         utils.addon_log("write multi strms")
+        # A dialog to rename the Change Title for Folder and MediaList entry:
+        selectAction = ['Rename Title!', 'No, continue with original Title!']
+        if guiTools.selectDialog(selectAction, header = 'Title for Folder and MediaList entry') == 0:
+            name = guiTools.editDialog(name)
+            Renamed=True
+        else:
+            Renamed = False
+            
         cType = guiTools.getType(url)
         fileSys.writeMediaList(url, name, cType)
         dialog.notification(cType, name, xbmcgui.NOTIFICATION_INFO, 5000, False) 
-        create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
+        create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType, iRenamed=Renamed)
         dialog.notification('Writing items...', "Done", xbmcgui.NOTIFICATION_INFO, 5000, False)    
     elif mode == 201:
         utils.addon_log("write single strm")
