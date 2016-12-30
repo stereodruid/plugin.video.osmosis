@@ -1,4 +1,7 @@
-﻿#.0.4.3
+﻿#.0.4.4 - 0.4.6
++ Some fixes
+
+#.0.4.3
 + New option: Update at startup
 + New Funktion: Rename
 + Some fixes
