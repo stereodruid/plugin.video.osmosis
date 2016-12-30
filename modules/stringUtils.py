@@ -146,6 +146,8 @@ def uni(string):
             string = string.encode('utf-8', 'ignore')
             
     return string
+def removeHTMLTAGS(text):
+    return re.sub('<[^<]+?>', '', text)
 
 def removeNonAscii(s): return "".join(filter(lambda x: ord(x) < 128, s))
 

@@ -250,6 +250,7 @@ def addMovies(contentList, strm_name='', strm_type='Other'):
     while pagesDone < int(PAGINGMovies):
 
         for detailInfo in contentList:
+            detailInfo = stringUtils.removeHTMLTAGS(detailInfo)
             files = re.search('"file" *: *"(.*?)",', detailInfo)
             filetypes = re.search('"filetype" *: *"(.*?)",', detailInfo)
             labels = re.search('"label" *: *"(.*?)",', detailInfo)
@@ -291,6 +292,7 @@ def addMovies(contentList, strm_name='', strm_type='Other'):
 def getTVShowFromList(showList, strm_name='', strm_type='Other'):
     strm_type = strm_type.replace('Shows-Collection', 'TV-Shows')
     for detailInfo in showList:
+        detailInfo = stringUtils.removeHTMLTAGS(detailInfo)
         filetypes = re.search('"filetype" *: *"(.*?)",', detailInfo)
         if filetypes:
             filetype = filetypes.group(1)
@@ -304,7 +306,9 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other'):
                     getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name, strm_type, Renamed)
                 else:
                     addTVShows(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name="", strm_type=strm_type)
-        
+                
+                
+            
 def addTVShows(contentList, strm_name='', strm_type='Other'):
     showsList = []
     showtitle = strm_name
@@ -313,6 +317,7 @@ def addTVShows(contentList, strm_name='', strm_type='Other'):
     
 #     while pagesDone < int(PAGINGTVshows):
     for detailInfo in contentList:
+        detailInfo = stringUtils.removeHTMLTAGS(detailInfo)
         filetypes = re.search('"filetype" *: *"(.*?)",', detailInfo)
             
         if filetypes:
@@ -339,6 +344,7 @@ def getEpisodes(episodesListRaw, strm_name, strm_type):
             episodesListRaw = typeChange
             
         for detailInfo in episodesListRaw:
+            detailInfo = stringUtils.removeHTMLTAGS(detailInfo)
             files = re.search('"file" *: *"(.*?)",', detailInfo)            
             filetypes = re.search('"filetype" *: *"(.*?)",', detailInfo)
             labels = re.search('"label" *: *"(.*?)",', detailInfo)
