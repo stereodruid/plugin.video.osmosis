@@ -1,3 +1,10 @@
+﻿#.0.4.7
++ Improved Auto update
++ Improved watched status (set as watched)
++ Now you can write your strms to a samba share, with or without login credentials.
+	Note: you have to set the share as source in kodi's file manager!
++ Some fixes
+
 #.0.4.4 - 0.4.6
 + Some fixes
 

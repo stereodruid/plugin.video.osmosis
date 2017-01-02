@@ -155,7 +155,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             filetype = filetypes.group(1)
             label = (stringUtils.cleanLabels(labels.group(1)))
             file = (files.group(1).replace("\\\\", "\\"))
-            strm_name = str(utils.multiple_reSub(strm_name.rstrip(), dictReplacements))
+            strm_name = str(utils.multiple_reSub(strm_name.rstrip().lstrip(), dictReplacements))
                          
             if not descriptions:
                 description = ''
@@ -274,8 +274,8 @@ def addMovies(contentList, strm_name='', strm_type='Other'):
                         link = file
                     
                     if label and strm_name and label:                        
-                        label = str(utils.multiple_reSub(label.rstrip(), dictReplacements))
-                        movieList.append([os.path.join(strm_type, strm_name, label), str(utils.multiple_reSub(label.rstrip(), dictReplacements)), link])
+                        label = str(utils.multiple_reSub(label.rstrip().lstrip(), dictReplacements))
+                        movieList.append([os.path.join(strm_type, strm_name.rstrip().lstrip(), label.rstrip().lstrip()), str(utils.multiple_reSub(label.rstrip().lstrip(), dictReplacements)), link])
             except:
                 pass
         
@@ -303,7 +303,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other'):
             
             if filetype != 'file':
                 if showtitles and seasons == "-1" and episodes == "-1":
-                    getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name, strm_type, Renamed)
+                    getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name.rstrip().lstrip(), strm_type, Renamed)
                 else:
                     addTVShows(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name="", strm_type=strm_type)
                 
@@ -325,7 +325,7 @@ def addTVShows(contentList, strm_name='', strm_type='Other'):
             files = re.search('"file" *: *"(.*?)",', detailInfo)            
                 
             if filetype != 'file':
-                getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name, strm_type)
+                getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name.rstrip().lstrip(), strm_type)
             else:              
                 getEpisodes(detailInfo, strm_name, strm_type)              
 #         pagesDone += 1
@@ -365,7 +365,7 @@ def getEpisodes(episodesListRaw, strm_name, strm_type):
                     filetype = filetypes.group(1)
                     label = (stringUtils.cleanLabels(labels.group(1))) 
                     file = (files.group(1).replace("\\\\", "\\"))
-                    strm_name = str(utils.multiple_reSub(strm_name.rstrip(), dictReplacements))
+                    strm_name = str(utils.multiple_reSub(strm_name.rstrip().lstrip(), dictReplacements))
                     showtitle = utils.multiple_reSub((showtitles.group(1)), dictReplacements)
                     season = (utils.multiple_reSub((seasons.group(1)).replace("-", ""), dictReplacements))
                     episode = (utils.multiple_reSub((episodes.group(1)).replace("-", ""), dictReplacements))
@@ -386,15 +386,15 @@ def getEpisodes(episodesListRaw, strm_name, strm_type):
                         link = file
 #                   
                     if this.renamed:
-                        showtitle = strm_name
-                    episodesList.append([os.path.join(xbmc.translatePath(strm_type + "//" + (utils.multiple_reSub(showtitle, dictReplacements)))), str('s' + season), str('e'+episode), link])
+                        showtitle = strm_name.rstrip().lstrip()
+                    episodesList.append([os.path.join(xbmc.translatePath(strm_type + "//" + (utils.multiple_reSub(showtitle.rstrip().lstrip(), dictReplacements)))), str('s' + season), str('e'+episode), link])
 
     except IOError as (errno, strerror):
-        print "I/O error({0}): {1}".format(errno, strerror)
+        print ("I/O error({0}): {1}").format(errno, strerror)
     except ValueError:
-        print "No valid integer in line."
+        print ("No valid integer in line.")
     except:
-        print "Unexpected error:", sys.exc_info()[0]
+        print ("Unexpected error:"), sys.exc_info()[0]
         raise
 
     for i in episodesList:
