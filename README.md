@@ -1,5 +1,5 @@
 # plugin.video.osmosis
-Kodi add-on to add streams to library
+Kodi add-on you can add streams to library with
 
 ##Beta version should be considered unstable. 
 
