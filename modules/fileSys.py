@@ -17,6 +17,8 @@
 
 import fileinput
 import os
+import sys
+import re
 import shutil
 
 from BeautifulSoup import BeautifulStoneSoup, BeautifulSoup, BeautifulSOAP
@@ -25,6 +27,7 @@ import pyxbmct
 import utils
 import codecs
 from modules import stringUtils
+from modules import guiTools
 import errno
 import xbmc
 import xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
@@ -78,33 +81,61 @@ def writeSTRM(path, file, url):
     makeSTRM(path, file, url)
     
 def makeSTRM(filepath, filename, url):
-    filepath = stringUtils.multiRstrip(filepath.decode("utf-8"))
-    filename = filename.decode("utf-8")
-    
     utils.addon_log('makeSTRM')
-    filepath = os.path.join(STRM_LOC, filepath)
     
-    if not xbmcvfs.exists(filepath): 
-        xbmcvfs.mkdirs(filepath)
-    fullpath = xbmc.translatePath(os.path.join(filepath, filename + '.strm'))
+    isSMB = False
+    try:
+        filepath = stringUtils.multiRstrip(filepath.decode("utf-8"))
+        filename = filename.decode("utf-8")
+        filepath = xbmc.translatePath(os.path.join(STRM_LOC, filepath))   
 
-    if xbmcvfs.exists(fullpath):
-        if addon.getSetting('Clear_Strms') == 'true':
-            x = 0 #xbmcvfs.delete(fullpath)
+        if not xbmcvfs.exists(filepath): 
+            xbmcvfs.mkdirs(filepath)
+        
+        if not STRM_LOC.startswith("smb:"):  
+            fullpath = os.path.normpath(xbmc.translatePath(os.path.join(filepath,  filename))) +'.strm'
         else:
-            return fullpath
-    else:
-        try:
-            fle = open(fullpath.encode("utf-8"), "w")
-        except:
-            fle = open(fullpath.decode("utf-8"), "w")
-            pass
-        fle.write("%s" % url)
-        fle.close()
-        del fle
-        return fullpath
+            isSMB = True 
+            fullpath = filepath + "/" + filename + ".strm"
+              
+        if xbmcvfs.exists(fullpath):
+            if addon.getSetting('Clear_Strms') == 'true':
+                x = 0 #xbmcvfs.delete(fullpath)
+            else:
+                return fullpath
+        else:
+            if isSMB:
+                try:
+                    fle = xbmcvfs.File (fullpath.encode("utf-8"), 'w')
+                except:
+                    fle = xbmcvfs.File (fullpath.encode("utf-8"), 'w')
+                    pass
+        
+                fle.write("%s" % url)
+                fle.close()
+                del fle
+            else:
+                try:
+                    fle = open(fullpath.encode("utf-8"), "w")
+                except:
+                    fle = open(fullpath.decode("utf-8"), "w")
+                    pass
+        
+                fle.write("%s" % url)
+                fle.close()
+                del fle
+                  
+    except IOError as (errno, strerror):
+        print ("I/O error({0}): {1}").format(errno, strerror)
+    except ValueError:
+        print ("No valid integer in line.")
+    except:
+        guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". Se your Kodi.log!"))
+        utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
+        print ("Unexpected error:"), sys.exc_info()[1]
+        pass
+    return fullpath
     
-
 def updateStream(strm_Fullpath, replace_text):
     utils.addon_log('updateStream')
     for line in fileinput.input(strm_Fullpath, inplace=1):

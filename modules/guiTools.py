@@ -16,6 +16,7 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 from datetime import timedelta
+import time
 import os, sys, re, traceback
 import random
 import shutil
@@ -182,11 +183,19 @@ def markSeries(sShowTitle,sEpisode,sSeason):
             meta = json.loads(meta)
             meta = meta['result']['episodes']
             try:
-                meta = [i for i in meta if cleaned_title in i['file'].rstrip()][0]
+                gotIt = [i for i in meta if (cleaned_title in i['showtitle'].rstrip() or i['showtitle'].rstrip() in cleaned_title)][0]
             except:
                 print("markSeries: Original title not found")
                 pass
-            xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % str(meta['episodeid']))
+            if gotIt:               
+                player = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
+                
+                #while meta.find("video") == -1:
+                    #time.sleep(2)
+            #resume playing
+            #xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "resume": {"position": 1600, "total": 3600}}, "id": 1 }' % str(gotIt['episodeid']))
+            #set watched
+            xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % str(gotIt['episodeid']))
         except:
             print("markSeries: Show not in DB!?")
             pass
@@ -227,8 +236,8 @@ def Error(header, line1='', line2='', line3=''):
     dlg.ok(header, line1, line2, line3)
     del dlg
 
-def infoDialog(str, header=ADDON_NAME, time=4000):
-    try: xbmcgui.Dialog().notification(header, str, THUMB, time, sound=False)
+def infoDialog(str, header=ADDON_NAME, time=10000):
+    try: xbmcgui.Dialog().notification(header, str, icon, time, sound=False)
     except: xbmc.executebuiltin("Notification(%s,%s, %s, %s)" % (header, str, time, THUMB))
 
 def okDialog(str1, str2='', header=ADDON_NAME):
