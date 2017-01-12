@@ -45,6 +45,7 @@ addon_version = addon.getAddonInfo('version')
 ADDON_NAME = addon.getAddonInfo('name')
 REAL_SETTINGS = xbmcaddon.Addon(id=addnon_id)
 ADDON_SETTINGS = REAL_SETTINGS.getAddonInfo('profile')
+ADDON_PATH = REAL_SETTINGS.getAddonInfo('path')
 MediaList_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS, 'MediaList.xml'))
 STRM_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS, 'STRM_LOC'))
 profile = xbmc.translatePath(addon.getAddonInfo('profile').decode('utf-8'))
@@ -106,9 +107,9 @@ def makeSTRM(filepath, filename, url):
         else:
             if isSMB:
                 try:
-                    fle = xbmcvfs.File (fullpath.encode("utf-8"), 'w')
+                    fle = xbmcvfs.File(fullpath.encode("utf-8"), 'w')
                 except:
-                    fle = xbmcvfs.File (fullpath.encode("utf-8"), 'w')
+                    fle = xbmcvfs.File(fullpath.encode("utf-8"), 'w')
                     pass
         
                 fle.write("%s" % url)
@@ -146,8 +147,57 @@ def updateStream(strm_Fullpath, replace_text):
     while os.stat(strm_Fullpath).st_size == 0:
         with open(strm_Fullpath, 'w') as newF:
             newF.write(replace_text)
+def isInMediaList(mdediaTitle, cType='Other'):
+    utils.addon_log('isInMediaList')
+    existInList = False
+    thelist = []
+    thefile = xbmc.translatePath(os.path.join(profile, 'MediaList.xml'))
+    
+    if not xbmcvfs.exists(profile): 
+        xbmcvfs.mkdirs(profile)
+    if not xbmcvfs.exists(thefile):
+        open(thefile, 'a').close()
+    
+    fle = codecs.open(thefile, "r", 'UTF-8')
+    thelist = fle.readlines()
+    fle.close()
+    del fle
+    
+    if len(thelist) > 0:
+        for i in thelist:
+            if i.split('|',2)[1] == mdediaTitle:
+                existInList = True     
+    if existInList:
+        return True
+    else:
+        return False
+    
+def isInMovieList(mdediaTitle, cType='Other'):
+    utils.addon_log('isInMediaList')
+    existInList = False
+    thelist = []
+    thefile = xbmc.translatePath(os.path.join(profile, 'MediaList.xml'))
+    
+    if not xbmcvfs.exists(profile): 
+        xbmcvfs.mkdirs(profile)
+    if not xbmcvfs.exists(thefile):
+        open(thefile, 'a').close()
+    
+    fle = codecs.open(thefile, "r", 'UTF-8')
+    thelist = fle.readlines()
+    fle.close()
+    del fle
+    
+    if len(thelist) > 0:
+        for i in thelist:
+            if i.split('|',2)[1] == mdediaTitle:
+                existInList = True     
+    if existInList:
+        return True
+    else:
+        return False
                
-def writeMediaList(url, name, cType='Other'):
+def writeMediaList(url, name, cType='Other', cleanName=True):
     utils.addon_log('writeMediaList')
     existInList = False
     thelist = []
@@ -166,7 +216,9 @@ def writeMediaList(url, name, cType='Other'):
     
     if len(thelist) > 0:
         for i in thelist:
+            
             if i.split('|',2)[1] == name:
+                xbmcgui.Dialog().notification(str(i), "Adding to MediaList",  os.path.join(ADDON_PATH, 'representerIcon.png'), 5000)
                 thelist = stringUtils.replaceStringElem(thelist, theentry, theentry)
                 existInList = True     
     if existInList != True:
@@ -178,7 +230,40 @@ def writeMediaList(url, name, cType='Other'):
                 output_file.write(linje.strip().encode('utf-8') + '\n')
             else:
                 output_file.write(linje.strip())
+def writeTutList(step):
+    utils.addon_log('writeMediaList')
+    existInList = False
+    thelist = []
+    thefile = xbmc.translatePath(os.path.join(profile, 'firstTimeTut.xml'))
+    theentry = '|'.join([step]) + '\n'  
+    
+    if not xbmcvfs.exists(profile): 
+        xbmcvfs.mkdirs(profile)
+    if not xbmcvfs.exists(thefile):
+        open(thefile, 'a').close()
+    
+    fle = codecs.open(thefile, "r", 'UTF-8')
+    thelist = fle.readlines()
+    fle.close()
+    del fle
+    
+    if len(thelist) > 0:
+        for i in thelist:          
+            if i.find(step) != -1:
+                existInList = True     
+    if existInList != True:
+        thelist.append(step)
 
+        with open(thefile.decode("utf-8"), 'w') as output_file: 
+            for linje in thelist:
+                if not linje.startswith('\n'):
+                    output_file.write(linje.strip().encode('utf-8') + '\n')
+                else:
+                    output_file.write(linje.strip())
+            return False
+    else:
+        return True
+                
 def make_sure_path_exists(path):
     try:
         os.makedirs(path)

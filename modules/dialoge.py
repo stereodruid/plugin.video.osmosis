@@ -13,10 +13,12 @@
 # GNU General Public License for more details.
 
 import os
+import sys
 
 import pyxbmct.addonwindow as pyxbmct
 import xbmcaddon
 import xbmcgui
+import urlparse
 
 
 _addon = xbmcaddon.Addon()
@@ -81,3 +83,63 @@ class MultiChoiceDialog(pyxbmct.AddonDialogWindow):
         self.selected = []
         self.selectedLabels = []
         super(MultiChoiceDialog, self).close()
+
+def createPopupWindow(jsonMessageParams, popTime):
+        jsonMessageParams = urlparse.parse_qs('&'.join(sys.argv[1:]))
+        window = PopupWindow(**jsonMessageParams)
+        window.show()
+        xbmc.sleep(popTime)
+        window.close()
+        del window
+
+def PopupWindow(elements):
+    # Create a window instance.
+    window = pyxbmct.AddonDialogWindow(elements[0])
+    # Set window width, height and grid resolution.
+    window.setGeometry(700, 250, 2, 1)
+    textbox = pyxbmct.TextBox(textColor='0xFFFFFFFF')
+    
+    window.placeControl(textbox, 0, 0,2,1)
+    textbox.setText(elements[1] + " " +  elements[2]+ " " +  elements[3])
+#     label = pyxbmct.Label(elements[1], alignment=pyxbmct.ALIGN_LEFT)
+#     label2 = pyxbmct.Label(elements[2], alignment=pyxbmct.ALIGN_LEFT)
+#     label3 = pyxbmct.Label(elements[3], alignment=pyxbmct.ALIGN_LEFT)
+#     window.placeControl(label, 0, 0, columnspan=1)
+#     window.placeControl(label2, 1, 0, columnspan=1)
+#     window.placeControl(label3, 2, 0, columnspan=1)
+    # Create a button.
+    button = pyxbmct.Button('Close')
+    # Place the button on the window grid.
+    window.placeControl(button, 2, 0)
+    # Set initial focus on the button.
+    window.setFocus(button)
+    # Connect the button to a function.
+    window.connect(button, window.close)
+    # Connect a key action to a function.
+    window.connect(pyxbmct.ACTION_NAV_BACK, window.close)
+    # Show the created window.
+    window.doModal()
+    # Delete the window instance when it is no longer used.
+    del window 
+
+class MyWindow(pyxbmct.AddonDialogWindow):
+
+    def __init__(self, title=''):
+        # You need to call base class' constructor.
+        super(MyWindow, self).__init__(title)
+        # Set the window width, height and the grid resolution: 2 rows, 3 columns.
+        self.setGeometry(350, 150, 2, 3)
+        # Create a text label.
+        label = pyxbmct.Label('This is a PyXBMCt window.', alignment=pyxbmct.ALIGN_CENTER)
+        # Place the label on the window grid.
+        self.placeControl(label, 0, 0, columnspan=3)
+        # Create a button.
+        button = pyxbmct.Button('Close')
+        # Place the button on the window grid.
+        self.placeControl(button, 1, 1)
+        # Set initial focus on the button.
+        self.setFocus(button)
+        # Connect the button to a function.
+        self.connect(button, self.close)
+        # Connect a key action to a function.
+        self.connect(pyxbmct.ACTION_NAV_BACK, self.close)

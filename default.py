@@ -20,12 +20,13 @@ import time
 
 import SimpleDownloader as downloader 
 from modules import create
+from modules import dialoge
 from modules import fileSys
 from modules import guiTools
 from modules import urlUtils
 
 import utils
-import xbmc, xbmcaddon, xbmcgui, xbmcplugin
+import xbmc, xbmcaddon, xbmcgui, xbmcplugin, xbmcvfs
 # Debug option pydevd:
 if False:
     import pydevd 
@@ -35,10 +36,6 @@ reload(sys)
 sys.setdefaultencoding("utf-8")
 
 #from modules import createNFO
-
-
-
-
 addnon_id = 'plugin.video.osmosis'
 addon = xbmcaddon.Addon(addnon_id)#
 addon_version = addon.getAddonInfo('version')
@@ -153,7 +150,7 @@ if __name__ == "__main__":
     utils.addon_log("Mode: " + str(mode))
  
     if not url is None:
-        utils.addon_log("URL: " + str(url)) #.encode('utf-8')))
+        utils.addon_log("URL: " + str(url))
         utils.addon_log("Name: " + str(name))
     #createNFO.setNamePath(STRM_LOC + "\\TV-Shows(de)", 'The Walking Dead', STRM_LOC) 
     if mode == None:
@@ -163,8 +160,21 @@ if __name__ == "__main__":
             xbmcplugin.endOfDirectory(int(sys.argv[1]))
         except:
             pass
+
+        if not fileSys.writeTutList("select:PluginType"):
+            tutWin = ["Adding content to your library",
+                      "Welcome, this is your first time using OSMOSIS. Here, you can select the content type you want to add: ",
+                      "Video Plugins: Select to add Movies,TV-Shows, YouTube Videos ",
+                      "Music Plugins: Select to add Music"]             
+            dialoge.PopupWindow(tutWin)
     elif mode == 1:   
         create.fillPlugins(url)
+        if not fileSys.writeTutList("select:Addon"):
+            tutWin = ["Adding content to your library",
+                      "Here, you can select the Add-on: ",
+                        "The selected Add-on should provide Video/Music content in the right structure ",
+                    "Take a look at ++ Naming video files/TV shows ++ http://kodi.wiki/view/naming_video_files/TV_shows" ]               
+            dialoge.PopupWindow(tutWin)
         try:
             xbmcplugin.endOfDirectory(int(sys.argv[1]))
         except:
@@ -210,6 +220,13 @@ if __name__ == "__main__":
             pass 
     elif mode == 101:
         create.fillPluginItems(url)
+        if not fileSys.writeTutList("select:AddonNavi"):
+            tutWin = ["Adding content to your library ",
+                       "Search for your Movie, TV-Show or Music. ", 
+                       "Mark/select content, do not play a Movie or enter a TV-Show.  ",   
+                       "Open context menu on the selected and select *create strms*."]                            
+            dialoge.PopupWindow(tutWin)
+
         try:
             xbmcplugin.endOfDirectory(int(sys.argv[1]))
         except:
@@ -217,19 +234,39 @@ if __name__ == "__main__":
         
     elif mode == 200:
         utils.addon_log("write multi strms")
-        # A dialog to rename the Change Title for Folder and MediaList entry:
-        selectAction = ['Rename Title!', 'No, continue with original Title!']
-        if guiTools.selectDialog(selectAction, header = 'Title for Folder and MediaList entry') == 0:
-            name = guiTools.editDialog(name)
-            Renamed=True
-        else:
-            Renamed = False
+        try:
+            # A dialog to rename the Change Title for Folder and MediaList entry:
+            selectAction = ['No, continue with original Title!', 'Rename Title!']
+            if not fileSys.writeTutList("select:Rename"):
+                tutWin = ["Adding content to your library",
+                    "You can rename your Movie, TV-Show or Music title. ", 
+                    "To make your scraper recognize the content, some times it is necessary to rename the title ",
+                    "Be careful, wrong title can also cause that your scraper can't recognize your content."]                
+                dialoge.PopupWindow(tutWin)
+            if guiTools.selectDialog(selectAction, header = 'Title for Folder and MediaList entry') == 1 or name == None or name == "":
+                name = guiTools.editDialog(name).lstrip().rstrip() + "++RenamedTitle++"
             
-        cType = guiTools.getType(url)
-        fileSys.writeMediaList(url, name, cType)
-        dialog.notification(cType, name, xbmcgui.NOTIFICATION_INFO, 5000, False) 
-        create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType, iRenamed=Renamed)
-        dialog.notification('Writing items...', "Done", xbmcgui.NOTIFICATION_INFO, 5000, False)    
+            if not fileSys.writeTutList("select:ContentTypeLang"):
+                tutWin = ["Adding content to your library",
+                          "Now select your content type. ", 
+                          "Select language or YouTube type  ",
+                          "Wait for done message."]                
+                dialoge.PopupWindow(tutWin)   
+            cType = guiTools.getType(url)
+
+            fileSys.writeMediaList(url, name, cType)
+            dialog.notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False) 
+            create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
+            dialog.notification('Writing items...', "Done", xbmcgui.NOTIFICATION_INFO, 5000, False)
+        except IOError as (errno, strerror):
+            print ("I/O error({0}): {1}").format(errno, strerror)
+        except ValueError:
+            print ("No valid integer in line.")
+        except:
+            guiTools.infoDialog(url + " " +  name + " " +  cType)
+            utils.addon_log(url + " " +  name + " " +  cType)
+            print (url + " " +  name + " " +  cType)
+            raise    
     elif mode == 201:
         utils.addon_log("write single strm")
         # create.fillPluginItems(url)

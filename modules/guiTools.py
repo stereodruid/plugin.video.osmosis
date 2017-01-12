@@ -16,6 +16,8 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 from datetime import timedelta
+from modules import stringUtils
+#from modules import fileSys
 import time
 import os, sys, re, traceback
 import random
@@ -27,17 +29,10 @@ import urllib, urllib2, cookielib, requests
 
 from BeautifulSoup import BeautifulStoneSoup, BeautifulSoup, BeautifulSOAP
 import SimpleDownloader as downloader
-from modules import stringUtils
 import pyxbmct
 import utils
 import xbmc
 import xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
-
-
-# Debug option pydevd:
-REMOTE_DBG = True
-#import pydevd
-#pydevd.settrace(stdoutToServer=True, stderrToServer=True)
 
 try:
     import json
@@ -132,26 +127,32 @@ def getSources():
     #ToDo Add label
 
 def getType(url):
-    
     if url.find('plugin.audio') != -1:
-        Types = ['YouTube Video','Audio-Album', 'Audio-Single', 'Other']
+        Types = ['YouTube','Audio-Album', 'Audio-Single', 'Other']
     else:
-        Types = ['Cinema', 'TV-Shows', 'Shows-Collection', 'YouTube Music', 'VTS-Movie structure','Other']
-    lang = ['(en)', '(de)','(sp)','(tr)', 'Other']
-
+        Types = ['Cinema', 'TV-Shows', 'Shows-Collection', 'YouTube',"TVShows sub structures",'Other']
+    
     selectType = selectDialog(Types, header ='Select category')
-    selectLang = selectDialog(lang, header ='Select language tag')
-    if selectType >= 0 and selectLang >= 0:
-        return Types[selectType]+ lang[selectLang]
+       
+    if selectType == 3:
+        subType = ['(Music)', '(Movies)','(TV-Shows)']
+        selectOption = selectDialog(subType, header ='Select Video type:')
+        
+    else:
+        subType = ['(en)', '(de)','(sp)','(tr)', 'Other']
+        selectOption = selectDialog(subType, header ='Select language tag')
+        
+    if selectType >= 0 and selectOption >= 0:
+        return Types[selectType]+ subType[selectOption]
 
 def selectDialog(list, header=ADDON_NAME, autoclose=0):
     if len(list) > 0:
         select = xbmcgui.Dialog().select(header, list, autoclose)
         return select
-def editDialog(nameToChange):
-        dialog = xbmcgui.Dialog()
-        select = dialog.input(nameToChange, type=xbmcgui.INPUT_ALPHANUM)
-        return select
+def editDialog(nameToChange): 
+    dialog = xbmcgui.Dialog()
+    select = dialog.input(nameToChange, type=xbmcgui.INPUT_ALPHANUM)
+    return select
 #Before executing the code below we need to know the movie original title (string variable originaltitle) and the year (string variable year). They can be obtained from the infolabels of the listitem. The code filters the database for items with the same original title and the same year, year-1 and year+1 to avoid errors identifying the media.
 def markMovie(sTitle):
     if xbmc.getCondVisibility('Library.HasContent(Movies)'):

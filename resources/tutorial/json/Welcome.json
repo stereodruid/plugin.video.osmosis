@@ -1,0 +1,16 @@
+{
+    "jsonrpc": "2.0",
+    "id": 0,
+    "method": "Addons.ExecuteAddon",
+    "params": {
+        "addonid": "script.popup",
+        "params": {
+            "image": "D:\\heartagram.jpg",
+            "line1": "Hello World",
+            "line2": "Showing this message using",
+            "line3": "Combination of Kodi python modules and",
+            "line4": "JSON-RPC API interface",
+            "line5": "Have fun coding"
+        }
+    }
+}

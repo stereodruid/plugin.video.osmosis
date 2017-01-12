@@ -21,6 +21,8 @@
 import os
 import time
 from modules import create
+from modules import guiTools
+import utils
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
 
 # Debug option pydevd:
@@ -50,7 +52,7 @@ Automatic_Update_Delay = REAL_SETTINGS.getSetting('Automatic_Update_Delay')
 Automatic_Update_Run = REAL_SETTINGS.getSetting('Automatic_Update_Run')
 represent = os.path.join(ADDON_PATH, 'representerIcon.png')
 toseconds = 0.0
-itime = 10000  # in miliseconds  
+itime = 5000  # in miliseconds  
    
 if __name__ == "__main__":
     def readMediaList(purge=False):
@@ -66,26 +68,29 @@ if __name__ == "__main__":
         thelist = readMediaList()
     
     def strm_update():
-        if xbmcvfs.exists(MediaList_LOC) and len(thelist) > 0:
-            pDialog = xbmcgui.DialogProgressBG()
-            pDialog.create(ADDON_NAME, "Updating")
-            j = 100 / len(thelist)
-                
-            for i in range(len(thelist)):
-                    cType , name, url = ((thelist[i]).strip().split('|', 2))
-                    # time.sleep(2) # delays for 2 seconds just to make sure Hodor can read the message 
-                    pDialog.update(j, ADDON_NAME + " Update: " + name.decode('utf-8')) 
-                    try:
-                        create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
-                    except:  #
-                        pass
+        xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (ADDON_NAME, "Updating!" , itime, represent))
+        try:
+            if xbmcvfs.exists(MediaList_LOC) and len(thelist) > 0:
+                for i in range(len(thelist)):
+                        cType , name, url = ((thelist[i]).strip().split('|', 2))
+                        # time.sleep(2) # delays for 2 seconds just to make sure Hodor can read the message 
+#                         pDialog.update(j, ADDON_NAME + " Update: " + name.decode('utf-8')) 
+                        try:
+                            create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
+                        except:  #
+                            pass
                         
-                    j = j + 100 / len(thelist)
-                    
-            pDialog.update(100, ADDON_NAME + " Update: Done") 
-            pDialog.close()
-            xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (ADDON_NAME, "Next update in: " + Automatic_Update_Time + "h" , itime, represent))
-
+                xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (ADDON_NAME, "Next update in: " + Automatic_Update_Time + "h" , itime, represent))
+        except IOError as (errno, strerror):
+            print ("I/O error({0}): {1}").format(errno, strerror)
+        except ValueError:
+            print ("No valid integer in line.")
+        except:
+            guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". Se your Kodi.log!"))
+            utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
+            print ("Unexpected error:"), sys.exc_info()[1]
+            pass 
+        
     if Updat_at_startup == "true":      
         strm_update()
         

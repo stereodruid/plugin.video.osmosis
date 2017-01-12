@@ -26,7 +26,10 @@ import xbmc, xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
 
 
 try:
-    import json
+   if sys.version_info >=  (2, 7):
+       import json as _json
+   else:
+        import simplejson as _json 
 except:
     import simplejson as json
 
