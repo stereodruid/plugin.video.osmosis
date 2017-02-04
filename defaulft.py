@@ -28,8 +28,9 @@ from modules import updateAll
 
 import utils
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin, xbmcvfs
+import service
 # Debug option pydevd:
-if False:
+if True:
     import pydevd 
     pydevd.settrace(stdoutToServer=True, stderrToServer=True)
 
@@ -185,13 +186,13 @@ if __name__ == "__main__":
         try:
             xbmcplugin.endOfDirectory(int(sys.argv[1]))
         except:
-            pass
-    elif mode == 666:
-        updateAll.strm_update() 
+            pass 
     elif mode == 4:
         create.removeItemsFromMediaList('list') 
     elif mode == 5:
         create.removeItemsFromMediaList('list')
+    elif mode == 666:
+        updateAll.strm_update() 
     elif mode == 10:
         meta = ""
         # Split url to get tags

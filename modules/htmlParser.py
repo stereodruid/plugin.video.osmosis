@@ -1,3 +1,18 @@
+# Copyright (C) 2016 stereodruid(J.G.)
+#
+#
+# This file is part of OSMOSIS
+#
+# OSMOSIS is free software: you can redistribute it. 
+# You can modify it for private use only.
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# OSMOSIS is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 from html.parser import HTMLParser
 
 class MLStripper(HTMLParser):

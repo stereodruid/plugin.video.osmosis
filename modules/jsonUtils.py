@@ -1,17 +1,17 @@
-# This file is part of OSMOSIS.
+# Copyright (C) 2016 stereodruid(J.G.)
 #
-# OSMOSIS is free software: you can redistribute it and/or modify
+#
+# This file is part of OSMOSIS
+#
+# OSMOSIS is free software: you can redistribute it. 
+# You can modify it for private use only.
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
 # OSMOSIS is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with OSMOSIS.  If not, see <http://www.gnu.org/licenses/>.
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 # -*- coding: utf-8 -*-
 
@@ -73,7 +73,7 @@ def requestItem(file, fletype='video'):
           
 def requestList(path, fletype='video'):
     utils.addon_log("requestList, path = " + path) 
-    json_query = ('{"jsonrpc": "2.0", "method": "Files.GetDirectory", "params": {"directory": "%s", "media": "%s", "properties":["thumbnail","fanart","title","year","mpaa","imdbnumber","description","season","episode","playcount","genre","duration","runtime","showtitle","album","artist","plot","plotoutline","tagline","tvshowid"]}, "id": 1}' % (path, fletype))
+    json_query = ('{"jsonrpc": "2.0", "method": "Files.GetDirectory", "params": {"directory": "%s", "media": "%s", "properties":["thumbnail","fanart","title","year","track","mpaa","imdbnumber","description","season","episode","playcount","genre","duration","runtime","showtitle","album","artist","plot","plotoutline","tagline","tvshowid"]}, "id": 1}' % (path, fletype))
     json_folder_detail = sendJSON(json_query)
     return re.compile("{(.*?)}", re.DOTALL).findall(json_folder_detail)
 

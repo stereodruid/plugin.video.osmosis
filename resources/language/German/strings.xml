@@ -21,6 +21,12 @@
 	<string id="34011">Medien Speicherort immer bereinigen(löscht alle Dateien im Ordner):</string>
 	<string id="32006">Interne Stream Referenz nutzen:</string>
 	<string id="33000">Update Konfiguration</string>
+	<string id="35000">Musikdatenbank</string>
+	<string id="35001">Musik-DB Benutzername"</string>
+    <string id="35002">Musik-DB Dateiname</string>
+    <string id="35003">Musik-DB Passwort</string>
+    <string id="35004">Musik-DB Speicherort</string>
+    <string id="35005">Musik-DB IP-Adresse</string>
 </strings>
 
 

@@ -1,19 +1,12 @@
-#.1.0.3
-+ Optimierungen in Richtung Stabilität, Kompatibel und Performance.
-+ Hinzufügen von Seriensammlungen, über mehrere Seiten wird jetzt unterstützt.
-+ Statusanzeige beim hinzufügen von Serien und Filmen erweitert.
-+ Kategorien die hinzugefügt werden, werden jetzt aufgeschlüsselt, dadurch wird jede Serie/Staffel die aus einer Kategorie kommt in die   MediaList eingetragen.
-  dass verhindert ein doppeltes hinzufügen, und ist als Vorbereitung für kommende Funktionen gedacht.
+﻿#.0.4.7 - 1.07
++ Improved Auto update
++ Improved watched status (set as watched)
++ Update button
++ Suport for Music, you can add yort music strms to the Kodi library.
++ YouTube support
++ Some fixes
 
-- YouTube wurde als neue Kategorie hinzugefügt.
-  Auch hier können keine einzelnen Videos hinzugefügt werden, noch nicht. Ich nutze es um Musikvideos zur DB hinzuzufügen.
-  Vorgehen beim hinzufügen:
-  In Osmosis > Video Addon > YouTube oder YouMusic auswählen > zur Playlist navigieren und die Playlist wie gewohnt per "create strms"     hinzufügen >
-  den Menüpunkt YouTube auswählen > Kategorie auswälen z.B Music > Danach, einmalig den Erstellten YouTube(Music) Ordner als Musikvideo-   Source im Scraper einstellen.
-  Vorsicht, bei Musikvideos ist in den Scraper-Einstellungen standardmäßig "Locale infos only" eingestellt, also beim hinzufügen darauf   achten das auch ein Scraper ..ausgewählt ist. Fertig.
-
-
-#.0.4.7 - 1.0.2
+#.0.4.7
 + Improved Auto update
 + Improved watched status (set as watched)
 + Now you can write your strms to a samba share, with or without login credentials.

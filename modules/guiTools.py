@@ -1,17 +1,17 @@
-# This file is part of OSMOSIS.
+# Copyright (C) 2016 stereodruid(J.G.)
 #
-# OSMOSIS is free software: you can redistribute it and/or modify
+#
+# This file is part of OSMOSIS
+#
+# OSMOSIS is free software: you can redistribute it. 
+# You can modify it for private use only.
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
 # OSMOSIS is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with OSMOSIS.  If not, see <http://www.gnu.org/licenses/>.
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 # -*- coding: utf-8 -*-
 from datetime import datetime
@@ -56,6 +56,8 @@ dialog = xbmcgui.Dialog()
 icon = os.path.join(home, 'icon.png')
 iconRemove = os.path.join(home, 'iconRemove.png')
 FANART = os.path.join(home, 'fanart.jpg')
+folderIcon= represent = os.path.join(home, 'folderIcon.png')
+updateIcon= represent = os.path.join(home, 'updateIcon.png')
 source_file = os.path.join(home, 'source_file')
 functions_dir = profile
 downloader = downloader.SimpleDownloader()
@@ -77,21 +79,34 @@ def addItem(labels="n.a"):
             utils.addon_log('addItem')
             u = "plugin://plugin.video.osmosis/?url=" + "&mode=" + str(5) + "&fanart=" + urllib.quote_plus(iconRemove)
             ok = True
-            liz = xbmcgui.ListItem(labels, iconImage="DefaultFolder.png", thumbnailImage="DefaultFolder.png")
+            liz = xbmcgui.ListItem(labels, iconImage=iconRemove, thumbnailImage=iconRemove)
             liz.setInfo(type="Video", infoLabels={ "Title": labels,"Genre": "actionRemove"})
-            liz.setProperty("Fanart_Image", iconRemove)
+            liz.setProperty("Fanart_Image", FANART)
             ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
             xbmcplugin.endOfDirectory(int(sys.argv[1]), updateListing=True)        
-        except:#
-            
+        except:#            
             pass
-    
+        
+def addFunction(labels= 'n.a' ):
+    if labels != 'n.a':    
+        try:
+            utils.addon_log('addItem')
+            u = "plugin://plugin.video.osmosis/?url=" + "&mode=" + str(666) + "&fanart=" + urllib.quote_plus(iconRemove)
+            ok = True
+            liz = xbmcgui.ListItem(labels, iconImage=updateIcon, thumbnailImage=updateIcon)
+            liz.setInfo(type="Video", infoLabels={ "Title": labels,"Genre": "actionRemove"})
+            liz.setProperty("Fanart_Image", FANART)
+            ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
+            #xbmcplugin.endOfDirectory(int(sys.argv[1]), updateListing=True)        
+        except:#          
+            pass
+            
 def addDir(name,url,mode,iconimage,fanart,description,genre,date,credits,showcontext=False):
     utils.addon_log('addDir')
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&fanart="+urllib.quote_plus(fanart)
     ok=True
     contextMenu = []
-    liz=xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
+    liz=xbmcgui.ListItem(name, iconImage=iconimage, thumbnailImage=iconimage)
     liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": description, "Genre": genre, "dateadded": date, "credits": credits })
     liz.setProperty("Fanart_Image", fanart)
     contextMenu.append(('Create Strms','XBMC.RunPlugin(%s&mode=200&name=%s)'%(u, name)))
@@ -102,13 +117,13 @@ def addDir(name,url,mode,iconimage,fanart,description,genre,date,credits,showcon
         pass
     
     return ok
-        
+      
 def addLink(name,url,mode,iconimage,fanart,description,genre,date,showcontext,playlist,regexs,total,setCookie=""): 
     utils.addon_log('addLink') 
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&fanart="+urllib.quote_plus(fanart)
     ok = True
     contextMenu =[]
-    liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
+    liz=xbmcgui.ListItem(name, iconImage=iconimage, thumbnailImage=iconimage)
     liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": description, "Genre": genre, "dateadded": date })
     liz.setProperty("Fanart_Image", fanart)
     liz.setProperty('IsPlayable', 'true')
@@ -119,10 +134,10 @@ def addLink(name,url,mode,iconimage,fanart,description,genre,date,showcontext,pl
 
 def getSources():
     utils.addon_log('getSources')
-    addDir('Video Plugins', 'video', 1, icon, FANART, 'description', 'genre', 'date', 'credits')
-    addDir('Music Plugins', 'audio', 1, icon, FANART, 'description', 'genre', 'date', 'credits')
-    addDir('UPNP Servers', 'upnp://', 2, icon, FANART, 'description', 'genre', 'date', 'credits')
-    addDir('PVR Backend', 'pvr://', 2, icon, FANART, 'description', 'genre', 'date', 'credits')
+    addDir('Video Plugins', 'video', 1, folderIcon, FANART, 'description', 'genre', 'date', 'credits')
+    addDir('Music Plugins', 'audio', 1, folderIcon, FANART, 'description', 'genre', 'date', 'credits')
+    addDir('UPNP Servers', 'upnp://', 2, folderIcon, FANART, 'description', 'genre', 'date', 'credits')
+    addFunction('Update')
     addItem(labels="Remove Media")
     #ToDo Add label
 

@@ -21,6 +21,12 @@
     <string id="34011">Clear Strm folder before each run</string>
     <string id="32006">Internal Strm link references</string>
     <string id="33000">Update Configuration</string>
+    <string id="35000">Music DB</string>
+    <string id="35001">Music-DB user name"</string>
+    <string id="35002">Music-DB file name</string>
+    <string id="35003">Music-DB password</string>
+    <string id="35004">Music-DB path</string>
+    <string id="35005">Music-DB IP</string>
   </strings>
 
 

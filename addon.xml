@@ -1,53 +1,61 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.osmosis" name="OSMOSIS" version="1.0.3" provider-name="Stereodruid">
-    <requires>
-        <import addon="xbmc.python" version="2.1.0"/>
-        <import addon="script.module.t0mm0.common" version="2.0.0"/>
-        <import addon="script.module.beautifulsoup" version="3.2.1"/>
-        <import addon="script.module.simple.downloader" version="0.9.4"/>
-        <import addon="script.module.beautifulsoup4" />
-        <import addon="script.module.simple.downloader" version="0.9.4"/>
-        <import addon="script.module.requests" />
-        <import addon="script.module.httplib2" />
-        <import addon="script.module.youtube.dl" optional="true"/>
-        <import addon="plugin.video.youtube" version="3.0.0"/>
-        <import addon="script.module.urlresolver" optional="true"/>
-        <import addon="script.module.simplejson" /> 
-        <import addon="script.common.plugin.cache" version="2.5.2"/>
-        <import addon="script.module.metahandler" version="2.9.0"/>
-        <import addon="script.module.pyxbmct" version="1.1" />
-        <import addon="service.watchdog" version="0.9.7"/>
-<!--         <import addon="script.module.pydevd" version="4.4.0"/>  -->
-    </requires>
-    <extension point="xbmc.python.pluginsource" library="default.py">
-    <provides>video</provides>
-    </extension>
-    <extension point="xbmc.service" library="service.py" start="startup"/>
-    <extension point="xbmc.addon.metadata">
-    <summary lang="en">Generates Strm files form streams that can be scraped to the library</summary>
-    <description lang="en">Generate Strm files from Kodi Plugins, Youtube, that can be scraped to the library. Special thanks goes to Kodinerds.net users: breaksrmine, XsupergurkeX, Sagorian, EpicFail80, hansjuergense, MicTie, krani83 , Casablanca89, Elux, willriker88
-	</description>
-    <disclaimer lang="en"></disclaimer>
-	<summary lang="de">
-		Erstellt Strm-Dateien die mit einem Scraper zur Datenbank hinzugefügt werden können.
-	</summary>
-    <description lang="de">
-    	Erstellt Strm-Dateien Kodi-Plugins,Youtube, die mit einem Scraper zur Datenbank hinzugefügt werden können. 
-    	Unterstützte Formate: Serien, Filme. Vielen Dank an Kodinerds.net und speziell an die Mitglieder​: breaksrmine, XsupergurkeX, Sagorian, EpicFail80, hansjuergense, MicTie, krani83 , Casablanca89, Elux, willriker88
-    </description>
-    <disclaimer lang="de"></disclaimer>
-    <language></language>
-    <platform>all</platform>
-    <license>GNU GENERAL PUBLIC LICENSE. Version 3</license>
-    <forum>https://www.kodinerds.net/index.php/Thread/53307-Beta-Version-OSMOSIS-Streams-zur-DB-hinzuf%C3%BCgen/?postID=328166#post327429</forum>
-    <website></website>
-    <email></email>
-    <source>https://github.com/stereodruid/OSMOSIS</source>
-    <news></news>
-    <assets>
-        <icon>icon.png</icon>
-        <fanart>fanart.jpg</fanart>
-        <screenshot>fanart.jpg</screenshot>
-    </assets>
-    </extension>
+<addon id="plugin.video.osmosis" name="OSMOSIS" version="1.0.7"
+	provider-name="Stereodruid">
+	<requires>
+		<import addon="xbmc.python" version="2.1.0" />
+		<import addon="script.module.t0mm0.common" version="2.0.0" />
+		<import addon="script.module.beautifulsoup" version="3.2.1" />
+		<import addon="script.module.simple.downloader" version="0.9.4" />
+		<import addon="script.module.beautifulsoup4" />
+		<import addon="script.module.simple.downloader" version="0.9.4" />
+		<import addon="script.module.requests" />
+		<import addon="script.module.httplib2" />
+		<import addon="script.module.youtube.dl" optional="true" />
+		<import addon="plugin.video.youtube" version="3.0.0" />
+		<import addon="script.module.urlresolver" optional="true" />
+		<import addon="script.module.simplejson" />
+		<import addon="script.common.plugin.cache" version="2.5.2" />
+		<import addon="script.module.metahandler" version="2.9.0" />
+		<import addon="script.module.pyxbmct" version="1.1" />
+		<import addon="service.watchdog" version="0.9.7" />
+<!-- 		<import addon="script.module.pydevd" version="4.4.0"/> -->
+	</requires>
+	<extension point="xbmc.python.pluginsource" library="default.py">
+		<provides>audio video</provides>
+	</extension>
+	<extension point="xbmc.service" library="service.py" start="startup" />
+	<extension point="xbmc.addon.metadata">
+		<summary lang="en">Generates Strm files form streams that can be
+			scraped to the library</summary>
+		<description lang="en">Generate Strm files from Kodi Plugins,that can be scraped to the library.
+			Suportet content: Movies, TV-Shows, Music. Special thanks goes to
+			Kodinerds.net users: @​breaksrmine, @Casablanca89​, @Construktor​, @ecazo​, @Eigen​, @Elux​, @haltandcatchfire​, @krani83​, @Sagorian​, @SirusX​, @stereodruid​, @willriker88​, @XsupergurkeX​
+		</description>
+		<disclaimer lang="en"></disclaimer>
+		<summary lang="de">
+			Erstellt Strm-Dateien die mit einem Scraper zur Datenbank hinzugefügt werden
+			können.
+		</summary>
+		<description lang="de">
+			Erstellt Strm-Dateien Kodi-Plugins,Youtube, die mit einem Scraper zur
+			Datenbank hinzugefügt werden können.
+			Unterstützte Formate: Serien, Filme und Musik. Vielen Dank an Kodinerds.net und speziell an
+			die Mitglieder​: @​breaksrmine, @Casablanca89​, @Construktor​, @ecazo​, @Eigen​, @Elux​, @haltandcatchfire​, @krani83​, @Sagorian​, @SirusX​, @stereodruid​, @willriker88​, @XsupergurkeX​
+		</description>
+		<disclaimer lang="de"></disclaimer>
+		<language></language>
+		<platform>all</platform>
+		<license>GNU GENERAL PUBLIC LICENSE. Version 3</license>
+		<forum>https://www.kodinerds.net/index.php/Thread/53307-Beta-Version-OSMOSIS-Streams-zur-DB-hinzuf%C3%BCgen/?postID=328166#post327429
+		</forum>
+		<website>https://www.youtube.com/channel/UCFC6pKk0cshN1sG15FEO5TQ</website>
+		<email></email>
+		<source>https://github.com/stereodruid/OSMOSIS</source>
+		<news></news>
+		<assets>
+			<icon>icon.png</icon>
+			<fanart>fanart.jpg</fanart>
+			<screenshot>fanart.jpg</screenshot>
+		</assets>
+	</extension>
 </addon>
