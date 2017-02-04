@@ -2,7 +2,7 @@
 + Improved Auto update
 + Improved watched status (set as watched)
 + Update button
-+ Suport for Music, you can add yort music strms to the Kodi library.
++ Suport for Music, you can add your music strms to the Kodi library.
 + YouTube support
 + Some fixes
 
