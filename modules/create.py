@@ -543,7 +543,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other'):
             raise
         
         pagesDone += 1
-        if pagesDone < int(PAGINGMovies):
+        if pagesDone < int(PAGINGTVshows):
             showList = []
             showList = stringUtils.uni(jsonUtils.requestList(files.group(1), 'video'))
 #             dirList = stringUtils.uni(jsonUtils.requestList(files.group(1), 'video'))
