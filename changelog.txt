@@ -1,4 +1,8 @@
-﻿#.0.4.7 - 1.07
+
+#1.07
+Fix for Series paging(Thanks gu3nter)
+ 
+ #.0.4.7 - 1.07
 + Improved Auto update
 + Improved watched status (set as watched)
 + Update button
