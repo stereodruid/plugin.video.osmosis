@@ -5,6 +5,10 @@
 #
 # OSMOSIS is free software: you can redistribute it. 
 # You can modify it for private use only.
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
 # OSMOSIS is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -25,7 +29,7 @@ _check_icon = os.path.join(_path, "iconRemove.png") # Don't decode _path to utf-
 class MultiChoiceDialog(pyxbmct.AddonDialogWindow):
     def __init__(self, title="", items=None):
         super(MultiChoiceDialog, self).__init__(title)
-        self.setGeometry(600, 400, 4, 4)
+        self.setGeometry(800, 600, 4, 4)
         self.selected = []
         self.selectedLabels = []
         self.set_controls()
@@ -38,11 +42,11 @@ class MultiChoiceDialog(pyxbmct.AddonDialogWindow):
         label = pyxbmct.Label('Note: You can select mulltiple items! To delete click on  "delete"')
         self.placeControl(label, 4, 0,columnspan=4)
         self.listing = pyxbmct.List(_imageWidth=20)
-        self.placeControl(self.listing, 0,1, rowspan=4, columnspan=4)
+        self.placeControl(self.listing, 0,0, rowspan=4, columnspan=4)
         self.ok_button = pyxbmct.Button("Delete")
-        self.placeControl(self.ok_button, 0, 0)
+        self.placeControl(self.ok_button, 3,0)
         self.cancel_button = pyxbmct.Button("Cancel")
-        self.placeControl(self.cancel_button, 1, 0)
+        self.placeControl(self.cancel_button, 3,1)
 
     def connect_controls(self):
         self.connect(self.listing, self.check_uncheck)

@@ -5,6 +5,10 @@
 #
 # OSMOSIS is free software: you can redistribute it. 
 # You can modify it for private use only.
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
 # OSMOSIS is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -62,12 +66,19 @@ DIRS = []
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
 
 def requestItem(file, fletype='video'):
-    utils.addon_log("requestItem") 
+    utils.addon_log("requestItem") #
+    if file.find("playMode=play")== -1:
+        detail = stringUtils.uni(requestList(file, fletype))
+        return detail
     json_query = ('{"jsonrpc":"2.0","method":"Player.GetItem","params":{"playerid":1,"properties":["thumbnail","fanart","title","year","mpaa","imdbnumber","description","season","episode","playcount","genre","duration","runtime","showtitle","album","artist","plot","plotoutline","tagline","tvshowid"]}, "id": 1}')
     json_folder_detail = sendJSON(json_query)
     return re.compile("{(.*?)}", re.DOTALL).findall(json_folder_detail)
           
 def requestList(path, fletype='video'):
+    if path.find("playMode=play")!= -1:
+        detail = stringUtils.uni(requestItem(path, fletype))
+        return detail
+    
     utils.addon_log("requestList, path = " + path) 
     json_query = ('{"jsonrpc": "2.0", "method": "Files.GetDirectory", "params": {"directory": "%s", "media": "%s", "properties":["thumbnail","fanart","title","year","track","mpaa","imdbnumber","description","season","episode","playcount","genre","duration","runtime","showtitle","album","artist","plot","plotoutline","tagline","tvshowid"]}, "id": 1}' % (path, fletype))
     json_folder_detail = sendJSON(json_query)

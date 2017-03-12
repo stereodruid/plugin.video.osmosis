@@ -5,9 +5,13 @@
 #
 # OSMOSIS is free software: you can redistribute it. 
 # You can modify it for private use only.
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
 # OSMOSIS is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 
 # -*- coding: utf-8 -*-
@@ -17,6 +21,7 @@ import sys
 from modules import create
 from modules import guiTools
 from modules import kodiDB
+from modules import fileSys
 
 import utils
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
@@ -45,10 +50,11 @@ Automatic_Update_Time = REAL_SETTINGS.getSetting('Automatic_Update_Time')
 Updat_at_startup = REAL_SETTINGS.getSetting('Updat_at_startup')
 Automatic_Update_Delay = REAL_SETTINGS.getSetting('Automatic_Update_Delay')
 Automatic_Update_Run = REAL_SETTINGS.getSetting('Automatic_Update_Run')
+supportES = REAL_SETTINGS.getSetting('supportES') 
 represent = os.path.join(ADDON_PATH, 'icon.png')
 toseconds = 0.0
 itime = 900000000000000  # in miliseconds  
-
+guiFix = False
 def readMediaList(purge=False):
         try:
             if xbmcvfs.exists(MediaList_LOC):
@@ -61,8 +67,15 @@ def readMediaList(purge=False):
 if xbmcvfs.exists(MediaList_LOC):           
     thelist = readMediaList()
 
-    
+def guIFix(bVal):
+    if supportES == "false":
+        return True
+    if not bVal:
+    # Sleep/wait for to avoid freeze
+        return guiTools.checkGuiA() 
+
 def strm_update():
+ 
     xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (ADDON_NAME, "Updating!" , itime, represent))
     try:
         #kodiDB.musicDatabase()

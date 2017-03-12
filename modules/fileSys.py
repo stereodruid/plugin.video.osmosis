@@ -5,6 +5,10 @@
 #
 # OSMOSIS is free software: you can redistribute it. 
 # You can modify it for private use only.
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
 # OSMOSIS is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -68,13 +72,11 @@ DIRS = []
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
 
 def writeSTRM(path, file, url):
-    
-    utils.addon_log('writeSTRM')
     #ToDo: OriginalPlugin option
-    if addon.getSetting('Link_Type') == '0':
-        if url.find("plugin://plugin.video.osmosis/?url=plugin") == -1:
-            url = url.strip().replace("?url=plugin", "plugin://plugin.video.osmosis/?url=plugin", 1)
-   
+#     if addon.getSetting('Link_Type') == '0':
+#         if url.find("plugin://plugin.video.osmosis/?url=plugin") == -1:
+#             url = url.strip().replace("?url=plugin", "plugin://plugin.video.osmosis/?url=plugin", 1)
+    utils.addon_log('writeSTRM')
     makeSTRM(path, file, url)
     
 def makeSTRM(filepath, filename, url):
@@ -95,12 +97,12 @@ def makeSTRM(filepath, filename, url):
             isSMB = True 
             fullpath = filepath + "/" + filename + ".strm"
               
-        if xbmcvfs.exists(fullpath):
-            if addon.getSetting('Clear_Strms') == 'true':
-                x = 0 #xbmcvfs.delete(fullpath)
-            else:
-                return fullpath
-        else:
+#         if xbmcvfs.exists(fullpath):
+#             if addon.getSetting('Clear_Strms') == 'true':
+#                 x = 0 #xbmcvfs.delete(fullpath)
+#             else:
+#                 return fullpath
+        if True:
             if isSMB:
                 try:
                     fle = xbmcvfs.File(fullpath.decode("utf-8"), 'w')

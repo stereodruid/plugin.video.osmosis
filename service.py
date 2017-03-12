@@ -17,12 +17,8 @@
 # -*- coding: utf-8 -*-
 import os
 import time
-from modules import create
-from modules import guiTools
-from modules import kodiDB
 from modules import updateAll
-
-import utils
+from modules import guiTools
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
 
 # Debug option pydevd:
@@ -52,13 +48,15 @@ Automatic_Update_Delay = REAL_SETTINGS.getSetting('Automatic_Update_Delay')
 Automatic_Update_Run = REAL_SETTINGS.getSetting('Automatic_Update_Run')
 represent = os.path.join(ADDON_PATH, 'icon.png')
 toseconds = 0.0
-itime = 5000000000  # in miliseconds  
+itime = 5000000000  # in miliseconds 
+guiFix = False 
    
 if __name__ == "__main__":
-    
-    if Updat_at_startup == "true":      
+    guiFix = updateAll.guIFix(guiFix)
+    if Updat_at_startup == "true":
+        guiFix = updateAll.guIFix(guiFix)        
         updateAll.strm_update()
-        
+       
     monitor = xbmc.Monitor()
     while not monitor.abortRequested():
         # Sleep/wait for abort for 10 seconds
@@ -74,11 +72,11 @@ if __name__ == "__main__":
             toseconds = toseconds + 10.0
             
             if ((toseconds >= float(Automatic_Update_Time) * 60 * 60)):
+                guiFix = updateAll.guIFix(guiFix)
                 updateAll.strm_update()
                 toseconds = 0.0
                 monitor.waitForAbort(60)
         elif (time.strftime("%H:%M") == Timed_Update_Run) and Timed_Update_Run != "0:00":
+            guiFix = updateAll.guIFix(guiFix)
             updateAll.strm_update()
             monitor.waitForAbort(60)
-           
-        # Sleep/wait for abort for 10 secondsds

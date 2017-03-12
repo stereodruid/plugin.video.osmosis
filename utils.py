@@ -21,6 +21,7 @@ import random
 import re
 import string
 import sys
+import datetime
 
 from modules import stringUtils
 import xbmc
@@ -110,6 +111,15 @@ def createSongNFO(filepath, filename , strm_ty='type',artists='none', albums='no
 def addon_log(string):
     # if debug == 'true':
     xbmc.log("[plugin.video.osmosis-%s]: %s" % (addon_version, string))
+def zeitspanne(sekunden):
+    
+    delta = datetime.timedelta(seconds = sekunden)
+    delta_str = str(delta)[-8:] # z.B: " 1:01:01"
+    hours, minutes, seconds = [ int(val) for val in delta_str.split(":", 3) ]
+    weeks = delta.days // 7
+    days = delta.days % 7
+    timePlayed = datetime.time(hours,minutes,seconds)
+    return weeks, days, hours, minutes, seconds, timePlayed
 
 def get_params():
     try:    

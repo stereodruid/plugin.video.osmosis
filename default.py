@@ -5,6 +5,10 @@
 #
 # OSMOSIS is free software: you can redistribute it. 
 # You can modify it for private use only.
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
 # OSMOSIS is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -13,9 +17,9 @@
 import os, sys
 import urllib
 import time
-
+import urlparse
 import SimpleDownloader as downloader 
-from modules import create
+from modules import create, kodiDB
 from modules import dialoge
 from modules import fileSys
 from modules import guiTools
@@ -28,6 +32,7 @@ import xbmc, xbmcaddon, xbmcgui, xbmcplugin, xbmcvfs
 if False:
     import pydevd 
     pydevd.settrace(stdoutToServer=True, stderrToServer=True)
+
 
 reload(sys)
 sys.setdefaultencoding("utf-8")
@@ -53,13 +58,6 @@ source_file = os.path.join(home, 'source_file')
 functions_dir = profile
 downloader = downloader.SimpleDownloader()#
 debug = addon.getSetting('debug')
-
-if os.path.exists(favorites) == True:
-    FAV = open(favorites).read()
-else: FAV = []
-if os.path.exists(favorites) == True:
-    FAV = open(favorites).read()
-else: FAV = []
 
 DIRS = []
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
@@ -122,6 +120,26 @@ if __name__ == "__main__":
     try:
         iconimage = urllib.unquote_plus(params["iconimage"])
     except:
+        pass
+    try:
+        movID = urllib.unquote_plus(params["id"])
+    except:
+        movID = None
+        pass
+    try:
+        showID = urllib.unquote_plus(params["showid"])
+    except:
+        showID = None
+        pass
+    try:
+        mediaType = urllib.unquote_plus(params["mediaType"])
+    except:
+        mediaType = None
+        pass
+    try:
+        episode = urllib.unquote_plus(params["episode"])
+    except:
+        episode = None
         pass
     try:
         fanart = urllib.unquote_plus(params["fanart"])
@@ -191,24 +209,89 @@ if __name__ == "__main__":
     elif mode == 10:
         meta = ""
         # Split url to get tags
-        purl = url.split('|')[0]
-        utils.addon_log("setResolvedUrl")
-        item = xbmcgui.ListItem(path=url)
+        #purl = url.split('|')[1]
+        if mediaType:
+            try:
+                #Play Movies:
+                if movID:       
+                    providers = kodiDB.getVideo(movID)
+                    if len(providers) == 1:
+                        url = providers[0][0]
+                    else:
+                        selectProvider = []
+                        for i in providers:
+                            selectProvider.append(i[1])
+                        # Get/Set Provider
+                        #url = urllib.unquote_plus(providers[guiTools.selectDialog(selectProvider, header = 'OSMOSIS: Select provider!')][0]).decode('utf-8')
+                        url = providers[guiTools.selectDialog(selectProvider, header = 'OSMOSIS: Select provider!')][0].decode('utf-8') 
+                #Play Tv-Shows:
+                elif showID:
+                    providers = kodiDB.getVideo(showID, episode)
+                    if len(providers) == 1:
+                        url = providers[0][0]
+                    else:       
+                        selectProvider = []
+                        for i in providers:
+                            selectProvider.append(i[1])
+                        # Get/Set Provider
+                        #url = urllib.unquote_plus(providers[guiTools.selectDialog(selectProvider, header = 'OSMOSIS: Select provider!')][0]).decode('utf-8')
+                        url = providers[guiTools.selectDialog(selectProvider, header = 'OSMOSIS: Select provider!')][0].decode('utf-8') 
+            except:
+                pass
+         
         # Gest infos from selectet media
+        item = xbmcgui.ListItem(path=url)
         sPatToItem = xbmc.getInfoLabel("ListItem.path")
         sTitle = xbmc.getInfoLabel("ListItem.title")
-
+       
         try:
             # Exec play process
             xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
             # Wait until the media is started in player
             while meta.find("video") == -1:
                 meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
-            time.sleep(2)
+                time.sleep(1)
+            
+                   
             if xbmc.getInfoLabel("VideoPlayer.TVShowTitle") != "":
                 guiTools.markSeries(xbmc.getInfoLabel("VideoPlayer.TVShowTitle"),xbmc.getInfoLabel("VideoPlayer.Episode"),xbmc.getInfoLabel("VideoPlayer.Season"))
             else:
-                guiTools.markMovie(xbmc.getInfoLabel("VideoPlayer.Title"))
+                #search bookmarks for the ID and get the played time if exists
+                checkURL = str(sys.argv[0].replace(r'|', sys.argv[2] + r'|'))
+                urlsResumePoint = kodiDB.getPlayedURLResumePoint(checkURL)
+                
+                movProps =  kodiDB.getKodiMovieID(xbmc.getInfoLabel("VideoPlayer.Title"), sTitle)               
+                movID = movProps[0][0]
+                movFileID = movProps[0][1]
+                meta = "video"
+                   
+                if urlsResumePoint: 
+                    conTime = utils.zeitspanne(int(urlsResumePoint[0][0]))               
+                    resume = ["Jump to position : %s " % (str(conTime[5])), "Start form beginning!"] 
+                    if guiTools.selectDialog(resume, header = 'OSMOSIS: Would you like to continue?') == 0:
+                        xbmc.Player().seekTime(int(urlsResumePoint[0][0]))
+                
+                while meta.find("video") != -1:
+                    meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
+                    time.sleep(1)
+                
+                time.sleep(1)   
+                urlsWatchedPoint = kodiDB.getPlayedURLResumePoint(checkURL)
+                if urlsWatchedPoint:
+                    pos = urlsWatchedPoint[0][0]
+                    total = urlsWatchedPoint[0][1]
+                    done = False
+                elif urlsResumePoint and not urlsWatchedPoint:
+                    pos = urlsResumePoint[0][1]
+                    total = urlsResumePoint[0][1]
+                    kodiDB.delBookMark(urlsResumePoint[0][2], movFileID)
+                    done = True
+                else:
+                    done = False
+              
+                if movID:
+                    guiTools.markMovie(movID, pos, total, done)
+                        
         except:
             pass 
     elif mode == 100:

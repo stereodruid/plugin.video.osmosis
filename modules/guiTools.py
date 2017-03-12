@@ -5,6 +5,10 @@
 #
 # OSMOSIS is free software: you can redistribute it. 
 # You can modify it for private use only.
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
 # OSMOSIS is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -29,6 +33,7 @@ import pyxbmct
 import utils
 import xbmc
 import xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
+
 
 try:
     import json
@@ -141,7 +146,7 @@ def getType(url):
     if url.find('plugin.audio') != -1:
         Types = ['YouTube','Audio-Album', 'Audio-Single', 'Other']
     else:
-        Types = ['Cinema', 'TV-Shows', 'Shows-Collection', 'YouTube',"TVShows sub structures",'Other']
+        Types = ['Movies', 'TV-Shows', 'YouTube','Other']
     
     selectType = selectDialog(Types, header ='Select category')
        
@@ -165,26 +170,21 @@ def editDialog(nameToChange):
     select = dialog.input(nameToChange, type=xbmcgui.INPUT_ALPHANUM)
     return select
 #Before executing the code below we need to know the movie original title (string variable originaltitle) and the year (string variable year). They can be obtained from the infolabels of the listitem. The code filters the database for items with the same original title and the same year, year-1 and year+1 to avoid errors identifying the media.
-def markMovie(sTitle):
-    if xbmc.getCondVisibility('Library.HasContent(Movies)'):
+def markMovie(movID, pos, total, done):
+    if done:
+        #int(100 * float(pos)/ float(total)) >= 95
         try:
-            print("Check if movie exists in library when marking as watched")
-            meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": { "filter": {"field": "playcount", "operator": "is", "value": "0"}, "limits": { "start" : 0, "end": 75 }, "properties" : ["art", "rating", "thumbnail", "playcount", "file"], "sort": { "order": "ascending", "method": "label", "ignorearticle": true } }, "id": "libMovies"}')  
-            meta = stringUtils.uni(meta)#(meta, 'utf-8', errors='ignore')
-            meta = json.loads(meta)
-            meta = meta['result']['movies']
-        
-            cleaned_title= re.sub('[^-a-zA-Z0-9_.()\\\/ ]+', '',  sTitle) #originaltitle)
-            try:
-                meta = [i for i in meta if cleaned_title.rstrip() in i['file'].rstrip()][0]
-            except:
-                print("markMovie: Original title not found")
-                pass
-            xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetMovieDetails", "params": {"movieid" : %s, "playcount" : 1 }, "id": 1 }' % str(meta['movieid']))
+            xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetMovieDetails", "params": {"movieid" : %s, "playcount" : 1 }, "id": 1 }' % movID)
         except:
             print("markMovie: Movie not in DB!?")
-            pass
-               
+            pass  
+    else:    
+        if xbmc.getCondVisibility('Library.HasContent(Movies)'):
+            try:
+                xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetMovieDetails", "params": {"movieid" : %s, "resume" : {"position":%s,"total":%s} }, "id": 1 }' % (movID, pos, total))
+            except:
+                print("markMovie: Movie not in DB!?")
+                pass
 
 def markSeries(sShowTitle,sEpisode,sSeason):
     if xbmc.getCondVisibility('Library.HasContent(TVShows)'):
@@ -201,12 +201,6 @@ def markSeries(sShowTitle,sEpisode,sSeason):
                 pass
             if gotIt:               
                 player = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
-                
-                #while meta.find("video") == -1:
-                    #time.sleep(2)
-            #resume playing
-            #xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "resume": {"position": 1600, "total": 3600}}, "id": 1 }' % str(gotIt['episodeid']))
-            #set watched
             xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % str(gotIt['episodeid']))
         except:
             print("markSeries: Show not in DB!?")
@@ -262,3 +256,29 @@ def yesnoDialog(str1, str2='', header=ADDON_NAME, yes='', no=''):
 def browse(type, heading, shares, mask='', useThumbs=False, treatAsFolder=False, path='', enableMultiple=False):
     retval = xbmcgui.Dialog().browse(type, heading, shares, mask, useThumbs, treatAsFolder, path, enableMultiple)
     return retval
+
+def checkGuiA():
+    try:
+        if xbmcvfs.exists(xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.xstream\default.py"))):
+            fle = open( xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.xstream\default.py")), "r")
+            thefile = fle.readlines()
+            fle.close()
+            with open(xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.xstream\default.py")), 'w') as output_file:
+                for linje in thefile:
+                    if linje.find('if not xbmc.getInfoLabel') != -1:
+                        output_file.write("" + '\n')
+                    else:
+                        output_file.write(linje)
+        if xbmcvfs.exists(xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.exodus/resources/lib/modules/control.py"))):
+            fle = open(xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.exodus/resources/lib/modules/control.py")), "r")
+            thefile = fle.readlines()
+            fle.close()
+            with open(xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.exodus/resources/lib/modules/control.py")), 'w') as output_file:
+                for linje in thefile:
+                    if linje.find('plugin.video.metallic') != -1:
+                        output_file.write(linje.replace("plugin.video.metallic", "plugin.video.osmosis"))
+                    else:
+                        output_file.write(linje)
+        return True
+    except:
+        pass
