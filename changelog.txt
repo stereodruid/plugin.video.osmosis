@@ -1,4 +1,8 @@
-﻿1.2.2
+﻿1.2.3
+  Fix for Progress bar
+  Fix for Paging TV-Shows
+
+1.2.2
   SQL Support
   SQL Movies.db
   SQL Shows.db
