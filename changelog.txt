@@ -1,7 +1,4 @@
-﻿1.2.3
-  fix for dates in string
-  
-1.2.2
+﻿1.2.2
   SQL Support
   SQL Movies.db
   SQL Shows.db
@@ -9,6 +6,7 @@
   Select Provider dialog
   New Look
   
+
 1.0.7
   Improved Auto update
   Improved watched status (set as watched)

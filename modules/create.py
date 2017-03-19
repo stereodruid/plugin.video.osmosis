@@ -428,7 +428,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
     listName = strm_name
     pagesDone = 0
     file=''
-    j = 100 / (len(contentList) * int(PAGINGMovies))
+    j = len(contentList) * int(PAGINGMovies) / 100
     
     while pagesDone < int(PAGINGMovies):
         if not contentList[0] == "palyableSingleMedia":
@@ -466,7 +466,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
                             label = str(utils.multiple_reSub(label.strip(), dictReplacements))
                             thisDialog.dialogeBG.update(j, ADDON_NAME + ": Gettin Movies: ",  " Video: " + label)
                             movieList.append([os.path.join(strm_type), str(utils.multiple_reSub(label.strip(), dictReplacements)),link, listName])
-                            j = j + 100 / (len(contentList) * int(PAGINGMovies))
+                            j = j + len(contentList) * int(PAGINGMovies) / 100
                 except IOError as (errno, strerror):
                     print ("I/O error({0}): {1}").format(errno, strerror)
                 except ValueError:
@@ -487,8 +487,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
     
     return movieList
  
-def getTVShowFromList(showList, strm_name='', strm_type='Other'):
-    pagesDone = 0
+def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
     file=''
     tvShowsList = []
     
@@ -524,11 +523,11 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other'):
                                 fileSys.writeMediaList(files.group(1).lstrip().rstrip(), label, strm_type)
                                       
                             if files and filetype != 'file' and label != ">>>" :
-                                addTVShows(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name=strm_name, strm_type=strm_type)
+                                pagesDone = addTVShows(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name=strm_name, strm_type=strm_type)
                             else:
                                 if showtitles and seasons == "-1" and episodes == "-1":
                                     xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (ADDON_NAME, "ShowsList" , 1000, ""))
-                                    getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name.strip(), strm_type)
+                                    pagesDone = getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name.strip(), strm_type)
                                 
         except IOError as (errno, strerror):
             print ("I/O error({0}): {1}").format(errno, strerror)
@@ -548,7 +547,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other'):
 #             for i in dirList:
 #                 showList.append(i)
         
-def addTVShows(contentList, strm_name='', strm_type='Other'):
+def addTVShows(contentList, strm_name='', strm_type='Other',pagesDone=0):
     showsList = []
     strm_name
     pagesDone = 0
@@ -568,9 +567,9 @@ def addTVShows(contentList, strm_name='', strm_type='Other'):
                 files = re.search('"file" *: *"(.*?)",', detailInfo)            
                    
                 if filetype != 'file':               
-                    getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name.strip(), strm_type, j)
+                    pagesDone = getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name.strip(), strm_type, j)
                 else:              
-                    getEpisodes(detailInfo, strm_name, strm_type, j)
+                    pagesDone = getEpisodes(detailInfo, strm_name, strm_type, j)
                 thisDialog.dialogeBG.update(j,showtitle)
                 j = j + 100 / len(contentList) 
         except IOError as (errno, strerror):
@@ -582,10 +581,10 @@ def addTVShows(contentList, strm_name='', strm_type='Other'):
             utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
             print ("Unexpected error:"), sys.exc_info()[0]
             raise
-
+        return pagesDone
    
    
-def getEpisodes(episodesListRaw, strm_name, strm_type, j=0):
+def getEpisodes(episodesListRaw, strm_name, strm_type, j=0, pagesDone=0):
     episodesList = []
     typeChange = []
 
@@ -665,7 +664,7 @@ def getEpisodes(episodesListRaw, strm_name, strm_type, j=0):
         fileSys.writeSTRM(os.path.join(stringUtils.cleanStrms((i[0].rstrip("."))),stringUtils.cleanStrms(i[1].rstrip("."))), stringUtils.cleanStrms(i[3] + i[4]) , "plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=show&episode=" + i[3] + i[4] + "&showid=" + str(i[2]) + "|" + i[1])
         #fileSys.writeSTRM(stringUtils.cleanStrms((i[0].rstrip("."))), stringUtils.cleanStrms(i[1].rstrip(".")) + stringUtils.cleanStrms(i[2].rstrip(".")) , i[3])
         thisDialog.dialogeBG.update(j)
-
+    return pagesDone
     
 def getData(url, fanart):
     utils.addon_log('getData, url = ' + cType)

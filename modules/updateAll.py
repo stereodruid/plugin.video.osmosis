@@ -75,18 +75,23 @@ def guIFix(bVal):
         return guiTools.checkGuiA() 
 
 def strm_update():
- 
-    xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (ADDON_NAME, "Updating!" , itime, represent))
+    dialogeBG = xbmcgui.DialogProgressBG()
+    dialogeBG.create("OSMOSIS: " ,  'Total Update-Progress:')
+   
+    #xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (ADDON_NAME, "Updating!" , itime, represent))
     try:
         #kodiDB.musicDatabase()
         if xbmcvfs.exists(MediaList_LOC) and len(thelist) > 0:
             listLen = len(thelist)
+            j = 100 / len(thelist)
             for i in range(len(thelist)):                     
                     cType , name, url = ((thelist[i]).strip().split('|', 2))
                     # time.sleep(2) # delays for 2 seconds just to make sure Hodor can read the message 
 #                        pDialog.update(j, ADDON_NAME + " Update: " + name.decode('utf-8')) 
                     try:
-                        xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (name, " Items left: " + str(listLen) , itime, represent))
+                        dialogeBG.update( j, "OSMOSIS total update process: " , "Current Item: " + name + " Items left: " + str(listLen) )
+                        j = j + 100 / len(thelist)
+                        #xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (name, " Items left: " + str(listLen) , itime, represent))
                         create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
                         listLen -= 1
                     except:  #
