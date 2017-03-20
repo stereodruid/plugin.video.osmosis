@@ -96,7 +96,7 @@ def strm_update():
                         listLen -= 1
                     except:  #
                         pass
-                        
+            dialogeBG.close()            
             xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (ADDON_NAME, "Next update in: " + Automatic_Update_Time + "h" , 5000, represent))
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)
