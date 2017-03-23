@@ -581,7 +581,7 @@ def addTVShows(contentList, strm_name='', strm_type='Other',pagesDone=0):
             utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
             print ("Unexpected error:"), sys.exc_info()[0]
             raise
-        return pagesDone
+    return pagesDone
    
    
 def getEpisodes(episodesListRaw, strm_name, strm_type, j=0, pagesDone=0):

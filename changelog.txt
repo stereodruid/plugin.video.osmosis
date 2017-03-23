@@ -1,6 +1,7 @@
-#1.2.3
+﻿1.2.3 - 1.3.6
   Fix for Progress bar
   Fix for Paging TV-Shows
+  Fix for Paging in single show
 
 1.2.2
   SQL Support

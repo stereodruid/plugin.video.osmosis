@@ -26,6 +26,7 @@ from modules import guiTools
 import xbmc
 import xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
 import sqlite3
+import mysql.connector
 import utils
 
 #Addon
@@ -73,6 +74,37 @@ try:
     import json
 except:
     import simplejson as json
+
+class Config(object):
+    """Configure me so examples work
+    
+    Use me like this:
+    
+        mysql.connector.Connect(**Config.dbinfo())
+    """
+    
+    HOST = 'localhost'
+    DATABASE = ''
+    USER = ''
+    PASSWORD = ''
+    PORT = 3306
+    
+    CHARSET = 'utf8'
+    UNICODE = True
+    WARNINGS = True
+    
+    @classmethod
+    def dbinfo(cls):
+        return {
+            'host': cls.HOST,
+            'port': cls.PORT,
+            'database': cls.DATABASE,
+            'user': cls.USER,
+            'password': cls.PASSWORD,
+            'charset': cls.CHARSET,
+            'use_unicode': cls.UNICODE,
+            'get_warnings': cls.WARNINGS,
+            }
     
 def musicDatabase(pstrAlbumName, pstrArtistName, pstrSongTitle, pstrPath, purlLink, track, artPath):
     path = str(os.path.join(STRM_LOC, pstrPath))
@@ -434,9 +466,18 @@ def movieExists(title, path):
         pass
 def showExists(title, path):
     try:
+
+        
+#         Config.HOST = 'localhost'
+#         Config.DATABASE = xbmc.translatePath(os.path.join(ADDON_SETTINGS, 'Shows.db'))
+#         config = Config.dbinfo().copy()
         connectMDB = sqlite3.connect(str(os.path.join(SHDBPATH)))
         cursor = connectMDB.cursor()
- 
+        
+#         connectMDB = mysql.connector.Connect(**config)
+#         cursor = connectMDB.cursor()
+       
+        
         if not cursor.execute("""select "%s" from "%s" where showTitle="%s";""" % ("showTitle","shows", title)).fetchone() :
             sql_path = """INSERT INTO shows (showTitle, filePath) VALUES ("%s", "%s");""" % (title, os.path.join(path + "\\"))
             cursor.execute(sql_path)
