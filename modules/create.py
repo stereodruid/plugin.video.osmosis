@@ -278,8 +278,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
 
             if strm_type in ['Other']:
                 path = os.path.join('Other', strm_name)
-                filename =str(strm_name + ' - ' + label)
-                
+                filename =str(strm_name + ' - ' + label)             
                                   
             if filetype == 'file':
                 if strm:
@@ -334,8 +333,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                 descriptions = re.search('"description" *: *"(.*?)",', detailInfo)
                 tracks = re.search('"track" *: *(.*?),', detailInfo)
                 durations = re.search('"duration" *: *"(.*?)",', detailInfo)
-                              
-                
+                                              
                 try:
                     if filetypes and labels and files:
                         filetype = filetypes.group(1)
@@ -345,8 +343,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                         if fanarts:
                             fanart = fanarts.group(1)
                         else:
-                            fanart = ''
-                         
+                            fanart = ''                        
                         if addon.getSetting('Link_Type') == '0': 
                             link = sys.argv[0] + "?url=" + urllib.quote_plus(file) + "&mode=" + str(10) + "&name=" + urllib.quote_plus(label) + "&fanart=" + urllib.quote_plus(fanart)
                         else:
@@ -512,22 +509,20 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
                             if labels:
                                 label = str(labels.group(1).lstrip().rstrip())
                             else:
-                                label = "None"
-            
+                                label = "None"          
                             if showtitles: 
                                 showtitle = str(showtitles.group(1).lstrip().rstrip())
                             else:
                                 label = "None"
-                             
                             if not fileSys.isInMediaList(label, strm_type) and label != "" and label != ">>>" and label != "None" and files.group(1).find("playMode=play") == "-1":            
                                 fileSys.writeMediaList(files.group(1).lstrip().rstrip(), label, strm_type)
                                       
                             if files and filetype != 'file' and label != ">>>" :
-                                pagesDone = addTVShows(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name=strm_name, strm_type=strm_type)
+                                pagesDone = addTVShows(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name=strm_name, strm_type=strm_type, pagesDone=pagesDone)
                             else:
                                 if showtitles and seasons == "-1" and episodes == "-1":
                                     xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (ADDON_NAME, "ShowsList" , 1000, ""))
-                                    pagesDone = getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name.strip(), strm_type)
+                                    pagesDone = getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name.strip(), strm_type, pagesDone=pagesDone)
                                 
         except IOError as (errno, strerror):
             print ("I/O error({0}): {1}").format(errno, strerror)
@@ -553,8 +548,8 @@ def addTVShows(contentList, strm_name='', strm_type='Other',pagesDone=0):
     pagesDone = 0
     sectiveContent = contentList
     #     while pagesDone < int(PAGINGTVshows):
-    j = 100 / len(contentList)
-   
+    j = 100 / len(contentList)    
+
     for detailInfo in contentList:
         detailInfo = stringUtils.removeHTMLTAGS(detailInfo)
         filetypes = re.search('"filetype" *: *"(.*?)",', detailInfo)
@@ -569,7 +564,7 @@ def addTVShows(contentList, strm_name='', strm_type='Other',pagesDone=0):
                 if filetype != 'file':               
                     pagesDone = getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name.strip(), strm_type, j)
                 else:              
-                    pagesDone = getEpisodes(detailInfo, strm_name, strm_type, j)
+                    pagesDone = getEpisodes(detailInfo, strm_name, strm_type, j, , pagesDone=pagesDone)
                 thisDialog.dialogeBG.update(j,showtitle)
                 j = j + 100 / len(contentList) 
         except IOError as (errno, strerror):
@@ -582,7 +577,6 @@ def addTVShows(contentList, strm_name='', strm_type='Other',pagesDone=0):
             print ("Unexpected error:"), sys.exc_info()[0]
             raise
     return pagesDone
-   
    
 def getEpisodes(episodesListRaw, strm_name, strm_type, j=0, pagesDone=0):
     episodesList = []
@@ -616,8 +610,7 @@ def getEpisodes(episodesListRaw, strm_name, strm_type, j=0, pagesDone=0):
 
                 if filetypes.group(1) == 'directory':
                     contentList = stringUtils.uni(jsonUtils.requestList(files.group(1), 'video'))
-                    continue
-         
+                    continue       
                 if showtitles and seasons and episodes:
                     filetype = filetypes.group(1)
                     label = (stringUtils.cleanLabels(labels.group(1))) 
