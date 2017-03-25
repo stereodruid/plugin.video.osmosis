@@ -564,7 +564,7 @@ def addTVShows(contentList, strm_name='', strm_type='Other',pagesDone=0):
                 if filetype != 'file':               
                     pagesDone = getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name.strip(), strm_type, j)
                 else:              
-                    pagesDone = getEpisodes(detailInfo, strm_name, strm_type, j, , pagesDone=pagesDone)
+                    pagesDone = getEpisodes(detailInfo, strm_name, strm_type, j, pagesDone=pagesDone)
                 thisDialog.dialogeBG.update(j,showtitle)
                 j = j + 100 / len(contentList) 
         except IOError as (errno, strerror):
