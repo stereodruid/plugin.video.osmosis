@@ -504,7 +504,9 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
                     
                     if episodes:
                         if episodes.group(1) != "-1":             
-                            addTVShows(showList, strm_name, strm_type)
+                            pagesDone = getEpisodes(showList, strm_name, strm_type,pagesDone=pagesDone)
+                            files =  re.search('"file" *: *"(.*?)",',showList[len(showList) -2])
+                            break
                         else:
                             if labels:
                                 label = str(labels.group(1).lstrip().rstrip())
@@ -520,10 +522,11 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
                             if files and filetype != 'file' and label != ">>>" :
                                 pagesDone = addTVShows(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name=strm_name, strm_type=strm_type, pagesDone=pagesDone)
                             else:
-                                if showtitles and seasons == "-1" and episodes == "-1":
-                                    xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (ADDON_NAME, "ShowsList" , 1000, ""))
-                                    pagesDone = getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name.strip(), strm_type, pagesDone=pagesDone)
-                                
+                                if showtitles and seasons and episodes:
+                                    if showtitles and seasons.group(1) == "-1" and episodes.group(1) == "-1":
+                                        xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (ADDON_NAME, "ShowsList" , 1000, ""))
+                                        pagesDone = getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name.strip(), strm_type, pagesDone=pagesDone)
+                                    
         except IOError as (errno, strerror):
             print ("I/O error({0}): {1}").format(errno, strerror)
         except ValueError:
@@ -545,7 +548,6 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
 def addTVShows(contentList, strm_name='', strm_type='Other',pagesDone=0):
     showsList = []
     strm_name
-    pagesDone = 0
     sectiveContent = contentList
     #     while pagesDone < int(PAGINGTVshows):
     j = 100 / len(contentList)    
@@ -562,10 +564,10 @@ def addTVShows(contentList, strm_name='', strm_type='Other',pagesDone=0):
                 files = re.search('"file" *: *"(.*?)",', detailInfo)            
                    
                 if filetype != 'file':               
-                    pagesDone = getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name.strip(), strm_type, j)
+                    pagesDone = getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name.strip(), strm_type, j, pagesDone=pagesDone)
                 else:              
                     pagesDone = getEpisodes(detailInfo, strm_name, strm_type, j, pagesDone=pagesDone)
-                thisDialog.dialogeBG.update(j,showtitle)
+                thisDialog.dialogeBG.update(j,"Page: " + str(pagesDone + 1) + " " + showtitle)
                 j = j + 100 / len(contentList) 
         except IOError as (errno, strerror):
             print ("I/O error({0}): {1}").format(errno, strerror)
