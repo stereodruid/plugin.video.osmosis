@@ -136,7 +136,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             initialize_DialogBG("Movie", "Adding")
             movieList = addMovies(detail, strm_name, strm_type)
             dbMovList = kodiDB.writeMovie(movieList)
-            j = 100 / len(dbMovList)
+            j = 100 / len(dbMovList) if len(dbMovList) > 0 else 1
             # Write strms for all values in movieList
             for i in dbMovList:   # path,name,url(+name)
                 thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing Movies: ",  " Video: " + i[1].rstrip("."))
@@ -425,6 +425,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
     listName = strm_name
     pagesDone = 0
     file=''
+    filetype=''
     j = len(contentList) * int(PAGINGMovies) / 100
     
     while pagesDone < int(PAGINGMovies):
@@ -462,7 +463,8 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
                         if label and strm_name:                                              
                             label = str(utils.multiple_reSub(label.strip(), dictReplacements))
                             thisDialog.dialogeBG.update(j, ADDON_NAME + ": Gettin Movies: ",  " Video: " + label)
-                            movieList.append([os.path.join(strm_type), str(utils.multiple_reSub(label.strip(), dictReplacements)),link, listName])
+                            if filetype == 'file':
+                                movieList.append([os.path.join(strm_type, strm_name.strip().replace('++RenamedTitle++', '')), str(utils.multiple_reSub(label.strip(), dictReplacements)), link, listName])
                             j = j + len(contentList) * int(PAGINGMovies) / 100
                 except IOError as (errno, strerror):
                     print ("I/O error({0}): {1}").format(errno, strerror)
@@ -474,12 +476,18 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
                     print ("Unexpected error:"), sys.exc_info()[0]
                     raise
             pagesDone += 1
-            if filetype != 'file' and pagesDone < int(PAGINGMovies):
+            if filetype != '' and filetype != 'file' and pagesDone < int(PAGINGMovies):
                 contentList = stringUtils.uni(jsonUtils.requestList(file, 'video'))
             else:
                 pagesDone = int(PAGINGMovies)            
         else:                                         #<       REMOVE                                   >
-            movieList.append([os.path.join(strm_type, strm_name.strip().replace('++RenamedTitle++', '')), str(utils.multiple_reSub(strm_name.strip(), dictReplacements)), contentList[1]])
+            provGeneral = re.search('%s(.*)'"\\/\\?"'' % (r"plugin://plugin.video."), contentList[1])
+            provXST = re.search('%s(.*)'"\&function"'' % (r"site="), contentList[1])
+            if provGeneral:
+                listName = provGeneral.group(1)
+                if provXST:
+                    listName = listName + ": " + provXST.group(1)
+            movieList.append([os.path.join(strm_type, utils.multiple_reSub(strm_name.strip(), dictReplacements).replace('++RenamedTitle++', '')), str(utils.multiple_reSub(strm_name.strip(), dictReplacements)), contentList[1], listName])
             pagesDone = int(PAGINGMovies)
     
     return movieList

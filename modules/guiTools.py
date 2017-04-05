@@ -265,7 +265,7 @@ def checkGuiA():
             fle.close()
             with open(xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.xstream\default.py")), 'w') as output_file:
                 for linje in thefile:
-                    if linje.find('if not xbmc.getInfoLabel') != -1:
+                    if linje.find('sys.exit()') != -1:
                         output_file.write("" + '\n')
                     else:
                         output_file.write(linje)
