@@ -88,8 +88,8 @@ def makeSTRM(filepath, filename, url):
         filename = filename.decode("utf-8")
         filepath = xbmc.translatePath(os.path.join(STRM_LOC, filepath))   
 
-        if not xbmcvfs.exists(filepath): 
-            xbmcvfs.mkdirs(filepath)
+        if not os.path.exists(filepath): 
+            os.makedirs(filepath)
         
         if not STRM_LOC.startswith("smb:"):  
             fullpath = os.path.normpath(xbmc.translatePath(os.path.join(filepath,  filename))) +'.strm'
