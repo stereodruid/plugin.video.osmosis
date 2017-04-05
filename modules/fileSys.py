@@ -85,7 +85,7 @@ def makeSTRM(filepath, filename, url):
     isSMB = False
     try:
         filepath = stringUtils.multiRstrip(filepath.decode("utf-8"))
-        filename = filename.decode("utf-8")        
+        filename = filename.decode("utf-8")
         filepath = completePath(os.path.join(STRM_LOC, filepath))
 
         if not xbmcvfs.exists(filepath):
