@@ -85,11 +85,19 @@ def makeSTRM(filepath, filename, url):
     isSMB = False
     try:
         filepath = stringUtils.multiRstrip(filepath.decode("utf-8"))
-        filename = filename.decode("utf-8")
-        filepath = xbmc.translatePath(os.path.join(STRM_LOC, filepath))   
+        filename = filename.decode("utf-8")        
+        filepath = completePath(os.path.join(STRM_LOC, filepath))
 
-        if not os.path.exists(filepath): 
-            os.makedirs(filepath)
+        if not xbmcvfs.exists(filepath):
+            filepath = filepath.replace(STRM_LOC,'')
+            dirs = filepath.split("\\") if filepath.find("\\") != -1 else filepath.split("\\")
+            dirs = filter(None, dirs)
+
+            filepath = STRM_LOC
+            for dir in dirs:
+                filepath = completePath(os.path.join(filepath, dir))
+                if not xbmcvfs.exists(filepath):
+                    xbmcvfs.mkdir(filepath)
         
         if not STRM_LOC.startswith("smb:"):  
             fullpath = os.path.normpath(xbmc.translatePath(os.path.join(filepath,  filename))) +'.strm'
@@ -324,3 +332,9 @@ def delNotInMediaList(delList, thelist, replacements):
             shutil.rmtree(path + "\\" + utils.multiple_reSub(itemPath, replacements) , ignore_errors=True)
         except OSError:
                 print ("Unable to remove folder: %s" % itemPath)
+
+def completePath(filepath):
+    if not filepath.endswith("\\"):
+        filepath += "\\"
+
+    return xbmc.translatePath(filepath)
