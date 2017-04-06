@@ -75,6 +75,7 @@ def guIFix(bVal):
         return guiTools.checkGuiA() 
 
 def strm_update():
+    guIFix(false)
     dialogeBG = xbmcgui.DialogProgressBG()
     dialogeBG.create("OSMOSIS: " ,  'Total Update-Progress:')
    
