@@ -89,7 +89,7 @@ def strm_update():
                     # time.sleep(2) # delays for 2 seconds just to make sure Hodor can read the message 
 #                        pDialog.update(j, ADDON_NAME + " Update: " + name.decode('utf-8')) 
                     try:
-                        dialogeBG.update( j, "OSMOSIS total update process: " , "Current Item: " + name + " Items left: " + str(listLen) )
+                        dialogeBG.update( j, "OSMOSIS total update process: " , "Current Item: " + namename.replace('++RenamedTitle++','') + " Items left: " + str(listLen) )
                         j = j + 100 / len(thelist)
                         #xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (name, " Items left: " + str(listLen) , itime, represent))
                         create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
