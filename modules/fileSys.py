@@ -335,7 +335,7 @@ def delNotInMediaList(delList, thelist, replacements):
                 print ("Unable to remove folder: %s" % itemPath)
 
 def completePath(filepath):
-    if not filepath.endswith("\\"):
+    if not filepath.endswith("\\") and not filepath.endswith("/"):
         filepath += "\\"
 
     return xbmc.translatePath(filepath)
