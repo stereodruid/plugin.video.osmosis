@@ -302,7 +302,7 @@ def removeItemsFromMediaList(action='list'):
     from modules import dialoge
     utils.addon_log('removingitemsdialog')
     thelist = fileSys.readMediaList(purge=False)
-    items = [((thelist[i]).strip().split('|')[1]).format(i) for i in range(len(thelist))]
+    items = [((thelist[i]).strip().split('|')[1].lstrip().replace('++RenamedTitle++', '')).format(i) for i in range(len(thelist))]
     dialog = dialoge.MultiChoiceDialog("Select items", items)
     dialog.doModal()
 
