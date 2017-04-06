@@ -329,7 +329,8 @@ def delNotInMediaList(delList, thelist, replacements):
             path = STRM_LOC + "\\" + (thelist[i]).strip().split('|')[0].format(i)
             itemPath = (thelist[i].decode('utf-8')).strip().split('|')[1].format(i)
             print ("remove folder: %s" % itemPath)
-            shutil.rmtree(path + "\\" + utils.multiple_reSub(itemPath, replacements) , ignore_errors=True)
+            fullpath = completePath(path + "\\" + utils.multiple_reSub(itemPath, replacements))
+            shutil.rmtree(fullpath , ignore_errors=True)
         except OSError:
                 print ("Unable to remove folder: %s" % itemPath)
 
