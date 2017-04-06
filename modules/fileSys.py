@@ -327,7 +327,7 @@ def delNotInMediaList(delList, thelist, replacements):
     for i in delList:
         try:
             path = STRM_LOC + "\\" + (thelist[i]).strip().split('|')[0].format(i)
-            itemPath = (thelist[i].decode('utf-8')).strip().split('|')[1].format(i)
+            itemPath = (thelist[i].decode('utf-8')).strip().split('|')[1].lstrip().replace('++RenamedTitle++', '').format(i)
             print ("remove folder: %s" % itemPath)
             fullpath = completePath(path + "\\" + utils.multiple_reSub(itemPath, replacements))
             shutil.rmtree(fullpath , ignore_errors=True)
