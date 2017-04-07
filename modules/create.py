@@ -611,12 +611,13 @@ def getEpisodes(episodesListRaw, strm_name, strm_type, j=0, pagesDone=0):
             showtitles = re.search('"showtitle" *: *"(.*?)",', detailInfo)
             provGeneral = re.search('%s(.*)'"\\/\\?"'' % (r"plugin://plugin.video."), detailInfo)
             provXST = re.search('%s(.*)'"\&function"'' % (r"site="), detailInfo)
+            listName = strm_name
 
             if filetypes:
                 if provGeneral:
-                    strm_name = provGeneral.group(1)
+                    listName = provGeneral.group(1)
                     if provXST:
-                        strm_name = strm_name + ": " + provXST.group(1)
+                        listName = listName + ": " + provXST.group(1)
 
                 if filetypes.group(1) == 'directory':
                     contentList = stringUtils.uni(jsonUtils.requestList(files.group(1), 'video'))
@@ -643,13 +644,11 @@ def getEpisodes(episodesListRaw, strm_name, strm_type, j=0, pagesDone=0):
                         fanart = fanarts.group(1)
                     else:
                         fanart = ''
-                             
-                    link = file
-#                   
+
                     if strm_name.find("++RenamedTitle++") != -1:
                         showtitle = strm_name.strip().replace('++RenamedTitle++', '')
                     if showtitle != "" and strm_type != "":
-                        episodesList.append([strm_type, str('s' + season), str('e'+episode), link, utils.multiple_reSub(showtitle.strip(), dictReplacements), strm_name])
+                        episodesList.append([strm_type, str('s' + season), str('e'+episode), file, utils.multiple_reSub(showtitle.strip(), dictReplacements), listName])
                         
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)
