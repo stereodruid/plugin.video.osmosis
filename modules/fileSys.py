@@ -325,10 +325,10 @@ def isMediaList(url, cType='Other'):
 def delNotInMediaList(delList, thelist):
     for i in delList:
         try:
-            path = completePath(STRM_LOC) + completePath((thelist[i]).strip().split('|')[0].format(i))
+            path = completePath(STRM_LOC) + (thelist[i]).strip().split('|')[0].format(i)
             itemPath = (thelist[i].decode('utf-8')).strip().split('|')[1].replace('++RenamedTitle++', '').format(i).format(i)
             print ("remove folder: %s" % itemPath)
-            shutil.rmtree(path + stringUtils.cleanByDictReplacements(itemPath) , ignore_errors=True)
+            shutil.rmtree(completePath(path) + stringUtils.cleanByDictReplacements(itemPath) , ignore_errors=True)
         except OSError:
                 print ("Unable to remove folder: %s" % itemPath)
 
