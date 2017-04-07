@@ -11,7 +11,7 @@ def update(strm_name, url, media_type, thelist):
     for plex_detail in plex_details:
         plex_detail = stringUtils.removeHTMLTAGS(plex_detail)
         label = re.search('"label" *: *"(.*?)",', plex_detail)
-        if label and strm_name.replace('++RenamedTitle++', '') == label.group(1).replace(":",""):
+        if label and strm_name.replace('++RenamedTitle++', '') == stringUtils.cleanByDictReplacements(label.group(1)):
             serverurl = re.search('"file" *: *"(.*?)",', plex_detail).group(1)
             if url != serverurl:
                 for entry in thelist:
