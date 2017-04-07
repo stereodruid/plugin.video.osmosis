@@ -157,3 +157,12 @@ def removeStringElem(lst, string=''):
     
 def replaceStringElem(lst, old='', new=''):
     return ([x.replace(old, new) for x in lst])
+
+def cleanByDictReplacements(string):
+    dictReplacements = {"'\(\\d+\)'" : '', '()' : '', 'Kinofilme' : '', 
+                        '  ' : ' ','\(de\)':'','\(en\)':'', 
+                        "\(TVshow\)":"",'Movies' : '', 'Filme' : '', 
+                        'Movie' : '', "'.'" : ' ', '\(\)' : '',
+                        ":": ' ','"?"': '','"':''}
+
+    return utils.multiple_reSub(string, dictReplacements)

@@ -88,9 +88,8 @@ def makeSTRM(filepath, filename, url):
         filename = filename.decode("utf-8")
         filepath = completePath(os.path.join(STRM_LOC, filepath))
 
-        if not xbmcvfs.exists(filepath):
-            filepath = filepath.replace(STRM_LOC,'')
-            dirs = filepath.split("\\") if filepath.find("\\") != -1 else filepath.split("\\")
+        if not xbmcvfs.exists(filepath):         
+            dirs = filepath.replace(STRM_LOC,'').split("\\") if filepath.find("\\") != -1 else filepath.replace(STRM_LOC,'').split("\\")
             dirs = filter(None, dirs)
 
             filepath = STRM_LOC
@@ -104,7 +103,7 @@ def makeSTRM(filepath, filename, url):
         else:
             isSMB = True 
             fullpath = filepath + "/" + filename + ".strm"
-              
+
 #         if xbmcvfs.exists(fullpath):
 #             if addon.getSetting('Clear_Strms') == 'true':
 #                 x = 0 #xbmcvfs.delete(fullpath)
@@ -293,7 +292,7 @@ def make_sure_path_exists(path):
             else:
                 output_file.write(linje.strip())
 
-def removeMediaList(Item_remove, replacements):
+def removeMediaList(Item_remove):
     utils.addon_log('Removing items')
     thelist = []
     thefile = xbmc.translatePath(os.path.join(profile, 'MediaList.xml'))
@@ -303,7 +302,7 @@ def removeMediaList(Item_remove, replacements):
         thelist = fle.readlines()
         fle.close()
         del fle
-        delNotInMediaList(Item_remove, thelist, replacements)
+        delNotInMediaList(Item_remove, thelist)
         thelist = [i for j, i in enumerate(thelist) if j not in Item_remove]
         
         fle = open(thefile, "w")
@@ -323,19 +322,18 @@ def isMediaList(url, cType='Other'):
     utils.addon_log('isMediaList')
     # parse MediaList for url return bool if found
 
-def delNotInMediaList(delList, thelist, replacements):
+def delNotInMediaList(delList, thelist):
     for i in delList:
         try:
-            path = STRM_LOC + "\\" + (thelist[i]).strip().split('|')[0].format(i)
-            itemPath = (thelist[i].decode('utf-8')).strip().split('|')[1].lstrip().replace('++RenamedTitle++', '').format(i)
+            path = STRM_LOC + "/" + (thelist[i]).strip().split('|')[0].format(i)
+            itemPath = (thelist[i].decode('utf-8')).strip().split('|')[1].replace('++RenamedTitle++', '').format(i).format(i)
             print ("remove folder: %s" % itemPath)
-            fullpath = completePath(path + "\\" + utils.multiple_reSub(itemPath, replacements))
-            shutil.rmtree(fullpath , ignore_errors=True)
+            shutil.rmtree(path + "/" + stringUtils.cleanByDictReplacementsutils(itemPath) , ignore_errors=True)
         except OSError:
                 print ("Unable to remove folder: %s" % itemPath)
 
 def completePath(filepath):
-    if not filepath.endswith("\\") and not filepath.endswith("/"):
+    if not filepath.endswith("\\"):
         filepath += "\\"
 
-    return xbmc.translatePath(filepath)
+    return xbmc.translatePath(filepath) 
