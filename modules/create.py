@@ -491,6 +491,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
 def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
     file=''
     filetype=''
+
     tvShowsList = []
     
     while pagesDone < int(PAGINGTVshows):
