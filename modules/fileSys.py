@@ -89,7 +89,7 @@ def makeSTRM(filepath, filename, url):
         filepath = completePath(os.path.join(STRM_LOC, filepath))
 
         if not xbmcvfs.exists(filepath):         
-            dirs = filepath.replace(STRM_LOC,'').split("\\") if filepath.find("\\") != -1 else filepath.replace(STRM_LOC,'').split("\\")
+            dirs = filepath.replace(STRM_LOC,'').split("\\") if filepath.find("\\") != -1 else filepath.replace(STRM_LOC,'').split("/")
             dirs = filter(None, dirs)
 
             filepath = STRM_LOC
@@ -325,15 +325,17 @@ def isMediaList(url, cType='Other'):
 def delNotInMediaList(delList, thelist):
     for i in delList:
         try:
-            path = STRM_LOC + "/" + (thelist[i]).strip().split('|')[0].format(i)
+            path = completePath(STRM_LOC) + (thelist[i]).strip().split('|')[0].format(i)
             itemPath = (thelist[i].decode('utf-8')).strip().split('|')[1].replace('++RenamedTitle++', '').format(i).format(i)
             print ("remove folder: %s" % itemPath)
-            shutil.rmtree(path + "/" + stringUtils.cleanByDictReplacementsutils(itemPath) , ignore_errors=True)
+            shutil.rmtree(completePath(path) + stringUtils.cleanByDictReplacements(itemPath) , ignore_errors=True)
         except OSError:
                 print ("Unable to remove folder: %s" % itemPath)
 
 def completePath(filepath):
-    if not filepath.endswith("\\"):
+    if filepath.find("\\") != -1 and not filepath.endswith("\\"):
         filepath += "\\"
+    elif filepath.find("/") != -1 and not filepath.endswith("/"):
+        filepath += "/"
 
     return xbmc.translatePath(filepath) 
