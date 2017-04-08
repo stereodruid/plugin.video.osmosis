@@ -266,7 +266,7 @@ def checkGuiA():
             with open(xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.xstream\default.py")), 'w') as output_file:
                 for linje in thefile:
                     if linje.find('sys.exit()') != -1:
-                        output_file.write("" + '\n')
+                        output_file.write(linje.replace('sys.exit()','pass')
                     else:
                         output_file.write(linje)
         if xbmcvfs.exists(xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.exodus/resources/lib/modules/control.py"))):
