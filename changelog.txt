@@ -1,3 +1,5 @@
+1.2.8
+ xS Fix. Thanks to Maven!
 1.2.7
  Paging Fix
 
