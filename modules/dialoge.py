@@ -42,11 +42,11 @@ class MultiChoiceDialog(pyxbmct.AddonDialogWindow):
         label = pyxbmct.Label('Note: You can select mulltiple items! To delete click on  "delete"')
         self.placeControl(label, 4, 0,columnspan=4)
         self.listing = pyxbmct.List(_imageWidth=20)
-        self.placeControl(self.listing, 0,0, rowspan=4, columnspan=4)
+        self.placeControl(self.listing, 0,1, rowspan=4, columnspan=3)
         self.ok_button = pyxbmct.Button("Delete")
-        self.placeControl(self.ok_button, 3,0)
+        self.placeControl(self.ok_button, 0,0)
         self.cancel_button = pyxbmct.Button("Cancel")
-        self.placeControl(self.cancel_button, 3,1)
+        self.placeControl(self.cancel_button, 1,0)
 
     def connect_controls(self):
         self.connect(self.listing, self.check_uncheck)
@@ -54,10 +54,9 @@ class MultiChoiceDialog(pyxbmct.AddonDialogWindow):
         self.connect(self.cancel_button, self.close)
 
     def set_navigation(self):
-        self.listing.controlUp(self.ok_button)
-        self.listing.controlDown(self.ok_button)
-        self.ok_button.setNavigation(self.listing, self.listing, self.cancel_button, self.cancel_button)
-        self.cancel_button.setNavigation(self.listing, self.listing, self.ok_button, self.ok_button)
+        self.listing.setNavigation(self.listing, self.listing, self.ok_button, self.ok_button)
+        self.ok_button.setNavigation(self.cancel_button, self.cancel_button, self.listing, self.listing)
+        self.cancel_button.setNavigation(self.ok_button, self.ok_button, self.listing, self.listing)
         if self.listing.size():
             self.setFocus(self.listing)
         else:
