@@ -4,7 +4,7 @@
 	<string id="32000">Allgemien</string>
 	<string id="30002">Konfigurationsmanager öffnen</string> 
 	<string id="31004">NFO's anlegen (In Kürze):</string>
-	<string id="34012">Unterstützung für Exodus und xStream: Wenn du diese Funktion aktivierst, erlaubst du das OSMOSIS, Programmcode von Exodus und xStream ändern darf:</string>
+	<string id="34012">Unterstützung für Exodus: Wenn du diese Funktion aktivierst, erlaubst du, dass OSMOSIS Programmcode von Exodus ändern darf:</string>
 	<string id="32003">Medien Speicherort:</string>
 	<string id="30310">Stream-Limit pro Konfiguration:</string>
 	<string id="32005">Veraltete Streams erneuern(empfohlen):</string>

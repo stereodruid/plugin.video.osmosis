@@ -259,16 +259,6 @@ def browse(type, heading, shares, mask='', useThumbs=False, treatAsFolder=False,
 
 def checkGuiA():
     try:
-        if xbmcvfs.exists(xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.xstream\default.py"))):
-            fle = open( xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.xstream\default.py")), "r")
-            thefile = fle.readlines()
-            fle.close()
-            with open(xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.xstream\default.py")), 'w') as output_file:
-                for linje in thefile:
-                    if linje.find('sys.exit()') != -1:
-                        output_file.write(linje.replace('sys.exit()','pass'))
-                    else:
-                        output_file.write(linje)
         if xbmcvfs.exists(xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.exodus/resources/lib/modules/control.py"))):
             fle = open(xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.exodus/resources/lib/modules/control.py")), "r")
             thefile = fle.readlines()
