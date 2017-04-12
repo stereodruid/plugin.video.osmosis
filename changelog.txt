@@ -1,4 +1,13 @@
-1.2.7
+1.2.9
+  Maven85 Movies: Option to save to your own folder (per MediaList entry)
+  Maven85 Fix: Android add and remove
+  Maven85 Pluginextensions
+  Maven85 [ADD TVShows] overwriting fix
+  Maven85 "++RenamedTitle++" removed from folder names and gui
+  Maven85 Fix: Create/delete folders
+  Maven85 Bugfixing
+
+1.2.7 - 1.2.8
  Paging Fix
 
 1.2.3 - 1.2.6

@@ -47,15 +47,16 @@ def initialize_DialogBG(mess1,mess2, barType="BG"):
             thisDialog.dialoge = xbmcgui.DialogProgress()
             thisDialog.dialoge.create("OSMOSIS: " + mess1 + ": " , " " + mess2)
 
-addnon_id = 'plugin.video.osmosis'
-addon = xbmcaddon.Addon(addnon_id)
+addon_id = 'plugin.video.osmosis'
+addon = xbmcaddon.Addon(addon_id)
 addon_version = addon.getAddonInfo('version')
 ADDON_NAME = addon.getAddonInfo('name')
-REAL_SETTINGS = xbmcaddon.Addon(id=addnon_id)
+REAL_SETTINGS = xbmcaddon.Addon(id=addon_id)
 ADDON_SETTINGS = REAL_SETTINGS.getAddonInfo('profile')
 MediaList_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'MediaList.xml'))
 PAGINGTVshows = REAL_SETTINGS.getSetting('paging_tvshows')
 PAGINGMovies = REAL_SETTINGS.getSetting('paging_movies')
+folder_movies = REAL_SETTINGS.getSetting('folder_movies')
 STRM_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'STRM_LOC'))
 profile = xbmc.translatePath(addon.getAddonInfo('profile').decode('utf-8'))
 home = xbmc.translatePath(addon.getAddonInfo('path').decode('utf-8'))
@@ -112,7 +113,7 @@ def fillPlugins(cType='video'):
 
 def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None'):
     initialize_DialogBG("Updating", "Getting content..")
-    thisDialog.dialogeBG.update(0, ADDON_NAME + ": Getting: ", strm_name.replace('++RenamedTitle++', ''))
+    thisDialog.dialogeBG.update(0, ADDON_NAME + ": Getting: ", getStrmname(strm_name))
     utils.addon_log('fillPluginItems')
     detail = []
     if url.find("playMode=play")== -1:
@@ -298,7 +299,7 @@ def removeItemsFromMediaList(action='list'):
     from modules import dialoge
     utils.addon_log('removingitemsdialog')
     thelist = fileSys.readMediaList(purge=False)
-    items = [((thelist[i]).strip().split('|')[1].lstrip().replace('++RenamedTitle++', '')).format(i) for i in range(len(thelist))]
+    items = [getStrmname(thelist[i].strip().split('|')[1]).format(i) for i in range(len(thelist))]
     dialog = dialoge.MultiChoiceDialog("Select items", items)
     dialog.doModal()
 
@@ -393,7 +394,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                 except:
                     pass             
         else:
-            albumList.append([os.path.join(strm_type, strm_name.strip().replace('++RenamedTitle++', '') , label.strip()), str(stringUtils.cleanByDictReplacements(label.strip())), link])
+            albumList.append([os.path.join(strm_type, getStrmname(strm_name) , label.strip()), str(stringUtils.cleanByDictReplacements(label.strip())), link])
             pagesDone = int(PAGINGalbums)
 
     try:
@@ -459,7 +460,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
                             label = str(stringUtils.cleanByDictReplacements(label.strip()))
                             thisDialog.dialogeBG.update(j, ADDON_NAME + ": Gettin Movies: ",  " Video: " + label)
                             if filetype == 'file':
-                                movieList.append([os.path.join(strm_type, strm_name.strip().replace('++RenamedTitle++', '')), str(stringUtils.cleanByDictReplacements(label.strip())), link, listName])
+                                movieList.append([getMovieStrmPath(strm_type, strm_name), stringUtils.cleanByDictReplacements(getStrmname(strm_name)), link, listName])
                             j = j + len(contentList) * int(PAGINGMovies) / 100
                 except IOError as (errno, strerror):
                     print ("I/O error({0}): {1}").format(errno, strerror)
@@ -483,7 +484,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
                 listName = provGeneral.group(1)
                 if provXST:
                     listName = listName + ": " + provXST.group(1)
-            movieList.append([os.path.join(strm_type, stringUtils.cleanByDictReplacements(strm_name.strip()).replace('++RenamedTitle++', '')), str(stringUtils.cleanByDictReplacements(strm_name.strip())), contentList[1], listName])
+            movieList.append([getMovieStrmPath(strm_type, strm_name), stringUtils.cleanByDictReplacements(getStrmname(strm_name)), contentList[1], listName])
             pagesDone = int(PAGINGMovies)
 
     return movieList
@@ -644,7 +645,7 @@ def getEpisodes(episodesListRaw, strm_name, strm_type, j=0, pagesDone=0):
                         fanart = ''
 
                     if strm_name.find("++RenamedTitle++") != -1:
-                        showtitle = strm_name.strip().replace('++RenamedTitle++', '')
+                        showtitle = getStrmname(strm_name)
                     if showtitle != "" and strm_type != "":
                         episodesList.append([strm_type, str('s' + season), str('e'+episode), file, stringUtils.cleanByDictReplacements(showtitle.strip()), listName])
                         
@@ -668,7 +669,16 @@ def getEpisodes(episodesListRaw, strm_name, strm_type, j=0, pagesDone=0):
     
 def getData(url, fanart):
     utils.addon_log('getData, url = ' + cType)
-    
+
+def getMovieStrmPath(strmPath, strm_name):
+    strm_name = stringUtils.cleanByDictReplacements(getStrmname(strm_name))
+    if folder_movies and folder_movies == 'true':
+        strmPath = os.path.join(strmPath, strm_name)
+    return strmPath
+
+def getStrmname(strm_name):
+    return strm_name.strip().replace('++RenamedTitle++', '')
+
 # def playsetresolved(url, name, iconimage, setresolved=True):
 #     utils.addon_log('playsetresolved')
 #     if setresolved:

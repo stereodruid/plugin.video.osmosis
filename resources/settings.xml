@@ -5,15 +5,16 @@
         <setting label="32006" type="enum" id="Link_Type" values="OSMOSIS|Original Plugin" default="0"/>
         <setting label="32008" type="bool" id="Clear_Strms" default="false"/>
         <setting label="32005" type="bool" id="Update_Strms" default="true"/>
-        <setting label="34009" type="bool" id="Automatic_Update_Folder" subsetting="true" visible="eq(-4,true)" default="false" />
-        <setting label="34010" type="bool" id="Automatic_Clean_Folder" subsetting="true" visible="eq(-5,true)" default="true" />
-        <setting label="34011" type="bool" id="Automatic_Clear_Folder" subsetting="false" visible="eq(-6,true)" default="false" />
-        <setting label="34012" type="bool" id="supportES" default="false"/>
+        <setting label="32009" type="bool" id="Automatic_Update_Folder" subsetting="true" visible="eq(-4,true)" default="false" />
+        <setting label="32010" type="bool" id="Automatic_Clean_Folder" subsetting="true" visible="eq(-5,true)" default="true" />
+        <setting label="32011" type="bool" id="Automatic_Clear_Folder" subsetting="false" visible="eq(-6,true)" default="false" />
+        <setting label="32012" type="bool" id="supportES" default="false"/>
      </category>
      <category label="31000">   
         <setting label="31004" type="bool" id="Write_NFOS" default="false" />      
         <setting label="31001" type="slider" id="paging_tvshows" default="2" range="1,100" option="int"/>
     	<setting label="31002" type="slider" id="paging_movies" default="2" range="1,100" option="int"/>
+    	<setting label="31003" type="bool" id="folder_movies" default="false"/>
     </category>
       <category label="33000">
       	<setting label="33001" type="bool" id="Updat_at_startup" default="true"/>
