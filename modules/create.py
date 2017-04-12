@@ -305,7 +305,7 @@ def removeItemsFromMediaList(action='list'):
 
     fileSys.removeMediaList(dialog.selected)
         
-    xbmcgui.Dialog().notification("Finished deleting:", "{0}".format(str(dialog.selectedLabels)))
+    xbmcgui.Dialog().notification("Finished deleting:", "{0}".format(", ".join(str(label) for label in dialog.selectedLabels)))
     del dialog
     
 def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):

@@ -1,5 +1,7 @@
 1.2.9
+  Maven85 Fix Umlaut in "Remove Media"-dialog
   Maven85 Movies: Option to save to your own folder (per MediaList entry)
+  Maven85 Remove xS support
   Maven85 Fix: Android add and remove
   Maven85 Pluginextensions
   Maven85 [ADD TVShows] overwriting fix
