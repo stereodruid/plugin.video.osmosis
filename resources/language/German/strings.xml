@@ -14,7 +14,8 @@
 	<string id="31004">NFO's anlegen (In Kürze)</string>
 	<string id="31001">Anzahl der Seiten aus Kategorie (Serien)</string>
 	<string id="31002">Anzahl der Seiten aus Kategorie (Filme)</string>
-	<string id="31003">Streams pro MediaList-Eintrag in eigenem Ordner speichern (Filme)</string>
+	<string id="31003">Pro MediaList-Eintrag die Streams in einem Oberordner speichern (Filme)</string>
+	<string id="31005">Jede Stream-Datei in eigenem Ordner speichern (Filme)</string>
 	
 	<string id="33000">Update Konfiguration</string>
 	<string id="33001">Aktualisierung bei Start</string>

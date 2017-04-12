@@ -56,7 +56,8 @@ ADDON_SETTINGS = REAL_SETTINGS.getAddonInfo('profile')
 MediaList_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'MediaList.xml'))
 PAGINGTVshows = REAL_SETTINGS.getSetting('paging_tvshows')
 PAGINGMovies = REAL_SETTINGS.getSetting('paging_movies')
-folder_movies = REAL_SETTINGS.getSetting('folder_movies')
+folder_medialistentry_movie = REAL_SETTINGS.getSetting('folder_medialistentry_movie')
+folder_movie = REAL_SETTINGS.getSetting('folder_movie')
 STRM_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'STRM_LOC'))
 profile = xbmc.translatePath(addon.getAddonInfo('profile').decode('utf-8'))
 home = xbmc.translatePath(addon.getAddonInfo('path').decode('utf-8'))
@@ -457,10 +458,10 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
                         link = file
                         
                         if label and strm_name:                                              
-                            label = str(stringUtils.cleanByDictReplacements(label.strip()))
+                            label = stringUtils.cleanByDictReplacements(label.strip())
                             thisDialog.dialogeBG.update(j, ADDON_NAME + ": Gettin Movies: ",  " Video: " + label)
                             if filetype == 'file':
-                                movieList.append([getMovieStrmPath(strm_type, strm_name), stringUtils.cleanByDictReplacements(getStrmname(strm_name)), link, listName])
+                                movieList.append([getMovieStrmPath(strm_type, strm_name, label), stringUtils.cleanByDictReplacements(getStrmname(label)), link, listName])
                             j = j + len(contentList) * int(PAGINGMovies) / 100
                 except IOError as (errno, strerror):
                     print ("I/O error({0}): {1}").format(errno, strerror)
@@ -670,11 +671,14 @@ def getEpisodes(episodesListRaw, strm_name, strm_type, j=0, pagesDone=0):
 def getData(url, fanart):
     utils.addon_log('getData, url = ' + cType)
 
-def getMovieStrmPath(strmPath, strm_name):
-    strm_name = stringUtils.cleanByDictReplacements(getStrmname(strm_name))
-    if folder_movies and folder_movies == 'true':
-        strmPath = os.path.join(strmPath, strm_name)
-    return strmPath
+def getMovieStrmPath(strmTypePath, mediaListEntry_name, movie_name=''):
+    if folder_medialistentry_movie and folder_medialistentry_movie == 'true':
+        mediaListEntry_name = stringUtils.cleanByDictReplacements(getStrmname(mediaListEntry_name))
+        strmTypePath = os.path.join(strmTypePath, mediaListEntry_name)
+    if movie_name != '' and folder_movie and folder_movie == 'true':
+        movie_name = stringUtils.cleanByDictReplacements(getStrmname(movie_name))
+        strmTypePath = os.path.join(strmTypePath, movie_name)
+    return strmTypePath
 
 def getStrmname(strm_name):
     return strm_name.strip().replace('++RenamedTitle++', '')

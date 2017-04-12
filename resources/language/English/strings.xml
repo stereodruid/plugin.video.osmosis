@@ -11,7 +11,8 @@
     <string id="30305">Download Youtube/RSS Thumbs (ComingSoon)</string>
     <string id="31001">Paging depth for TV-Shows</string>
     <string id="31002">Paging depth for Movies</string>
-    <string id="31003">Save streams per MediaList entry in your own folder (movies)</string>
+    <string id="31003">Save the streams pro MediaList entry in a superfolder (movies)</string>
+    <string id="31005">Save each stream file in its own folder (movies)</string>
     <string id="32100">Service</string>
     <string id="33001">Update at startup</string>
     <string id="33002">Automatic Update</string>
