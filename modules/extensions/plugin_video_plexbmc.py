@@ -1,5 +1,5 @@
 from modules import stringUtils, jsonUtils
-import re
+import re, os
 import xbmc, xbmcaddon
 
 ADDON_ID = 'plugin.video.osmosis'
@@ -11,7 +11,7 @@ def update(strm_name, url, media_type, thelist):
     for plex_detail in plex_details:
         plex_detail = stringUtils.removeHTMLTAGS(plex_detail)
         label = re.search('"label" *: *"(.*?)",', plex_detail)
-        if label and strm_name.replace('++RenamedTitle++', '') == stringUtils.cleanByDictReplacements(label.group(1)):
+        if label and strm_name.replace('++RenamedTitle++', '') == stringUtils.cleanLabels(label.group(1)):
             serverurl = re.search('"file" *: *"(.*?)",', plex_detail).group(1)
             if url != serverurl:
                 for entry in thelist:
@@ -25,6 +25,7 @@ def update(strm_name, url, media_type, thelist):
                                     output_file.write(linje.strip().encode('utf-8') + '\n')
                                 else:
                                     output_file.write(linje.strip())
-                        break
-                url = serverurl
+                        return serverurl
+            else:
+                break
     return url
