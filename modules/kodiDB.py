@@ -503,7 +503,8 @@ def movieStreamExists(movieID, provider, url):
         if url.find("?url=plugin") != -1:
             url = url.strip().replace("?url=plugin", "plugin", 1)
             
-        if not cursor.execute("""SELECT "%s" FROM "%s" WHERE mov_id="%s" AND provider="%s";""" % ("mov_id","stream_ref", movieID, provider)).fetchone() :
+        entry = cursor.execute("""SELECT "%s", "%s" FROM "%s" WHERE mov_id="%s" AND provider="%s";""" % ("mov_id","url", "stream_ref", movieID, provider)).fetchone()
+        if not entry:
             sql_path = """INSERT INTO stream_ref (mov_id, provider, url) VALUES ("%s", "%s", "%s");""" % (movieID, provider, url)
             cursor.execute(sql_path)
             connectMDB.commit()
@@ -512,6 +513,10 @@ def movieStreamExists(movieID, provider, url):
             connectMDB.close()
             return dID
         else:
+            if str(entry[1]) != url:
+                sql_path = """UPDATE stream_ref SET url = "%s" WHERE mov_id = "%s";""" % (url, movieID)
+                cursor.execute(sql_path)
+                connectMDB.commit()
             dID = cursor.execute("""SELECT "%s" FROM "%s" WHERE mov_id="%s" AND url="%s";""" % ("mov_id","stream_ref", movieID, url)).fetchone()[0] 
             cursor.close()
             connectMDB.close()
@@ -608,4 +613,3 @@ def getKodiMovieID(title, sTitle):
     except:
         cursor.close()
         connectMDB.close()
-    
