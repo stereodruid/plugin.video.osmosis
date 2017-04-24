@@ -259,52 +259,6 @@ def browse(type, heading, shares, mask='', useThumbs=False, treatAsFolder=False,
 
 def checkGuiA():
     try:
-        if xbmcvfs.exists(xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.xstream\default.py"))):
-            fle = open( xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.xstream\default.py")), "r")
-            thefile = fle.readlines()
-            fle.close()
-            with open(xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.xstream\default.py")), 'w') as output_file:
-                override = False
-                for linje in thefile:
-                    if linje.find('try') != -1:
-                        override = True
-                        output_file.write(linje)
-                    elif override:
-                        if linje.find('run()') == -1:
-                            w = re.search('(\s*)(.*)', linje)
-                            output_file.write(w.group(1) + 'run()\n' + linje)
-                        else:
-                            output_file.write(linje)
-                        override = False
-                    else:
-                        output_file.write(linje)
-            thefile = None
-            
-        if xbmcvfs.exists(xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.xstream/xstream.py"))):
-            fle = open( xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.xstream/xstream.py")), "r")
-            thefile = fle.readlines()
-            fle.close()
-            with open(xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.xstream/xstream.py")), 'w') as output_file:
-                override = False
-                for linje in thefile:
-                    utils.addon_log("override: " + str(override))
-                    if linje.find('sys.exit()') != -1 and linje.find('"sys.exit()"') == -1 :
-                        override = True
-                        output_file.write(linje.replace('sys.exit()', 'x = "sys.exit()"'))
-                        override = False
-                    else:
-                        output_file.write(linje)        
-                        
-        if xbmcvfs.exists(xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.exodus/resources/lib/modules/control.py"))):
-            fle = open(xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.exodus/resources/lib/modules/control.py")), "r")
-            thefile = fle.readlines()
-            fle.close()
-            with open(xbmc.translatePath(os.path.join("special://home/addons/","plugin.video.exodus/resources/lib/modules/control.py")), 'w') as output_file:
-                for linje in thefile:
-                    if linje.find('plugin.video.metallic') != -1:
-                        output_file.write(linje.replace("plugin.video.metallic", "plugin.video.osmosis"))
-                    else:
-                        output_file.write(linje)
         return True
     except:
         pass
