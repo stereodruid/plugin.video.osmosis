@@ -558,7 +558,7 @@ def addTVShows(contentList, strm_name='', strm_type='Other',pagesDone=0):
     strm_name
     sectiveContent = contentList
     #     while pagesDone < int(PAGINGTVshows):
-    j = 100 / len(contentList)    
+    j = 100 / len(contentList) if len(contentList) > 0 else 1
 
     for detailInfo in contentList:
         detailInfo = stringUtils.removeHTMLTAGS(detailInfo)
