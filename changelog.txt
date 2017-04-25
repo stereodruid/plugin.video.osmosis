@@ -1,4 +1,5 @@
 1.2.9
+  Maven85 [ADD TVShows]: Fix for adding a complete series (AmazonVOD)
   Maven85 Movies: Option to save each stream to its own folder
   Maven85 Fix Umlaut in "Remove Media"-dialog
   Maven85 Movies: Option to save streams to its own superfolder (per MediaList entry)
