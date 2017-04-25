@@ -511,7 +511,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
                     labels = re.search('"label" *: *"(.*?)",', detailInfo)
                     
                     if episodes:
-                        if episodes.group(1) != "-1":             
+                        if episodes.group(1) != "-1" and filetype == 'file':             
                             pagesDone = getEpisodes(showList, strm_name, strm_type,pagesDone=pagesDone)
                             files =  re.search('"file" *: *"(.*?)",',showList[len(showList) -2])
                             break
