@@ -154,22 +154,6 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
             print ("Unexpected error:"), sys.exc_info()[0]
             raise
-             
-    if strm_type.find('OLDTV-Show') != -1:
-        try:
-            initialize_DialogBG("TV-Show", "Adding")
-            tvShowList = addTVShows(detail, strm_name, strm_type)
-            #dbShows = kodiDB.writeShow(tvShowList)
-            thisDialog.dialogeBG.close()
-            thisDialog.dialogeBG = None
-            return
-        except:
-            thisDialog.dialogeBG.close()
-            thisDialog.dialogeBG = None
-            guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". Se your Kodi.log!"))
-            utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
-            print ("Unexpected error:"), sys.exc_info()[0]
-            raise
         
     if strm_type.find('TV-Show') != -1 or strm_type.find('Shows-Collection') != -1:
         try:
@@ -225,8 +209,8 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         
         if filetypes and labels and files:
             filetype = filetypes.group(1)
-            label = (stringUtils.cleanLabels(labels.group(1)))
-            file = (files.group(1).replace("\\\\", "\\"))
+            label = stringUtils.cleanLabels(labels.group(1))
+            file = files.group(1).replace("\\\\", "\\")
             strm_name = str(stringUtils.cleanByDictReplacements(strm_name.strip()))
                          
             if not descriptions:
@@ -237,7 +221,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             thumbnail = thumbnails.group(1) #stringUtils.removeNonAscii(thumbnails.group(1))
             fanart = fanarts.group(1) #stringUtils.removeNonAscii(fanarts.group(1))
             
-            if addon.getSetting('Link_Type') == '0': 
+            if addon.getSetting('Link_Type') == '0':
                 link = sys.argv[0] + "?url=" +urllib.quote_plus(stringUtils.uni(file)) + "&mode=" + str(10) + "&name=" +urllib.quote_plus(stringUtils.uni(label)) + "&fanart=" + urllib.quote_plus(fanart)
             else:
                 link = file
@@ -498,7 +482,10 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
     while pagesDone < int(PAGINGTVshows):
         strm_type = strm_type.replace('Shows-Collection', 'TV-Shows')
         try:
-            for detailInfo in showList:
+            showList = filter(lambda elem: re.search('"filetype" *: *"(.*?)",', elem), showList)
+            step = float(100.0 / len(showList) if len(showList) > 0 else 1)
+
+            for index, detailInfo in enumerate(showList):
                 detailInfo = stringUtils.removeHTMLTAGS(detailInfo)
                 filetypes = re.search('"filetype" *: *"(.*?)",', detailInfo)
                 if filetypes:
@@ -509,7 +496,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
                     labels = re.search('"label" *: *"(.*?)",', detailInfo)
                     
                     if labels:
-                        label = str(labels.group(1).lstrip().rstrip())
+                        label = str(labels.group(1).strip())
                     else:
                         label = "None"          
 
@@ -519,9 +506,12 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
                     if filetype == 'directory':
                         dirList.append(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')))
                         continue
-                    
-                    if seasons and episodes and seasons.group(1) != "-1" and episodes.group(1) != "-1" and filetype == 'file':           
-                        pagesDone = addTVShows(showList, strm_name, strm_type,pagesDone=pagesDone)
+
+                    if seasons and episodes and seasons.group(1) != "-1" and episodes.group(1) != "-1" and filetype == 'file': 
+                        j = int(step * (index + 1))
+                        thisDialog.dialogeBG.update(j, "Page: " + str(pagesDone + 1) + " " + getStrmname(strm_name))                    
+                        pagesDone = getEpisodes(detailInfo, strm_name, strm_type,pagesDone=pagesDone)
+                        utils.addon_log("percentdone: " + str(j) + "; step: " + str(step))
                                     
         except IOError as (errno, strerror):
             print ("I/O error({0}): {1}").format(errno, strerror)
@@ -536,36 +526,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
         pagesDone += 1
         if pagesDone < int(PAGINGTVshows) and len(dirList) > 0:
             showList = [item for sublist in dirList for item in sublist]
-        
-def addTVShows(contentList, strm_name='', strm_type='Other',pagesDone=0):
-    showsList = []
-    strm_name
-    #     while pagesDone < int(PAGINGTVshows):
-    j = 100 / len(contentList) if len(contentList) > 0 else 1
 
-    for detailInfo in contentList:
-        detailInfo = stringUtils.removeHTMLTAGS(detailInfo)
-        showtitles = re.search('"showtitle" *: *"(.*?)",', detailInfo) 
-        if showtitles:
-            showtitle = showtitles.group(1)
-        else:
-            showtitle = getStrmname(strm_name)
-
-        try:
-            pagesDone = getEpisodes(detailInfo, strm_name, strm_type, j, pagesDone=pagesDone)
-            thisDialog.dialogeBG.update(j, "Page: " + str(pagesDone + 1) + " " + showtitle)
-            j = j + 100 / len(contentList) 
-        except IOError as (errno, strerror):
-            print ("I/O error({0}): {1}").format(errno, strerror)
-        except ValueError:
-            print ("No valid integer in line.")
-        except:
-            guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". Se your Kodi.log!"))
-            utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
-            print ("Unexpected error:"), sys.exc_info()[0]
-            raise
-    return pagesDone
-   
 def getEpisodes(episodesListRaw, strm_name, strm_type, j=0, pagesDone=0):
     episodesList = []
     typeChange = []
