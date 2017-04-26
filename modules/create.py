@@ -526,6 +526,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
         pagesDone += 1
         if pagesDone < int(PAGINGTVshows) and len(dirList) > 0:
             showList = [item for sublist in dirList for item in sublist]
+            dirList = []
 
 def getEpisodes(episodesListRaw, strm_name, strm_type, j=0, pagesDone=0):
     episodesList = []
