@@ -104,7 +104,7 @@ def addFunction(labels= 'n.a' ):
             
 def addDir(name,url,mode,iconimage,fanart,description,genre,date,credits,showcontext=False):
     utils.addon_log('addDir')
-    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&fanart="+urllib.quote_plus(fanart)
+    u=sys.argv[0]+"?url="+urllib.quote_plus(stringUtils.uni(url))+"&mode="+str(mode)+"&name="+urllib.quote_plus(stringUtils.uni(name))+"&fanart="+urllib.quote_plus(fanart)
     ok=True
     contextMenu = []
     liz=xbmcgui.ListItem(name, iconImage=iconimage, thumbnailImage=iconimage)
@@ -121,7 +121,7 @@ def addDir(name,url,mode,iconimage,fanart,description,genre,date,credits,showcon
       
 def addLink(name,url,mode,iconimage,fanart,description,genre,date,showcontext,playlist,regexs,total,setCookie=""): 
     utils.addon_log('addLink') 
-    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&fanart="+urllib.quote_plus(fanart)
+    u=sys.argv[0]+"?url="+urllib.quote_plus(stringUtils.uni(url))+"&mode="+str(mode)+"&name="+urllib.quote_plus(stringUtils.uni(name))+"&fanart="+urllib.quote_plus(fanart)
     ok = True
     contextMenu =[]
     liz=xbmcgui.ListItem(name, iconImage=iconimage, thumbnailImage=iconimage)

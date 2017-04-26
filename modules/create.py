@@ -238,7 +238,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             fanart = fanarts.group(1) #stringUtils.removeNonAscii(fanarts.group(1))
             
             if addon.getSetting('Link_Type') == '0': 
-                link = sys.argv[0] + "?url=" + urllib.quote_plus(file) + "&mode=" + str(10) + "&name=" + urllib.quote_plus(label) + "&fanart=" + urllib.quote_plus(fanart)
+                link = sys.argv[0] + "?url=" +urllib.quote_plus(stringUtils.uni(file)) + "&mode=" + str(10) + "&name=" +urllib.quote_plus(stringUtils.uni(label)) + "&fanart=" + urllib.quote_plus(fanart)
             else:
                 link = file
         
