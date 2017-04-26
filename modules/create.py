@@ -493,8 +493,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
 def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
     file=''
     filetype=''
-
-    tvShowsList = []
+    dirList = []
     
     while pagesDone < int(PAGINGTVshows):
         strm_type = strm_type.replace('Shows-Collection', 'TV-Shows')
@@ -507,33 +506,22 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
                     files = re.search('"file" *: *"(.*?)",', detailInfo)
                     episodes = re.search('"episode" *: *(.*?),', detailInfo)
                     seasons = re.search('"season" *: *(.*?),', detailInfo)
-                    showtitles = re.search('"showtitle" *: *"(.*?)",', detailInfo)
                     labels = re.search('"label" *: *"(.*?)",', detailInfo)
                     
-                    if episodes:
-                        if episodes.group(1) != "-1" and filetype == 'file':             
-                            pagesDone = getEpisodes(showList, strm_name, strm_type,pagesDone=pagesDone)
-                            files =  re.search('"file" *: *"(.*?)",',showList[len(showList) -2])
-                            break
-                        else:
-                            if labels:
-                                label = str(labels.group(1).lstrip().rstrip())
-                            else:
-                                label = "None"          
-                            if showtitles: 
-                                showtitle = str(showtitles.group(1).lstrip().rstrip())
-                            else:
-                                label = "None"
-                            if not fileSys.isInMediaList(label, strm_type) and label != "" and label != ">>>" and label != "None" and files.group(1).find("playMode=play") == "-1":            
-                                fileSys.writeMediaList(files.group(1).lstrip().rstrip(), label, strm_type)
-                                      
-                            if files and filetype != 'file' and label != ">>>" :
-                                pagesDone = addTVShows(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name=strm_name, strm_type=strm_type, pagesDone=pagesDone)
-                            else:
-                                if showtitles and seasons and episodes:
-                                    if showtitles and seasons.group(1) == "-1" and episodes.group(1) == "-1":
-                                        xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (ADDON_NAME, "ShowsList" , 1000, ""))
-                                        pagesDone = getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name.strip(), strm_type, pagesDone=pagesDone)
+                    if labels:
+                        label = str(labels.group(1).lstrip().rstrip())
+                    else:
+                        label = "None"          
+
+                    if not fileSys.isInMediaList(label, strm_type) and label != "" and label != ">>>" and label != "None" and files.group(1).find("playMode=play") == "-1":            
+                        fileSys.writeMediaList(files.group(1).strip(), label, strm_type)
+                    
+                    if filetype == 'directory':
+                        dirList.append(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')))
+                        continue
+                    
+                    if seasons and episodes and seasons.group(1) != "-1" and episodes.group(1) != "-1" and filetype == 'file':           
+                        pagesDone = addTVShows(showList, strm_name, strm_type,pagesDone=pagesDone)
                                     
         except IOError as (errno, strerror):
             print ("I/O error({0}): {1}").format(errno, strerror)
@@ -546,37 +534,27 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
             raise
         
         pagesDone += 1
-        if pagesDone < int(PAGINGTVshows) and filetype != '' and filetype == "directory":
-            showList = []
-            showList = stringUtils.uni(jsonUtils.requestList(files.group(1), 'video'))
-#             dirList = stringUtils.uni(jsonUtils.requestList(files.group(1), 'video'))
-#             for i in dirList:
-#                 showList.append(i)
+        if pagesDone < int(PAGINGTVshows) and len(dirList) > 0:
+            showList = [item for sublist in dirList for item in sublist]
         
 def addTVShows(contentList, strm_name='', strm_type='Other',pagesDone=0):
     showsList = []
     strm_name
-    sectiveContent = contentList
     #     while pagesDone < int(PAGINGTVshows):
     j = 100 / len(contentList) if len(contentList) > 0 else 1
 
     for detailInfo in contentList:
         detailInfo = stringUtils.removeHTMLTAGS(detailInfo)
-        filetypes = re.search('"filetype" *: *"(.*?)",', detailInfo)
         showtitles = re.search('"showtitle" *: *"(.*?)",', detailInfo) 
         if showtitles:
             showtitle = showtitles.group(1)
-        try:        
-            if filetypes:
-                filetype = filetypes.group(1)
-                files = re.search('"file" *: *"(.*?)",', detailInfo)            
-                   
-                if filetype != 'file':               
-                    pagesDone = getEpisodes(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')), strm_name.strip(), strm_type, j, pagesDone=pagesDone)
-                else:              
-                    pagesDone = getEpisodes(detailInfo, strm_name, strm_type, j, pagesDone=pagesDone)
-                thisDialog.dialogeBG.update(j,"Page: " + str(pagesDone + 1) + " " + showtitle)
-                j = j + 100 / len(contentList) 
+        else:
+            showtitle = getStrmname(strm_name)
+
+        try:
+            pagesDone = getEpisodes(detailInfo, strm_name, strm_type, j, pagesDone=pagesDone)
+            thisDialog.dialogeBG.update(j, "Page: " + str(pagesDone + 1) + " " + showtitle)
+            j = j + 100 / len(contentList) 
         except IOError as (errno, strerror):
             print ("I/O error({0}): {1}").format(errno, strerror)
         except ValueError:
@@ -618,10 +596,7 @@ def getEpisodes(episodesListRaw, strm_name, strm_type, j=0, pagesDone=0):
                     listName = provGeneral.group(1)
                     if provXST:
                         listName = listName + ": " + provXST.group(1)
-
-                if filetypes.group(1) == 'directory':
-                    contentList = stringUtils.uni(jsonUtils.requestList(files.group(1), 'video'))
-                    continue       
+     
                 if showtitles and seasons and episodes:
                     filetype = filetypes.group(1)
                     label = (stringUtils.cleanLabels(labels.group(1))) 
