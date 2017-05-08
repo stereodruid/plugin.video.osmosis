@@ -582,7 +582,7 @@ def getEpisodes(episodesListRaw, strm_name, strm_type, j=0, pagesDone=0):
                     else:
                         fanart = ''
 
-                    if strm_name.find("++RenamedTitle++") != -1:
+                    if strm_name.find("++RenamedTitle++") != -1 or showtitle == "":
                         showtitle = getStrmname(strm_name)
                     if showtitle != "" and strm_type != "":
                         episodesList.append([strm_type, str('s' + season), str('e'+episode), file, stringUtils.cleanByDictReplacements(showtitle.strip()), listName])
