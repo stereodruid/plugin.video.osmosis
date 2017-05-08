@@ -88,7 +88,7 @@ def fillPlugins(cType='video'):
     json_query = ('{"jsonrpc":"2.0","method":"Addons.GetAddons","params":{"type":"xbmc.addon.%s","properties":["name","path","thumbnail","description","fanart","summary"]}, "id": 1 }' % cType)
     json_detail = jsonUtils.sendJSON(json_query)
     detail = re.compile("{(.*?)}", re.DOTALL).findall(json_detail)
-    for f in detail:
+    for f in sorted(detail, key=lambda str: re.search('"name" *: *"(.*?)",', str).group(1).lower() if re.search('"name" *: *"(.*?)",', str) else str):
         names = re.search('"name" *: *"(.*?)",', f)
         paths = re.search('"addonid" *: *"(.*?)",', f)
         thumbnails = re.search('"thumbnail" *: *"(.*?)",', f)
