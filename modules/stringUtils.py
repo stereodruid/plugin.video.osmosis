@@ -166,3 +166,15 @@ def cleanByDictReplacements(string):
                         ":": ' ','"?"': '','"':''}
 
     return utils.multiple_reSub(string, dictReplacements)
+
+def getMovieStrmPath(strmTypePath, mediaListEntry_name, movie_name=''):
+    if folder_medialistentry_movie and folder_medialistentry_movie == 'true':
+        mediaListEntry_name = stringUtils.cleanByDictReplacements(getStrmname(mediaListEntry_name)) if mediaListEntry_name.find('++RenamedTitle++') == -1 else getStrmname(mediaListEntry_name)
+        strmTypePath = os.path.join(strmTypePath, mediaListEntry_name)
+    if movie_name != '' and folder_movie and folder_movie == 'true':
+        movie_name = stringUtils.cleanByDictReplacements(getStrmname(movie_name))
+        strmTypePath = os.path.join(strmTypePath, movie_name)
+    return strmTypePath
+
+def getStrmname(strm_name):
+    return strm_name.strip().replace('++RenamedTitle++', '')

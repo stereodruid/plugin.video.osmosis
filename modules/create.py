@@ -88,7 +88,9 @@ def fillPlugins(cType='video'):
     json_query = ('{"jsonrpc":"2.0","method":"Addons.GetAddons","params":{"type":"xbmc.addon.%s","properties":["name","path","thumbnail","description","fanart","summary"]}, "id": 1 }' % cType)
     json_detail = jsonUtils.sendJSON(json_query)
     detail = re.compile("{(.*?)}", re.DOTALL).findall(json_detail)
+
     for f in sorted(detail, key=lambda str: re.search('"name" *: *"(.*?)",', str).group(1).lower() if re.search('"name" *: *"(.*?)",', str) else str):
+        utils.addon_log('fillPlugins entry: ' + str(f))
         names = re.search('"name" *: *"(.*?)",', f)
         paths = re.search('"addonid" *: *"(.*?)",', f)
         thumbnails = re.search('"thumbnail" *: *"(.*?)",', f)
@@ -114,7 +116,7 @@ def fillPlugins(cType='video'):
 
 def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None'):
     initialize_DialogBG("Updating", "Getting content..")
-    thisDialog.dialogeBG.update(0, ADDON_NAME + ": Getting: ", getStrmname(strm_name))
+    thisDialog.dialogeBG.update(0, ADDON_NAME + ": Getting: ", stringUtils.getStrmname(strm_name))
     utils.addon_log('fillPluginItems')
     detail = []
     if url.find("playMode=play")== -1:
@@ -284,7 +286,11 @@ def removeItemsFromMediaList(action='list'):
     from modules import dialoge
     utils.addon_log('removingitemsdialog')
     thelist = fileSys.readMediaList(purge=False)
-    items = [getStrmname(thelist[i].strip().split('|')[1]).format(i) for i in range(len(thelist))]
+    items = []
+    for entry in thelist:
+        splits = entry.strip().split('|')
+        plugin = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), splits[2])
+        items.append(stringUtils.getStrmname(splits[1]) + " (" + fileSys.getAddonname(plugin.group(1)) + ")")
     dialog = dialoge.MultiChoiceDialog("Select items", items)
     dialog.doModal()
 
@@ -379,7 +385,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                 except:
                     pass             
         else:
-            albumList.append([os.path.join(strm_type, getStrmname(strm_name) , label.strip()), str(stringUtils.cleanByDictReplacements(label.strip())), link])
+            albumList.append([os.path.join(strm_type, stringUtils.getStrmname(strm_name) , label.strip()), str(stringUtils.cleanByDictReplacements(label.strip())), link])
             pagesDone = int(PAGINGalbums)
 
     try:
@@ -445,7 +451,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
                             label = stringUtils.cleanByDictReplacements(label.strip())
                             thisDialog.dialogeBG.update(j, ADDON_NAME + ": Gettin Movies: ",  " Video: " + label)
                             if filetype == 'file':
-                                movieList.append([getMovieStrmPath(strm_type, strm_name, label), stringUtils.cleanByDictReplacements(getStrmname(label)), link, listName])
+                                movieList.append([stringUtils.getMovieStrmPath(strm_type, strm_name, label), stringUtils.cleanByDictReplacements(stringUtils.getStrmname(label)), link, listName])
                             j = j + len(contentList) * int(PAGINGMovies) / 100
                 except IOError as (errno, strerror):
                     print ("I/O error({0}): {1}").format(errno, strerror)
@@ -469,7 +475,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
                 listName = provGeneral.group(1)
                 if provXST:
                     listName = listName + ": " + provXST.group(1)
-            movieList.append([getMovieStrmPath(strm_type, strm_name), stringUtils.cleanByDictReplacements(getStrmname(strm_name)), contentList[1], listName])
+            movieList.append([stringUtils.getMovieStrmPath(strm_type, strm_name), stringUtils.cleanByDictReplacements(stringUtils.getStrmname(strm_name)), contentList[1], listName])
             pagesDone = int(PAGINGMovies)
 
     return movieList
@@ -494,13 +500,13 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
                     episodes = re.search('"episode" *: *(.*?),', detailInfo)
                     seasons = re.search('"season" *: *(.*?),', detailInfo)
                     labels = re.search('"label" *: *"(.*?)",', detailInfo)
-                    
+
                     if labels:
                         label = str(labels.group(1).strip())
                     else:
                         label = "None"          
 
-                    if not fileSys.isInMediaList(label, strm_type) and label != "" and label != ">>>" and label != "None" and files.group(1).find("playMode=play") == "-1":            
+                    if not fileSys.isInMediaList(stringUtils.getStrmname(strm_name), files.group(1).strip(), strm_type) and label != "" and label != ">>>" and label != "None" and files.group(1).find("playMode=play") == "-1":            
                         fileSys.writeMediaList(files.group(1).strip(), label, strm_type)
                     
                     if filetype == 'directory':
@@ -509,7 +515,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
 
                     if seasons and episodes and seasons.group(1) != "-1" and episodes.group(1) != "-1" and filetype == 'file': 
                         j = int(step * (index + 1))
-                        thisDialog.dialogeBG.update(j, "Page: " + str(pagesDone + 1) + " " + getStrmname(strm_name))                    
+                        thisDialog.dialogeBG.update(j, "Page: " + str(pagesDone + 1) + " " + stringUtils.getStrmname(strm_name))                    
                         pagesDone = getEpisodes(detailInfo, strm_name, strm_type,pagesDone=pagesDone)
                         utils.addon_log("percentdone: " + str(j) + "; step: " + str(step))
                                     
@@ -549,13 +555,13 @@ def getEpisodes(episodesListRaw, strm_name, strm_type, j=0, pagesDone=0):
             episodes = re.search('"episode" *: *(.*?),', detailInfo)
             seasons = re.search('"season" *: *(.*?),', detailInfo)
             showtitles = re.search('"showtitle" *: *"(.*?)",', detailInfo)
-            provGeneral = re.search('%s(.*)'"\\/\\?"'' % (r"plugin://plugin.video."), detailInfo)
+            provGeneral = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), detailInfo)
             provXST = re.search('%s(.*)'"\&function"'' % (r"site="), detailInfo)
             listName = strm_name
 
             if filetypes:
                 if provGeneral:
-                    listName = provGeneral.group(1)
+                    listName = fileSys.getAddonname(provGeneral.group(1))
                     if provXST:
                         listName = listName + ": " + provXST.group(1)
      
@@ -582,8 +588,8 @@ def getEpisodes(episodesListRaw, strm_name, strm_type, j=0, pagesDone=0):
                     else:
                         fanart = ''
 
-                    if strm_name.find("++RenamedTitle++") != -1 or showtitle == "":
-                        showtitle = getStrmname(strm_name)
+                    if strm_name.find("++RenamedTitle++") != -1 or showtitle == '':
+                        showtitle = stringUtils.getStrmname(strm_name)
                     if showtitle != "" and strm_type != "":
                         episodesList.append([strm_type, str('s' + season), str('e'+episode), file, stringUtils.cleanByDictReplacements(showtitle.strip()), listName])
                         
@@ -607,18 +613,6 @@ def getEpisodes(episodesListRaw, strm_name, strm_type, j=0, pagesDone=0):
     
 def getData(url, fanart):
     utils.addon_log('getData, url = ' + cType)
-
-def getMovieStrmPath(strmTypePath, mediaListEntry_name, movie_name=''):
-    if folder_medialistentry_movie and folder_medialistentry_movie == 'true':
-        mediaListEntry_name = stringUtils.cleanByDictReplacements(getStrmname(mediaListEntry_name))
-        strmTypePath = os.path.join(strmTypePath, mediaListEntry_name)
-    if movie_name != '' and folder_movie and folder_movie == 'true':
-        movie_name = stringUtils.cleanByDictReplacements(getStrmname(movie_name))
-        strmTypePath = os.path.join(strmTypePath, movie_name)
-    return strmTypePath
-
-def getStrmname(strm_name):
-    return strm_name.strip().replace('++RenamedTitle++', '')
 
 # def playsetresolved(url, name, iconimage, setresolved=True):
 #     utils.addon_log('playsetresolved')
