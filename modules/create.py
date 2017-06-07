@@ -56,8 +56,6 @@ ADDON_SETTINGS = REAL_SETTINGS.getAddonInfo('profile')
 MediaList_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'MediaList.xml'))
 PAGINGTVshows = REAL_SETTINGS.getSetting('paging_tvshows')
 PAGINGMovies = REAL_SETTINGS.getSetting('paging_movies')
-folder_medialistentry_movie = REAL_SETTINGS.getSetting('folder_medialistentry_movie')
-folder_movie = REAL_SETTINGS.getSetting('folder_movie')
 STRM_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'STRM_LOC'))
 profile = xbmc.translatePath(addon.getAddonInfo('profile').decode('utf-8'))
 home = xbmc.translatePath(addon.getAddonInfo('path').decode('utf-8'))
@@ -353,40 +351,28 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
     
     while pagesDone < int(PAGINGMovies):
         if not contentList[0] == "palyableSingleMedia":
-            for detail in contentList:
-                files = re.search('"file" *: *"(.*?)",', detailInfo)
-                filetypes = re.search('"filetype" *: *"(.*?)",', detailInfo)
-                labels = re.search('"label" *: *"(.*?)",', detailInfo)
-                thumbnails = re.search('"thumbnail" *: *"(.*?)",', detailInfo)
-                fanarts = re.search('"fanart" *: *"(.*?)",', detailInfo)
-                descriptions = re.search('"description" *: *"(.*?)",', detailInfo)
-                provGeneral = re.search('%s(.*)'"\\/\\?"'' % (r"plugin://plugin.video."), detailInfo)
-                provXST = re.search('%s(.*)'"\&function"'' % (r"site="), detailInfo)
+            for detailInfo in contentList:
+                file = detailInfo['file'].replace("\\\\", "\\")
+                filetype = detailInfo['filetype']
+                label = detailInfo['label'].strip()
+                thumbnail = detailInfo.get('thumbnail', '')
+                fanart = detailInfo.get('fanart', '')
+                description = detailInfo.get('description', '')
+                provGeneral = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), file)
+                provXST = re.search('%s(.*)'"\&function"'' % (r"site="), file)
             
-                try:
-                    if filetypes and labels and files:
-                        filetype = filetypes.group(1)
-                        label = (stringUtils.cleanLabels(labels.group(1)))
-                        file = (files.group(1).replace("\\\\", "\\"))
-                        
-                        if provGeneral:
-                            listName = provGeneral.group(1)
-                            if provXST:
-                                listName = listName + ": " + provXST.group(1)
-                        
-                        if fanarts:
-                            fanart = fanarts.group(1)
-                        else:
-                            fanart = ''                 
-                            
-                        link = file
-                        
-                        if label and strm_name:                                              
-                            label = stringUtils.cleanByDictReplacements(label.strip())
-                            thisDialog.dialogeBG.update(j, ADDON_NAME + ": Gettin Movies: ",  " Video: " + label)
-                            if filetype == 'file':
-                                movieList.append([stringUtils.getMovieStrmPath(strm_type, strm_name, label), stringUtils.cleanByDictReplacements(stringUtils.getStrmname(label)), link, listName])
-                            j = j + len(contentList) * int(PAGINGMovies) / 100
+                try:                        
+                    if provGeneral:
+                        listName = fileSys.getAddonname(provGeneral.group(1))
+                        if provXST:
+                            listName = listName + ": " + provXST.group(1)               
+                    
+                    if label and strm_name:                                              
+                        label = stringUtils.cleanByDictReplacements(label)
+                        thisDialog.dialogeBG.update(j, ADDON_NAME + ": Getting Movies: ",  " Video: " + label)
+                        if filetype == 'file':
+                            movieList.append([stringUtils.getMovieStrmPath(strm_type, strm_name, label), stringUtils.cleanByDictReplacements(stringUtils.getStrmname(label)), file, listName])
+                        j = j + len(contentList) * int(PAGINGMovies) / 100
                 except IOError as (errno, strerror):
                     print ("I/O error({0}): {1}").format(errno, strerror)
                 except ValueError:
@@ -396,13 +382,14 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
                     utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
                     print ("Unexpected error:"), sys.exc_info()[0]
                     raise
+
             pagesDone += 1
             if filetype != '' and filetype != 'file' and pagesDone < int(PAGINGMovies):
-                contentList = stringUtils.uni(jsonUtils.requestList(file, 'video'))
+                contentList = jsonUtils.requestList(file, 'video').get('files', [])
             else:
                 pagesDone = int(PAGINGMovies)            
-        else:                                         #<       REMOVE                                   >
-            provGeneral = re.search('%s(.*)'"\\/\\?"'' % (r"plugin://plugin.video."), contentList[1])
+        else:
+            provGeneral = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), contentList[1])
             provXST = re.search('%s(.*)'"\&function"'' % (r"site="), contentList[1])
 
             if provGeneral:
