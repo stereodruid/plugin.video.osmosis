@@ -423,8 +423,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
     while pagesDone < int(PAGINGTVshows):
         strm_type = strm_type.replace('Shows-Collection', 'TV-Shows')
         try:
-            step = float(100.0 / len(showList) if len(showList) > 0 else 1)
-            for index, detailInfo in enumerate(showList):
+            for detailInfo in showList:
                 filetype = detailInfo.get('filetype', '')
                 if filetype != '':
                     file = detailInfo.get('file', '').strip()
@@ -442,11 +441,13 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
                     if season > -1 and episode > -1 and filetype == 'file': 
                         episodesList.append(detailInfo)
                 
-            if len(episodesList) > 0:
-                j = int(step * (index + 1))
-                thisDialog.dialogeBG.update(j, "Page: " + str(pagesDone + 1) + " " + stringUtils.getStrmname(strm_name))                    
-                pagesDone = getEpisodes(episodesList, strm_name, strm_type, pagesDone=pagesDone)
-                episodesList = []
+            step = float(100.0 / len(episodesList) if len(episodesList) > 0 else 1)
+            thisDialog.dialogeBG.update(int(step), "Page: " + str(pagesDone + 1) + " " + stringUtils.getStrmname(strm_name))
+            for index, episode in enumerate(episodesList):
+                pagesDone = getEpisode(episode, strm_name, strm_type, pagesDone=pagesDone)
+                thisDialog.dialogeBG.update(int(step * (index + 1)))
+
+            episodesList = []
                                     
         except IOError as (errno, strerror):
             print ("I/O error({0}): {1}").format(errno, strerror)
@@ -463,53 +464,52 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
             showList = [item for sublist in dirList for item in sublist]
             dirList = []
 
-def getEpisodes(detailList, strm_name, strm_type, j=0, pagesDone=0):
+def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
     try:
-        episodesList = []
-        for detailInfo in detailList:     
-            utils.addon_log("detailInfo: " + str(detailInfo))
-            file = detailInfo['file']
-            filetype = detailInfo['filetype'].replace("\\\\", "\\")
-            label = detailInfo['label']
-            thumbnail = detailInfo.get('thumbnail','')
-            fanart = detailInfo.get('fanart','')
-            description = stringUtils.cleanLabels(detailInfo.get('description',''))
-            episode = str(detailInfo['episode'])
-            season = str(detailInfo['season'])
-            showtitle = detailInfo.get('showtitle', '')
-            provGeneral = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), file)
-            provXST = re.search('%s(.*)'"\&function"'' % (r"site="), file)
-            listName = strm_name
-            strm_name = str(stringUtils.cleanByDictReplacements(strm_name.strip()))
-            episodesHDF = re.search('Folge.(\\d+)&', file)
-            
-            if provGeneral:
-                listName = fileSys.getAddonname(provGeneral.group(1))
-                if provXST:
-                    listName = listName + ": " + provXST.group(1)
-            
-            if file.find("hdfilme") != "-1" and episodesHDF:
-                episode = int(re.search('Folge.(\\d+)&', file).group(1))
+        episodeList = []
+
+        utils.addon_log("detailInfo: " + str(episode_item))
+        file = episode_item['file']
+        filetype = episode_item['filetype'].replace("\\\\", "\\")
+        label = episode_item['label']
+        thumbnail = episode_item.get('thumbnail','')
+        fanart = episode_item.get('fanart','')
+        description = stringUtils.cleanLabels(episode_item.get('description',''))
+        episode = str(episode_item['episode'])
+        season = str(episode_item['season'])
+        showtitle = episode_item.get('showtitle', '')
+        provGeneral = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), file)
+        provXST = re.search('%s(.*)'"\&function"'' % (r"site="), file)
+        listName = strm_name
+        strm_name = str(stringUtils.cleanByDictReplacements(strm_name.strip()))
+        episodesHDF = re.search('Folge.(\\d+)&', file)
         
-            if strm_name.find("++RenamedTitle++") != -1 or showtitle == '':
-                showtitle = stringUtils.getStrmname(strm_name)
-            if showtitle != "" and strm_type != "":
-                episodesList.append([strm_type, str('s' + season), str('e'+episode), file, stringUtils.cleanByDictReplacements(showtitle.strip()), listName])                   
+        if provGeneral:
+            listName = fileSys.getAddonname(provGeneral.group(1))
+            if provXST:
+                listName = listName + ": " + provXST.group(1)
+        
+        if file.find("hdfilme") != "-1" and episodesHDF:
+            episode = int(re.search('Folge.(\\d+)&', file).group(1))
+    
+        if strm_name.find("++RenamedTitle++") != -1 or showtitle == '':
+            showtitle = stringUtils.getStrmname(strm_name)
+        if showtitle != "" and strm_type != "":
+            episodeList.append([strm_type, str('s' + season), str('e'+episode), file, stringUtils.cleanByDictReplacements(showtitle.strip()), listName])                   
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)
     except ValueError:
         print ("No valid integer in line.")
     except:
-        guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". Se your Kodi.log!"))
+        guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". See your Kodi.log!"))
         utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
         print ("Unexpected error:"), sys.exc_info()[0]
         raise
-    dbEpisodes = kodiDB.writeShow(episodesList)
-    for i in dbEpisodes:
-        j += 1
-        
+
+    dbEpisode = kodiDB.writeShow(episodeList)
+    
+    for i in dbEpisode:        
         fileSys.writeSTRM(os.path.join(stringUtils.cleanStrms((i[0].rstrip("."))),stringUtils.cleanStrms(i[1].rstrip("."))), stringUtils.cleanStrms(i[3] + i[4]) , "plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=show&episode=" + i[3] + i[4] + "&showid=" + str(i[2]) + "|" + i[1])
-        thisDialog.dialogeBG.update(j)
     return pagesDone
     
 def getData(url, fanart):
