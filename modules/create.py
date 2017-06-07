@@ -345,9 +345,12 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
     movieList = []
     listName = strm_name
     pagesDone = 0
-    file=''
-    filetype=''
+    file = ''
+    filetype = ''
     j = len(contentList) * int(PAGINGMovies) / 100
+    
+    if len(contentList) == 0:
+        return contentList
     
     while pagesDone < int(PAGINGMovies):
         if not contentList[0] == "palyableSingleMedia":
@@ -433,9 +436,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
             for index, episode in enumerate(episodesList):
                 pagesDone = getEpisode(episode, strm_name, strm_type, pagesDone=pagesDone)
                 thisDialog.dialogeBG.update(int(step * (index + 1)))
-
-            episodesList = []
-                                    
+                                   
         except IOError as (errno, strerror):
             print ("I/O error({0}): {1}").format(errno, strerror)
         except ValueError:
@@ -447,9 +448,13 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
             raise
         
         pagesDone += 1
-        if pagesDone < int(PAGINGTVshows) and len(dirList) > 0:
-            showList = [item for sublist in dirList for item in sublist]
-            dirList = []
+        if pagesDone < int(PAGINGTVshows):
+            episodesList = []
+            if len(dirList) > 0:
+                showList = [item for sublist in dirList for item in sublist]
+                dirList = []
+            else:
+                showList = [] 
 
 def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
     try:

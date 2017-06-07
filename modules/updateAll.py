@@ -70,9 +70,7 @@ def guIFix(bVal):
 def strm_update():
     guIFix(False)
    
-    #xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (ADDON_NAME, "Updating!" , itime, represent))
     try:
-        #kodiDB.musicDatabase()
         if xbmcvfs.exists(MediaList_LOC):
             thelist = readMediaList()
             if len(thelist) > 0:
@@ -81,23 +79,23 @@ def strm_update():
 
                 listLen = len(thelist)
                 j = 100 / len(thelist)
-                for i in range(len(thelist)):                     
-                    cType , name, url = ((thelist[i]).strip().split('|', 2))
-                    # time.sleep(2) # delays for 2 seconds just to make sure Hodor can read the message 
-#                        pDialog.update(j, ADDON_NAME + " Update: " + name.decode('utf-8')) 
+                for i in range(len(thelist)):
+                    cType , name, url = ((thelist[i]).strip().split('|'))
+
                     try:
-                        r_pluginname = re.search('plugin:\/\/([^\/]*)', url)
-                        if r_pluginname:
-                            module = moduleUtil.getModule(r_pluginname.group(1))
+                        plugin_id = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
+                        if plugin_id:
+                            xbmc.log("plugin_id = " + str(plugin_id))
+                            module = moduleUtil.getModule(plugin_id.group(1))
                             if module and hasattr(module, 'update'):
                                 url = module.update(name, url, 'video', thelist)
-
+    
                         dialogeBG.update( j, "OSMOSIS total update process: " , "Current Item: " + name.replace('++RenamedTitle++','') + " Items left: " + str(listLen) )
                         j = j + 100 / len(thelist)
-                        #xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (name, " Items left: " + str(listLen) , itime, represent))
+    
                         create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
                         listLen -= 1
-                    except:  #
+                    except:
                         pass
                 dialogeBG.close()
                 xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (ADDON_NAME, "Next update in: " + Automatic_Update_Time + "h" , 5000, represent))

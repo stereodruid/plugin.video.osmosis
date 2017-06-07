@@ -7,7 +7,7 @@ REAL_SETTINGS = xbmcaddon.Addon(id=ADDON_ID)
 profile = xbmc.translatePath(REAL_SETTINGS.getAddonInfo('profile').decode('utf-8'))
 
 def update(strm_name, url, media_type, thelist):
-    plex_details = jsonUtils.requestList("plugin://plugin.video.plexbmc", media_type)
+    plex_details = jsonUtils.requestList("plugin://plugin.video.plexbmc", media_type).get('files', [])
     for plex_detail in plex_details:
         if strm_name.replace('++RenamedTitle++', '') == stringUtils.cleanLabels(plex_detail['label']):
             serverurl = plex_detail['file']
