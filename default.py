@@ -18,7 +18,8 @@ import os, sys
 import urllib
 import time
 import urlparse
-import SimpleDownloader as downloader 
+import SimpleDownloader as downloader
+import re 
 from modules import create, kodiDB
 from modules import dialoge
 from modules import fileSys
@@ -325,21 +326,24 @@ if __name__ == "__main__":
                     "To make your scraper recognize the content, some times it is necessary to rename the title ",
                     "Be careful, wrong title can also cause that your scraper can't recognize your content."]                
                 dialoge.PopupWindow(tutWin)
-            if guiTools.selectDialog(selectAction, header = 'Title for Folder and MediaList entry') == 1 or name == None or name == "":
-                name = guiTools.editDialog(name).lstrip().rstrip() + "++RenamedTitle++"
+            choice = guiTools.selectDialog(selectAction, header = 'Title for Folder and MediaList entry')
+            if choice != -1:
+                if choice == 1 or name == None or name == "":
+                    name = guiTools.editDialog(name).strip() + "++RenamedTitle++"
             
-            if not fileSys.writeTutList("select:ContentTypeLang"):
-                tutWin = ["Adding content to your library",
-                          "Now select your content type. ", 
-                          "Select language or YouTube type  ",
-                          "Wait for done message."]                
-                dialoge.PopupWindow(tutWin)   
-            cType = guiTools.getType(url)
+                if not fileSys.writeTutList("select:ContentTypeLang"):
+                    tutWin = ["Adding content to your library",
+                              "Now select your content type. ", 
+                              "Select language or YouTube type  ",
+                              "Wait for done message."]                
+                    dialoge.PopupWindow(tutWin) 
 
-            fileSys.writeMediaList(url, name, cType)
-            dialog.notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False) 
-            create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
-            dialog.notification('Writing items...', "Done", xbmcgui.NOTIFICATION_INFO, 5000, False)
+                cType = guiTools.getType(url)
+                if cType != -1:
+                    fileSys.writeMediaList(url, name, cType)
+                    dialog.notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False) 
+                    create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
+                    dialog.notification('Writing items...', "Done", xbmcgui.NOTIFICATION_INFO, 5000, False)
         except IOError as (errno, strerror):
             print ("I/O error({0}): {1}").format(errno, strerror)
         except ValueError:

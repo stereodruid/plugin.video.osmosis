@@ -97,7 +97,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
     thisDialog.dialogeBG.update(0, ADDON_NAME + ": Getting: ", stringUtils.getStrmname(strm_name))
     utils.addon_log('fillPluginItems')
     details = []
-    if url.find("playMode=play")== -1:
+    if url.find("playMode=play") == -1:
         if not file_type:
             details = jsonUtils.requestList(url, media_type).get('files', [])
         else:

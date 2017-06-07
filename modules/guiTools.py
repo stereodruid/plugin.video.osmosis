@@ -149,7 +149,10 @@ def getType(url):
         Types = ['Movies', 'TV-Shows', 'YouTube','Other']
     
     selectType = selectDialog(Types, header ='Select category')
-       
+
+    if selectType == -1:
+        return -1
+        
     if selectType == 3:
         subType = ['(Music)', '(Movies)','(TV-Shows)']
         selectOption = selectDialog(subType, header ='Select Video type:')
@@ -157,9 +160,12 @@ def getType(url):
     else:
         subType = ['(en)', '(de)','(sp)','(tr)', 'Other']
         selectOption = selectDialog(subType, header ='Select language tag')
-        
+
+    if selectOption == -1:
+        return -1
+
     if selectType >= 0 and selectOption >= 0:
-        return Types[selectType]+ subType[selectOption]
+        return Types[selectType] + subType[selectOption]
 
 def selectDialog(list, header=ADDON_NAME, autoclose=0):
     if len(list) > 0:
