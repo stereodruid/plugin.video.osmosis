@@ -56,6 +56,8 @@ ADDON_SETTINGS = REAL_SETTINGS.getAddonInfo('profile')
 MediaList_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'MediaList.xml'))
 PAGINGTVshows = REAL_SETTINGS.getSetting('paging_tvshows')
 PAGINGMovies = REAL_SETTINGS.getSetting('paging_movies')
+folder_medialistentry_movie = REAL_SETTINGS.getSetting('folder_medialistentry_movie')
+folder_movie = REAL_SETTINGS.getSetting('folder_movie')
 STRM_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'STRM_LOC'))
 profile = xbmc.translatePath(addon.getAddonInfo('profile').decode('utf-8'))
 home = xbmc.translatePath(addon.getAddonInfo('path').decode('utf-8'))
@@ -77,69 +79,44 @@ if os.path.exists(favorites) == True:
     FAV = open(favorites).read()
 else: FAV = []
 
-global listLength
 DIRS = []
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
 
-def fillPlugins(cType='video'):
-    utils.addon_log('fillPlugins, type = ' + cType)
+def fillPlugins(cType='video'):    
     json_query = ('{"jsonrpc":"2.0","method":"Addons.GetAddons","params":{"type":"xbmc.addon.%s","properties":["name","path","thumbnail","description","fanart","summary"]}, "id": 1 }' % cType)
-    json_detail = jsonUtils.sendJSON(json_query)
-    detail = re.compile("{(.*?)}", re.DOTALL).findall(json_detail)
-
-    for f in sorted(detail, key=lambda str: re.search('"name" *: *"(.*?)",', str).group(1).lower() if re.search('"name" *: *"(.*?)",', str) else str):
-        utils.addon_log('fillPlugins entry: ' + str(f))
-        names = re.search('"name" *: *"(.*?)",', f)
-        paths = re.search('"addonid" *: *"(.*?)",', f)
-        thumbnails = re.search('"thumbnail" *: *"(.*?)",', f)
-        fanarts = re.search('"fanart" *: *"(.*?)",', f)
-        descriptions = re.search('"description" *: *"(.*?)",', f)
-        if not descriptions:
-            descriptions = re.search('"summary" *: *"(.*?)",', f)
-        if descriptions:
-            description = stringUtils.cleanLabels(descriptions.group(1))
-        else:
-            description = ''
-        if names and paths:
-            name = stringUtils.cleanLabels(names.group(1))
-            path = paths.group(1)
-            if cType == 'video' and path.startswith('plugin.video') and not path.startswith('plugin.video.osmosis'):
-                thumbnail = thumbnails.group(1) #stringUtils.removeNonAscii(thumbnails.group(1))
-                fanart = fanarts.group(1) #stringUtils.removeNonAscii(fanarts.group(1))
-                guiTools.addDir(name, 'plugin://' + path, 101, thumbnail, fanart, description, cType, 'date', 'credits')
-            elif cType == 'audio' and path.startswith('plugin.audio') and not path.startswith('plugin.video.osmosis'):
-                thumbnail = thumbnails.group(1) #stringUtils.removeNonAscii(thumbnails.group(1))
-                fanart = fanarts.group(1) #stringUtils.removeNonAscii(fanarts.group(1))
-                guiTools.addDir(name, 'plugin://' + path, 101, thumbnail, fanart, description, cType, 'date', 'credits')
+    json_details = jsonUtils.sendJSON(json_query)
+    for addon in sorted(json_details["addons"], key=lambda json: json['name'].lower()):
+        utils.addon_log('fillPlugins entry: ' + str(addon))
+        if cType == 'video' and addon['addonid'].startswith('plugin.video') and not addon['addonid'].startswith('plugin.video.osmosis'):
+            guiTools.addDir(addon['name'], 'plugin://' + addon['addonid'], 101, addon['thumbnail'], addon['fanart'], addon['description'], cType, 'date', 'credits')
+        elif cType == 'audio' and addon['addonid'].startswith('plugin.audio') and not addon['addonid'].startswith('plugin.video.osmosis'):
+            guiTools.addDir(addon['name'], 'plugin://' + addon['addonid'], 101, addon['thumbnail'], addon['fanart'], addon['description'], cType, 'date', 'credits')
 
 def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None'):
     initialize_DialogBG("Updating", "Getting content..")
     thisDialog.dialogeBG.update(0, ADDON_NAME + ": Getting: ", stringUtils.getStrmname(strm_name))
     utils.addon_log('fillPluginItems')
-    detail = []
+    details = []
     if url.find("playMode=play")== -1:
         if not file_type:
-            detail = stringUtils.uni(jsonUtils.requestList(url, media_type))
-            listLength = len(detail)
+            details = jsonUtils.requestList(url, media_type).get('files', [])
         else:
-            detail = stringUtils.uni(jsonUtils.requestItem(url, media_type))
+            details = jsonUtils.requestItem(url, media_type).get('files', [])
     else: 
-        detail.append("palyableSingleMedia")
-        detail.append(url)
+        details.append("palyableSingleMedia")
+        details.append(url)
         
     thisDialog.dialogeBG.close()
     thisDialog.dialogeBG = None  
     if strm_type.find('Cinema') != -1 or strm_type.find('YouTube') != -1 or strm_type.find('Movies') != -1:
         try:
             initialize_DialogBG("Movie", "Adding")
-            movieList = addMovies(detail, strm_name, strm_type)
+            movieList = addMovies(details, strm_name, strm_type)
             dbMovList = kodiDB.writeMovie(movieList)
             j = 100 / len(dbMovList) if len(dbMovList) > 0 else 1
             # Write strms for all values in movieList
-            for i in dbMovList:   # path,name,url(+name)
+            for i in dbMovList:
                 thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing Movies: ",  " Video: " + i[1].rstrip("."))
-                #fileSys.writeSTRM(stringUtils.cleanStrms((i[0].rstrip("."))), stringUtils.cleanStrms(i[1].rstrip(".")) , i[2] + "|" + i[1])
-                # plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=show&episode=                
                 fileSys.writeSTRM(stringUtils.cleanStrms(i[0].rstrip(".")), stringUtils.cleanStrms((i[1].rstrip("."))) , "plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=movie&id=" + str(i[2]) + "|" + i[1])
 
                 j = j + 100 / len(movieList)
@@ -158,7 +135,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
     if strm_type.find('TV-Show') != -1 or strm_type.find('Shows-Collection') != -1:
         try:
             initialize_DialogBG("Adding TV-Shows", "working..")
-            getTVShowFromList(detail, strm_name, strm_type)
+            getTVShowFromList(details, strm_name, strm_type)
             thisDialog.dialogeBG.close()
             thisDialog.dialogeBG = None
             return
@@ -173,7 +150,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
     if strm_type.find('Album')!= -1 :
         try:
             initialize_DialogBG("Album", "Adding")
-            addAlbum(detail, strm_name, strm_type)
+            addAlbum(details, strm_name, strm_type)
             thisDialog.dialogeBG.close()
             thisDialog.dialogeBG = None       
             return
@@ -184,101 +161,61 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
             print ("Unexpected error:"), sys.exc_info()[0]
             raise
-#     if strm_type.find('YouTube') != -1:
-#         
-#         video = pafy.new(url)
-#         bestaudio = video.getbestaudio()
-#         bestaudio.bitrate #get bit rate
-#         bestaudio.extension #extension of audio fileurl
-# 
-#         bestaudio.url #get url
-# 
-#         #download if you want
-#         bestaudio.download()
-#         return
-            
-    for f in detail:
-        files = re.search('"file" *: *"(.*?)",', f)
-        filetypes = re.search('"filetype" *: *"(.*?)",', f)
-        labels = re.search('"label" *: *"(.*?)",', f)
-        thumbnails = re.search('"thumbnail" *: *"(.*?)",', f)
-        fanarts = re.search('"fanart" *: *"(.*?)",', f)
-        descriptions = re.search('"description" *: *"(.*?)",', f)
-        tracks = re.search('"track" *: *(.*?),', f)
-        durations = re.search('"duration" *: *"(.*?)",', f)
-        
-        if filetypes and labels and files:
-            filetype = filetypes.group(1)
-            label = stringUtils.cleanLabels(labels.group(1))
-            file = files.group(1).replace("\\\\", "\\")
-            strm_name = str(stringUtils.cleanByDictReplacements(strm_name.strip()))
-                         
-            if not descriptions:
-                description = ''
-            else:
-                description = stringUtils.cleanLabels(descriptions.group(1))
-                
-            thumbnail = thumbnails.group(1) #stringUtils.removeNonAscii(thumbnails.group(1))
-            fanart = fanarts.group(1) #stringUtils.removeNonAscii(fanarts.group(1))
-            
-            if addon.getSetting('Link_Type') == '0':
-                link = sys.argv[0] + "?url=" +urllib.quote_plus(stringUtils.uni(file)) + "&mode=" + str(10) + "&name=" +urllib.quote_plus(stringUtils.uni(label)) + "&fanart=" + urllib.quote_plus(fanart)
-            else:
-                link = file
-        
-            if strm_type in ['Audio-Single']:
-                path = os.path.join('Singles', str(strm_name))
-                try:
-                    album = re.search('"album" *: *"(.*?)",', f).group(1).strip()
-                    try:
-                        artist = re.search('"artist" *: *"(.*?)",', f).group(1).strip()
-                    except:
-                        artist= re.search('"artist"*:*."(.*?)".,', f).group(1).strip()
-                    pass
-                    titl = re.search('"title" *: *(.*?),', f).group(1).strip()
-                    types = re.search('"type" *: *(.*?),', f).group(1).strip()
-                    filename = str(strm_name + ' - ' + label).strip()
-                except:
-                    filename =str(strm_name + ' - ' + label).strip()
-                                   
-            if strm_type.find('Audio-Album') != -1:
-                path = os.path.join(strm_type, strm_name)
-                if tracks:
-                    track = tracks.group(1)
-                try:
-                    album = re.search('"album" *: *"(.*?)",', f).group(1).strip()
-                    try:
-                        artist = stringUtils.cleanByDictReplacements(re.search('"artist" *: *"(.*?)",', f).group(1).strip())
-                    except:
-                        artist = stringUtils.cleanByDictReplacements(re.search('"artist"*:*."(.*?)".,', f).group(1).strip())
-                    pass
-                    titl = stringUtils.cleanByDictReplacements(re.search('"title" *: *(.*?),', f).group(1).strip())
-                    types = stringUtils.cleanByDictReplacements(re.search('"type" *: *(.*?),', f).group(1).strip())
-                    filename = stringUtils.cleanByDictReplacements(str(label).strip())
-                except:
-                    filename = stringUtils.cleanByDictReplacements(str(label).strip())
 
-            if strm_type in ['Other']:
-                path = os.path.join('Other', strm_name)
-                filename =str(strm_name + ' - ' + label)             
-                                  
-            if filetype == 'file':
-                if strm:
-                    if strm_type.find('Audio-Albums') != -1:
-                        utils.addon_log(str(path + ' ' + filename))
-                        #utils.createSongNFO(stringUtils.cleanStrms((path.rstrip("."))), stringUtils.cleanStrms(filename.rstrip(".")), strm_ty=strm_type, artists=artist,albums=album , titls=titl, typese=types) 
-                        kodiDB.musicDatabase(album, artist, label, path, link, track)
-                    # xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%(path + " - " + filename, " writing...",5000,""))
-                    fileSys.writeSTRM(stringUtils.cleanStrms((path.rstrip("."))), stringUtils.cleanStrms(filename.rstrip(".")) , link)
-                else:
-                    guiTools.addLink(label, file, 10, thumbnail, fanart, description, '', '', '', None, '', total=len(detail))
-                    # xbmc.executebuiltin("Container.SetViewMode(500)")
+    for detail in details:
+        filetype = detail['filetype']
+        label = stringUtils.cleanLabels(detail['label'])
+        file = detail['file'].replace("\\\\", "\\")
+        strm_name = str(stringUtils.cleanByDictReplacements(strm_name.strip()))
+        description = stringUtils.cleanLabels(detail.get('description',''))
+        thumbnail = detail.get('thumbnail','')
+        fanart = detail.get('fanart','')
+        
+        if addon.getSetting('Link_Type') == '0':
+            link = sys.argv[0] + "?url=" +urllib.quote_plus(stringUtils.uni(file)) + "&mode=" + str(10) + "&name=" +urllib.quote_plus(stringUtils.uni(label)) + "&fanart=" + urllib.quote_plus(fanart)
+        else:
+            link = file
+    
+        if strm_type == 'Audio-Single':
+            path = os.path.join('Singles', str(strm_name))
+            try:
+                album = detail['album'].strip()
+                artist = detail['artist'].strip()
+                title = detail['title'].strip()
+                type = detail['type'].strip()
+                filename = str(strm_name + ' - ' + label).strip()
+            except:
+                filename = str(strm_name + ' - ' + label).strip()
+                               
+        if strm_type.find('Audio-Album') != -1:
+            path = os.path.join(strm_type, strm_name)
+            track = detail.get('track','')
+            try:
+                album = detail['album'].strip()
+                artist = stringUtils.cleanByDictReplacements(detail['artist'].strip())
+                title = stringUtils.cleanByDictReplacements(detail['title'].strip())
+                type = stringUtils.cleanByDictReplacements(detail['type'].strip())
+                filename = stringUtils.cleanByDictReplacements(label.strip())
+            except:
+                filename = stringUtils.cleanByDictReplacements(label.strip())
+
+        if strm_type in ['Other']:
+            path = os.path.join('Other', strm_name)
+            filename = str(strm_name + ' - ' + label)             
+                              
+        if filetype == 'file':
+            if strm:
+                if strm_type.find('Audio-Albums') != -1:
+                    utils.addon_log(str(path + ' ' + filename)) 
+                    kodiDB.musicDatabase(album, artist, label, path, link, track)
+                fileSys.writeSTRM(stringUtils.cleanStrms((path.rstrip("."))), stringUtils.cleanStrms(filename.rstrip(".")) , link)
             else:
-                if strm:
-                    fillPluginItems(file, media_type, file_type, strm, label, strm_type)
-                else:
-                    guiTools.addDir(label, file, 101, thumbnail, fanart, description, '', '', '')
-                    # xbmc.executebuiltin("Container.SetViewMode(500)")
+                guiTools.addLink(label, file, 10, thumbnail, fanart, description, '', '', '', None, '', total=len(details))
+        else:
+            if strm:
+                fillPluginItems(file, media_type, file_type, strm, label, strm_type)
+            else:
+                guiTools.addDir(label, file, 101, thumbnail, fanart, description, '', '', '')
 
 def removeItemsFromMediaList(action='list'):
     from modules import dialoge
@@ -416,8 +353,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
     
     while pagesDone < int(PAGINGMovies):
         if not contentList[0] == "palyableSingleMedia":
-            for detailInfo in contentList:
-                detailInfo = stringUtils.removeHTMLTAGS(detailInfo)
+            for detail in contentList:
                 files = re.search('"file" *: *"(.*?)",', detailInfo)
                 filetypes = re.search('"filetype" *: *"(.*?)",', detailInfo)
                 labels = re.search('"label" *: *"(.*?)",', detailInfo)
@@ -482,40 +418,35 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
     file=''
     filetype=''
     dirList = []
+    episodesList = []
     
     while pagesDone < int(PAGINGTVshows):
         strm_type = strm_type.replace('Shows-Collection', 'TV-Shows')
         try:
-            showList = filter(lambda elem: re.search('"filetype" *: *"(.*?)",', elem), showList)
             step = float(100.0 / len(showList) if len(showList) > 0 else 1)
-
             for index, detailInfo in enumerate(showList):
-                detailInfo = stringUtils.removeHTMLTAGS(detailInfo)
-                filetypes = re.search('"filetype" *: *"(.*?)",', detailInfo)
-                if filetypes:
-                    filetype = filetypes.group(1)
-                    files = re.search('"file" *: *"(.*?)",', detailInfo)
-                    episodes = re.search('"episode" *: *(.*?),', detailInfo)
-                    seasons = re.search('"season" *: *(.*?),', detailInfo)
-                    labels = re.search('"label" *: *"(.*?)",', detailInfo)
-
-                    if labels:
-                        label = str(labels.group(1).strip())
-                    else:
-                        label = "None"          
-
-                    if not fileSys.isInMediaList(stringUtils.getStrmname(strm_name), files.group(1).strip(), strm_type) and label != "" and label != ">>>" and label != "None" and files.group(1).find("playMode=play") == "-1":            
-                        fileSys.writeMediaList(files.group(1).strip(), label, strm_type)
+                filetype = detailInfo.get('filetype', '')
+                if filetype != '':
+                    file = detailInfo.get('file', '').strip()
+                    episode = detailInfo.get('episode', -1)
+                    season = detailInfo.get('season', -1)
+                    label = detailInfo.get('label', None).strip()       
+    
+                    if not fileSys.isInMediaList(stringUtils.getStrmname(strm_name), file, strm_type) and label != None and label != ">>>" and label != "" and file.find("playMode=play") == "-1":            
+                        fileSys.writeMediaList(files, label, strm_type)
                     
                     if filetype == 'directory':
-                        dirList.append(stringUtils.uni(jsonUtils.requestList(files.group(1), 'video')))
+                        dirList.append(jsonUtils.requestList(file, 'video').get('files', []))
                         continue
-
-                    if seasons and episodes and seasons.group(1) != "-1" and episodes.group(1) != "-1" and filetype == 'file': 
-                        j = int(step * (index + 1))
-                        thisDialog.dialogeBG.update(j, "Page: " + str(pagesDone + 1) + " " + stringUtils.getStrmname(strm_name))                    
-                        pagesDone = getEpisodes(detailInfo, strm_name, strm_type,pagesDone=pagesDone)
-                        utils.addon_log("percentdone: " + str(j) + "; step: " + str(step))
+    
+                    if season > -1 and episode > -1 and filetype == 'file': 
+                        episodesList.append(detailInfo)
+                
+            if len(episodesList) > 0:
+                j = int(step * (index + 1))
+                thisDialog.dialogeBG.update(j, "Page: " + str(pagesDone + 1) + " " + stringUtils.getStrmname(strm_name))                    
+                pagesDone = getEpisodes(episodesList, strm_name, strm_type, pagesDone=pagesDone)
+                episodesList = []
                                     
         except IOError as (errno, strerror):
             print ("I/O error({0}): {1}").format(errno, strerror)
@@ -532,65 +463,38 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
             showList = [item for sublist in dirList for item in sublist]
             dirList = []
 
-def getEpisodes(episodesListRaw, strm_name, strm_type, j=0, pagesDone=0):
-    episodesList = []
-    typeChange = []
-
+def getEpisodes(detailList, strm_name, strm_type, j=0, pagesDone=0):
     try:
-        if type(episodesListRaw) is unicode:
-            typeChange.append(episodesListRaw)
-            episodesListRaw = typeChange
-    
-        for detailInfo in episodesListRaw:
-            utils.addon_log("detailInfo: " + detailInfo)
-            detailInfo = stringUtils.removeHTMLTAGS(detailInfo)
-            files = re.search('"file" *: *"(.*?)",', detailInfo)            
-            filetypes = re.search('"filetype" *: *"(.*?)",', detailInfo)
-            labels = re.search('"label" *: *"(.*?)",', detailInfo)
-            thumbnails = re.search('"thumbnail" *: *"(.*?)",', detailInfo)
-            fanarts = re.search('"fanart" *: *"(.*?)",', detailInfo)
-            descriptions = re.search('"description" *: *"(.*?)",', detailInfo)
-            episodes = re.search('"episode" *: *(.*?),', detailInfo)
-            seasons = re.search('"season" *: *(.*?),', detailInfo)
-            showtitles = re.search('"showtitle" *: *"(.*?)",', detailInfo)
-            provGeneral = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), detailInfo)
-            provXST = re.search('%s(.*)'"\&function"'' % (r"site="), detailInfo)
+        episodesList = []
+        for detailInfo in detailList:     
+            utils.addon_log("detailInfo: " + str(detailInfo))
+            file = detailInfo['file']
+            filetype = detailInfo['filetype'].replace("\\\\", "\\")
+            label = detailInfo['label']
+            thumbnail = detailInfo.get('thumbnail','')
+            fanart = detailInfo.get('fanart','')
+            description = stringUtils.cleanLabels(detailInfo.get('description',''))
+            episode = str(detailInfo['episode'])
+            season = str(detailInfo['season'])
+            showtitle = detailInfo.get('showtitle', '')
+            provGeneral = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), file)
+            provXST = re.search('%s(.*)'"\&function"'' % (r"site="), file)
             listName = strm_name
-
-            if filetypes:
-                if provGeneral:
-                    listName = fileSys.getAddonname(provGeneral.group(1))
-                    if provXST:
-                        listName = listName + ": " + provXST.group(1)
-     
-                if showtitles and seasons and episodes:
-                    filetype = filetypes.group(1)
-                    label = (stringUtils.cleanLabels(labels.group(1))) 
-                    file = (files.group(1).replace("\\\\", "\\"))
-                    strm_name = str(stringUtils.cleanByDictReplacements(strm_name.strip()))
-                    showtitle = stringUtils.cleanByDictReplacements((showtitles.group(1)))
-                    season = stringUtils.cleanByDictReplacements(seasons.group(1).replace("-", ""))
-                    episode = stringUtils.cleanByDictReplacements(episodes.group(1).replace("-", ""))
-                    episodesHDF = re.search('Folge.(\\d+)&', file)
-                    
-                    if file.find("hdfilme") != "-1" and episodesHDF:
-                        episode = re.search('Folge.(\\d+)&', file).group(1)
-                    
-                    if not descriptions:
-                        description = ''
-                    else:
-                        description = stringUtils.cleanLabels(descriptions.group(1))
+            strm_name = str(stringUtils.cleanByDictReplacements(strm_name.strip()))
+            episodesHDF = re.search('Folge.(\\d+)&', file)
+            
+            if provGeneral:
+                listName = fileSys.getAddonname(provGeneral.group(1))
+                if provXST:
+                    listName = listName + ": " + provXST.group(1)
+            
+            if file.find("hdfilme") != "-1" and episodesHDF:
+                episode = int(re.search('Folge.(\\d+)&', file).group(1))
         
-                    if fanarts:
-                        fanart = fanarts.group(1)
-                    else:
-                        fanart = ''
-
-                    if strm_name.find("++RenamedTitle++") != -1 or showtitle == '':
-                        showtitle = stringUtils.getStrmname(strm_name)
-                    if showtitle != "" and strm_type != "":
-                        episodesList.append([strm_type, str('s' + season), str('e'+episode), file, stringUtils.cleanByDictReplacements(showtitle.strip()), listName])
-                        
+            if strm_name.find("++RenamedTitle++") != -1 or showtitle == '':
+                showtitle = stringUtils.getStrmname(strm_name)
+            if showtitle != "" and strm_type != "":
+                episodesList.append([strm_type, str('s' + season), str('e'+episode), file, stringUtils.cleanByDictReplacements(showtitle.strip()), listName])                   
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)
     except ValueError:
@@ -605,7 +509,6 @@ def getEpisodes(episodesListRaw, strm_name, strm_type, j=0, pagesDone=0):
         j += 1
         
         fileSys.writeSTRM(os.path.join(stringUtils.cleanStrms((i[0].rstrip("."))),stringUtils.cleanStrms(i[1].rstrip("."))), stringUtils.cleanStrms(i[3] + i[4]) , "plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=show&episode=" + i[3] + i[4] + "&showid=" + str(i[2]) + "|" + i[1])
-        #fileSys.writeSTRM(stringUtils.cleanStrms((i[0].rstrip("."))), stringUtils.cleanStrms(i[1].rstrip(".")) + stringUtils.cleanStrms(i[2].rstrip(".")) , i[3])
         thisDialog.dialogeBG.update(j)
     return pagesDone
     
