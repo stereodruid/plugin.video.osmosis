@@ -145,7 +145,7 @@ def musicDatabase(pstrAlbumName, pstrArtistName, pstrSongTitle, pstrPath, purlLi
     
     try:
         validateMusicDB(str(os.path.join(MusicDB_LOC)))
-        writeIntoSongTable(pstrSongTitle, songID, pstrArtistName, pstrAlbumName, albumID,path, pathID, purlLink, roleID, artistID, songArtistRel, "F")
+        writeIntoSongTable(pstrSongTitle, songID, pstrArtistName, pstrAlbumName, albumID, path, pathID, purlLink, roleID, artistID, songArtistRel, "F")
     except:        
         pass    
    
@@ -180,7 +180,7 @@ def writeIntoSongTable (pstrSongTitle, songID, pstrArtistName, pstrAlbumName, al
     
     insertQuery = "INSERT INTO songs (strSongTitle, songID, strArtistName, strAlbumName, albumID, strPath, pathID, strURL, roleID, artistID, songArtistRel, delSong)  " """VALUES 
                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
-    insertArgs =  (pstrSongTitle, songID, pstrArtistName,pstrAlbumName, albumID,path, pathID, purlLink,roleID, artistID,albumID, songArtistRel, delSong)
+    insertArgs =  (pstrSongTitle, songID, pstrArtistName, pstrAlbumName, albumID, path, pathID, purlLink, roleID, artistID, songArtistRel, delSong)
     
     dID = manageDbRecord (selectQuery, selectArgs, insertQuery, insertArgs, str(os.path.join(MusicDB_LOC)))
 

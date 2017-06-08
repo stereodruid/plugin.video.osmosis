@@ -87,4 +87,4 @@ def sendJSON(command):
         data = xbmc.executeJSONRPC(stringUtils.uni(command))
     except UnicodeEncodeError:
         data = xbmc.executeJSONRPC(stringUtils.asciis(command))
-    return json.loads(data.decode('utf-8'))
+    return json.loads(data.decode('utf-8')).get('result', [])

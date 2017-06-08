@@ -100,6 +100,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             details = jsonUtils.requestList(url, media_type).get('files', [])
         else:
             details = jsonUtils.requestItem(url, media_type).get('files', [])
+        xbmc.log("details = " + str(details))
     else: 
         details.append("palyableSingleMedia")
         details.append(url)
@@ -145,7 +146,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             print ("Unexpected error:"), sys.exc_info()[0]
             raise
         
-    if strm_type.find('Album')!= -1 :
+    if strm_type.find('Album') != -1 :
         try:
             initialize_DialogBG("Album", "Adding")
             addAlbum(details, strm_name, strm_type)
@@ -178,7 +179,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             path = os.path.join('Singles', str(strm_name))
             try:
                 album = detail['album'].strip()
-                artist = detail['artist'].strip()
+                artist = stringUtils.cleanByDictReplacements(", ".join(artist.strip() for artist in detailInfo['artist']))
                 title = detail['title'].strip()
                 type = detail['type'].strip()
                 filename = str(strm_name + ' - ' + label).strip()
@@ -187,10 +188,10 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
                                
         if strm_type.find('Audio-Album') != -1:
             path = os.path.join(strm_type, strm_name)
-            track = detail.get('track','')
+            track = detail.get('track', 0)
             try:
                 album = detail['album'].strip()
-                artist = stringUtils.cleanByDictReplacements(detail['artist'].strip())
+                artist = stringUtils.cleanByDictReplacements(", ".join(artist.strip() for artist in detailInfo['artist']))
                 title = stringUtils.cleanByDictReplacements(detail['title'].strip())
                 type = stringUtils.cleanByDictReplacements(detail['type'].strip())
                 filename = stringUtils.cleanByDictReplacements(label.strip())
@@ -204,7 +205,6 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         if filetype == 'file':
             if strm:
                 if strm_type.find('Audio-Albums') != -1:
-                    utils.addon_log(str(path + ' ' + filename)) 
                     kodiDB.musicDatabase(album, artist, label, path, link, track)
                 fileSys.writeSTRM(stringUtils.cleanStrms((path.rstrip("."))), stringUtils.cleanStrms(filename.rstrip(".")) , link)
             else:
@@ -234,68 +234,57 @@ def removeItemsFromMediaList(action='list'):
     
 def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
     albumList = []
+    dirList = []
     pagesDone = 0
-    file=''
-    j = 100 / (len(contentList) * int(PAGINGalbums))
-    
+    file = ''
+    filetype = ''
+    j = 100 / (len(contentList) * int(PAGINGalbums)) if len(contentList) > 0 else 1
+
+    if len(contentList) == 0:
+        return contentList
+    xbmc.log("contentList = " + str(contentList))
     while pagesDone < int(PAGINGalbums):
         if not contentList[0] == "palyableSingleMedia":
-            albumThumbnails = re.search('"thumbnail" *: *"(.*?)",', str(contentList))
-            if albumThumbnails:
-                aThumb = urlUtils.stripUnquoteURL(albumThumbnails.group(1))
+            aThumb = urlUtils.stripUnquoteURL(contentList[0].get('thumbnail', ''))
                  
             for detailInfo in contentList:
-                detailInfo = stringUtils.removeHTMLTAGS(detailInfo)
-                files = re.search('"file" *: *"(.*?)",', detailInfo)
-                filetypes = re.search('"filetype" *: *"(.*?)",', detailInfo)
-                labels = re.search('"label" *: *"(.*?)",', detailInfo)
-                thumbnails = re.search('"thumbnail" *: *"(.*?)",', detailInfo)
-                fanarts = re.search('"fanart" *: *"(.*?)",', detailInfo)
-                descriptions = re.search('"description" *: *"(.*?)",', detailInfo)
-                tracks = re.search('"track" *: *(.*?),', detailInfo)
-                durations = re.search('"duration" *: *"(.*?)",', detailInfo)
+                file = detailInfo['file'].replace("\\\\", "\\")
+                filetype = detailInfo['filetype']
+                label = stringUtils.cleanLabels(detailInfo['label'])
+                thumb = detailInfo.get('thumbnail', '')
+                fanart = detailInfo.get('fanart', '')
+                description = detailInfo.get('description', '')
+                track = detailInfo.get('track', 0)
+                duration = detailInfo.get('duration', 0)
                                               
                 try:
-                    if filetypes and labels and files:
-                        filetype = filetypes.group(1)
-                        label = (stringUtils.cleanLabels(labels.group(1)))
-                        file = (files.group(1).replace("\\\\", "\\"))
+                    if filetype == 'directory':
+                        dirList.append(jsonUtils.requestList(file, 'video').get('files', []))
+                        continue
 
-                        if fanarts:
-                            fanart = fanarts.group(1)
-                        else:
-                            fanart = ''                        
-                        if addon.getSetting('Link_Type') == '0': 
-                            link = sys.argv[0] + "?url=" + urllib.quote_plus(file) + "&mode=" + str(10) + "&name=" + urllib.quote_plus(label) + "&fanart=" + urllib.quote_plus(fanart)
-                        else:
-                            link = file
-                        if thumbnails:
-                            thumb = urlUtils.stripUnquoteURL(thumbnails.group(1))
-                        else:
-                            thumb =""   
-                        if label and strm_name:                                                 
-                            label = str(stringUtils.cleanByDictReplacements(label.strip()))
-                        if tracks:
-                            track = tracks.group(1)
-                        try:
-                            album = re.search('"album" *: *"(.*?)",', detailInfo).group(1).strip()
-                            try:
-                                artist = stringUtils.cleanByDictReplacements(re.search('"artist" *: *"(.*?)",', detailInfo).group(1).strip())
-                            except:
-                                artist = stringUtils.cleanByDictReplacements(re.search('"artist"*:*."(.*?)".,', detailInfo).group(1).strip())
-                            pass                      
-                            titl = stringUtils.cleanByDictReplacements(re.search('"title" *: *(.*?),', detailInfo).group(1).strip())
-                            types = stringUtils.cleanByDictReplacements(re.search('"type" *: *(.*?),', detailInfo).group(1).strip())
-                            filename = stringUtils.cleanByDictReplacements(str(label).strip())
-                        except:
-                            filename = stringUtils.cleanByDictReplacements(str(label).strip())
-                            pass
+                    if addon.getSetting('Link_Type') == '0': 
+                        link = sys.argv[0] + "?url=" + urllib.quote_plus(file) + "&mode=" + str(10) + "&name=" + urllib.quote_plus(label) + "&fanart=" + urllib.quote_plus(fanart)
+                    else:
+                        link = file
+ 
+                    if label and strm_name:                                                 
+                        label = str(stringUtils.cleanByDictReplacements(label.strip()))
 
-                        thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing File: ",  " Title: " + label)
-                        path = os.path.join(strm_type, artist.strip(),album.strip())
-                        if album and artist and label and path and link and track:  
-                            albumList.append([path, label.strip(), link, album, artist, track, thumb])
-                        j = j + 100 / (len(contentList) * int(PAGINGalbums))
+                    try:
+                        album = detailInfo['album'].strip()
+                        artist = stringUtils.cleanByDictReplacements(", ".join(artist.strip() for artist in detailInfo['artist']))
+                        title = stringUtils.cleanByDictReplacements(detailInfo['title'].strip())
+                        type = stringUtils.cleanByDictReplacements(detailInfo['type'].strip())
+                        filename = stringUtils.cleanByDictReplacements(str(label).strip())
+                    except:
+                        filename = stringUtils.cleanByDictReplacements(str(label).strip())
+                        pass
+
+                    thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing File: ",  " Title: " + label)
+                    path = os.path.join(strm_type, artist.strip(), album.strip())
+                    if album and artist and label and path and link and track:  
+                        albumList.append([path, label.strip(), link, album, artist, track, thumb])
+                    j = j + 100 / (len(contentList) * int(PAGINGalbums))
                 except IOError as (errno, strerror):
                     print ("I/O error({0}): {1}").format(errno, strerror)
                 except ValueError:
@@ -306,15 +295,16 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                     utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
                     print ("Unexpected error:"), sys.exc_info()[0]
                     raise
+
             pagesDone += 1
-            if filetypes:
-                if filetype != 'file' and pagesDone < int(PAGINGalbums):
-                    contentList = stringUtils.uni(jsonUtils.requestList(file, 'video'))
-                else:
-                    pagesDone = int(PAGINGalbums)
+            contentList = []
+            if pagesDone < int(PAGINGTVshows) and len(dirList) > 0:
+                contentList = [item for sublist in dirList for item in sublist]
+                dirList = []            
+
             if False:     
                 try:
-                    urlUtils.downloadThumb(aThumb,album, os.path.join(STRM_LOC, strm_type, artist)) 
+                    urlUtils.downloadThumb(aThumb, album, os.path.join(STRM_LOC, strm_type, artist)) 
                 except:
                     pass             
         else:
@@ -405,8 +395,6 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
     return movieList
  
 def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
-    file=''
-    filetype=''
     dirList = []
     episodesList = []
     
@@ -448,13 +436,11 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
             raise
         
         pagesDone += 1
-        if pagesDone < int(PAGINGTVshows):
-            episodesList = []
-            if len(dirList) > 0:
-                showList = [item for sublist in dirList for item in sublist]
-                dirList = []
-            else:
-                showList = [] 
+        episodesList = []
+        showList = []
+        if pagesDone < int(PAGINGTVshows) and len(dirList) > 0:
+            showList = [item for sublist in dirList for item in sublist]
+            dirList = []                
 
 def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
     try:
