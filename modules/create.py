@@ -179,7 +179,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             path = os.path.join('Singles', str(strm_name))
             try:
                 album = detail['album'].strip()
-                artist = stringUtils.cleanByDictReplacements(", ".join(artist.strip() for artist in detailInfo['artist']))
+                artist = stringUtils.cleanByDictReplacements(", ".join(artist.strip() for artist in detailInfo['artist']) if isinstance(detailInfo['artist'], (list, tuple)) else detailInfo['artist'].strip())
                 title = detail['title'].strip()
                 type = detail['type'].strip()
                 filename = str(strm_name + ' - ' + label).strip()
@@ -191,7 +191,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             track = detail.get('track', 0)
             try:
                 album = detail['album'].strip()
-                artist = stringUtils.cleanByDictReplacements(", ".join(artist.strip() for artist in detailInfo['artist']))
+                artist = stringUtils.cleanByDictReplacements(", ".join(artist.strip() for artist in detailInfo['artist']) if isinstance(detailInfo['artist'], (list, tuple)) else detailInfo['artist'].strip())
                 title = stringUtils.cleanByDictReplacements(detail['title'].strip())
                 type = stringUtils.cleanByDictReplacements(detail['type'].strip())
                 filename = stringUtils.cleanByDictReplacements(label.strip())
@@ -250,7 +250,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
             for detailInfo in contentList:
                 file = detailInfo['file'].replace("\\\\", "\\")
                 filetype = detailInfo['filetype']
-                label = stringUtils.cleanLabels(detailInfo['label'])
+                label = stringUtils.cleanLabels(detailInfo['label'].strip())
                 thumb = detailInfo.get('thumbnail', '')
                 fanart = detailInfo.get('fanart', '')
                 description = detailInfo.get('description', '')
@@ -272,7 +272,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
 
                     try:
                         album = detailInfo['album'].strip()
-                        artist = stringUtils.cleanByDictReplacements(", ".join(artist.strip() for artist in detailInfo['artist']))
+                        artist = stringUtils.cleanByDictReplacements(", ".join(artist.strip() for artist in detailInfo['artist']) if isinstance(detailInfo['artist'], (list, tuple)) else detailInfo['artist'].strip())
                         title = stringUtils.cleanByDictReplacements(detailInfo['title'].strip())
                         type = stringUtils.cleanByDictReplacements(detailInfo['type'].strip())
                         filename = stringUtils.cleanByDictReplacements(str(label).strip())
@@ -281,9 +281,9 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                         pass
 
                     thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing File: ",  " Title: " + label)
-                    path = os.path.join(strm_type, artist.strip(), album.strip())
+                    path = os.path.join(strm_type, artist, album)
                     if album and artist and label and path and link and track:  
-                        albumList.append([path, label.strip(), link, album, artist, track, thumb])
+                        albumList.append([path, label, link, album, artist, track, thumb])
                     j = j + 100 / (len(contentList) * int(PAGINGalbums))
                 except IOError as (errno, strerror):
                     print ("I/O error({0}): {1}").format(errno, strerror)
@@ -455,7 +455,7 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
         description = stringUtils.cleanLabels(episode_item.get('description',''))
         episode = str(episode_item['episode'])
         season = str(episode_item['season'])
-        showtitle = episode_item.get('showtitle', '')
+        showtitle = stringUtils.removeHTMLTAGS(episode_item.get('showtitle', ''))
         provGeneral = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), file)
         provXST = re.search('%s(.*)'"\&function"'' % (r"site="), file)
         listName = strm_name
@@ -467,13 +467,13 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
             if provXST:
                 listName = listName + ": " + provXST.group(1)
         
-        if file.find("hdfilme") != "-1" and episodesHDF:
-            episode = int(re.search('Folge.(\\d+)&', file).group(1))
+        if file.find("hdfilme") != -1 and episodesHDF:
+            episode = re.search('Folge.(\\d+)&', file).group(1)
     
         if strm_name.find("++RenamedTitle++") != -1 or showtitle == '':
             showtitle = stringUtils.getStrmname(strm_name)
         if showtitle != "" and strm_type != "":
-            episodeList.append([strm_type, str('s' + season), str('e'+episode), file, stringUtils.cleanByDictReplacements(showtitle.strip()), listName])                   
+            episodeList.append([strm_type, str('s' + season), str('e' + episode), file, stringUtils.cleanByDictReplacements(showtitle.strip()), listName])                   
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)
     except ValueError:
