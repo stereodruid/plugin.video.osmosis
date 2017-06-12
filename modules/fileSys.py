@@ -68,8 +68,8 @@ if os.path.exists(favorites) == True:
     FAV = open(favorites).read()
 else: FAV = []
 
-DIRS = []
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
+addonList = {}
 
 def writeSTRM(path, file, url):
     #ToDo: OriginalPlugin option
@@ -349,9 +349,13 @@ def completePath(filepath):
     return xbmc.translatePath(filepath) 
 
 def getAddonname(addonid):
-    r = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "id": 1, "method": "Addons.GetAddonDetails", "params": {"addonid":"'+addonid+'", "properties": ["name"]}}')
-    data = json.loads(r)
-    if not "error" in data.keys():
-        return data["result"]["addon"]["name"]
-        
-    return None
+    if addonid not in addonList:
+        r = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "id": 1, "method": "Addons.GetAddonDetails", "params": {"addonid": "' + addonid + '", "properties": ["name"]}}')
+        data = json.loads(r)
+        if not "error" in data.keys():
+            addonList[addonid] = data["result"]["addon"]["name"]
+            return addonList[addonid]
+        else:
+            return addonid
+    else:
+        return addonList[addonid]
