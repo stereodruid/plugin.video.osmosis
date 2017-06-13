@@ -81,13 +81,17 @@ DIRS = []
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
 
 def fillPlugins(cType='video'):    
-    json_query = ('{"jsonrpc":"2.0","method":"Addons.GetAddons","params":{"type":"xbmc.addon.%s","properties":["name","path","thumbnail","description","fanart","summary"]}, "id": 1 }' % cType)
+    json_query = ('{"jsonrpc":"2.0","method":"Addons.GetAddons","params":{"type":"xbmc.addon.%s","properties":["name","path","thumbnail","description","fanart","summary", "extrainfo"]}, "id": 1 }' % cType)
     json_details = jsonUtils.sendJSON(json_query)
     for addon in sorted(json_details["addons"], key=lambda json: json['name'].lower()):
         utils.addon_log('fillPlugins entry: ' + str(addon))
-        if cType == 'video' and addon['addonid'].startswith('plugin.video') and not addon['addonid'].startswith('plugin.video.osmosis'):
-            guiTools.addDir(addon['name'], 'plugin://' + addon['addonid'], 101, addon['thumbnail'], addon['fanart'], addon['description'], cType, 'date', 'credits')
-        elif cType == 'audio' and addon['addonid'].startswith('plugin.audio') and not addon['addonid'].startswith('plugin.video.osmosis'):
+        addontypes = []
+        for info in addon['extrainfo']:
+            if info['key'] == 'provides':
+                addontypes = info['value'].split(" ")
+                break
+
+        if cType in addontypes and not addon['addonid'] == 'plugin.video.osmosis':
             guiTools.addDir(addon['name'], 'plugin://' + addon['addonid'], 101, addon['thumbnail'], addon['fanart'], addon['description'], cType, 'date', 'credits')
 
 def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None'):

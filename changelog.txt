@@ -1,4 +1,8 @@
 1.2.9
+  Maven85 Change the condition for displaying addons
+  Maven85 Check the provider for a medialist entry
+  Maven85 [TVShows]: Url update (db) if changed
+  Maven85 Abort the create dialog without error message 
   Maven85 Display addon name in "Remove Media"-dialog
   Maven85 JSON support
   Maven85 [ADD TVShows]: Fix for adding a complete series (AmazonVOD)
