@@ -85,7 +85,6 @@ def strm_update():
                     try:
                         plugin_id = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
                         if plugin_id:
-                            xbmc.log("plugin_id = " + str(plugin_id))
                             module = moduleUtil.getModule(plugin_id.group(1))
                             if module and hasattr(module, 'update'):
                                 url = module.update(name, url, 'video', thelist)

@@ -99,12 +99,12 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
     thisDialog.dialogeBG.update(0, ADDON_NAME + ": Getting: ", stringUtils.getStrmname(strm_name))
     utils.addon_log('fillPluginItems')
     details = []
+
     if url.find("playMode=play") == -1:
         if not file_type:
             details = jsonUtils.requestList(url, media_type).get('files', [])
         else:
             details = jsonUtils.requestItem(url, media_type).get('files', [])
-        xbmc.log("details = " + str(details))
     else: 
         details.append("palyableSingleMedia")
         details.append(url)
@@ -246,42 +246,39 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
 
     if len(contentList) == 0:
         return contentList
-    xbmc.log("contentList = " + str(contentList))
+
     while pagesDone < int(PAGINGalbums):
         if not contentList[0] == "palyableSingleMedia":
             aThumb = urlUtils.stripUnquoteURL(contentList[0].get('thumbnail', ''))
                  
-            for detailInfo in contentList:
+            for index, detailInfo in enumerate(contentList):
                 file = detailInfo['file'].replace("\\\\", "\\")
                 filetype = detailInfo['filetype']
                 label = stringUtils.cleanLabels(detailInfo['label'].strip())
                 thumb = detailInfo.get('thumbnail', '')
                 fanart = detailInfo.get('fanart', '')
                 description = detailInfo.get('description', '')
-                track = detailInfo.get('track', 0)
+                track = detailInfo.get('track', 0) if detailInfo.get('track', 0) > 0 else index + 1
                 duration = detailInfo.get('duration', 0)
                                               
                 try:
                     if filetype == 'directory':
-                        dirList.append(jsonUtils.requestList(file, 'video').get('files', []))
+                        dirList.append(jsonUtils.requestList(file, 'music').get('files', []))
                         continue
 
                     if addon.getSetting('Link_Type') == '0': 
                         link = sys.argv[0] + "?url=" + urllib.quote_plus(file) + "&mode=" + str(10) + "&name=" + urllib.quote_plus(label) + "&fanart=" + urllib.quote_plus(fanart)
                     else:
                         link = file
- 
-                    if label and strm_name:                                                 
-                        label = str(stringUtils.cleanByDictReplacements(label.strip()))
 
                     try:
                         album = detailInfo['album'].strip()
                         artist = stringUtils.cleanByDictReplacements(", ".join(artist.strip() for artist in detailInfo['artist']) if isinstance(detailInfo['artist'], (list, tuple)) else detailInfo['artist'].strip())
                         title = stringUtils.cleanByDictReplacements(detailInfo['title'].strip())
                         type = stringUtils.cleanByDictReplacements(detailInfo['type'].strip())
-                        filename = stringUtils.cleanByDictReplacements(str(label).strip())
+                        filename = stringUtils.cleanByDictReplacements(label.strip())
                     except:
-                        filename = stringUtils.cleanByDictReplacements(str(label).strip())
+                        filename = stringUtils.cleanByDictReplacements(label.strip())
                         pass
 
                     thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing File: ",  " Title: " + label)
@@ -342,7 +339,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
     file = ''
     filetype = ''
     j = len(contentList) * int(PAGINGMovies) / 100
-    
+
     if len(contentList) == 0:
         return contentList
     

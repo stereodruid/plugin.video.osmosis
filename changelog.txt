@@ -1,4 +1,5 @@
 1.2.9
+  Maven85 Add SkyGo extension
   Maven85 Change the condition for displaying addons
   Maven85 Check the provider for a medialist entry
   Maven85 [TVShows]: Url update (db) if changed
