@@ -26,6 +26,7 @@ from modules import fileSys
 from modules import guiTools
 from modules import urlUtils
 from modules import updateAll
+from modules import moduleUtil
 
 import utils
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin, xbmcvfs
@@ -341,7 +342,17 @@ if __name__ == "__main__":
                 cType = guiTools.getType(url)
                 if cType != -1:
                     fileSys.writeMediaList(url, name, cType)
-                    dialog.notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False) 
+                    dialog.notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False)
+
+                    try:
+                        plugin_id = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
+                        if plugin_id:                            
+                            module = moduleUtil.getModule(plugin_id.group(1))
+                            if module and hasattr(module, 'create'):
+                                url = module.create(name, url, 'video')
+                    except:
+                        pass
+                    
                     create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
                     dialog.notification('Writing items...', "Done", xbmcgui.NOTIFICATION_INFO, 5000, False)
         except IOError as (errno, strerror):
