@@ -1,6 +1,4 @@
-1.3.0
-  MYSQL support
-1.2.9
+1.2.9-1.3.0
   Maven85 Add SkyGo extension
   Maven85 Change the condition for displaying addons
   Maven85 Check the provider for a medialist entry
