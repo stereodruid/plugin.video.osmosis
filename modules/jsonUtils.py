@@ -66,23 +66,20 @@ DIRS = []
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
 
 def requestItem(file, fletype='video'):
-    utils.addon_log("requestItem") #
+    utils.addon_log("requestItem, file = " + file)
     if file.find("playMode=play")== -1:
-        detail = stringUtils.uni(requestList(file, fletype))
-        return detail
+        return requestList(file, fletype)
+
     json_query = ('{"jsonrpc":"2.0","method":"Player.GetItem","params":{"playerid":1,"properties":["thumbnail","fanart","title","year","mpaa","imdbnumber","description","season","episode","playcount","genre","duration","runtime","showtitle","album","artist","plot","plotoutline","tagline","tvshowid"]}, "id": 1}')
-    json_folder_detail = sendJSON(json_query)
-    return re.compile("{(.*?)}", re.DOTALL).findall(json_folder_detail)
+    return sendJSON(json_query)
           
 def requestList(path, fletype='video'):
-    if path.find("playMode=play")!= -1:
-        detail = stringUtils.uni(requestItem(path, fletype))
-        return detail
-    
     utils.addon_log("requestList, path = " + path) 
+    if path.find("playMode=play")!= -1:
+        return requestItem(path, fletype)
+
     json_query = ('{"jsonrpc": "2.0", "method": "Files.GetDirectory", "params": {"directory": "%s", "media": "%s", "properties":["thumbnail","fanart","title","year","track","mpaa","imdbnumber","description","season","episode","playcount","genre","duration","runtime","showtitle","album","artist","plot","plotoutline","tagline","tvshowid"]}, "id": 1}' % (path, fletype))
-    json_folder_detail = sendJSON(json_query)
-    return re.compile("{(.*?)}", re.DOTALL).findall(json_folder_detail)
+    return sendJSON(json_query)
 
 def sendJSON(command):
     data = ''
@@ -90,4 +87,4 @@ def sendJSON(command):
         data = xbmc.executeJSONRPC(stringUtils.uni(command))
     except UnicodeEncodeError:
         data = xbmc.executeJSONRPC(stringUtils.asciis(command))
-    return data.decode('utf-8') #uni(data)
+    return json.loads(data.decode('utf-8')).get('result', [])

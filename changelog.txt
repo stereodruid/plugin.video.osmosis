@@ -1,13 +1,23 @@
-1.2.9
-	Fix for xS
-	Maven85 Xs fix
-	Maven85 Fix: Android add and remove
-	Maven85 Pluginextensions
-	Maven85 [ADD TVShows]overwriting fix
-	Maven85 Cosmetic
-	Maven85 "++RenamedTitle++" removed form folder names
-	Maven85 Fix: Create/delete folders
-	Maven85 Bugfixing
+1.2.9-1.3.0
+  Maven85 Add SkyGo extension
+  Maven85 Change the condition for displaying addons
+  Maven85 Check the provider for a medialist entry
+  Maven85 [TVShows]: Url update (db) if changed
+  Maven85 Abort the create dialog without error message 
+  Maven85 Display addon name in "Remove Media"-dialog
+  Maven85 JSON support
+  Maven85 [ADD TVShows]: Fix for adding a complete series (AmazonVOD)
+  Maven85 Movies: Option to save each stream to its own folder
+  Maven85 Fix Umlaut in "Remove Media"-dialog
+  Maven85 Movies: Option to save streams to its own superfolder (per MediaList entry)
+  Maven85 Xs fix
+  Maven85 Remove xS support
+  Maven85 Fix: Android add and remove
+  Maven85 Pluginextensions
+  Maven85 [ADD TVShows] overwriting fix
+  Maven85 "++RenamedTitle++" removed from folder names and gui
+  Maven85 Fix: Create/delete folders
+  Maven85 Bugfixing
 
 1.2.7 - 1.2.8
  Paging Fix

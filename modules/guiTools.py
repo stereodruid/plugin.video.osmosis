@@ -104,7 +104,7 @@ def addFunction(labels= 'n.a' ):
             
 def addDir(name,url,mode,iconimage,fanart,description,genre,date,credits,showcontext=False):
     utils.addon_log('addDir')
-    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&fanart="+urllib.quote_plus(fanart)
+    u=sys.argv[0]+"?url="+urllib.quote_plus(stringUtils.uni(url))+"&mode="+str(mode)+"&name="+urllib.quote_plus(stringUtils.uni(name))+"&fanart="+urllib.quote_plus(fanart)
     ok=True
     contextMenu = []
     liz=xbmcgui.ListItem(name, iconImage=iconimage, thumbnailImage=iconimage)
@@ -121,7 +121,7 @@ def addDir(name,url,mode,iconimage,fanart,description,genre,date,credits,showcon
       
 def addLink(name,url,mode,iconimage,fanart,description,genre,date,showcontext,playlist,regexs,total,setCookie=""): 
     utils.addon_log('addLink') 
-    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&fanart="+urllib.quote_plus(fanart)
+    u=sys.argv[0]+"?url="+urllib.quote_plus(stringUtils.uni(url))+"&mode="+str(mode)+"&name="+urllib.quote_plus(stringUtils.uni(name))+"&fanart="+urllib.quote_plus(fanart)
     ok = True
     contextMenu =[]
     liz=xbmcgui.ListItem(name, iconImage=iconimage, thumbnailImage=iconimage)
@@ -149,7 +149,10 @@ def getType(url):
         Types = ['Movies', 'TV-Shows', 'YouTube','Other']
     
     selectType = selectDialog(Types, header ='Select category')
-       
+
+    if selectType == -1:
+        return -1
+        
     if selectType == 3:
         subType = ['(Music)', '(Movies)','(TV-Shows)']
         selectOption = selectDialog(subType, header ='Select Video type:')
@@ -157,9 +160,12 @@ def getType(url):
     else:
         subType = ['(en)', '(de)','(sp)','(tr)', 'Other']
         selectOption = selectDialog(subType, header ='Select language tag')
-        
+
+    if selectOption == -1:
+        return -1
+
     if selectType >= 0 and selectOption >= 0:
-        return Types[selectType]+ subType[selectOption]
+        return Types[selectType] + subType[selectOption]
 
 def selectDialog(list, header=ADDON_NAME, autoclose=0):
     if len(list) > 0:

@@ -122,7 +122,7 @@ def musicDatabase(pstrAlbumName, pstrArtistName, pstrSongTitle, pstrPath, purlLi
     
     try:
         validateMusicDB(str(os.path.join(MusicDB_LOC)))
-        writeIntoSongTable(pstrSongTitle, songID, pstrArtistName, pstrAlbumName, albumID,path, pathID, purlLink, roleID, artistID, songArtistRel, "F")
+        writeIntoSongTable(pstrSongTitle, songID, pstrArtistName, pstrAlbumName, albumID, path, pathID, purlLink, roleID, artistID, songArtistRel, "F")
     except:        
         pass    
    
@@ -157,7 +157,7 @@ def writeIntoSongTable (pstrSongTitle, songID, pstrArtistName, pstrAlbumName, al
     
     insertQuery = "INSERT INTO songs (strSongTitle, songID, strArtistName, strAlbumName, albumID, strPath, pathID, strURL, roleID, artistID, songArtistRel, delSong)  " """VALUES 
                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
-    insertArgs =  (pstrSongTitle, songID, pstrArtistName,pstrAlbumName, albumID,path, pathID, purlLink,roleID, artistID,albumID, songArtistRel, delSong)
+    insertArgs =  (pstrSongTitle, songID, pstrArtistName, pstrAlbumName, albumID, path, pathID, purlLink, roleID, artistID, songArtistRel, delSong)
     
     dID = manageDbRecord (selectQuery, selectArgs, insertQuery, insertArgs, str(os.path.join(MusicDB_LOC)))
 
@@ -511,7 +511,8 @@ def movieStreamExists(movieID, provider, url):
         if url.find("?url=plugin") != -1:
             url = url.strip().replace("?url=plugin", "plugin", 1)
             
-        if not cursor.execute("""SELECT "%s" FROM "%s" WHERE mov_id="%s" AND provider="%s";""" % ("mov_id","stream_ref", movieID, provider)).fetchone() :
+        entry = cursor.execute("""SELECT "%s", "%s" FROM "%s" WHERE mov_id="%s" AND provider="%s";""" % ("mov_id","url", "stream_ref", movieID, provider)).fetchone()
+        if not entry:
             sql_path = """INSERT INTO stream_ref (mov_id, provider, url) VALUES ("%s", "%s", "%s");""" % (movieID, provider, url)
             cursor.execute(sql_path)
             connectMDB.commit()
@@ -520,6 +521,10 @@ def movieStreamExists(movieID, provider, url):
             connectMDB.close()
             return dID
         else:
+            if str(entry[1]) != url:
+                sql_path = """UPDATE stream_ref SET url = "%s" WHERE mov_id = "%s";""" % (url, movieID)
+                cursor.execute(sql_path)
+                connectMDB.commit()
             dID = cursor.execute("""SELECT "%s" FROM "%s" WHERE mov_id="%s" AND url="%s";""" % ("mov_id","stream_ref", movieID, url)).fetchone()[0] 
             cursor.close()
             connectMDB.close()
@@ -535,8 +540,9 @@ def episodeStreamExists(showID,seEp, provider, url):
         cursor = connectMDB.cursor()
         if url.find("?url=plugin") != -1:
             url = url.strip().replace("?url=plugin", "plugin", 1)
-            
-        if not cursor.execute("""SELECT "%s" FROM "%s" WHERE show_id="%s" AND seasonEpisode="%s" AND provider="%s";""" % ("show_id","stream_ref", showID, seEp, provider)).fetchone() :
+
+        entry = cursor.execute("""SELECT "%s", "%s" FROM "%s" WHERE show_id="%s" AND seasonEpisode="%s" AND provider="%s";""" % ("show_id", "url", "stream_ref", showID, seEp, provider)).fetchone()
+        if not entry:
             sql_path = """INSERT INTO stream_ref (show_id, seasonEpisode, provider, url) VALUES ("%s", "%s", "%s", "%s");""" % (showID, seEp, provider, url)
             cursor.execute(sql_path)
             connectMDB.commit()
@@ -545,6 +551,10 @@ def episodeStreamExists(showID,seEp, provider, url):
             connectMDB.close()
             return dID
         else:
+            if str(entry[1]) != url:
+                sql_path = """UPDATE stream_ref SET url = "%s" WHERE show_id="%s" AND seasonEpisode="%s" AND provider="%s";""" % (url, showID, seEp, provider)
+                cursor.execute(sql_path)
+                connectMDB.commit()
             dID = cursor.execute("""SELECT "%s" FROM "%s" WHERE show_id="%s" AND seasonEpisode="%s" AND provider="%s";""" % ("show_id","stream_ref", showID, seEp, provider)).fetchone()[0] 
             cursor.close()
             connectMDB.close()
@@ -616,4 +626,3 @@ def getKodiMovieID(title, sTitle):
     except:
         cursor.close()
         connectMDB.close()
-    
