@@ -10,6 +10,7 @@
   Maven85 Movies: Option to save each stream to its own folder
   Maven85 Fix Umlaut in "Remove Media"-dialog
   Maven85 Movies: Option to save streams to its own superfolder (per MediaList entry)
+  Maven85 Xs fix
   Maven85 Remove xS support
   Maven85 Fix: Android add and remove
   Maven85 Pluginextensions

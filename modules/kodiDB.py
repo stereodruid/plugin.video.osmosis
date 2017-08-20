@@ -83,10 +83,10 @@ class Config(object):
         mysql.connector.Connect(**Config.dbinfo())
     """
     
-    HOST = 'localhost'
-    DATABASE = ''
-    USER = ''
-    PASSWORD = ''
+    
+    DATABASE = 'Shows.db'
+    USER = 'kodi'
+    PASSWORD = 'admin'
     PORT = 3306
     
     CHARSET = 'utf8'
@@ -374,6 +374,7 @@ def writeMovie(movieList):
 
 def writeShow(showList):
     dbShowList = []
+    createShowDB()
     if not xbmcvfs.exists(SHDBPATH):
         createShowDB()
     elif xbmcvfs.exists(SHDBPATH) and not valDB(SHDBPATH, "stream_ref"):
@@ -425,7 +426,12 @@ def createMovDB():
         pass
     
 def createShowDB():
-    try:        
+    try: 
+#         Config.HOST = '192.168.178.78'
+#         Config.DATABASE = 'Shows.db'
+#         config = Config.dbinfo().copy()        
+#         connectMDB = mysql.connector.Connect(**config)
+#         cursor = connectMDB.cursor()       
         connectMDB = sqlite3.connect(str(os.path.join(SHDBPATH)))
         sql_strm_ref = """CREATE TABLE stream_ref (id INTEGER PRIMARY KEY, show_id INTEGER NOT NULL, seasonEpisode TEXT NOT NULL, provider TEXT NOT NULL, url TEXT NOT NULL);"""
         sql_showtable = """CREATE TABLE shows (id INTEGER PRIMARY KEY, showTitle TEXT NOT NULL, filePath TEXT NOT NULL);"""
@@ -468,15 +474,17 @@ def showExists(title, path):
     try:
 
         
-#         Config.HOST = 'localhost'
-#         Config.DATABASE = xbmc.translatePath(os.path.join(ADDON_SETTINGS, 'Shows.db'))
-#         config = Config.dbinfo().copy()
+
+
         connectMDB = sqlite3.connect(str(os.path.join(SHDBPATH)))
         cursor = connectMDB.cursor()
-        
+
+#         Config.HOST = '192.168.178.78'
+#         Config.DATABASE = 'Shows.db'
+#         config = Config.dbinfo().copy()        
 #         connectMDB = mysql.connector.Connect(**config)
 #         cursor = connectMDB.cursor()
-       
+#        
         
         if not cursor.execute("""select "%s" from "%s" where showTitle="%s";""" % ("showTitle","shows", title)).fetchone() :
             sql_path = """INSERT INTO shows (showTitle, filePath) VALUES ("%s", "%s");""" % (title, os.path.join(path + "\\"))
