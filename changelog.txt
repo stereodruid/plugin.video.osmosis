@@ -1,5 +1,7 @@
 1.3.0
   MYSQL support
+  Added options to create TV-Shows and Subfolders in settings
+  Fix for resume playing
 1.2.9
   Maven85 Add SkyGo extension
   Maven85 Change the condition for displaying addons
