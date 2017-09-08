@@ -55,6 +55,7 @@ REAL_SETTINGS = xbmcaddon.Addon(id=addon_id)
 ADDON_SETTINGS = REAL_SETTINGS.getAddonInfo('profile')
 MediaList_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'MediaList.xml'))
 PAGINGTVshows = REAL_SETTINGS.getSetting('paging_tvshows')
+PAGINGTVshowsSublist = REAL_SETTINGS.getSetting('paging_tvshows_sublist')
 PAGINGMovies = REAL_SETTINGS.getSetting('paging_movies')
 STRM_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'STRM_LOC'))
 profile = xbmc.translatePath(addon.getAddonInfo('profile').decode('utf-8'))
@@ -299,7 +300,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
 
             pagesDone += 1
             contentList = []
-            if pagesDone < int(PAGINGTVshows) and len(dirList) > 0:
+            if pagesDone < int(PAGINGTVshowsSublist) and len(dirList) > 0:
                 contentList = [item for sublist in dirList for item in sublist]
                 dirList = []            
 
@@ -399,7 +400,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
     dirList = []
     episodesList = []
     
-    while pagesDone < int(PAGINGTVshows):
+    while pagesDone < (int(PAGINGTVshows)+int(PAGINGTVshowsSublist)-1):
         strm_type = strm_type.replace('Shows-Collection', 'TV-Shows')
         try:
             for detailInfo in showList:
@@ -421,7 +422,10 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
                         episodesList.append(detailInfo)
                 
             step = float(100.0 / len(episodesList) if len(episodesList) > 0 else 1)
-            thisDialog.dialogeBG.update(int(step), "Page: " + str(pagesDone + 1) + " " + stringUtils.getStrmname(strm_name))
+            if pagesDone == 0:
+                thisDialog.dialogeBG.update(int(step), "Initialisation of TV-Shows: " + stringUtils.getStrmname(strm_name))
+            else:
+                thisDialog.dialogeBG.update(int(step), "Page: " + str(pagesDone) + " " + stringUtils.getStrmname(strm_name))
             for index, episode in enumerate(episodesList):
                 pagesDone = getEpisode(episode, strm_name, strm_type, pagesDone=pagesDone)
                 thisDialog.dialogeBG.update(int(step * (index + 1)))
@@ -439,7 +443,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
         pagesDone += 1
         episodesList = []
         showList = []
-        if pagesDone < int(PAGINGTVshows) and len(dirList) > 0:
+        if pagesDone < (int(PAGINGTVshows)+int(PAGINGTVshowsSublist)-1) and len(dirList) > 0:
             showList = [item for sublist in dirList for item in sublist]
             dirList = []                
 

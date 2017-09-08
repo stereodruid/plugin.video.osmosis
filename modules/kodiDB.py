@@ -71,6 +71,7 @@ KMODBPASSWORD = REAL_SETTINGS.getSetting('KMovie-DB password')
 KMODBNAME = REAL_SETTINGS.getSetting('KMovie-DB name')
 KMODBPATH = xbmc.translatePath(REAL_SETTINGS.getSetting('KMovie-DB path'))
 KMODBIP = REAL_SETTINGS.getSetting('KMovie-DB IP')
+KMODBPORT = REAL_SETTINGS.getSetting('KMovi-DB port')
 
 profile = xbmc.translatePath(addon.getAddonInfo('profile').decode('utf-8'))
 home = xbmc.translatePath(addon.getAddonInfo('path').decode('utf-8'))
@@ -109,7 +110,9 @@ class Config(object):
        
         DBValuses = ["SERNAME", "PASSWORD", "NAME", "IP", "PORT"]
         
-        if cls.DatabaseTYpe == "Musik":   
+        if cls.DatabaseTYpe == "KMovies":   
+            DBValuses = [KMODBUSERNAME, KMODBPASSWORD, KMODBNAME, KMODBIP, KMODBPORT]
+        elif cls.DatabaseTYpe == "Musik":   
             DBValuses = [MDBUSERNAME, MDBPASSWORD, MDBNAME, MDBIP, MDBPORT]
         elif cls.DatabaseTYpe == "Movies":
             DBValuses = [MOVDBUSERNAME, MOVDBPASSWORD, MOVDBNAME, MOVDBIP, MOVDBPORT]
@@ -648,45 +651,88 @@ def getVideo(ID, seasonEpisodes="n.a"):
         pass
 def getPlayedURLResumePoint(url):
     try:
-        connectMDB = sqlite3.connect(str(os.path.join(KMODBPATH)))
+        Config.DatabaseTYpe = 'KMovies'
+        query = ("""SELECT idFile FROM files WHERE strFilename="%s" """)
+        selectStm = (url)
+        
+        Config.BUFFERED = True
+        config = Config.dataBaseVal().copy()        
+        connectMDB = mysql.connector.Connect(**config)
         cursor = connectMDB.cursor()
-                  
-        if cursor.execute("""SELECT "%s" FROM "%s" WHERE strFilename="%s";""" % ("idFile","files", url)).fetchone():
-            dbURLID = cursor.execute("""SELECT "%s" FROM "%s" WHERE strFilename="%s";""" % ("idFile","files", url)).fetchone()[0]
-            if cursor.execute("""SELECT "%s", "%s" FROM "%s" WHERE idFile="%s";""" % ("timeInSeconds", "totalTimeInSeconds","bookmark", dbURLID)).fetchone():
-                return cursor.execute("""SELECT "%s", "%s", "%s" FROM "%s" WHERE idFile="%s";""" % ("timeInSeconds","totalTimeInSeconds", "idBookmark","bookmark", dbURLID)).fetchall()
+        
+        cursor.execute(query % selectStm)
+        if cursor.fetchone() :
+            dbURLID = cursor.fetchone()[0]
+            query = ("""SELECT timeInSeconds, totalTimeInSeconds FROM bookmark WHERE idFile="%s" """)
+            selectStm = (dbURLID)
+            cursor.execute(query % selectStm)
+            if cursor.fetchone() :
+                query = ("""SELECT timeInSeconds, totalTimeInSeconds, idBookmark FROM "bookmark WHERE idFile="%s" """)
+                selectStm = (dbURLID)
+                urlResumePoint = cursor.fetchall()
+        
         cursor.close()
         connectMDB.close()
+        
+        return urlResumePoint     
     except:
         cursor.close()
         connectMDB.close()
         pass
 def delBookMark(ID, movFileID):
     try:
-        connectMDB = sqlite3.connect(str(os.path.join(KMODBPATH)))
+        Config.DatabaseTYpe = 'KMovies'
+        query = ("""SELECT idBookmark FROM bookmark WHERE idFile="%s" """)
+        selectStm = (movFileID)
+        
+        Config.BUFFERED = True
+        config = Config.dataBaseVal().copy()        
+        connectMDB = mysql.connector.Connect(**config)
         cursor = connectMDB.cursor()
-                
-        if cursor.execute("""SELECT "%s" FROM "%s" WHERE idFile="%s";""" % ("idBookmark","bookmark", movFileID)).fetchone():
-            cursor.execute("""DELETE FROM "%s" WHERE idFile="%s";""" % ("bookmark", movFileID))
+        
+        cursor.execute(query % selectStm)
+        if cursor.fetchone() :
+            query = ("""DELETE FROM bookmark WHERE idFile="%s" """)
+            selectStm = (movFileID)
+            cursor.execute(query % selectStm)
             time.sleep(1)
-        if cursor.execute("""SELECT "%s" FROM "%s" WHERE idBookmark="%s";""" % ("idBookmark","bookmark", ID)).fetchone():
-            cursor.execute("""DELETE FROM "%s" WHERE idBookmark="%s";""" % ("bookmark", ID))
-        connectMDB.commit()  
+        
+        query = ("""SELECT idBookmark FROM bookmark WHERE idFile="%s" """)
+        selectStm = (movFileID)
+        
+        cursor.execute(query % selectStm)
+        if cursor.fetchone() :
+            query = ("""DELETE FROM bookmark WHERE idBookmark="%s" """)
+            selectStm = (ID)
+            cursor.execute(query % selectStm)
+        
         cursor.close()
-        connectMDB.close()   
+        connectMDB.close()
     except:
         cursor.close()
         connectMDB.close()
         pass
 def getKodiMovieID(title, sTitle):
     try:
-        connectMDB = sqlite3.connect(str(os.path.join(KMODBPATH)))
+        Config.DatabaseTYpe = 'KMovies'
+        query = ("""SELECT idMovie, idFile FROM movie WHERE c00 LIKE "%s" OR c00 LIKE "%s" """)
+        selectStm = (title, sTitle)
+        
+        Config.BUFFERED = True
+        config = Config.dataBaseVal().copy()        
+        connectMDB = mysql.connector.Connect(**config)
         cursor = connectMDB.cursor()
-                  
-        if cursor.execute("""SELECT "%s", "%s" FROM "%s" WHERE c00 LIKE "%s" OR c00 LIKE "%s";"""  % ("idMovie","idFile","movie", title, sTitle)).fetchone():
-            return cursor.execute("""SELECT "%s", "%s" FROM "%s" WHERE c00 LIKE "%s" OR c00 LIKE "%s";"""  % ("idMovie","idFile","movie", title, sTitle)).fetchall()
+        
+        cursor.execute(query % selectStm)
+        if cursor.fetchone() :
+            kodiMovID = cursor.fetchall()
+        
+        
         cursor.close()
-        connectMDB.close()        
+        connectMDB.close()
+        
+        return kodiMovID     
     except:
         cursor.close()
         connectMDB.close()
+        pass
