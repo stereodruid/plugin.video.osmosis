@@ -128,7 +128,7 @@ def addLink(name,url,mode,iconimage,fanart,description,genre,date,showcontext,pl
     liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": description, "Genre": genre, "dateadded": date })
     liz.setProperty("Fanart_Image", fanart)
     liz.setProperty('IsPlayable', 'true')
-    contextMenu.append(('Create Strm','XBMC.RunPlugin(%s&mode=200&name=%s)'%(u, name)))
+    contextMenu.append(('Create Strm','XBMC.RunPlugin(%s&mode=200&name=%s&filetype=file)'%(u, name)))
     liz.addContextMenuItems(contextMenu)
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,totalItems=total)
     return ok

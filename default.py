@@ -163,6 +163,7 @@ if __name__ == "__main__":
         regexs = params["regexs"]
     except:
         pass
+    filetype = params.get("filetype", "directory")
     
     utils.addon_log("Mode: " + str(mode))
  
@@ -343,6 +344,9 @@ if __name__ == "__main__":
                 if cType != -1:
                     fileSys.writeMediaList(url, name, cType)
                     dialog.notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False)
+                    
+                    if filetype == 'file':
+                        url += '&playMode=play'
 
                     try:
                         plugin_id = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
