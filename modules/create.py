@@ -55,7 +55,6 @@ REAL_SETTINGS = xbmcaddon.Addon(id=addon_id)
 ADDON_SETTINGS = REAL_SETTINGS.getAddonInfo('profile')
 MediaList_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'MediaList.xml'))
 PAGINGTVshows = REAL_SETTINGS.getSetting('paging_tvshows')
-PAGINGTVshowsSublist = REAL_SETTINGS.getSetting('paging_tvshows_sublist')
 PAGINGMovies = REAL_SETTINGS.getSetting('paging_movies')
 STRM_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'STRM_LOC'))
 profile = xbmc.translatePath(addon.getAddonInfo('profile').decode('utf-8'))
@@ -171,7 +170,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         label = stringUtils.cleanLabels(detail['label'])
         file = detail['file'].replace("\\\\", "\\")
         strm_name = str(stringUtils.cleanByDictReplacements(strm_name.strip()))
-        description = stringUtils.cleanLabels(detail.get('description',''))
+        plot = stringUtils.cleanLabels(detail.get('plot',''))
         thumbnail = detail.get('thumbnail','')
         fanart = detail.get('fanart','')
         
@@ -213,12 +212,12 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
                     kodiDB.musicDatabase(album, artist, label, path, link, track)
                 fileSys.writeSTRM(stringUtils.cleanStrms((path.rstrip("."))), stringUtils.cleanStrms(filename.rstrip(".")) , link)
             else:
-                guiTools.addLink(label, file, 10, thumbnail, fanart, description, '', '', '', None, '', total=len(details))
+                guiTools.addLink(label, file, 10, thumbnail, fanart, plot, '', '', '', None, '', total=len(details))
         else:
             if strm:
                 fillPluginItems(file, media_type, file_type, strm, label, strm_type)
             else:
-                guiTools.addDir(label, file, 101, thumbnail, fanart, description, '', '', '')
+                guiTools.addDir(label, file, 101, thumbnail, fanart, plot, '', '', '')
 
 def removeItemsFromMediaList(action='list'):
     from modules import dialoge
@@ -300,7 +299,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
 
             pagesDone += 1
             contentList = []
-            if pagesDone < int(PAGINGTVshowsSublist) and len(dirList) > 0:
+            if pagesDone < int(PAGINGTVshows) and len(dirList) > 0:
                 contentList = [item for sublist in dirList for item in sublist]
                 dirList = []            
 
@@ -400,7 +399,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
     dirList = []
     episodesList = []
     
-    while pagesDone < (int(PAGINGTVshows)+int(PAGINGTVshowsSublist)-1):
+    while pagesDone < int(PAGINGTVshows):
         strm_type = strm_type.replace('Shows-Collection', 'TV-Shows')
         try:
             for detailInfo in showList:
@@ -443,7 +442,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
         pagesDone += 1
         episodesList = []
         showList = []
-        if pagesDone < (int(PAGINGTVshows)+int(PAGINGTVshowsSublist)-1) and len(dirList) > 0:
+        if pagesDone < int(PAGINGTVshows) and len(dirList) > 0:
             showList = [item for sublist in dirList for item in sublist]
             dirList = []                
 

@@ -102,13 +102,13 @@ def addFunction(labels= 'n.a' ):
         except:#          
             pass
             
-def addDir(name,url,mode,iconimage,fanart,description,genre,date,credits,showcontext=False):
+def addDir(name,url,mode,iconimage,fanart,plot,genre,date,credits,showcontext=False):
     utils.addon_log('addDir')
     u=sys.argv[0]+"?url="+urllib.quote_plus(stringUtils.uni(url))+"&mode="+str(mode)+"&name="+urllib.quote_plus(stringUtils.uni(name))+"&fanart="+urllib.quote_plus(fanart)
     ok=True
     contextMenu = []
     liz=xbmcgui.ListItem(name, iconImage=iconimage, thumbnailImage=iconimage)
-    liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": description, "Genre": genre, "dateadded": date, "credits": credits })
+    liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": plot, "Genre": genre, "dateadded": date, "credits": credits })
     liz.setProperty("Fanart_Image", fanart)
     contextMenu.append(('Create Strms','XBMC.RunPlugin(%s&mode=200&name=%s)'%(u, name)))
     liz.addContextMenuItems(contextMenu)
@@ -119,13 +119,13 @@ def addDir(name,url,mode,iconimage,fanart,description,genre,date,credits,showcon
     
     return ok
       
-def addLink(name,url,mode,iconimage,fanart,description,genre,date,showcontext,playlist,regexs,total,setCookie=""): 
+def addLink(name,url,mode,iconimage,fanart,plot,genre,date,showcontext,playlist,regexs,total,setCookie=""): 
     utils.addon_log('addLink') 
     u=sys.argv[0]+"?url="+urllib.quote_plus(stringUtils.uni(url))+"&mode="+str(mode)+"&name="+urllib.quote_plus(stringUtils.uni(name))+"&fanart="+urllib.quote_plus(fanart)
     ok = True
     contextMenu =[]
     liz=xbmcgui.ListItem(name, iconImage=iconimage, thumbnailImage=iconimage)
-    liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": description, "Genre": genre, "dateadded": date })
+    liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": plot, "Genre": genre, "dateadded": date })
     liz.setProperty("Fanart_Image", fanart)
     liz.setProperty('IsPlayable', 'true')
     contextMenu.append(('Create Strm','XBMC.RunPlugin(%s&mode=200&name=%s&filetype=file)'%(u, name)))
