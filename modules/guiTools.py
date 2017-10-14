@@ -192,25 +192,20 @@ def markMovie(movID, pos, total, done):
                 print("markMovie: Movie not in DB!?")
                 pass
 
-def markSeries(sShowTitle,sEpisode,sSeason):
-    if xbmc.getCondVisibility('Library.HasContent(TVShows)'):
+def markSeries(sShowTitle,sEpisode,sSeason,shoID,pos,total,done):
+    if done:
         try:
-            print("Check if tvshow episode exists in library when marking as watched")
-            cleaned_title= (re.sub('[^-a-zA-Z0-9_.()\\\/ ]+', '',  sShowTitle)).rstrip().lstrip()
-            meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["title", "plot", "votes", "rating", "writer", "firstaired", "playcount", "runtime", "director", "productioncode", "season", "episode", "originaltitle", "showtitle", "lastplayed", "fanart", "thumbnail", "file", "resume", "tvshowid", "dateadded", "uniqueid"]}, "id": 1}' % (sSeason, sEpisode))
-            meta = json.loads(meta)
-            meta = meta['result']['episodes']
-            try:
-                gotIt = [i for i in meta if (cleaned_title in i['showtitle'].rstrip() or i['showtitle'].rstrip() in cleaned_title)][0]
-            except:
-                print("markSeries: Original title not found")
-                pass
-            if gotIt:               
-                player = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
-            xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % str(gotIt['episodeid']))
+            xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % shoID)
         except:
-            print("markSeries: Show not in DB!?")
+            print("markMovie: Episode not in DB!?")
             pass
+    else:    
+        if xbmc.getCondVisibility('Library.HasContent(TVShows)'):
+            try:
+                xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "resume" : {"position":%s,"total":%s} }, "id": 1 }' % (shoID, pos, total))
+            except:
+			    print("markSeries: Show not in DB!?")
+			    pass
 # Functions not in usee yet:
 def handle_wait(time_to_wait, header, title):
     dlg = xbmcgui.DialogProgress()
