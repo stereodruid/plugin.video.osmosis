@@ -614,6 +614,23 @@ def delBookMark(ID, movFileID):
         cursor.close()
         connectMDB.close()
         pass
+def delShoBookMark(ID, shoFileID):
+    try:
+        connectMDB = sqlite3.connect(str(os.path.join(KMODBPATH)))
+        cursor = connectMDB.cursor()
+                
+        if cursor.execute("""SELECT "%s" FROM "%s" WHERE idFile="%s";""" % ("idBookmark","bookmark", shoFileID)).fetchone():
+            cursor.execute("""DELETE FROM "%s" WHERE idFile="%s";""" % ("bookmark", shoFileID))
+            time.sleep(1)			
+        if cursor.execute("""SELECT "%s" FROM "%s" WHERE idBookmark="%s";""" % ("idBookmark","bookmark", ID)).fetchone():
+            cursor.execute("""DELETE FROM "%s" WHERE idBookmark="%s";""" % ("bookmark", ID))
+        connectMDB.commit()  
+        cursor.close()
+        connectMDB.close()   
+    except:
+        cursor.close()
+        connectMDB.close()
+        pass		
 def getKodiMovieID(title, sTitle):
     try:
         connectMDB = sqlite3.connect(str(os.path.join(KMODBPATH)))
@@ -626,3 +643,16 @@ def getKodiMovieID(title, sTitle):
     except:
         cursor.close()
         connectMDB.close()
+def getKodiEpisodeID(title, sTitle):
+	try:
+		connectMDB = sqlite3.connect(str(os.path.join(KMODBPATH)))
+		cursor = connectMDB.cursor()
+				  
+		if cursor.execute("""SELECT "%s", "%s" FROM "%s" WHERE c00 LIKE "%s" OR c00 LIKE "%s";"""  % ("idEpisode","idFile","episode", title, sTitle)).fetchone():
+			return cursor.execute("""SELECT "%s", "%s" FROM "%s" WHERE c00 LIKE "%s" OR c00 LIKE "%s";"""  % ("idEpisode","idFile","episode", title, sTitle)).fetchall()
+		cursor.close()
+		connectMDB.close()		  
+	except:
+		cursor.close()
+		connectMDB.close()
+        
