@@ -81,9 +81,6 @@ def strm_update():
                 j = 100 / len(thelist)
                 for i in range(len(thelist)):
                     cType , name, url = ((thelist[i]).strip().split('|'))
-                    single_movie = re.search('%s([^\/\?]*)' % ("action=play"), url)
-                    if single_movie:
-                        url += '&playMode=play'
 
                     try:
                         plugin_id = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
