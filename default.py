@@ -380,12 +380,11 @@ if __name__ == "__main__":
                     dialoge.PopupWindow(tutWin) 
 
                 cType = guiTools.getType(url)
+                if filetype == 'file':             
+                    url += '&playMode=play' 
                 if cType != -1:
                     fileSys.writeMediaList(url, name, cType)
                     dialog.notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False)
-                    
-                    if filetype == 'file':
-                        url += '&playMode=play'
 
                     try:
                         plugin_id = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
