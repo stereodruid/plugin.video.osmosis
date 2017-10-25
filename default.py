@@ -129,6 +129,11 @@ if __name__ == "__main__":
         movID = None
         pass
     try:
+        shoID = urllib.unquote_plus(params["showid"])
+    except:
+        shoID = None
+        pass    
+    try:
         showID = urllib.unquote_plus(params["showid"])
     except:
         showID = None
@@ -163,6 +168,7 @@ if __name__ == "__main__":
         regexs = params["regexs"]
     except:
         pass
+    filetype = params.get("filetype", "directory")
     
     utils.addon_log("Mode: " + str(mode))
  
@@ -256,7 +262,41 @@ if __name__ == "__main__":
             
                    
             if xbmc.getInfoLabel("VideoPlayer.TVShowTitle") != "":
-                guiTools.markSeries(xbmc.getInfoLabel("VideoPlayer.TVShowTitle"),xbmc.getInfoLabel("VideoPlayer.Episode"),xbmc.getInfoLabel("VideoPlayer.Season"))
+                # guiTools.markSeries(xbmc.getInfoLabel("VideoPlayer.TVShowTitle"),xbmc.getInfoLabel("VideoPlayer.Episode"),xbmc.getInfoLabel("VideoPlayer.Season"))
+                checkURL = str(sys.argv[0].replace(r'|', sys.argv[2] + r'|'))
+                urlsResumePoint = kodiDB.getPlayedURLResumePoint(checkURL)
+                
+                shoProps =  kodiDB.getKodiEpisodeID(xbmc.getInfoLabel("VideoPlayer.Title"), sTitle)               
+                shoID = shoProps[0][0]
+                shoFileID = shoProps[0][1]
+                meta = "video"
+                   
+                if urlsResumePoint: 
+                    conTime = utils.zeitspanne(int(urlsResumePoint[0][0]))               
+                    resume = ["Jump to position : %s " % (str(conTime[5])), "Start form beginning!"] 
+                    if guiTools.selectDialog(resume, header = 'OSMOSIS: Would you like to continue?') == 0:
+                        xbmc.Player().seekTime(int(urlsResumePoint[0][0]))
+                
+                while meta.find("video") != -1:
+                    meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
+                    time.sleep(1)
+                
+                time.sleep(1)   
+                urlsWatchedPoint = kodiDB.getPlayedURLResumePoint(checkURL)
+                if urlsWatchedPoint:
+                    pos = urlsWatchedPoint[0][0]
+                    total = urlsWatchedPoint[0][1]
+                    done = False
+                elif urlsResumePoint and not urlsWatchedPoint:
+                    pos = urlsResumePoint[0][1]
+                    total = urlsResumePoint[0][1]
+                    kodiDB.delShoBookMark(urlsResumePoint[0][2], shoFileID)
+                    done = True
+                else:
+                    done = False
+              
+                if shoID:
+                    guiTools.markSeries(xbmc.getInfoLabel("VideoPlayer.TVShowTitle"),xbmc.getInfoLabel("VideoPlayer.Episode"),xbmc.getInfoLabel("VideoPlayer.Season"),shoID, pos, total, done)
             else:
                 #search bookmarks for the ID and get the played time if exists
                 checkURL = str(sys.argv[0].replace(r'|', sys.argv[2] + r'|'))
@@ -340,6 +380,8 @@ if __name__ == "__main__":
                     dialoge.PopupWindow(tutWin) 
 
                 cType = guiTools.getType(url)
+                if filetype == 'file':             
+                    url += '&playMode=play' 
                 if cType != -1:
                     fileSys.writeMediaList(url, name, cType)
                     dialog.notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False)

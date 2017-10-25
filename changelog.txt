@@ -1,4 +1,9 @@
 1.3.0
+	  Add option hide streams in [OV] (e. g. AMAZON VOD)
+	  updated to current future-sqlite branch
+	  Fix for "support single movies"
+          Fix for Series-Resume-Point
+	  Add support for single movies
   MYSQL support
   Added options to create TV-Shows and Subfolders in settings
   Fix for resume playing
