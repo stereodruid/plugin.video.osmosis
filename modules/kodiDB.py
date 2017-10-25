@@ -362,7 +362,12 @@ def valDB(databaseName):
     connectMDB = mysql.connector.Connect(**config)
     
     cursor = connectMDB.cursor()
-    stmt = "SHOW TABLES LIKE 'stream_ref'"
+    if databaseName == 'Movies':
+		stmt = "SHOW TABLES LIKE 'movies'"
+    elif databaseName == 'TVShows':
+		stmt = "SHOW TABLES LIKE 'shows'"
+    else:
+		stmt = "SHOW TABLES LIKE 'stream_ref'"
     cursor.execute(stmt)
     result = cursor.fetchone()
     if result:
@@ -461,10 +466,9 @@ def createMovDB():
 def createShowDB():
     try: 
         Config.DatabaseTYpe = 'TVShows'
+        Config.BUFFERED = True
         config = Config.dataBaseVal().copy()        
         connectMDB = mysql.connector.Connect(**config)
-        cursor = connectMDB.cursor()   
-        #connectMDB = sqlite3.connect(str(os.path.join(SHDBPATH)))
         sql_strm_ref = """CREATE TABLE stream_ref (id INTEGER PRIMARY KEY AUTO_INCREMENT, show_id INTEGER NOT NULL, seasonEpisode TEXT NOT NULL, provider TEXT NOT NULL, url TEXT NOT NULL);"""
         sql_showtable = """CREATE TABLE shows (id INTEGER PRIMARY KEY AUTO_INCREMENT, showTitle TEXT NOT NULL, filePath TEXT NOT NULL);"""
         cursor = connectMDB.cursor()  
