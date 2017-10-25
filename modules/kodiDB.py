@@ -363,11 +363,11 @@ def valDB(databaseName):
     
     cursor = connectMDB.cursor()
     if databaseName == 'Movies':
-		stmt = "SHOW TABLES LIKE 'movies'"
+	stmt = "SHOW TABLES LIKE 'movies'"
     elif databaseName == 'TVShows':
-		stmt = "SHOW TABLES LIKE 'shows'"
+	stmt = "SHOW TABLES LIKE 'shows'"
     else:
-		stmt = "SHOW TABLES LIKE 'stream_ref'"
+	stmt = "SHOW TABLES LIKE 'stream_ref'"
     cursor.execute(stmt)
     result = cursor.fetchone()
     if result:
