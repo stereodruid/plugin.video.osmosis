@@ -51,6 +51,6 @@
         <setting label="37003" type="text" id="TV-Show-DB name" />
         <setting label="37004" type="folder" id="TV-Show-DB path" source="auto" default=""/>
         <setting label="37005" type="ipaddress" id="TV-Show-DB IP" default="localhost"/>
-        <setting label="37006" type="ipaddress" id="TV-Show-DB port" default="3306"/>
+        <setting label="37006" type="number" id="TV-Show-DB port" default="3306"/>
     </category>
 </settings>
