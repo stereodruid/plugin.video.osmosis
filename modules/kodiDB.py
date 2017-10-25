@@ -702,7 +702,40 @@ def delBookMark(ID, movFileID):
             time.sleep(1)
         
         query = ("""SELECT idBookmark FROM bookmark WHERE idFile="%s" """)
-        selectStm = (movFileID)
+        selectStm = (ID)
+        
+        cursor.execute(query % selectStm)
+        if cursor.fetchone() :
+            query = ("""DELETE FROM bookmark WHERE idBookmark="%s" """)
+            selectStm = (ID)
+            cursor.execute(query % selectStm)
+        
+        cursor.close()
+        connectMDB.close()
+    except:
+        cursor.close()
+        connectMDB.close()
+        pass
+def delShoBookMark(ID, shoFileID):
+    try:
+        Config.DatabaseTYpe = 'KMovies'
+        query = ("""SELECT idBookmark FROM bookmark WHERE idFile="%s" """)
+        selectStm = (shoFileID)
+        
+        Config.BUFFERED = True
+        config = Config.dataBaseVal().copy()        
+        connectMDB = mysql.connector.Connect(**config)
+        cursor = connectMDB.cursor()
+        
+        cursor.execute(query % selectStm)
+        if cursor.fetchone() :
+            query = ("""DELETE FROM bookmark WHERE idFile="%s" """)
+            selectStm = (shoFileID)
+            cursor.execute(query % selectStm)
+            time.sleep(1)
+        
+        query = ("""SELECT idBookmark FROM bookmark WHERE idFile="%s" """)
+        selectStm = (ID)
         
         cursor.execute(query % selectStm)
         if cursor.fetchone() :
