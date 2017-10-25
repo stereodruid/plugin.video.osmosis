@@ -1,4 +1,5 @@
 1.2.9-1.3.0
+  gu3nter Added option to hide movies in [OV] (e. g. AMAZON VOD)
 	  Fix for "support single movies"
           Fix for Series-Resume-Point
   Maven85 Add SkyGo extension
