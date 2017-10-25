@@ -26,8 +26,8 @@
         <setting label="38002" type="text" id="KMovie-DB password" />
         <setting label="38003" type="text" id="KMovie-DB name" />
         <setting label="38004" type="file" id="KMovie-DB path" source="auto" default=""/>
-        <setting label="38005" type="ipaddress" id="KMovie-DB IP"/>
-        <setting label="35006" type="number" id="KMovie-DB port" default="3306"/>
+        <setting label="38005" type="ipaddress" id="KMovie-DB IP" default="localhost"/>
+        <setting label="38006" type="number" id="KMovie-DB port" default="3306"/>
     </category>
     <category label="35000">
       	<setting label="35001" type="text" id="Music-DB username" />
@@ -35,7 +35,7 @@
         <setting label="35003" type="text" id="Music-DB name" />
         <setting label="35004" type="file" id="Music-DB path" source="auto" default=""/>
         <setting label="35005" type="ipaddress" id="Music-DB IP" default="localhost"/>
-        <setting label="35006" type="ipaddress" id="Music-DB port" default="3306"/>
+        <setting label="35006" type="number" id="Music-DB port" default="3306"/>
     </category>
     <category label="36000">
       	<setting label="36001" type="text" id="Movies-DB username" />
