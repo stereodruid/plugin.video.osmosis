@@ -54,6 +54,7 @@ ADDON_NAME = addon.getAddonInfo('name')
 REAL_SETTINGS = xbmcaddon.Addon(id=addon_id)
 ADDON_SETTINGS = REAL_SETTINGS.getAddonInfo('profile')
 MediaList_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'MediaList.xml'))
+HIDE_tile_in_OV = REAL_SETTINGS.getSetting('Hide_tilte_in_OV')
 PAGINGTVshows = REAL_SETTINGS.getSetting('paging_tvshows')
 PAGINGMovies = REAL_SETTINGS.getSetting('paging_movies')
 STRM_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'STRM_LOC'))
@@ -361,10 +362,15 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
                         if provXST:
                             listName = listName + ": " + provXST.group(1)               
                     
-                    if label and strm_name:                                              
+                    if label and strm_name:                                                 
+                        label = stringUtils.cleanByDictReplacements(label)           
+                        if HIDE_tile_in_OV == "true" and not label.find("[OV]") == -1:   
+  							get_title_with_OV = 0
+                        else:
+                            get_title_with_OV = 1                                    
                         label = stringUtils.cleanByDictReplacements(label)
                         thisDialog.dialogeBG.update(j, ADDON_NAME + ": Getting Movies: ",  " Video: " + label)
-                        if filetype == 'file':
+                        if filetype == 'file' and get_title_with_OV == 1:
                             movieList.append([stringUtils.getMovieStrmPath(strm_type, strm_name, label), stringUtils.cleanByDictReplacements(stringUtils.getStrmname(label)), file, listName])
                         j = j + len(contentList) * int(PAGINGMovies) / 100
                 except IOError as (errno, strerror):
