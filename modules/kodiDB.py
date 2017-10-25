@@ -735,4 +735,26 @@ def getKodiMovieID(title, sTitle):
     except:
         cursor.close()
         connectMDB.close()
-        pass
+def getKodiEpisodeID(title, sTitle):
+    try:
+        Config.DatabaseTYpe = 'KMovies'
+        query = ("""SELECT idEpisode, idFile FROM episode WHERE c00 LIKE "%s" OR c00 LIKE "%s" """)
+        selectStm = (title, sTitle)
+        
+        Config.BUFFERED = True
+        config = Config.dataBaseVal().copy()        
+        connectMDB = mysql.connector.Connect(**config)
+        cursor = connectMDB.cursor()
+        
+        cursor.execute(query % selectStm)
+        if cursor.fetchone() :
+            kodiShoID = cursor.fetchall()
+        
+        
+        cursor.close()
+        connectMDB.close()
+        
+        return kodiShoID     
+    except:
+        cursor.close()
+        connectMDB.close()
