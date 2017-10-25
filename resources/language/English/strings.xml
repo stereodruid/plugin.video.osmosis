@@ -11,6 +11,7 @@
     	<string id="30305">Download Youtube/RSS Thumbs (ComingSoon)</string>
     	<string id="31001">Number of levels to search (TV-Shows)</string>
     	<string id="31002">Number of levels to search (Movies)</string>
+	<string id="32013">Do not add streams which are in "[OV]" (e. g. AMAZON VOD)</string>
     	<string id="32100">Service</string>
     	<string id="33001">Update at startup</string>
     	<string id="33002">Automatic Update</string>
