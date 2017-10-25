@@ -12,7 +12,6 @@
      </category>
      <category label="31000">
         <setting label="31004" type="bool" id="Write_NFOS" default="false" />
-        <setting label="31006" type="slider" id="paging_tvshows_sublist" default="2" range="1,100" option="int"/>
         <setting label="31001" type="slider" id="paging_tvshows" default="2" range="1,100" option="int"/>
     	<setting label="31002" type="slider" id="paging_movies" default="2" range="1,100" option="int"/>
     </category>
