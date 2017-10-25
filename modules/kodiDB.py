@@ -671,7 +671,7 @@ def getPlayedURLResumePoint(url):
             selectStm = (dbURLID)
             cursor.execute(query % selectStm)
             if cursor.fetchone() :
-                query = ("""SELECT timeInSeconds, totalTimeInSeconds, idBookmark FROM "bookmark WHERE idFile="%s" """)
+                query = ("""SELECT timeInSeconds, totalTimeInSeconds, idBookmark FROM bookmark WHERE idFile="%s" """)
                 selectStm = (dbURLID)
                 urlResumePoint = cursor.fetchall()
         
