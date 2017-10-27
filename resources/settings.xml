@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
     <category label="32000">
+        <setting label="32014" type="bool" id="USE_MYSQL" default="false"/>
         <setting label="32003" type="folder" id="STRM_LOC" source="auto" default="special://userdata/addon_data/plugin.video.osmosis/strms"/>   
         <setting label="32006" type="enum" id="Link_Type" values="OSMOSIS|Original Plugin" default="0"/>
         <setting label="32008" type="bool" id="Clear_Strms" default="false"/>
@@ -28,21 +29,30 @@
       	<setting label="38001" type="text" id="KMovie-DB username" />
         <setting label="38002" type="text" id="KMovie-DB password" />
         <setting label="38003" type="text" id="KMovie-DB name" />
+        <setting label="38005" type="ipaddress" id="KMovie-DB IP" default="localhost"/>
+        <setting label="38006" type="number" id="KMovie-DB port" default="3306"/>
         <setting label="38004" type="file" id="KMovie-DB path" source="auto" default=""/>
-        <setting label="38005" type="ipaddress" id="KMovie-DB IP"/>
     </category>
     <category label="35000">
       	<setting label="35001" type="text" id="Music-DB username" />
         <setting label="35002" type="text" id="Music-DB password" />
         <setting label="35003" type="text" id="Music-DB name" />
+        <setting label="35005" type="ipaddress" id="Music-DB IP" default="localhost"/>
+        <setting label="35006" type="number" id="Music-DB port" default="3306"/>
         <setting label="35004" type="file" id="Music-DB path" source="auto" default=""/>
-        <setting label="35005" type="ipaddress" id="Music-DB IP"/>
     </category>
+    <category label="36000">
+      	<setting label="36001" type="text" id="Movies-DB username" />
+        <setting label="36002" type="text" id="Movies-DB password" />
+        <setting label="36003" type="text" id="Movies-DB name" />
+        <setting label="36005" type="ipaddress" id="Movies-DB IP" default="localhost"/>
+        <setting label="36006" type="number" id="Movies-DB port" default="3306"/>
+	</category>
     <category label="37000">
       	<setting label="37001" type="text" id="TV-Show-DB username" />
         <setting label="37002" type="text" id="TV-Show-DB password" />
         <setting label="37003" type="text" id="TV-Show-DB name" />
-        <setting label="37004" type="folder" id="TV-Show-DB path" source="auto" default=""/>
-        <setting label="37005" type="ipaddress" id="TV-Show-DB IP"/>
+        <setting label="37005" type="ipaddress" id="TV-Show-DB IP" default="localhost"/>
+        <setting label="37006" type="number" id="TV-Show-DB port" default="3306"/>
     </category>
 </settings>
