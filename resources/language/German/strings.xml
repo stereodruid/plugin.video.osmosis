@@ -10,7 +10,7 @@
 	<string id="32011">Medien Speicherort immer bereinigen (löscht alle Dateien im Ordner)</string>
 	<string id="32012">Unterstützung für Exodus: Wenn du diese Funktion aktivierst, erlaubst du, dass OSMOSIS Programmcode von Exodus ändern darf</string>
 	<string id="32013">Keine Streams hinzufügen, die in "[OV]" vorhanden sind (z. B. AMAZON VOD)</string>
-	<string id="32014">Kodi is using MYSQL-Database</string>
+	<string id="32014">Kodi verwendet eine MYSQL-Datenbank</string>
 	
 	<string id="31000">Medien</string>
 	<string id="31004">NFO's anlegen (In Kürze)</string>
