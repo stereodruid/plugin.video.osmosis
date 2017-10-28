@@ -292,6 +292,10 @@ if __name__ == "__main__":
                     total = urlsResumePoint[0][1]
                     kodiDB.delShoBookMark(urlsResumePoint[0][2], shoFileID)
                     done = True
+                elif not urlsResumePoint and not urlsWatchedPoint:
+                    pos = ()
+                    total = ()
+                    done = True
                 else:
                     done = False
               
@@ -327,6 +331,10 @@ if __name__ == "__main__":
                     pos = urlsResumePoint[0][1]
                     total = urlsResumePoint[0][1]
                     kodiDB.delBookMark(urlsResumePoint[0][2], movFileID)
+                    done = True
+                elif not urlsResumePoint and not urlsWatchedPoint:
+                    pos = ()
+                    total = ()
                     done = True
                 else:
                     done = False
