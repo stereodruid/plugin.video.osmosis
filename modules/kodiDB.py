@@ -530,7 +530,7 @@ def createShowDB():
 			sql_strm_ref = """CREATE TABLE stream_ref (id INTEGER PRIMARY KEY, show_id INTEGER NOT NULL, seasonEpisode TEXT NOT NULL, provider TEXT NOT NULL, url TEXT NOT NULL);"""
 			sql_showtable = """CREATE TABLE shows (id INTEGER PRIMARY KEY, showTitle TEXT NOT NULL, filePath TEXT NOT NULL);"""
 			cursor = connectMDB.cursor()  
-			cursor.execute(sql_movtable)
+			cursor.execute(sql_showtable)
 			cursor.execute(sql_strm_ref)
 				
 			while not xbmcvfs.exists(SHDBPATH):
