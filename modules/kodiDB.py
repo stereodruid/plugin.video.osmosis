@@ -461,7 +461,7 @@ def writeShow(showList):
 		#createShowDB()
 		if not xbmcvfs.exists(SHDBPATH):
 			createShowDB()
-		elif xbmcvfs.exists(SHDBPATH) and not valDB(SHDBPATH, "stream_ref"):
+		elif xbmcvfs.exists(SHDBPATH) and not valDB(SHDBPATH):
 			xbmcvfs.delete(SHDBPATH)
 			createShowDB()       
     else:
