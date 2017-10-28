@@ -4,6 +4,7 @@
   gu3nter  Added option to hide movies in [OV] (e. g. AMAZON VOD)
   gu3nter  Fix for "support single movies"
   Gismo112 Fix for Series-Resume-Point
+  Maven85  Support single movies
   Maven85  Add SkyGo extension
   Maven85  Change the condition for displaying addons
   Maven85  Check the provider for a medialist entry
