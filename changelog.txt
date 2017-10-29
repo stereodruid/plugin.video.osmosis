@@ -1,0 +1,169 @@
+1.3.0-1.3.1
+  gu3nter  Sqlite3 and MYSQL are now supported in one Branch
+
+1.2.9-1.3.0
+  Gismo112 Fix watchedstate for not resumed video
+  gu3nter  Added option to hide movies in [OV] (e. g. AMAZON VOD)
+  gu3nter  Fix for "support single movies"
+  Gismo112 Fix for Series-Resume-Point
+  Maven85  Support single movies
+  Maven85  Add SkyGo extension
+  Maven85  Change the condition for displaying addons
+  Maven85  Check the provider for a medialist entry
+  Maven85  [TVShows]: Url update (db) if changed
+  Maven85  Abort the create dialog without error message 
+  Maven85  Display addon name in "Remove Media"-dialog
+  Maven85  JSON support
+  Maven85  [ADD TVShows]: Fix for adding a complete series (AmazonVOD)
+  Maven85  Movies: Option to save each stream to its own folder
+  Maven85  Fix Umlaut in "Remove Media"-dialog
+  Maven85  Movies: Option to save streams to its own superfolder (per MediaList entry)
+  Maven85  Xs fix
+  Maven85  Remove xS support
+  Maven85  Fix: Android add and remove
+  Maven85  Pluginextensions
+  Maven85  [ADD TVShows] overwriting fix
+  Maven85  "++RenamedTitle++" removed from folder names and gui
+  Maven85  Fix: Create/delete folders
+  Maven85  Bugfixing
+
+1.2.7 - 1.2.8
+ Paging Fix
+
+1.2.3 - 1.2.6
+  Fix for Progress bar
+  Fix for Paging TV-Shows
+  Fix for Paging in single show
+
+1.2.2
+  SQL Support
+  SQL Movies.db
+  SQL Shows.db
+  Resume Playing(Movies)
+  Select Provider dialog
+  New Look
+  
+
+1.0.7
+  Improved Auto update
+  Improved watched status (set as watched)
+  Update button
+  Suport for Music, you can add your music strms to the Kodi library.
+  YouTube support
+  Some fixes
+
+0.4.7
+  Improved Auto update
+  Improved watched status (set as watched)
+  Now you can write your strms to a samba share, with or without login credentials.
+	Note: you have to set the share as source in kodi's file manager!
+  Some fixes
+
+0.4.4 - 0.4.6
+  Some fixes
+
+0.4.3
+  New option: Update at startup
+  New Funktion: Rename
+  Some fixes
+
+0.4.2 
+  Some fixes
+
+0.4.1 RC
+New Funktion: Watched status for Movies and TV-Shows
+New Funktion: Timed update for your content
+  Some fixes
+
+0.4.0 RC
+  Some fixes
+
+0.3.9 RC
+  New Function: Shows-Collection
+  Some fixes
+
+0.3.8 RC
+  Code cleaning part5
+  Some fixes
+
+0.3.7 RC
+  Code cleaning part4
+  Added new methods addTVShows, getEpisodes and getTVShowsFromList
+  Some fixes
+
+0.3.5 RC
+  Code cleaning part3
+  Added new methods markSeries and markMovies as watched
+  Some fixes
+
+0.3.2 RC1
+  Code cleaning part2
+  Added new methods addMovies and addSeries
+  Movie strms are created in their own folder now 
+  Some fixes
+
+0.3.1 RC1
+  Code cleaning part1
+  Some fixes
+
+0.1.9
+  Fix for update loop
+
+0.2.4
+  Bug fixing
+  Last build before RC 1
+
+0.2.3
+  Bug fixing
+
+0.2.2
+  Fix
+
+0.2.1
+  New Funktions: Language selection after selectin "create_strms"
+  Fix for unstable folder structure.
+
+0.2.0
+  Remove files and folders for removed items in settings2.xml
+  Fix for update function full hours
+
+0.1.9
+  Fix for update loop
+
+0.1.8
+  Fix for AutoUpdate function
+
+0.1.7
+  Some other fixes
+
+0.1.6
+  Decoding error fix for ÄÜÖ
+  Fix for YouTube Playlists adding as TV
+  Some other fixes
+
+0.1.5
+  Some fixes
+
+0.1.4
+  Renaming Project to OSMOSIS
+
+0.1.3
+  Some fixes
+
+0.1.2
+  New Funktion: You can add audio strms now
+  New Funktion: Added a dialog that allows you to remove items from settings2.xml Open OSMOSIS >> select "Remove Media" >>     select   items to be removed(mullti selection) >> click on "delete" to remove the items form "settings2.xml"
+ Some fixes
+
+0.1.1
+  Support for Amazon Prime Music
+  New Function: NFO-Files for strms containing audio streams
+  To get library support, you have to add the audio strms as "Music Video"
+  Improved Auto update
+  Some fixes
+
+0.1.0
+  New Funktion: Auto update strms, 
+  New Funktion: Status bar for updates, 
+  New Funktion: Status when adding content, 
+  Some fixes
