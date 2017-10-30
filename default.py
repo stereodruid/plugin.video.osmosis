@@ -296,11 +296,7 @@ if __name__ == "__main__":
                     pos = ()
                     total = ()
                     done = True
-                else:
-                    done = False
-              
-                if shoID:
-                    guiTools.markSeries(xbmc.getInfoLabel("VideoPlayer.TVShowTitle"),xbmc.getInfoLabel("VideoPlayer.Episode"),xbmc.getInfoLabel("VideoPlayer.Season"),shoID, pos, total, done)				
+                    guiTools.markSeries(xbmc.getInfoLabel("VideoPlayer.TVShowTitle"),xbmc.getInfoLabel("VideoPlayer.Episode"),xbmc.getInfoLabel("VideoPlayer.Season"),shoID, pos, total, done)
             else:
                 #search bookmarks for the ID and get the played time if exists
                 checkURL = str(sys.argv[0].replace(r'|', sys.argv[2] + r'|'))

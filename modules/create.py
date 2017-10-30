@@ -365,9 +365,10 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
                     if label and strm_name:                                              
                         label = stringUtils.cleanByDictReplacements(label)           
                         if HIDE_tile_in_OV == "true" and not label.find("[OV]") == -1:   
-			    get_title_with_OV = 0
+			                      get_title_with_OV = 0
                         else:
                             get_title_with_OV = 1
+
                         thisDialog.dialogeBG.update(j, ADDON_NAME + ": Getting Movies: ",  " Video: " + label)
                         if filetype == 'file' and get_title_with_OV == 1:
                             movieList.append([stringUtils.getMovieStrmPath(strm_type, strm_name, label), stringUtils.cleanByDictReplacements(stringUtils.getStrmname(label)), file, listName])
