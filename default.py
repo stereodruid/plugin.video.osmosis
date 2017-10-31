@@ -296,6 +296,8 @@ if __name__ == "__main__":
                     pos = ()
                     total = ()
                     done = True
+                else:
+                    done = False
               
                 if shoID:
                     guiTools.markSeries(xbmc.getInfoLabel("VideoPlayer.TVShowTitle"),xbmc.getInfoLabel("VideoPlayer.Episode"),xbmc.getInfoLabel("VideoPlayer.Season"),shoID, pos, total, done)
@@ -334,6 +336,8 @@ if __name__ == "__main__":
                     pos = ()
                     total = ()
                     done = True
+                else:
+                    done = False
               
                 if movID:
                     guiTools.markMovie(movID, pos, total, done)
