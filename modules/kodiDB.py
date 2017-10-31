@@ -73,6 +73,7 @@ TVSDBPASSWORD = REAL_SETTINGS.getSetting('TV-Show-DB password')
 TVSDBNAME = REAL_SETTINGS.getSetting('TV-Show-DB name')
 TVSDBIP = REAL_SETTINGS.getSetting('TV-Show-DB IP')
 TVSDBPORT = REAL_SETTINGS.getSetting('TV-Show-DB port')
+
 profile = xbmc.translatePath(addon.getAddonInfo('profile').decode('utf-8'))
 home = xbmc.translatePath(addon.getAddonInfo('path').decode('utf-8'))
 favorites = os.path.join(profile, 'favorites')
@@ -155,7 +156,6 @@ class Config(object):
 				'get_warnings': cls.WARNINGS,
 				'buffered': cls.BUFFERED,
 				}
-  
     
 def musicDatabase(pstrAlbumName, pstrArtistName, pstrSongTitle, pstrPath, purlLink, track, artPath):
     path = str(os.path.join(STRM_LOC, pstrPath))
@@ -388,7 +388,6 @@ def writeMoviePath(path):
         cursor.close()
         connectMDB.close() 
         pass    
-
 def valDB(database):
 	if DATABASE_MYSQL == "false":
 		dbcon = sqlite3.connect(database)
@@ -537,7 +536,7 @@ def createShowDB():
 			while not xbmcvfs.exists(SHDBPATH):
 				True
         else:
-			  Config.DatabaseTYpe = 'TVShows'
+			Config.DatabaseTYpe = 'TVShows'
 			Config.BUFFERED = True
 			config = Config.dataBaseVal().copy()        
 			connectMDB = mysql.connector.Connect(**config)
@@ -724,10 +723,10 @@ def episodeStreamExists(showID,seEp, provider, url):
             return dID
         else:
             if str(entry[1]) != url:
-                sql_path = """UPDATE stream_ref_series SET url = "%s" WHERE show_id="%s" AND seasonEpisode="%s" AND provider="%s";""" % (url, showID, seEp, provider)
+                sql_path = """UPDATE stream_ref SET url = "%s" WHERE show_id="%s" AND seasonEpisode="%s" AND provider="%s";""" % (url, showID, seEp, provider)
                 cursor.execute(sql_path)
                 connectMDB.commit()
-            dID = cursor.execute("""SELECT "%s" FROM "%s" WHERE show_id="%s" AND seasonEpisode="%s" AND provider="%s";""" % ("show_id","stream_ref_series", showID, seEp, provider)).fetchone()[0] 
+            dID = cursor.execute("""SELECT "%s" FROM "%s" WHERE show_id="%s" AND seasonEpisode="%s" AND provider="%s";""" % ("show_id","stream_ref", showID, seEp, provider)).fetchone()[0] 
             cursor.close()
             connectMDB.close()
             return dID     
@@ -811,8 +810,6 @@ def getPlayedURLResumePoint(url):
         
         cursor.close()
         connectMDB.close()
-        
-        return urlResumePoint     
     except:
         cursor.close()
         connectMDB.close()
@@ -855,40 +852,7 @@ def delBookMark(ID, movFileID):
                 connectMDB.commit()
         
         cursor.close()
-        connectMDB.close()
-    except:
-        cursor.close()
-        connectMDB.close()
-        pass
-def delShoBookMark(ID, shoFileID):
-    try:
-        Config.DatabaseTYpe = 'KMovies'
-        query = ("""SELECT idBookmark FROM bookmark WHERE idFile="%s" """)
-        selectStm = (shoFileID)
-        
-        Config.BUFFERED = True
-        config = Config.dataBaseVal().copy()        
-        connectMDB = mysql.connector.Connect(**config)
-        cursor = connectMDB.cursor()
-        
-        cursor.execute(query % selectStm)
-        if cursor.fetchone() :
-            query = ("""DELETE FROM bookmark WHERE idFile="%s" """)
-            selectStm = (shoFileID)
-            cursor.execute(query % selectStm)
-            time.sleep(1)
-        
-        query = ("""SELECT idBookmark FROM bookmark WHERE idFile="%s" """)
-        selectStm = (ID)
-        
-        cursor.execute(query % selectStm)
-        if cursor.fetchone() :
-            query = ("""DELETE FROM bookmark WHERE idBookmark="%s" """)
-            selectStm = (ID)
-            cursor.execute(query % selectStm)
-        
-        cursor.close()
-        connectMDB.close()
+        connectMDB.close()   
     except:
         cursor.close()
         connectMDB.close()
@@ -986,32 +950,7 @@ def getKodiEpisodeID(title, sTitle):
                 return kodiMovID
         
         cursor.close()
-        connectMDB.close()
-        
-        return kodiMovID     
-    except:
-        cursor.close()
-        connectMDB.close()
-def getKodiEpisodeID(title, sTitle):
-    try:
-        Config.DatabaseTYpe = 'KMovies'
-        query = ("""SELECT idEpisode, idFile FROM episode WHERE c00 LIKE "%s" OR c00 LIKE "%s" """)
-        selectStm = (title, sTitle)
-        
-        Config.BUFFERED = True
-        config = Config.dataBaseVal().copy()        
-        connectMDB = mysql.connector.Connect(**config)
-        cursor = connectMDB.cursor()
-        
-        cursor.execute(query % selectStm)
-        if cursor.fetchone() :
-            kodiShoID = cursor.fetchall()
-        
-        
-        cursor.close()
-        connectMDB.close()
-        
-        return kodiShoID     
+        connectMDB.close()        
     except:
         cursor.close()
         connectMDB.close()
