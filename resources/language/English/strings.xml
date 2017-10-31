@@ -34,12 +34,12 @@
 	<string id="38006">Movie-DB Port (MYSQL)</string>
 	
 	<string id="35000">Kodi Music database</string>
-	<string id="35001">Music-DB username (MYSQL)</string>
-    <string id="35002">Music-DB password (MYSQL)</string>
-    <string id="35003">Music-DB filename (MYSQL)</string>
+	<string id="35001">Music-DB username (MYSQL(comming soon))</string>
+    <string id="35002">Music-DB password (MYSQL(comming soon))</string>
+    <string id="35003">Music-DB filename (MYSQL(comming soon))</string>
     <string id="35004">Music-DB directory (SQLITE3)</string>
-    <string id="35005">Music-DB IP (MYSQL)</string>
-	<string id="35006">Music-DB Port (MYSQL)</string>
+    <string id="35005">Music-DB IP (MYSQL(comming soon))</string>
+	<string id="35006">Music-DB Port (MYSQL(comming soon))</string>
     
     <string id="37000">Osmosis TV-Show database</string>
 	<string id="37001">TV-Show-DB username (MYSQL)</string>
