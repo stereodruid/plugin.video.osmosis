@@ -296,6 +296,8 @@ if __name__ == "__main__":
                     pos = ()
                     total = ()
                     done = True
+              
+                if shoID:
                     guiTools.markSeries(xbmc.getInfoLabel("VideoPlayer.TVShowTitle"),xbmc.getInfoLabel("VideoPlayer.Episode"),xbmc.getInfoLabel("VideoPlayer.Season"),shoID, pos, total, done)
             else:
                 #search bookmarks for the ID and get the played time if exists
