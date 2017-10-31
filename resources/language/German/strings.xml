@@ -35,11 +35,11 @@
 	
 	<string id="35000">Kodi Musikdatenbank</string>
 	<string id="35001">Musik-DB Benutzername (MYSQL)</string>
-    <string id="35002">Musik-DB Passwort (MYSQL)</string>
-    <string id="35003">Musik-DB Datenbank (MYSQL)</string>
+    <string id="35002">Musik-DB Passwort (MYSQL (in kürze))</string>
+    <string id="35003">Musik-DB Datenbank (MYSQL (in kürze))</string>
     <string id="35004">Musik-DB Speicherort (SQLITE3)</string>
-    <string id="35005">Musik-DB IP-Adresse (MYSQL)</string>
-	<string id="35006">Musik-DB Port (MYSQL)</string>
+    <string id="35005">Musik-DB IP-Adresse (MYSQL (in kürze))</string>
+	<string id="35006">Musik-DB Port (MYSQL (in kürze))</string>
     
     <string id="37000">Osmosis Seriendatenbank</string>
 	<string id="37001">Serien-DB Benutzername (MYSQL)</string>
