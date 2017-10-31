@@ -364,8 +364,8 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
                     
                     if label and strm_name:                                              
                         label = stringUtils.cleanByDictReplacements(label)           
-                        if HIDE_tile_in_OV == "true" and not label.find("[OV]") == -1:   
-			                      get_title_with_OV = 0
+                        if HIDE_tile_in_OV == "true" and not label.find("[OV]") == -1:  
+                            get_title_with_OV = 0
                         else:
                             get_title_with_OV = 1
 
