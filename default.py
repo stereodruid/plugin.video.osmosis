@@ -332,8 +332,6 @@ if __name__ == "__main__":
                     pos = ()
                     total = ()
                     done = True
-                else:
-                    done = False
               
                 if movID:
                     guiTools.markMovie(movID, pos, total, done)
