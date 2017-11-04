@@ -1,4 +1,6 @@
 1.3.0-1.3.1
+  gu3nter  Added MYSQL support for Music
+  Gismo112 Add SkinUpdate Resume / Watchedstates
   gu3nter  Sqlite3 and MYSQL are now supported in one Branch
 
 1.2.9-1.3.0
