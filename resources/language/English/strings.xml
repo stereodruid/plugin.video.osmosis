@@ -34,12 +34,12 @@
 	<string id="38006">Movie-DB Port (MYSQL)</string>
 	
 	<string id="35000">Kodi Music database</string>
-	<string id="35001">Music-DB username (MYSQL(comming soon))</string>
-    <string id="35002">Music-DB password (MYSQL(comming soon))</string>
-    <string id="35003">Music-DB filename (MYSQL(comming soon))</string>
+	<string id="35001">Music-DB username (MYSQL)</string>
+    <string id="35002">Music-DB password (MYSQL)</string>
+    <string id="35003">Music-DB filename (MYSQL)</string>
     <string id="35004">Music-DB directory (SQLITE3)</string>
-    <string id="35005">Music-DB IP (MYSQL(comming soon))</string>
-	<string id="35006">Music-DB Port (MYSQL(comming soon))</string>
+    <string id="35005">Music-DB IP (MYSQL)</string>
+	<string id="35006">Music-DB Port (MYSQL)</string>
     
     <string id="37000">Osmosis TV-Show database</string>
 	<string id="37001">TV-Show-DB username (MYSQL)</string>
@@ -56,6 +56,14 @@
     <string id="36004">Movie-DB directory (SQLITE3)</string>
     <string id="36005">Movie-DB IP (MYSQL)</string>
 	<string id="36006">Movie-DB Port (MYSQL)</string>
+	
+	<string id="34000">Osmosis Music database</string>
+	<string id="34001">Music-DB username (MYSQL)</string>
+    <string id="34002">Music-DB password (MYSQL)</string>
+    <string id="34003">Music-DB filename (MYSQL)</string>
+    <string id="34004">Music-DB directory (SQLITE3)</string>
+    <string id="34005">Music-DB IP (MYSQL)</string>
+	<string id="34006">Music-DB Port (MYSQL)</string>
     
 	<string id="30310">Strm Limit Per Configuration</string>	
 	<string id="30305">Download Youtube/RSS Thumbs (ComingSoon)</string>
