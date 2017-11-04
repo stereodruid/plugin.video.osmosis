@@ -34,12 +34,12 @@
         <setting label="38004" type="file" id="KMovie-DB path" source="auto" default=""/>
     </category>
     <category label="35000">
-      	<setting label="35001" type="text" id="Music-DB username" />
-        <setting label="35002" type="text" id="Music-DB password" />
-        <setting label="35003" type="text" id="Music-DB name" />
-        <setting label="35005" type="ipaddress" id="Music-DB IP" default="localhost"/>
-        <setting label="35006" type="number" id="Music-DB port" default="3306"/>
-        <setting label="35004" type="file" id="Music-DB path" source="auto" default=""/>
+      	<setting label="35001" type="text" id="KMusic-DB username" />
+        <setting label="35002" type="text" id="KMusic-DB password" />
+        <setting label="35003" type="text" id="KMusic-DB name" />
+        <setting label="35005" type="ipaddress" id="KMusic-DB IP" default="localhost"/>
+        <setting label="35006" type="number" id="KMusic-DB port" default="3306"/>
+        <setting label="35004" type="file" id="KMusic-DB path" source="auto" default=""/>
     </category>
     <category label="36000">
       	<setting label="36001" type="text" id="Movies-DB username" />
@@ -54,5 +54,12 @@
         <setting label="37003" type="text" id="TV-Show-DB name" />
         <setting label="37005" type="ipaddress" id="TV-Show-DB IP" default="localhost"/>
         <setting label="37006" type="number" id="TV-Show-DB port" default="3306"/>
+    </category>
+    <category label="34000">
+      	<setting label="34001" type="text" id="Music-DB username" />
+        <setting label="34002" type="text" id="Music-DB password" />
+        <setting label="34003" type="text" id="Music-DB name" />
+        <setting label="34005" type="ipaddress" id="Music-DB IP" default="localhost"/>
+        <setting label="34006" type="number" id="Music-DB port" default="3306"/>
     </category>
 </settings>
