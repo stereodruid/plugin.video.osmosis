@@ -300,7 +300,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
 
             pagesDone += 1
             contentList = []
-            if pagesDone < int(PAGINGTVshows) and len(dirList) > 0:
+            if pagesDone < int(PAGINGalbums) and len(dirList) > 0:
                 contentList = [item for sublist in dirList for item in sublist]
                 dirList = []            
 
