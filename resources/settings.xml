@@ -10,7 +10,6 @@
         <setting label="32009" type="bool" id="Automatic_Update_Folder" subsetting="true" visible="eq(-4,true)" default="false" />
         <setting label="32010" type="bool" id="Automatic_Clean_Folder" subsetting="true" visible="eq(-5,true)" default="true" />
         <setting label="32011" type="bool" id="Automatic_Clear_Folder" subsetting="false" visible="eq(-6,true)" default="false" />
-        <setting label="32012" type="bool" id="supportES" default="false"/>
      </category>
      <category label="31000">   
         <setting label="31004" type="bool" id="Write_NFOS" default="false" />

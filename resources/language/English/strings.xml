@@ -8,7 +8,7 @@
 	<string id="32009">Run Library Scan when finished</string>
 	<string id="32010">Clean Database when finished</string>
 	<string id="32011">Clear Strm folder before each run</string>
-	<string id="32012">Support Exodus: If the function is enabled, OSMOSIS is allowed to change the code of Exodus</string>
+	<!-- 32012 -->
 	<string id="32013">Do not add streams which are in "[OV]" (e. g. AMAZON VOD)</string>
 	<string id="32014">Kodi is using MYSQL-Database</string>
 	

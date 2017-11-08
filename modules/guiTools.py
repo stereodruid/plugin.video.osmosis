@@ -130,6 +130,7 @@ def addLink(name,url,mode,iconimage,fanart,plot,genre,date,showcontext,playlist,
     liz.setProperty('IsPlayable', 'true')
     contextMenu.append(('Create Strm','XBMC.RunPlugin(%s&mode=200&name=%s&filetype=file)'%(u, name)))
     liz.addContextMenuItems(contextMenu)
+    xbmcplugin.setContent(int(sys.argv[1]), 'movies')
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,totalItems=total)
     return ok
 
@@ -261,9 +262,3 @@ def yesnoDialog(str1, str2='', header=ADDON_NAME, yes='', no=''):
 def browse(type, heading, shares, mask='', useThumbs=False, treatAsFolder=False, path='', enableMultiple=False):
     retval = xbmcgui.Dialog().browse(type, heading, shares, mask, useThumbs, treatAsFolder, path, enableMultiple)
     return retval
-
-def checkGuiA():
-    try:
-        return True
-    except:
-        pass

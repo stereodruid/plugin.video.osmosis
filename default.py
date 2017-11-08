@@ -66,10 +66,6 @@ STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
 
 if __name__ == "__main__":
     try:
-        xbmcplugin.setContent(int(sys.argv[1]), 'movies')
-    except:
-        pass
-    try:
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_UNSORTED)
     except:
         pass
@@ -180,6 +176,7 @@ if __name__ == "__main__":
         utils.addon_log("getSources")
         guiTools.getSources()
         try:
+            xbmcplugin.setContent(int(sys.argv[1]), 'movies')
             xbmcplugin.endOfDirectory(int(sys.argv[1]))
         except:
             pass
@@ -199,6 +196,7 @@ if __name__ == "__main__":
                     "Take a look at ++ Naming video files/TV shows ++ http://kodi.wiki/view/naming_video_files/TV_shows" ]               
             dialoge.PopupWindow(tutWin)
         try:
+            xbmcplugin.setContent(int(sys.argv[1]), 'movies')
             xbmcplugin.endOfDirectory(int(sys.argv[1]))
         except:
             pass

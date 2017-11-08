@@ -49,14 +49,8 @@ Automatic_Update_Run = REAL_SETTINGS.getSetting('Automatic_Update_Run')
 represent = os.path.join(ADDON_PATH, 'icon.png')
 toseconds = 0.0
 itime = 5000000000  # in miliseconds 
-guiFix = False 
    
-if __name__ == "__main__":
-    guiFix = updateAll.guIFix(guiFix)
-    if Updat_at_startup == "true":
-        guiFix = updateAll.guIFix(guiFix)        
-        updateAll.strm_update()
-       
+if __name__ == "__main__":       
     monitor = xbmc.Monitor()
     while not monitor.abortRequested():
         # Sleep/wait for abort for 10 seconds

@@ -45,10 +45,8 @@ ADDON_SETTINGS = REAL_SETTINGS.getAddonInfo('profile')
 # PC Settings Info
 MediaList_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS, 'MediaList.xml'))
 Automatic_Update_Time = REAL_SETTINGS.getSetting('Automatic_Update_Time') 
-supportES = REAL_SETTINGS.getSetting('supportES') 
 represent = os.path.join(ADDON_PATH, 'icon.png')
 itime = 900000000000000  # in miliseconds  
-guiFix = False
 
 def readMediaList(purge=False):
     try:
@@ -60,16 +58,7 @@ def readMediaList(purge=False):
     except:
         pass
 
-def guIFix(bVal):
-    if supportES == "false":
-        return True
-    if not bVal:
-    # Sleep/wait for to avoid freeze
-        return guiTools.checkGuiA() 
-
-def strm_update():
-    guIFix(False)
-   
+def strm_update():   
     try:
         if xbmcvfs.exists(MediaList_LOC):
             thelist = readMediaList()
