@@ -244,7 +244,7 @@ def writeMediaList(url, name, cType='Other', cleanName=True):
             else:
                 output_file.write(linje.strip())
 def writeTutList(step):
-    utils.addon_log('writeMediaList')
+    utils.addon_log('writeTutList')
     existInList = False
     thelist = []
     thefile = xbmc.translatePath(os.path.join(profile, 'firstTimeTut.xml'))

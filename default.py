@@ -164,7 +164,10 @@ if __name__ == "__main__":
         regexs = params["regexs"]
     except:
         pass
-    filetype = params.get("filetype", "directory")
+    try:
+        filetype = params.get("filetype", "directory")
+    except:
+        pass
     
     utils.addon_log("Mode: " + str(mode))
  
