@@ -172,7 +172,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         file = detail['file'].replace("\\\\", "\\")
         strm_name = str(stringUtils.cleanByDictReplacements(strm_name.strip()))
         plot = stringUtils.cleanLabels(detail.get('plot',''))
-        thumbnail = detail.get('thumbnail','')
+        thumbnail = detail.get('thumbnail') if detail.get('thumbnail', '') != '' else detail.get('fanart','')
         fanart = detail.get('fanart','')
         
         if addon.getSetting('Link_Type') == '0':
