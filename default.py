@@ -263,27 +263,26 @@ if __name__ == "__main__":
                 time.sleep(1)
                 counter += 1
                 if counter >= 30:
-                    raise
-            
-                   
+                    raise            
+
             if xbmc.getInfoLabel("VideoPlayer.TVShowTitle") != "":
                 # guiTools.markSeries(xbmc.getInfoLabel("VideoPlayer.TVShowTitle"),xbmc.getInfoLabel("VideoPlayer.Episode"),xbmc.getInfoLabel("VideoPlayer.Season"))
                 checkURL = str(sys.argv[0].replace(r'|', sys.argv[2] + r'|'))
                 urlsResumePoint = kodiDB.getPlayedURLResumePoint(checkURL)
-                
+
                 shoProps =  kodiDB.getKodiEpisodeID(xbmc.getInfoLabel("VideoPlayer.Title"), sTitle)               
                 shoID = shoProps[0][0]
                 shoFileID = shoProps[0][1]
-                meta = "video"
-                   
+
                 if urlsResumePoint: 
                     conTime = utils.zeitspanne(int(urlsResumePoint[0][0]))               
                     resume = ["Jump to position : %s " % (str(conTime[5])), "Start form beginning!"] 
                     if guiTools.selectDialog(resume, header = 'OSMOSIS: Would you like to continue?') == 0:
                         xbmc.Player().seekTime(int(urlsResumePoint[0][0]) - 10)
-                
+
+                watched = 0
                 while xbmc.Player().isPlaying():
-                    meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
+                    watched = xbmc.Player().getTime() * 100 / xbmc.Player().getTotalTime()
                     time.sleep(1)
                 
                 time.sleep(1)   
@@ -300,7 +299,7 @@ if __name__ == "__main__":
                 elif not urlsResumePoint and not urlsWatchedPoint:
                     pos = ()
                     total = ()
-                    done = True
+                    done = done = True if watched > 92 else False
                 else:
                     done = False
               
@@ -314,16 +313,16 @@ if __name__ == "__main__":
                 movProps =  kodiDB.getKodiMovieID(xbmc.getInfoLabel("VideoPlayer.Title"), sTitle)               
                 movID = movProps[0][0]
                 movFileID = movProps[0][1]
-                meta = "video"
                    
                 if urlsResumePoint: 
                     conTime = utils.zeitspanne(int(urlsResumePoint[0][0]))               
                     resume = ["Jump to position : %s " % (str(conTime[5])), "Start form beginning!"] 
                     if guiTools.selectDialog(resume, header = 'OSMOSIS: Would you like to continue?') == 0:
                         xbmc.Player().seekTime(int(urlsResumePoint[0][0]) - 10)
-                
+
+                watched = 0
                 while xbmc.Player().isPlaying():
-                    meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
+                    watched = xbmc.Player().getTime() * 100 / xbmc.Player().getTotalTime()
                     time.sleep(1)
                 
                 time.sleep(1)   
@@ -340,7 +339,7 @@ if __name__ == "__main__":
                 elif not urlsResumePoint and not urlsWatchedPoint:
                     pos = ()
                     total = ()
-                    done = True
+                    done = True if watched > 92 else False
                 else:
                     done = False
               
