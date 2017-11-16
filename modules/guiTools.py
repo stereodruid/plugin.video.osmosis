@@ -102,14 +102,14 @@ def addFunction(labels= 'n.a' ):
         except:#          
             pass
             
-def addDir(name,url,mode,iconimage,fanart,plot,genre,date,credits,showcontext=False):
+def addDir(name,url,mode,art,plot,genre,date,credits,showcontext=False):
     utils.addon_log('addDir')
-    u=sys.argv[0]+"?url="+urllib.quote_plus(stringUtils.uni(url))+"&mode="+str(mode)+"&name="+urllib.quote_plus(stringUtils.uni(name))+"&fanart="+urllib.quote_plus(fanart)
+    u=sys.argv[0]+"?url="+urllib.quote_plus(stringUtils.uni(url))+"&mode="+str(mode)+"&name="+urllib.quote_plus(stringUtils.uni(name))+"&fanart="+urllib.quote_plus(art.get('fanart',''))
     ok=True
     contextMenu = []
-    liz=xbmcgui.ListItem(name, iconImage=iconimage, thumbnailImage=iconimage)
+    liz=xbmcgui.ListItem(name, iconImage=art.get('thumb',None), thumbnailImage=art.get('thumb',None))
     liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": plot, "Genre": genre, "dateadded": date, "credits": credits })
-    liz.setProperty("Fanart_Image", fanart)
+    liz.setArt(art)
     contextMenu.append(('Create Strms','XBMC.RunPlugin(%s&mode=200&name=%s)'%(u, name)))
     liz.addContextMenuItems(contextMenu)
     try:
@@ -119,14 +119,14 @@ def addDir(name,url,mode,iconimage,fanart,plot,genre,date,credits,showcontext=Fa
     
     return ok
       
-def addLink(name,url,mode,iconimage,fanart,plot,genre,date,showcontext,playlist,regexs,total,setCookie=""): 
+def addLink(name,url,mode,art,plot,genre,date,showcontext,playlist,regexs,total,setCookie=""): 
     utils.addon_log('addLink') 
-    u=sys.argv[0]+"?url="+urllib.quote_plus(stringUtils.uni(url))+"&mode="+str(mode)+"&name="+urllib.quote_plus(stringUtils.uni(name))+"&fanart="+urllib.quote_plus(fanart)
+    u=sys.argv[0]+"?url="+urllib.quote_plus(stringUtils.uni(url))+"&mode="+str(mode)+"&name="+urllib.quote_plus(stringUtils.uni(name))+"&fanart="+urllib.quote_plus(art.get('fanart',''))
     ok = True
     contextMenu =[]
-    liz=xbmcgui.ListItem(name, iconImage=iconimage, thumbnailImage=iconimage)
+    liz=xbmcgui.ListItem(name, iconImage=art.get('thumb',None), thumbnailImage=art.get('thumb',None))
     liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": plot, "Genre": genre, "dateadded": date })
-    liz.setProperty("Fanart_Image", fanart)
+    liz.setArt(art)
     liz.setProperty('IsPlayable', 'true')
     contextMenu.append(('Create Strm','XBMC.RunPlugin(%s&mode=200&name=%s&filetype=file)'%(u, name)))
     liz.addContextMenuItems(contextMenu)
@@ -136,9 +136,11 @@ def addLink(name,url,mode,iconimage,fanart,plot,genre,date,showcontext,playlist,
 
 def getSources():
     utils.addon_log('getSources')
-    addDir('Video Plugins', 'video', 1, folderIcon, FANART, 'description', 'genre', 'date', 'credits')
-    addDir('Music Plugins', 'audio', 1, folderIcon, FANART, 'description', 'genre', 'date', 'credits')
-    addDir('UPNP Servers', 'upnp://', 2, folderIcon, FANART, 'description', 'genre', 'date', 'credits')
+    xbmcplugin.setContent(int(sys.argv[1]), 'movies')
+    art = {'fanart': FANART, 'thumb': folderIcon}
+    addDir('Video Plugins', 'video', 1, art, 'description', 'genre', 'date', 'credits')
+    addDir('Music Plugins', 'audio', 1, art, 'description', 'genre', 'date', 'credits')
+    addDir('UPNP Servers', 'upnp://', 2, art, 'description', 'genre', 'date', 'credits')
     addFunction('Update')
     addItem(labels="Remove Media")
     #ToDo Add label
@@ -209,8 +211,8 @@ def markSeries(sShowTitle,sEpisode,sSeason,shoID,pos,total,done):
                 xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "resume" : {"position":%s,"total":%s} }, "id": 1 }' % (shoID, pos, total))
                 xbmc.executebuiltin("XBMC.Container.Refresh")
             except:
-			    print("markSeries: Show not in DB!?")
-			    pass
+                print("markSeries: Show not in DB!?")
+                pass
 # Functions not in usee yet:
 def handle_wait(time_to_wait, header, title):
     dlg = xbmcgui.DialogProgress()

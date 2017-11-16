@@ -93,7 +93,8 @@ def fillPlugins(cType='video'):
                 break
 
         if cType in addontypes and not addon['addonid'] == 'plugin.video.osmosis':
-            guiTools.addDir(addon['name'], 'plugin://' + addon['addonid'], 101, addon['thumbnail'], addon['fanart'], addon['description'], cType, 'date', 'credits')
+            art = {'thumb': addon['thumbnail'], 'fanart': addon['fanart']}
+            guiTools.addDir(addon['name'], 'plugin://' + addon['addonid'], 101, art, addon['description'], cType, 'date', 'credits')
 
 def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None'):
     initialize_DialogBG("Updating", "Getting content..")
@@ -172,11 +173,10 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         file = detail['file'].replace("\\\\", "\\")
         strm_name = str(stringUtils.cleanByDictReplacements(strm_name.strip()))
         plot = stringUtils.cleanLabels(detail.get('plot',''))
-        thumbnail = detail.get('thumbnail') if detail.get('thumbnail', '') != '' else detail.get('fanart','')
-        fanart = detail.get('fanart','')
+        art = detail.get('art',{})
         
         if addon.getSetting('Link_Type') == '0':
-            link = sys.argv[0] + "?url=" +urllib.quote_plus(stringUtils.uni(file)) + "&mode=" + str(10) + "&name=" +urllib.quote_plus(stringUtils.uni(label)) + "&fanart=" + urllib.quote_plus(fanart)
+            link = sys.argv[0] + "?url=" +urllib.quote_plus(stringUtils.uni(file)) + "&mode=" + str(10) + "&name=" +urllib.quote_plus(stringUtils.uni(label)) + "&fanart=" + urllib.quote_plus(art.get('fanart',''))
         else:
             link = file
     
@@ -213,12 +213,12 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
                     kodiDB.musicDatabase(album, artist, label, path, link, track)
                 fileSys.writeSTRM(stringUtils.cleanStrms((path.rstrip("."))), stringUtils.cleanStrms(filename.rstrip(".")) , link)
             else:
-                guiTools.addLink(label, file, 10, thumbnail, fanart, plot, '', '', '', None, '', total=len(details))
+                guiTools.addLink(label, file, 10, art, plot, '', '', '', None, '', total=len(details))
         else:
             if strm:
                 fillPluginItems(file, media_type, file_type, strm, label, strm_type)
             else:
-                guiTools.addDir(label, file, 101, thumbnail, fanart, plot, '', '', '')
+                guiTools.addDir(label, file, 101, art, plot, '', '', '')
 
 def removeItemsFromMediaList(action='list'):
     from modules import dialoge
