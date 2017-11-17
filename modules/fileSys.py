@@ -39,11 +39,11 @@ except:
     import simplejson as json
 
 
-addnon_id = 'plugin.video.osmosis'
-addon = xbmcaddon.Addon(addnon_id)
+addon_id = 'plugin.video.osmosis'
+addon = xbmcaddon.Addon(addon_id)
 addon_version = addon.getAddonInfo('version')
 ADDON_NAME = addon.getAddonInfo('name')
-REAL_SETTINGS = xbmcaddon.Addon(id=addnon_id)
+REAL_SETTINGS = xbmcaddon.Addon(id=addon_id)
 ADDON_SETTINGS = REAL_SETTINGS.getAddonInfo('profile')
 ADDON_PATH = REAL_SETTINGS.getAddonInfo('path')
 MediaList_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS, 'MediaList.xml'))
@@ -68,8 +68,8 @@ if os.path.exists(favorites) == True:
     FAV = open(favorites).read()
 else: FAV = []
 
-DIRS = []
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
+addonList = {}
 
 def writeSTRM(path, file, url):
     #ToDo: OriginalPlugin option
@@ -152,7 +152,7 @@ def updateStream(strm_Fullpath, replace_text):
     while os.stat(strm_Fullpath).st_size == 0:
         with open(strm_Fullpath, 'w') as newF:
             newF.write(replace_text)
-def isInMediaList(mdediaTitle, cType='Other'):
+def isInMediaList(mediaTitle, url, cType='Other'):
     utils.addon_log('isInMediaList')
     existInList = False
     thelist = []
@@ -170,8 +170,13 @@ def isInMediaList(mdediaTitle, cType='Other'):
     
     if len(thelist) > 0:
         for i in thelist:
-            if i.split('|',2)[1] == mdediaTitle:
-                existInList = True     
+            splits = i.strip().split('|')
+            if splits[1] == mediaTitle:
+                splitPlugin = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), splits[2])
+                mediaPlugin = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
+                if mediaPlugin and splitPlugin and mediaPlugin.group(1) == splitPlugin.group(1):
+                    existInList = True
+
     if existInList:
         return True
     else:
@@ -221,11 +226,14 @@ def writeMediaList(url, name, cType='Other', cleanName=True):
     
     if len(thelist) > 0:
         for i in thelist:
-            
-            if i.split('|',2)[1] == name:
-                xbmcgui.Dialog().notification(str(i), "Adding to MediaList",  os.path.join(ADDON_PATH, 'representerIcon.png'), 5000)
-                thelist = stringUtils.replaceStringElem(thelist, theentry, theentry)
-                existInList = True     
+            splits = i.strip().split('|')
+            if stringUtils.getStrmname(splits[1]) == stringUtils.getStrmname(name):
+                splitPlugin = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), splits[2])
+                mediaPlugin = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
+                if mediaPlugin and splitPlugin and mediaPlugin.group(1) == splitPlugin.group(1):
+                    xbmcgui.Dialog().notification(str(i), "Adding to MediaList",  os.path.join(ADDON_PATH, 'representerIcon.png'), 5000)
+                    thelist = stringUtils.replaceStringElem(thelist, i, theentry)
+                    existInList = True     
     if existInList != True:
         thelist.append(theentry)
         
@@ -236,7 +244,7 @@ def writeMediaList(url, name, cType='Other', cleanName=True):
             else:
                 output_file.write(linje.strip())
 def writeTutList(step):
-    utils.addon_log('writeMediaList')
+    utils.addon_log('writeTutList')
     existInList = False
     thelist = []
     thefile = xbmc.translatePath(os.path.join(profile, 'firstTimeTut.xml'))
@@ -339,3 +347,15 @@ def completePath(filepath):
         filepath += "/"
 
     return xbmc.translatePath(filepath) 
+
+def getAddonname(addonid):
+    if addonid not in addonList:
+        r = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "id": 1, "method": "Addons.GetAddonDetails", "params": {"addonid": "' + addonid + '", "properties": ["name"]}}')
+        data = json.loads(r)
+        if not "error" in data.keys():
+            addonList[addonid] = data["result"]["addon"]["name"]
+            return addonList[addonid]
+        else:
+            return addonid
+    else:
+        return addonList[addonid]
