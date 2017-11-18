@@ -107,7 +107,7 @@ def addDir(name,url,mode,art,plot,genre,date,credits,showcontext=False):
     u=sys.argv[0]+"?url="+urllib.quote_plus(stringUtils.uni(url))+"&mode="+str(mode)+"&name="+urllib.quote_plus(stringUtils.uni(name))+"&fanart="+urllib.quote_plus(art.get('fanart',''))
     ok=True
     contextMenu = []
-    liz=xbmcgui.ListItem(name, iconImage=art.get('thumb',None), thumbnailImage=art.get('thumb',None))
+    liz=xbmcgui.ListItem(name, iconImage=art.get('thumbnail',None), thumbnailImage=art.get('thumbnail',None))
     liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": plot, "Genre": genre, "dateadded": date, "credits": credits })
     liz.setProperty("Fanart_Image", art.get('fanart'))
     liz.setArt(art)
@@ -125,7 +125,7 @@ def addLink(name,url,mode,art,plot,genre,date,showcontext,playlist,regexs,total,
     u=sys.argv[0]+"?url="+urllib.quote_plus(stringUtils.uni(url))+"&mode="+str(mode)+"&name="+urllib.quote_plus(stringUtils.uni(name))+"&fanart="+urllib.quote_plus(art.get('fanart',''))
     ok = True
     contextMenu =[]
-    liz=xbmcgui.ListItem(name, iconImage=art.get('thumb',None), thumbnailImage=art.get('thumb',None))
+    liz=xbmcgui.ListItem(name, iconImage=art.get('thumbnail',None), thumbnailImage=art.get('thumbnail',None))
     liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": plot, "Genre": genre, "dateadded": date })
     liz.setProperty("Fanart_Image", art.get('fanart'))
     liz.setArt(art)
