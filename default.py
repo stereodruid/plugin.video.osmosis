@@ -260,6 +260,7 @@ if __name__ == "__main__":
             counter = 0
             while meta.find("video") == -1:
                 meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
+                sTitle = xbmc.getInfoLabel("Player.Title")
                 time.sleep(1)
                 counter += 1
                 if counter >= 30:
