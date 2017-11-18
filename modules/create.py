@@ -93,7 +93,7 @@ def fillPlugins(cType='video'):
                 break
 
         if cType in addontypes and not addon['addonid'] == 'plugin.video.osmosis':
-            art = {'thumbnail': addon['thumbnail'], 'fanart': addon['fanart']}
+            art = {'thumb': addon['thumbnail'], 'fanart': addon['fanart']}
             guiTools.addDir(addon['name'], 'plugin://' + addon['addonid'], 101, art, addon['description'], cType, 'date', 'credits')
 
 def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None'):
@@ -173,7 +173,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         file = detail['file'].replace("\\\\", "\\")
         strm_name = str(stringUtils.cleanByDictReplacements(strm_name.strip()))
         plot = stringUtils.cleanLabels(detail.get('plot',''))
-        art = {'thumbnail': detail['thumbnail'], 'fanart': detail['fanart']}
+        art = detail.get('art',{})
         
         if addon.getSetting('Link_Type') == '0':
             link = sys.argv[0] + "?url=" +urllib.quote_plus(stringUtils.uni(file)) + "&mode=" + str(10) + "&name=" +urllib.quote_plus(stringUtils.uni(label)) + "&fanart=" + urllib.quote_plus(art.get('fanart',''))
