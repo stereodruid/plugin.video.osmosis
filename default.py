@@ -279,7 +279,7 @@ if __name__ == "__main__":
                     conTime = utils.zeitspanne(int(urlsResumePoint[0][0]))               
                     resume = ["Jump to position : %s " % (str(conTime[5])), "Start form beginning!"] 
                     if guiTools.selectDialog(resume, header = 'OSMOSIS: Would you like to continue?') == 0:
-                        xbmc.Player().seekTime(int(urlsResumePoint[0][0]) - 10)
+                        xbmc.Player().seekTime(int(urlsResumePoint[0][0]) - 5)
 
                 watched = 0
                 while xbmc.Player().isPlaying():
@@ -319,7 +319,7 @@ if __name__ == "__main__":
                     conTime = utils.zeitspanne(int(urlsResumePoint[0][0]))               
                     resume = ["Jump to position : %s " % (str(conTime[5])), "Start form beginning!"] 
                     if guiTools.selectDialog(resume, header = 'OSMOSIS: Would you like to continue?') == 0:
-                        xbmc.Player().seekTime(int(urlsResumePoint[0][0]) - 10)
+                        xbmc.Player().seekTime(int(urlsResumePoint[0][0]) - 5)
 
                 watched = 0
                 while xbmc.Player().isPlaying():
