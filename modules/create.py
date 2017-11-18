@@ -93,7 +93,7 @@ def fillPlugins(cType='video'):
                 break
 
         if cType in addontypes and not addon['addonid'] == 'plugin.video.osmosis':
-            art = {'thumb': addon['thumbnail'], 'fanart': addon['fanart']}
+            art = {'thumbnail': addon['thumbnail'], 'fanart': addon['fanart']}
             guiTools.addDir(addon['name'], 'plugin://' + addon['addonid'], 101, art, addon['description'], cType, 'date', 'credits')
 
 def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None'):
