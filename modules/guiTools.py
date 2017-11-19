@@ -107,7 +107,10 @@ def addDir(name,url,mode,art,plot,genre,date,credits,showcontext=False):
     u=sys.argv[0]+"?url="+urllib.quote_plus(stringUtils.uni(url))+"&mode="+str(mode)+"&name="+urllib.quote_plus(stringUtils.uni(name))+"&fanart="+urllib.quote_plus(art.get('fanart',''))
     ok=True
     contextMenu = []
-    liz=xbmcgui.ListItem(name, iconImage=art.get('thumb',None), thumbnailImage=art.get('thumb',None))
+    thumbArt = art.get('thumb',None)
+    if thumbArt == None:
+        thumbArt = art.get('fanart',None)
+    liz=xbmcgui.ListItem(name, iconImage=thumbArt, thumbnailImage=thumbArt)
     liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": plot, "Genre": genre, "dateadded": date, "credits": credits })
     liz.setArt(art)
     contextMenu.append(('Create Strms','XBMC.RunPlugin(%s&mode=200&name=%s)'%(u, name)))
@@ -124,7 +127,10 @@ def addLink(name,url,mode,art,plot,genre,date,showcontext,playlist,regexs,total,
     u=sys.argv[0]+"?url="+urllib.quote_plus(stringUtils.uni(url))+"&mode="+str(mode)+"&name="+urllib.quote_plus(stringUtils.uni(name))+"&fanart="+urllib.quote_plus(art.get('fanart',''))
     ok = True
     contextMenu =[]
-    liz=xbmcgui.ListItem(name, iconImage=art.get('thumb',None), thumbnailImage=art.get('thumb',None))
+    thumbArt = art.get('thumb',None)
+    if thumbArt == None:
+        thumbArt = art.get('fanart',None)
+    liz=xbmcgui.ListItem(name, iconImage=thumbArt, thumbnailImage=thumbArt)
     liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": plot, "Genre": genre, "dateadded": date })
     liz.setArt(art)
     liz.setProperty('IsPlayable', 'true')
