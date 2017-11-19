@@ -130,8 +130,7 @@ def addLink(name,url,mode,art,plot,genre,date,showcontext,playlist,regexs,total,
     thumbArt = art.get('thumb',None)
     if thumbArt == None:
         thumbArt = art.get('fanart',None)
-    liz=xbmcgui.ListItem(name, iconImage=thumbArt, thumbnailImage=thumbArt)    
-    liz=xbmcgui.ListItem(name, iconImage=art.get('thumb',None), thumbnailImage=art.get('thumb',None))
+    liz=xbmcgui.ListItem(name, iconImage=thumbArt, thumbnailImage=thumbArt)
     liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": plot, "Genre": genre, "dateadded": date })
     liz.setArt(art)
     liz.setProperty('IsPlayable', 'true')
