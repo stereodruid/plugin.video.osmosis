@@ -260,6 +260,7 @@ if __name__ == "__main__":
             counter = 0
             while meta.find("video") == -1:
                 meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
+                sTitle = xbmc.getInfoLabel("Player.Title")
                 time.sleep(1)
                 counter += 1
                 if counter >= 30:
@@ -278,7 +279,7 @@ if __name__ == "__main__":
                     conTime = utils.zeitspanne(int(urlsResumePoint[0][0]))               
                     resume = ["Jump to position : %s " % (str(conTime[5])), "Start form beginning!"] 
                     if guiTools.selectDialog(resume, header = 'OSMOSIS: Would you like to continue?') == 0:
-                        xbmc.Player().seekTime(int(urlsResumePoint[0][0]) - 10)
+                        xbmc.Player().seekTime(int(urlsResumePoint[0][0]) - 5)
 
                 watched = 0
                 while xbmc.Player().isPlaying():
@@ -318,7 +319,7 @@ if __name__ == "__main__":
                     conTime = utils.zeitspanne(int(urlsResumePoint[0][0]))               
                     resume = ["Jump to position : %s " % (str(conTime[5])), "Start form beginning!"] 
                     if guiTools.selectDialog(resume, header = 'OSMOSIS: Would you like to continue?') == 0:
-                        xbmc.Player().seekTime(int(urlsResumePoint[0][0]) - 10)
+                        xbmc.Player().seekTime(int(urlsResumePoint[0][0]) - 5)
 
                 watched = 0
                 while xbmc.Player().isPlaying():
