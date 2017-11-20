@@ -65,7 +65,7 @@ DIRS = []
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
 
 def getAndMarkResumePoint(props, isTVShow):
-    id = props[0][0]
+    ID = props[0][0]
     fileID = props[0][1]
 
     #search bookmarks for the ID and get the played time if exists
@@ -74,7 +74,7 @@ def getAndMarkResumePoint(props, isTVShow):
 
     if urlsResumePoint: 
         conTime = utils.zeitspanne(int(urlsResumePoint[0][0]))               
-        resume = ["Jump to position : %s " % (str(conTime[5])), "Start form beginning!"] 
+        resume = ["Jump to position : %s " % (str(conTime[5])), "Start from beginning!"]
         if guiTools.selectDialog(resume, header = 'OSMOSIS: Would you like to continue?') == 0:
             xbmc.Player().seekTime(int(urlsResumePoint[0][0]) - 5)
 
@@ -83,26 +83,25 @@ def getAndMarkResumePoint(props, isTVShow):
         watched = xbmc.Player().getTime() * 100 / xbmc.Player().getTotalTime()
         time.sleep(1)
 
-    time.sleep(1)   
+    time.sleep(1)
+
+    pos = 0
+    total = 0
     urlsWatchedPoint = kodiDB.getPlayedURLResumePoint(checkURL)
     if urlsWatchedPoint:
         pos = urlsWatchedPoint[0][0]
         total = urlsWatchedPoint[0][1]
         done = False
     elif urlsResumePoint and not urlsWatchedPoint:
-        pos = urlsResumePoint[0][1]
-        total = urlsResumePoint[0][1]
-        kodiDB.delBookMark(urlsResumePoint[0][2], fileID) if isTVShow == False else kodiDB.delShoBookMark(urlsResumePoint[0][2], fileID)
+        kodiDB.delBookMark(urlsResumePoint[0][2], fileID)
         done = True
     elif not urlsResumePoint and not urlsWatchedPoint:
-        pos = ()
-        total = ()
         done = True if watched > 50 else False
     else:
         done = False
 
-    if id:
-        guiTools.markMovie(id, pos, total, done) if isTVShow == False else guiTools.markSeries(id, pos, total, done)
+    if ID:
+        guiTools.markMovie(ID, pos, total, done) if isTVShow == False else guiTools.markSeries(ID, pos, total, done)
 
 if __name__ == "__main__":
     try:

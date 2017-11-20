@@ -187,7 +187,6 @@ def editDialog(nameToChange):
 #Before executing the code below we need to know the movie original title (string variable originaltitle) and the year (string variable year). They can be obtained from the infolabels of the listitem. The code filters the database for items with the same original title and the same year, year-1 and year+1 to avoid errors identifying the media.
 def markMovie(movID, pos, total, done):
     if done:
-        #int(100 * float(pos)/ float(total)) >= 95
         try:
             xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetMovieDetails", "params": {"movieid" : %s, "playcount" : 1 }, "id": 1 }' % movID)
             xbmc.executebuiltin("XBMC.Container.Refresh")
@@ -195,7 +194,7 @@ def markMovie(movID, pos, total, done):
             print("markMovie: Movie not in DB!?")
             pass  
     else:    
-        if xbmc.getCondVisibility('Library.HasContent(Movies)'):
+        if xbmc.getCondVisibility('Library.HasContent(Movies)') and pos > 0 and total > 0:
             try:
                 xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetMovieDetails", "params": {"movieid" : %s, "resume" : {"position":%s,"total":%s} }, "id": 1 }' % (movID, pos, total))
                 xbmc.executebuiltin("XBMC.Container.Refresh")
@@ -203,7 +202,7 @@ def markMovie(movID, pos, total, done):
                 print("markMovie: Movie not in DB!?")
                 pass
 
-def markSeries(shoID,pos,total,done):
+def markSeries(shoID, pos, total, done):
     if done:
         try:
             xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % shoID)
@@ -212,7 +211,7 @@ def markSeries(shoID,pos,total,done):
             print("markMovie: Episode not in DB!?")
             pass
     else:    
-        if xbmc.getCondVisibility('Library.HasContent(TVShows)'):
+        if xbmc.getCondVisibility('Library.HasContent(TVShows)') and pos > 0 and total > 0:
             try:
                 xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "resume" : {"position":%s,"total":%s} }, "id": 1 }' % (shoID, pos, total))
                 xbmc.executebuiltin("XBMC.Container.Refresh")

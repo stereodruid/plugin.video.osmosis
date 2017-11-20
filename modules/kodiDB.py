@@ -877,16 +877,16 @@ def getPlayedURLResumePoint(url):
         connectMDB.close()
         pass
 
-def delBookMark(ID, movFileID):
+def delBookMark(bookmarkID, fileID):
     try:
         if DATABASE_MYSQL == "false":
             connectMDB = sqlite3.connect(str(os.path.join(KMODBPATH)))
             cursor = connectMDB.cursor()
-            if cursor.execute("""SELECT "%s" FROM "%s" WHERE idFile="%s";""" % ("idBookmark","bookmark", movFileID)).fetchone():
-                cursor.execute("""DELETE FROM "%s" WHERE idFile="%s";""" % ("bookmark", movFileID))
+            if cursor.execute("""SELECT "%s" FROM "%s" WHERE idFile="%s";""" % ("idBookmark","bookmark", fileID)).fetchone():
+                cursor.execute("""DELETE FROM "%s" WHERE idFile="%s";""" % ("bookmark", fileID))
                 time.sleep(1)
-            if cursor.execute("""SELECT "%s" FROM "%s" WHERE idBookmark="%s";""" % ("idBookmark","bookmark", ID)).fetchone():
-                cursor.execute("""DELETE FROM "%s" WHERE idBookmark="%s";""" % ("bookmark", ID))
+            if cursor.execute("""SELECT "%s" FROM "%s" WHERE idBookmark="%s";""" % ("idBookmark","bookmark", bookmarkID)).fetchone():
+                cursor.execute("""DELETE FROM "%s" WHERE idBookmark="%s";""" % ("bookmark", bookmarkID))
             connectMDB.commit()
         else:
             Config.DatabaseTYpe = 'KMovies'
@@ -895,66 +895,22 @@ def delBookMark(ID, movFileID):
             connectMDB = mysql.connector.Connect(**config)
             cursor = connectMDB.cursor()
             query = ("""SELECT idBookmark FROM bookmark WHERE idFile="%s" """)
-            selectStm = (movFileID)
+            selectStm = (fileID)
             cursor.execute(query % selectStm)
             dbmovFileID = cursor.fetchone()[0]
             if dbmovFileID:
                 query = ("""DELETE FROM bookmark WHERE idFile="%s" """)
-                selectStm = (movFileID)
+                selectStm = (fileID)
                 cursor.execute(query % selectStm)
                 connectMDB.commit()
                 time.sleep(1)
             query = ("""SELECT idBookmark FROM bookmark WHERE idBookmark="%s" """)
-            selectStm = (ID)
+            selectStm = (bookmarkID)
             cursor.execute(query % selectStm)
             dbID = cursor.fetchone()
             if dbID:
                 query = ("""DELETE FROM bookmark WHERE idBookmark="%s" """)
-                selectStm = (ID)
-                cursor.execute(query % selectStm)
-                connectMDB.commit()
-        
-        cursor.close()
-        connectMDB.close()   
-    except:
-        cursor.close()
-        connectMDB.close()
-        pass
-
-def delShoBookMark(ID, shoFileID):
-    try:
-        if DATABASE_MYSQL == "false":
-            connectMDB = sqlite3.connect(str(os.path.join(KMODBPATH)))
-            cursor = connectMDB.cursor()
-            if cursor.execute("""SELECT "%s" FROM "%s" WHERE idFile="%s";""" % ("idBookmark","bookmark", shoFileID)).fetchone():
-                cursor.execute("""DELETE FROM "%s" WHERE idFile="%s";""" % ("bookmark", shoFileID))
-                time.sleep(1)
-            if cursor.execute("""SELECT "%s" FROM "%s" WHERE idBookmark="%s";""" % ("idBookmark","bookmark", ID)).fetchone():
-                cursor.execute("""DELETE FROM "%s" WHERE idBookmark="%s";""" % ("bookmark", ID))
-            connectMDB.commit()
-        else:
-            Config.DatabaseTYpe = 'KMovies'
-            Config.BUFFERED = True
-            config = Config.dataBaseVal().copy()
-            connectMDB = mysql.connector.Connect(**config)
-            cursor = connectMDB.cursor()
-            query = ("""SELECT idBookmark FROM bookmark WHERE idFile="%s" """)
-            selectStm = (shoFileID)
-            cursor.execute(query % selectStm)
-            dbmovFileID = cursor.fetchone()[0]
-            if dbmovFileID:
-                query = ("""DELETE FROM bookmark WHERE idFile="%s" """)
-                selectStm = (shoFileID)
-                cursor.execute(query % selectStm)
-                connectMDB.commit()
-                time.sleep(1)
-            query = ("""SELECT idBookmark FROM bookmark WHERE idBookmark="%s" """)
-            selectStm = (ID)
-            cursor.execute(query % selectStm)
-            dbID = cursor.fetchone()
-            if dbID:
-                query = ("""DELETE FROM bookmark WHERE idBookmark="%s" """)
-                selectStm = (ID)
+                selectStm = (bookmarkID)
                 cursor.execute(query % selectStm)
                 connectMDB.commit()
         
