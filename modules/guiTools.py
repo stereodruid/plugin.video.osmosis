@@ -203,7 +203,7 @@ def markMovie(movID, pos, total, done):
                 print("markMovie: Movie not in DB!?")
                 pass
 
-def markSeries(sShowTitle,sEpisode,sSeason,shoID,pos,total,done):
+def markSeries(shoID,pos,total,done):
     if done:
         try:
             xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % shoID)
