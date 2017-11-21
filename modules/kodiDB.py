@@ -921,27 +921,24 @@ def delBookMark(bookmarkID, fileID):
         connectMDB.close()
         pass
 
-def getKodiMovieID(title, sTitle):
+def getKodiMovieID(sTitle):
     try:
         kodiMovID = None
+        query = """SELECT %s, %s FROM %s WHERE c00 LIKE "%s";""" % ("idMovie","idFile","movie", sTitle)
         if DATABASE_MYSQL == "false":
             connectMDB = sqlite3.connect(str(os.path.join(KMODBPATH)))
             cursor = connectMDB.cursor()
-            if cursor.execute("""SELECT "%s", "%s" FROM "%s" WHERE c00 LIKE "%s" OR c00 LIKE "%s";"""  % ("idMovie","idFile","movie", title, sTitle)).fetchone():
-                kodiMovID = cursor.execute("""SELECT "%s", "%s" FROM "%s" WHERE c00 LIKE "%s" OR c00 LIKE "%s";"""  % ("idMovie","idFile","movie", title, sTitle)).fetchall()
+            if cursor.execute(query).fetchone():
+                kodiMovID = cursor.execute(query).fetchall()
         else:
             Config.DatabaseTYpe = 'KMovies'
             Config.BUFFERED = True
             config = Config.dataBaseVal().copy()
             connectMDB = mysql.connector.Connect(**config)
             cursor = connectMDB.cursor()
-            query = ("""SELECT idMovie, idFile FROM movie WHERE c00 LIKE "%s" OR c00 LIKE "%s" """)
-            selectStm = (title, sTitle)
-            cursor.execute(query % selectStm)
-            dbidMovie = cursor.fetchone()
+            dbidMovie = cursor.execute(query).fetchone()
             if dbidMovie:
-                cursor.execute(query % selectStm)
-                kodiMovID = cursor.fetchall()
+                kodiMovID = cursor.execute(query).fetchall()
         
         cursor.close()
         connectMDB.close()

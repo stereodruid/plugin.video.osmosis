@@ -65,9 +65,6 @@ DIRS = []
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
 
 def getAndMarkResumePoint(props, isTVShow):
-    ID = props[0][0]
-    fileID = props[0][1]
-
     #search bookmarks for the ID and get the played time if exists
     checkURL = str(sys.argv[0].replace(r'|', sys.argv[2] + r'|'))
     urlsResumePoint = kodiDB.getPlayedURLResumePoint(checkURL)
@@ -84,23 +81,25 @@ def getAndMarkResumePoint(props, isTVShow):
         time.sleep(1)
 
     time.sleep(1)
-
-    pos = 0
-    total = 0
-    urlsWatchedPoint = kodiDB.getPlayedURLResumePoint(checkURL)
-    if urlsWatchedPoint:
-        pos = urlsWatchedPoint[0][0]
-        total = urlsWatchedPoint[0][1]
-        done = False
-    elif urlsResumePoint and not urlsWatchedPoint:
-        kodiDB.delBookMark(urlsResumePoint[0][2], fileID)
-        done = True
-    elif not urlsResumePoint and not urlsWatchedPoint:
-        done = True if watched > 50 else False
-    else:
-        done = False
-
-    if ID:
+    
+    if props:
+        ID = props[0][0]
+        fileID = props[0][1]
+        pos = 0
+        total = 0
+        urlsWatchedPoint = kodiDB.getPlayedURLResumePoint(checkURL)
+        if urlsWatchedPoint:
+            pos = urlsWatchedPoint[0][0]
+            total = urlsWatchedPoint[0][1]
+            done = False
+        elif urlsResumePoint and not urlsWatchedPoint:
+            kodiDB.delBookMark(urlsResumePoint[0][2], fileID)
+            done = True
+        elif not urlsResumePoint and not urlsWatchedPoint:
+            done = True if watched > 50 else False
+        else:
+            done = False
+    
         guiTools.markMovie(ID, pos, total, done) if isTVShow == False else guiTools.markSeries(ID, pos, total, done)
 
 if __name__ == "__main__":
@@ -290,15 +289,15 @@ if __name__ == "__main__":
                 if counter >= 30:
                     raise            
 
-            if xbmc.getInfoLabel("VideoPlayer.TVShowTitle") != "":
-                sTVShowTitle = xbmc.getInfoLabel("VideoPlayer.TVShowTitle")
-                iSeason = xbmc.getInfoLabel("VideoPlayer.Season")
-                iEpisode = xbmc.getInfoLabel("VideoPlayer.Episode")
-
+            if mediaType == 'show':
+                sTVShowTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
+                iSeason = int(episode[1:episode.index('e')])
+                iEpisode = int(episode[episode.index('e') + 1:])
                 shoProps =  kodiDB.getKodiEpisodeID(sTVShowTitle, iSeason, iEpisode)
                 getAndMarkResumePoint(shoProps, True)                
             else:
-                movProps =  kodiDB.getKodiMovieID(xbmc.getInfoLabel("VideoPlayer.Title"), xbmc.getInfoLabel("ListItem.Title"))       
+                sTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
+                movProps =  kodiDB.getKodiMovieID(sTitle)       
                 getAndMarkResumePoint(movProps, False)
         except:
             pass 
