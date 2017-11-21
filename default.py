@@ -277,6 +277,33 @@ if __name__ == "__main__":
         try:
             # Get infos from selectet media
             item = xbmcgui.ListItem(path=url)
+            
+            props = None
+            infoLabels = {}
+            if mediaType == 'show':
+                sTVShowTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
+                iSeason = int(episode[1:episode.index('e')])
+                iEpisode = int(episode[episode.index('e') + 1:])
+                props = kodiDB.getKodiEpisodeID(sTVShowTitle, iSeason, iEpisode)
+
+                infoLabels['tvShowTitle'] = sTVShowTitle
+                infoLabels['season'] = iSeason
+                infoLabels['episode'] = iEpisode
+                infoLabels['mediatype'] = 'episode'
+                if props:
+                    infoLabels['title'] = props[0][2]
+                    infoLabels['aired'] = props[0][3]
+            else:
+                sTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
+                props = kodiDB.getKodiMovieID(sTitle)
+                infoLabels['title'] = sTitle
+                infoLabels['mediatype'] = 'movie'
+                if props:
+                    infoLabels['premiered'] = props[0][2]
+                    infoLabels['genre'] = props[0][3]
+
+            if len(infoLabels) > 0:
+                item.setInfo('video', infoLabels)
 
             # Exec play process
             xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
@@ -289,16 +316,7 @@ if __name__ == "__main__":
                 if counter >= 30:
                     raise            
 
-            if mediaType == 'show':
-                sTVShowTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
-                iSeason = int(episode[1:episode.index('e')])
-                iEpisode = int(episode[episode.index('e') + 1:])
-                shoProps =  kodiDB.getKodiEpisodeID(sTVShowTitle, iSeason, iEpisode)
-                getAndMarkResumePoint(shoProps, True)                
-            else:
-                sTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
-                movProps =  kodiDB.getKodiMovieID(sTitle)       
-                getAndMarkResumePoint(movProps, False)
+            getAndMarkResumePoint(props, mediaType == 'show')
         except:
             pass 
     elif mode == 100:

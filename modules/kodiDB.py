@@ -924,7 +924,7 @@ def delBookMark(bookmarkID, fileID):
 def getKodiMovieID(sTitle):
     try:
         kodiMovID = None
-        query = """SELECT %s, %s FROM %s WHERE c00 LIKE "%s";""" % ("idMovie","idFile","movie", sTitle)
+        query = """SELECT %s, %s, %s, %s FROM %s WHERE c00 LIKE "%s";""" % ("idMovie", "idFile", "premiered", "c14", "movie", sTitle)
         if DATABASE_MYSQL == "false":
             connectMDB = sqlite3.connect(str(os.path.join(KMODBPATH)))
             cursor = connectMDB.cursor()
@@ -950,7 +950,7 @@ def getKodiMovieID(sTitle):
 def getKodiEpisodeID(sTVShowTitle, iSeason, iEpisode):
     try:
         kodiMovID = None
-        queue = """SELECT episode.idEpisode, episode.idFile FROM episode WHERE episode.c12 = %s and c13 = %s and episode.idShow in (select tvshow.idShow from tvshow where tvshow.c00 like "%s");""" % (iSeason, iEpisode, sTVShowTitle)
+        queue = """SELECT episode.idEpisode, episode.idFile, episode.c00, episode.c05 FROM episode inner join tvshow on tvshow.idShow = episode.idShow WHERE episode.c12 = %s and episode.c13 = %s and tvshow.c00 like "%s";""" % (iSeason, iEpisode, sTVShowTitle)
         if DATABASE_MYSQL == "false":
             connectMDB = sqlite3.connect(str(os.path.join(KMODBPATH)))
             cursor = connectMDB.cursor()
