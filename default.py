@@ -64,6 +64,44 @@ debug = addon.getSetting('debug')
 DIRS = []
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
 
+def getAndMarkResumePoint(props, isTVShow):
+    #search bookmarks for the ID and get the played time if exists
+    checkURL = str(sys.argv[0].replace(r'|', sys.argv[2] + r'|'))
+    urlsResumePoint = kodiDB.getPlayedURLResumePoint(checkURL)
+
+    if urlsResumePoint: 
+        conTime = utils.zeitspanne(int(urlsResumePoint[0][0]))               
+        resume = ["Jump to position : %s " % (str(conTime[5])), "Start from beginning!"]
+        if guiTools.selectDialog(resume, header = 'OSMOSIS: Would you like to continue?') == 0:
+            xbmc.Player().seekTime(int(urlsResumePoint[0][0]) - 5)
+
+    watched = 0
+    while xbmc.Player().isPlaying():
+        watched = xbmc.Player().getTime() * 100 / xbmc.Player().getTotalTime()
+        time.sleep(1)
+
+    time.sleep(1)
+    
+    if props:
+        ID = props[0][0]
+        fileID = props[0][1]
+        pos = 0
+        total = 0
+        urlsWatchedPoint = kodiDB.getPlayedURLResumePoint(checkURL)
+        if urlsWatchedPoint:
+            pos = urlsWatchedPoint[0][0]
+            total = urlsWatchedPoint[0][1]
+            done = False
+        elif urlsResumePoint and not urlsWatchedPoint:
+            kodiDB.delBookMark(urlsResumePoint[0][2], fileID)
+            done = True
+        elif not urlsResumePoint and not urlsWatchedPoint:
+            done = True if watched > 50 else False
+        else:
+            done = False
+    
+        guiTools.markMovie(ID, pos, total, done) if isTVShow == False else guiTools.markSeries(ID, pos, total, done)
+
 if __name__ == "__main__":
     try:
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_UNSORTED)
@@ -221,9 +259,9 @@ if __name__ == "__main__":
         #purl = url.split('|')[1]
         if mediaType:
             try:
-                #Play Movies:
-                if movID:       
-                    providers = kodiDB.getVideo(movID)
+                #Play Movies/TV-Shows:
+                if movID or showID:       
+                    providers = kodiDB.getVideo(movID) if movID else kodiDB.getVideo(showID, episode)
                     if len(providers) == 1:
                         url = providers[0][0]
                     else:
@@ -233,120 +271,52 @@ if __name__ == "__main__":
                         # Get/Set Provider
                         #url = urllib.unquote_plus(providers[guiTools.selectDialog(selectProvider, header = 'OSMOSIS: Select provider!')][0]).decode('utf-8')
                         url = providers[guiTools.selectDialog(selectProvider, header = 'OSMOSIS: Select provider!')][0].decode('utf-8') 
-                #Play Tv-Shows:
-                elif showID:
-                    providers = kodiDB.getVideo(showID, episode)
-                    if len(providers) == 1:
-                        url = providers[0][0]
-                    else:       
-                        selectProvider = []
-                        for i in providers:
-                            selectProvider.append(i[1])
-                        # Get/Set Provider
-                        #url = urllib.unquote_plus(providers[guiTools.selectDialog(selectProvider, header = 'OSMOSIS: Select provider!')][0]).decode('utf-8')
-                        url = providers[guiTools.selectDialog(selectProvider, header = 'OSMOSIS: Select provider!')][0].decode('utf-8') 
             except:
                 pass
-         
-        # Gest infos from selectet media
-        item = xbmcgui.ListItem(path=url)
-        sPatToItem = xbmc.getInfoLabel("ListItem.path")
-        sTitle = xbmc.getInfoLabel("ListItem.title")
-       
+
         try:
+            # Get infos from selectet media
+            item = xbmcgui.ListItem(path=url)
+            
+            props = None
+            infoLabels = {}
+            if mediaType == 'show':
+                sTVShowTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
+                iSeason = int(episode[1:episode.index('e')])
+                iEpisode = int(episode[episode.index('e') + 1:])
+                props = kodiDB.getKodiEpisodeID(sTVShowTitle, iSeason, iEpisode)
+
+                infoLabels['tvShowTitle'] = sTVShowTitle
+                infoLabels['season'] = iSeason
+                infoLabels['episode'] = iEpisode
+                infoLabels['mediatype'] = 'episode'
+                if props:
+                    infoLabels['title'] = props[0][2]
+                    infoLabels['aired'] = props[0][3]
+            else:
+                sTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
+                props = kodiDB.getKodiMovieID(sTitle)
+                infoLabels['title'] = sTitle
+                infoLabels['mediatype'] = 'movie'
+                if props:
+                    infoLabels['premiered'] = props[0][2]
+                    infoLabels['genre'] = props[0][3]
+
+            if len(infoLabels) > 0:
+                item.setInfo('video', infoLabels)
+
             # Exec play process
             xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
             # Wait until the media is started in player
             counter = 0
             while meta.find("video") == -1:
                 meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
-                sTitle = xbmc.getInfoLabel("Player.Title")
                 time.sleep(1)
                 counter += 1
                 if counter >= 30:
                     raise            
 
-            if xbmc.getInfoLabel("VideoPlayer.TVShowTitle") != "":
-                # guiTools.markSeries(xbmc.getInfoLabel("VideoPlayer.TVShowTitle"),xbmc.getInfoLabel("VideoPlayer.Episode"),xbmc.getInfoLabel("VideoPlayer.Season"))
-                checkURL = str(sys.argv[0].replace(r'|', sys.argv[2] + r'|'))
-                urlsResumePoint = kodiDB.getPlayedURLResumePoint(checkURL)
-
-                shoProps =  kodiDB.getKodiEpisodeID(xbmc.getInfoLabel("VideoPlayer.Title"), sTitle)               
-                shoID = shoProps[0][0]
-                shoFileID = shoProps[0][1]
-
-                if urlsResumePoint: 
-                    conTime = utils.zeitspanne(int(urlsResumePoint[0][0]))               
-                    resume = ["Jump to position : %s " % (str(conTime[5])), "Start form beginning!"] 
-                    if guiTools.selectDialog(resume, header = 'OSMOSIS: Would you like to continue?') == 0:
-                        xbmc.Player().seekTime(int(urlsResumePoint[0][0]) - 5)
-
-                watched = 0
-                while xbmc.Player().isPlaying():
-                    watched = xbmc.Player().getTime() * 100 / xbmc.Player().getTotalTime()
-                    time.sleep(1)
-                
-                time.sleep(1)   
-                urlsWatchedPoint = kodiDB.getPlayedURLResumePoint(checkURL)
-                if urlsWatchedPoint:
-                    pos = urlsWatchedPoint[0][0]
-                    total = urlsWatchedPoint[0][1]
-                    done = False
-                elif urlsResumePoint and not urlsWatchedPoint:
-                    pos = urlsResumePoint[0][1]
-                    total = urlsResumePoint[0][1]
-                    kodiDB.delShoBookMark(urlsResumePoint[0][2], shoFileID)
-                    done = True
-                elif not urlsResumePoint and not urlsWatchedPoint:
-                    pos = ()
-                    total = ()
-                    done = done = True if watched > 92 else False
-                else:
-                    done = False
-              
-                if shoID:
-                    guiTools.markSeries(xbmc.getInfoLabel("VideoPlayer.TVShowTitle"),xbmc.getInfoLabel("VideoPlayer.Episode"),xbmc.getInfoLabel("VideoPlayer.Season"),shoID, pos, total, done)				
-            else:
-                #search bookmarks for the ID and get the played time if exists
-                checkURL = str(sys.argv[0].replace(r'|', sys.argv[2] + r'|'))
-                urlsResumePoint = kodiDB.getPlayedURLResumePoint(checkURL)
-                
-                movProps =  kodiDB.getKodiMovieID(xbmc.getInfoLabel("VideoPlayer.Title"), sTitle)               
-                movID = movProps[0][0]
-                movFileID = movProps[0][1]
-                   
-                if urlsResumePoint: 
-                    conTime = utils.zeitspanne(int(urlsResumePoint[0][0]))               
-                    resume = ["Jump to position : %s " % (str(conTime[5])), "Start form beginning!"] 
-                    if guiTools.selectDialog(resume, header = 'OSMOSIS: Would you like to continue?') == 0:
-                        xbmc.Player().seekTime(int(urlsResumePoint[0][0]) - 5)
-
-                watched = 0
-                while xbmc.Player().isPlaying():
-                    watched = xbmc.Player().getTime() * 100 / xbmc.Player().getTotalTime()
-                    time.sleep(1)
-                
-                time.sleep(1)   
-                urlsWatchedPoint = kodiDB.getPlayedURLResumePoint(checkURL)
-                if urlsWatchedPoint:
-                    pos = urlsWatchedPoint[0][0]
-                    total = urlsWatchedPoint[0][1]
-                    done = False
-                elif urlsResumePoint and not urlsWatchedPoint:
-                    pos = urlsResumePoint[0][1]
-                    total = urlsResumePoint[0][1]
-                    kodiDB.delBookMark(urlsResumePoint[0][2], movFileID)
-                    done = True
-                elif not urlsResumePoint and not urlsWatchedPoint:
-                    pos = ()
-                    total = ()
-                    done = True if watched > 92 else False
-                else:
-                    done = False
-              
-                if movID:
-                    guiTools.markMovie(movID, pos, total, done)
-                        
+            getAndMarkResumePoint(props, mediaType == 'show')
         except:
             pass 
     elif mode == 100:
