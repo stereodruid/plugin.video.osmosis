@@ -238,6 +238,7 @@ def removeItemsFromMediaList(action='list'):
     del dialog
     
 def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
+    #import web_pdb; web_pdb.set_trace()
     albumList = []
     dirList = []
     pagesDone = 0
@@ -250,14 +251,16 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
 
     while pagesDone < int(PAGINGalbums):
         if not contentList[0] == "palyableSingleMedia":
-            aThumb = urlUtils.stripUnquoteURL(contentList[0].get('thumbnail', ''))
+            artThumb = contentList[0].get('art', {})
+            aThumb = urlUtils.stripUnquoteURL(artThumb.get('thumb', ''))
                  
             for index, detailInfo in enumerate(contentList):
+                art = detailInfo.get('art',{})
                 file = detailInfo['file'].replace("\\\\", "\\")
                 filetype = detailInfo['filetype']
                 label = stringUtils.cleanLabels(detailInfo['label'].strip())
-                thumb = detailInfo.get('thumbnail', '')
-                fanart = detailInfo.get('fanart', '')
+                thumb = art.get('thumb','')
+                fanart = art.get('fanart','')
                 description = detailInfo.get('description', '')
                 track = detailInfo.get('track', 0) if detailInfo.get('track', 0) > 0 else index + 1
                 duration = detailInfo.get('duration', 0)
@@ -268,7 +271,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                         continue
 
                     if addon.getSetting('Link_Type') == '0': 
-                        link = sys.argv[0] + "?url=" + urllib.quote_plus(file) + "&mode=" + str(10) + "&name=" + urllib.quote_plus(label) + "&fanart=" + urllib.quote_plus(fanart)
+                        link = sys.argv[0] + "?url=" + urllib.quote_plus(file) + "&mode=" + str(10) + "&name=" + urllib.quote_plus(label) + "&fanart=" + urllib.quote_plus(art.get('fanart',''))
                     else:
                         link = file
 
@@ -315,9 +318,10 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
 
     try:
         # Write strms for all values in albumList
+        #import web_pdb; web_pdb.set_trace()
         for i in albumList:
-            fileSys.writeSTRM(path, stringUtils.cleanStrms(i[1].rstrip(".")) , i[2] + "|" + i[1])
-            kodiDB.musicDatabase(i[3], i[4], i[1], i[0], i[2], i[5], aThumb)
+		fileSys.writeSTRM(path, stringUtils.cleanStrms(i[1].rstrip(".")) , i[2] + "|" + i[1])
+        kodiDB.musicDatabase(i[3], i[4], i[1], i[0], i[2], i[5], aThumb)
         thisDialog.dialogeBG.close()
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)
