@@ -288,7 +288,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                     thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing File: ",  " Title: " + label)
                     path = os.path.join(strm_type, artist, album)
                     if album and artist and label and path and link and track:  
-                        albumList.append([path, label, link, album, artist, track, thumb])
+                        albumList.append([path, label, link, album, artist, track, duration, thumb])
                     j = j + 100 / (len(contentList) * int(PAGINGalbums))
                 except IOError as (errno, strerror):
                     print ("I/O error({0}): {1}").format(errno, strerror)
@@ -320,8 +320,8 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
         # Write strms for all values in albumList
         #import web_pdb; web_pdb.set_trace()
         for i in albumList:
-		fileSys.writeSTRM(path, stringUtils.cleanStrms(i[1].rstrip(".")) , i[2] + "|" + i[1])
-        kodiDB.musicDatabase(i[3], i[4], i[1], i[0], i[2], i[5], aThumb)
+            fileSys.writeSTRM(path, stringUtils.cleanStrms(i[1].rstrip(".")) , i[2] + "|" + i[1])
+            kodiDB.musicDatabase(i[3], i[4], i[1], i[0], i[2], i[5], i[6], aThumb)
         thisDialog.dialogeBG.close()
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)
