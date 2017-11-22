@@ -165,7 +165,7 @@ class Config(object):
                 'buffered': cls.BUFFERED,
                 }
     
-def musicDatabase(pstrAlbumName, pstrArtistName, pstrSongTitle, pstrPath, purlLink, track, artPath):
+def musicDatabase(pstrAlbumName, pstrArtistName, pstrSongTitle, pstrPath, purlLink, track, duration, artPath):
     path = str(os.path.join(STRM_LOC, pstrPath))
     
     # Write to music db and get id's
@@ -173,7 +173,7 @@ def musicDatabase(pstrAlbumName, pstrArtistName, pstrSongTitle, pstrPath, purlLi
     pathID = writePath(path)
     artistID = writeArtist(pstrArtistName)
     albumID = writeAlbums(pstrAlbumName,pstrArtistName)
-    songID = writeSong(pathID, albumID,  pstrArtistName, pstrSongTitle, track)   
+    songID = writeSong(pathID, albumID, pstrArtistName, pstrSongTitle, duration, track)   
     songArtistRel = writeSongArtist(artistID, songID,"1", pstrArtistName,"0")
     writeAlbumArtist(artistID, albumID,pstrArtistName)
     writeThump(artistID, "artist", "thumb", artPath)
@@ -273,28 +273,29 @@ def writeAlbums(album, artist, firstReleaseType='album'):
     if DATABASE_MYSQL == "false":
         selectQuery = "SELECT idAlbum FROM album WHERE strAlbum=?"
         selectArgs =  (album,)
-        insertQuery = "INSERT INTO album (strAlbum, strArtists, strReleaseType, lastScraped) " """VALUES (?, ?, ?, ?)"""
+        insertQuery = "INSERT INTO album (strAlbum, strArtistDisp, strReleaseType, lastScraped) " """VALUES (?, ?, ?, ?)"""
         insertArgs =  (album, artist, firstReleaseType, lastScraped)
     else:
         selectQuery = ("""SELECT idAlbum FROM album WHERE strAlbum="%s" """)
         selectArgs =  (album,)
-        insertQuery = ("INSERT INTO album (strAlbum, strArtists, strReleaseType, lastScraped) VALUES (%s, %s, %s, %s) ")
+        insertQuery = ("INSERT INTO album (strAlbum, strArtistDisp, strReleaseType, lastScraped) VALUES (%s, %s, %s, %s) ")
         insertArgs =  (album, artist, firstReleaseType, lastScraped,)
     
     return manageDbRecord (selectQuery, selectArgs, insertQuery, insertArgs)
 
-def writeSong(pathID, albumID, artist, songName, track="NULL"):
+def writeSong(pathID, albumID, artist, songName, duration, track="NULL"):
+    #import web_pdb; web_pdb.set_trace()
     dateAdded = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     dateYear = datetime.datetime.now().strftime("%Y")
     if DATABASE_MYSQL == "false":
         selectQuery = "SELECT idSong FROM song WHERE strTitle=?"
         selectArgs =  (songName,)
-        insertQuery = "INSERT INTO song (iYear,dateAdded,idAlbum,idPath,strArtists,strTitle,strFileName,iTrack,strGenres,iDuration,iTimesPlayed,iStartOffset,iEndOffset,userrating,comment,mood,votes) " """VALUES (?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
-        insertArgs =  (dateYear, dateAdded, albumID, pathID, artist, songName, songName + ".strm", track, "osmosis", "200", "0", "0", "0", "5", "osmosis", "osmosis", "100" )
+        insertQuery = "INSERT INTO song (iYear,dateAdded,idAlbum,idPath,strArtistDisp,strTitle,strFileName,iTrack,strGenres,iDuration,iTimesPlayed,iStartOffset,iEndOffset,userrating,comment,mood,votes) " """VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+        insertArgs =  (dateYear, dateAdded, albumID, pathID, artist, songName, songName + ".strm", track, "osmosis", duration, "0", "0", "0", "5", "osmosis", "osmosis", "100" )
     else:
         selectQuery = ("""SELECT idSong FROM song WHERE strTitle="%s" """)
         selectArgs =  (songName,)
-        insertQuery = ("INSERT INTO song (iYear,dateAdded,idAlbum,idPath,strArtists,strTitle,strFileName,iTrack,strGenres,iDuration,iTimesPlayed,iStartOffset,iEndOffset,userrating,comment,mood,votes) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ")
+        insertQuery = ("INSERT INTO song (iYear,dateAdded,idAlbum,idPath,strArtistDisp,strTitle,strFileName,iTrack,strGenres,iDuration,iTimesPlayed,iStartOffset,iEndOffset,userrating,comment,mood,votes) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ")
         insertArgs =  (dateYear, dateAdded, albumID, pathID, artist, songName, songName + ".strm", track, "osmosis", "200", "0", "0", "0", "5", "osmosis", "osmosis", "100",)
     
     return manageDbRecord (selectQuery, selectArgs, insertQuery, insertArgs)
@@ -362,6 +363,7 @@ def writeAlbumArtist(artistID, albumID,pstrAartistName):
     return dID
 
 def writeThump(mediaId, mediaType, imageType, artPath):
+    #import web_pdb; web_pdb.set_trace()
     if DATABASE_MYSQL == "false":
         selectQuery = "SELECT media_id FROM art WHERE media_type=? AND media_id=?"
         selectArgs =  (mediaType, mediaId)
@@ -378,6 +380,7 @@ def writeThump(mediaId, mediaType, imageType, artPath):
     return dID
 
 def manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, database=str(os.path.join(KMDBPATH))):
+    #import web_pdb; web_pdb.set_trace()
     try:
         dID = None
         if DATABASE_MYSQL == "false":
