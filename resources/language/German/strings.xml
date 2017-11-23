@@ -11,6 +11,7 @@
 	<!-- 32012 -->
 	<string id="32013">Keine Streams hinzufügen, die in "[OV]" vorhanden sind (z. B. AMAZON VOD)</string>
 	<string id="32014">Kodi verwendet eine MYSQL-Datenbank</string>
+	<string id="32015">Kodi's SQLite-DBs automatisch ermitteln</string>
 	
 	<string id="31000">Medien</string>
 	<string id="31004">NFO's anlegen (In Kürze)</string>
