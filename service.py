@@ -50,7 +50,10 @@ represent = os.path.join(ADDON_PATH, 'icon.png')
 toseconds = 0.0
 itime = 5000000000  # in miliseconds 
    
-if __name__ == "__main__":       
+if __name__ == "__main__":
+    if Updat_at_startup == "true":                        
+        updateAll.strm_update()
+ 
     monitor = xbmc.Monitor()
     while not monitor.abortRequested():
         # Sleep/wait for abort for 10 seconds
