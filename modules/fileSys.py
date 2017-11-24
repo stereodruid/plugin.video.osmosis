@@ -181,31 +181,6 @@ def isInMediaList(mediaTitle, url, cType='Other'):
         return True
     else:
         return False
-    
-def isInMovieList(mdediaTitle, cType='Other'):
-    utils.addon_log('isInMediaList')
-    existInList = False
-    thelist = []
-    thefile = xbmc.translatePath(os.path.join(profile, 'MediaList.xml'))
-    
-    if not xbmcvfs.exists(profile): 
-        xbmcvfs.mkdirs(profile)
-    if not xbmcvfs.exists(thefile):
-        open(thefile, 'a').close()
-    
-    fle = codecs.open(thefile, "r", 'UTF-8')
-    thelist = fle.readlines()
-    fle.close()
-    del fle
-    
-    if len(thelist) > 0:
-        for i in thelist:
-            if i.split('|',2)[1] == mdediaTitle:
-                existInList = True     
-    if existInList:
-        return True
-    else:
-        return False
                
 def writeMediaList(url, name, cType='Other', cleanName=True):
     utils.addon_log('writeMediaList')
