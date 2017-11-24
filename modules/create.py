@@ -279,6 +279,17 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                     try:
                         album = detailInfo['album'].strip()
                         artist = stringUtils.cleanByDictReplacements(", ".join(artist.strip() for artist in detailInfo['artist']) if isinstance(detailInfo['artist'], (list, tuple)) else detailInfo['artist'].strip())
+                        artistList = []
+                        #Check for Various Artists
+                        for i, sArtist in enumerate(contentList):
+                            artistList.append(sArtist.get('artist'))
+                        if len(artistList) > 1:
+                            try:
+                                if artistList[0] != artistList[1] and artistList[1] != artistList[2]:
+                                    artist = 'Various Artists'
+                            except IndexError:
+                                if artistList[0] != artistList[1]:
+                                    artist = 'Various Artists'
                         title = stringUtils.cleanByDictReplacements(detailInfo['title'].strip())
                         type = stringUtils.cleanByDictReplacements(detailInfo['type'].strip())
                         filename = stringUtils.cleanByDictReplacements(label.strip())
