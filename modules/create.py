@@ -238,7 +238,6 @@ def removeItemsFromMediaList(action='list'):
     del dialog
     
 def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
-    #import web_pdb; web_pdb.set_trace()
     albumList = []
     dirList = []
     pagesDone = 0
@@ -264,14 +263,16 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                 description = detailInfo.get('description', '')
                 track = detailInfo.get('track', 0) if detailInfo.get('track', 0) > 0 else index + 1
                 duration = detailInfo.get('duration', 0)
-                                              
+                if duration == 0:
+				    duration = 200
+				
                 try:
                     if filetype == 'directory':
                         dirList.append(jsonUtils.requestList(file, 'music').get('files', []))
                         continue
 
                     if addon.getSetting('Link_Type') == '0': 
-                        link = sys.argv[0] + "?url=" + urllib.quote_plus(file) + "&mode=" + str(10) + "&name=" + urllib.quote_plus(label) + "&fanart=" + urllib.quote_plus(art.get('fanart',''))
+                        link = sys.argv[0] + "?url=" + urllib.quote_plus(file) + "&mode=" + str(10) + "&name=" + urllib.quote_plus(label) + "&fanart=" + urllib.quote_plus(fanart)
                     else:
                         link = file
 
@@ -286,7 +287,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                         pass
 
                     thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing File: ",  " Title: " + label)
-                    path = os.path.join(strm_type, artist, album)
+                    path = os.path.join(strm_type, artist, strm_name.replace('++RenamedTitle++', ''))
                     if album and artist and label and path and link and track:  
                         albumList.append([path, label, link, album, artist, track, duration, thumb])
                     j = j + 100 / (len(contentList) * int(PAGINGalbums))
@@ -318,7 +319,17 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
 
     try:
         # Write strms for all values in albumList
-        #import web_pdb; web_pdb.set_trace()
+        thelist = fileSys.readMediaList(purge=False)
+        items = []
+        for entry in thelist:
+            splits = entry.strip().split('|')
+            splitsstrm = splits[0]
+            splitsname = splits[1]
+            if splitsstrm.find('Album') != -1 and splitsname.find(strm_name) != -1:
+                url = splits[2]
+                cType = splits[0]
+                albumartist = artist
+                fileSys.rewriteMediaList(url, strm_name, albumartist, cType)
         for i in albumList:
             fileSys.writeSTRM(path, stringUtils.cleanStrms(i[1].rstrip(".")) , i[2] + "|" + i[1])
             kodiDB.musicDatabase(i[3], i[4], i[1], i[0], i[2], i[5], i[6], aThumb)
