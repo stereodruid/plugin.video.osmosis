@@ -27,6 +27,7 @@ from modules import guiTools
 from modules import urlUtils
 from modules import updateAll
 from modules import moduleUtil
+from modules import stringUtils
 
 import utils
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin, xbmcvfs
