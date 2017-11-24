@@ -282,6 +282,7 @@ if __name__ == "__main__":
             infoLabels = {}
             if mediaType == 'show':
                 sTVShowTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
+                sTVShowTitle = stringUtils.unicodetoascii(sTVShowTitle)
                 iSeason = int(episode[1:episode.index('e')])
                 iEpisode = int(episode[episode.index('e') + 1:])
                 props = kodiDB.getKodiEpisodeID(sTVShowTitle, iSeason, iEpisode)
