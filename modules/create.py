@@ -250,18 +250,22 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
 
     while pagesDone < int(PAGINGalbums):
         if not contentList[0] == "palyableSingleMedia":
-            aThumb = urlUtils.stripUnquoteURL(contentList[0].get('thumbnail', ''))
+            artThumb = contentList[0].get('art', {})
+            aThumb = urlUtils.stripUnquoteURL(artThumb.get('thumb', ''))
                  
             for index, detailInfo in enumerate(contentList):
-                file = detailInfo['file'].replace("\\\\", "\\")
+                art = detailInfo.get('art',{})
+                file = detailInfo['file'].replace("\\\\", "\\").encode('utf-8')
                 filetype = detailInfo['filetype']
                 label = stringUtils.cleanLabels(detailInfo['label'].strip())
-                thumb = detailInfo.get('thumbnail', '')
-                fanart = detailInfo.get('fanart', '')
+                thumb = art.get('thumb','')
+                fanart = art.get('fanart','')
                 description = detailInfo.get('description', '')
                 track = detailInfo.get('track', 0) if detailInfo.get('track', 0) > 0 else index + 1
                 duration = detailInfo.get('duration', 0)
-                                              
+                if duration == 0:
+				    duration = 200
+				
                 try:
                     if filetype == 'directory':
                         dirList.append(jsonUtils.requestList(file, 'music').get('files', []))
@@ -275,6 +279,17 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                     try:
                         album = detailInfo['album'].strip()
                         artist = stringUtils.cleanByDictReplacements(", ".join(artist.strip() for artist in detailInfo['artist']) if isinstance(detailInfo['artist'], (list, tuple)) else detailInfo['artist'].strip())
+                        artistList = []
+                        #Check for Various Artists
+                        for i, sArtist in enumerate(contentList):
+                            artistList.append(sArtist.get('artist'))
+                        if len(artistList) > 1:
+                            try:
+                                if artistList[0] != artistList[1] and artistList[1] != artistList[2]:
+                                    artist = 'Various Artists'
+                            except IndexError:
+                                if artistList[0] != artistList[1]:
+                                    artist = 'Various Artists'
                         title = stringUtils.cleanByDictReplacements(detailInfo['title'].strip())
                         type = stringUtils.cleanByDictReplacements(detailInfo['type'].strip())
                         filename = stringUtils.cleanByDictReplacements(label.strip())
@@ -283,9 +298,9 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                         pass
 
                     thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing File: ",  " Title: " + label)
-                    path = os.path.join(strm_type, artist, album)
+                    path = os.path.join(strm_type, artist, strm_name.replace('++RenamedTitle++', ''))
                     if album and artist and label and path and link and track:  
-                        albumList.append([path, label, link, album, artist, track, thumb])
+                        albumList.append([path, label, link, album, artist, track, duration, thumb])
                     j = j + 100 / (len(contentList) * int(PAGINGalbums))
                 except IOError as (errno, strerror):
                     print ("I/O error({0}): {1}").format(errno, strerror)
@@ -315,9 +330,20 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
 
     try:
         # Write strms for all values in albumList
+        thelist = fileSys.readMediaList(purge=False)
+        items = []
+        for entry in thelist:
+            splits = entry.strip().split('|')
+            splitsstrm = splits[0]
+            splitsname = splits[1]
+            if splitsstrm.find('Album') != -1 and splitsname.find(strm_name) != -1:
+                url = splits[2]
+                cType = splits[0]
+                albumartist = artist
+                fileSys.rewriteMediaList(url, strm_name, albumartist, cType)
         for i in albumList:
             fileSys.writeSTRM(path, stringUtils.cleanStrms(i[1].rstrip(".")) , i[2] + "|" + i[1])
-            kodiDB.musicDatabase(i[3], i[4], i[1], i[0], i[2], i[5], aThumb)
+            kodiDB.musicDatabase(i[3], i[4], i[1], i[0], i[2], i[5], i[6], aThumb)
         thisDialog.dialogeBG.close()
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)
