@@ -284,7 +284,6 @@ def writeAlbums(album, artist, firstReleaseType='album'):
     return manageDbRecord (selectQuery, selectArgs, insertQuery, insertArgs)
 
 def writeSong(pathID, albumID, artist, songName, duration, track="NULL"):
-    #import web_pdb; web_pdb.set_trace()
     dateAdded = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     dateYear = datetime.datetime.now().strftime("%Y")
     if DATABASE_MYSQL == "false":
@@ -363,7 +362,6 @@ def writeAlbumArtist(artistID, albumID,pstrAartistName):
     return dID
 
 def writeThump(mediaId, mediaType, imageType, artPath):
-    #import web_pdb; web_pdb.set_trace()
     if DATABASE_MYSQL == "false":
         selectQuery = "SELECT media_id FROM art WHERE media_type=? AND media_id=?"
         selectArgs =  (mediaType, mediaId)
@@ -380,7 +378,6 @@ def writeThump(mediaId, mediaType, imageType, artPath):
     return dID
 
 def manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, database=str(os.path.join(KMDBPATH))):
-    #import web_pdb; web_pdb.set_trace()
     try:
         dID = None
         if DATABASE_MYSQL == "false":
