@@ -342,7 +342,6 @@ def isMediaList(url, cType='Other'):
     # parse MediaList for url return bool if found
 
 def delNotInMediaList(delList, thelist):
-    import web_pdb; web_pdb.set_trace()
     for i in delList:
         try:
             artistPath = (thelist[i]).strip().split('|')[3].format(i)
