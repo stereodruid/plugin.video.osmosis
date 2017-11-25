@@ -255,7 +255,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                  
             for index, detailInfo in enumerate(contentList):
                 art = detailInfo.get('art',{})
-                file = detailInfo['file'].replace("\\\\", "\\")
+                file = detailInfo['file'].replace("\\\\", "\\").encode('utf-8')
                 filetype = detailInfo['filetype']
                 label = stringUtils.cleanLabels(detailInfo['label'].strip())
                 thumb = art.get('thumb','')
