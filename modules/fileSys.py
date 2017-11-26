@@ -181,31 +181,6 @@ def isInMediaList(mediaTitle, url, cType='Other'):
         return True
     else:
         return False
-    
-def isInMovieList(mdediaTitle, cType='Other'):
-    utils.addon_log('isInMediaList')
-    existInList = False
-    thelist = []
-    thefile = xbmc.translatePath(os.path.join(profile, 'MediaList.xml'))
-    
-    if not xbmcvfs.exists(profile): 
-        xbmcvfs.mkdirs(profile)
-    if not xbmcvfs.exists(thefile):
-        open(thefile, 'a').close()
-    
-    fle = codecs.open(thefile, "r", 'UTF-8')
-    thelist = fle.readlines()
-    fle.close()
-    del fle
-    
-    if len(thelist) > 0:
-        for i in thelist:
-            if i.split('|',2)[1] == mdediaTitle:
-                existInList = True     
-    if existInList:
-        return True
-    else:
-        return False
                
 def writeMediaList(url, name, cType='Other', cleanName=True):
     utils.addon_log('writeMediaList')
@@ -232,6 +207,42 @@ def writeMediaList(url, name, cType='Other', cleanName=True):
                 mediaPlugin = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
                 if mediaPlugin and splitPlugin and mediaPlugin.group(1) == splitPlugin.group(1):
                     xbmcgui.Dialog().notification(str(i), "Adding to MediaList",  os.path.join(ADDON_PATH, 'representerIcon.png'), 5000)
+                    thelist = stringUtils.replaceStringElem(thelist, i, theentry)
+                    existInList = True     
+    if existInList != True:
+        thelist.append(theentry)
+        
+    with open(thefile.decode("utf-8"), 'w') as output_file: 
+        for linje in thelist:
+            if not linje.startswith('\n'):
+                output_file.write(linje.strip().encode('utf-8') + '\n')
+            else:
+                output_file.write(linje.strip())
+def rewriteMediaList(url, name, albumartist, cType='Other', cleanName=True):
+    utils.addon_log('writeMediaList')
+    existInList = False
+    thelist = []
+    thefile = xbmc.translatePath(os.path.join(profile, 'MediaList.xml'))
+    theentry = '|'.join([cType, name.decode("utf-8"), url, albumartist.decode('utf-8')]) + '\n'  
+    
+    if not xbmcvfs.exists(profile): 
+        xbmcvfs.mkdirs(profile)
+    if not xbmcvfs.exists(thefile):
+        open(thefile, 'a').close()
+    
+    fle = codecs.open(thefile, "r", 'UTF-8')
+    thelist = fle.readlines()
+    fle.close()
+    del fle
+    
+    if len(thelist) > 0:
+        for i in thelist:
+            splits = i.strip().split('|')
+            if stringUtils.getStrmname(splits[1]) == stringUtils.getStrmname(name):
+                splitPlugin = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), splits[2])
+                mediaPlugin = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
+                if mediaPlugin and splitPlugin and mediaPlugin.group(1) == splitPlugin.group(1):
+                    #xbmcgui.Dialog().notification(str(i), "Adding to MediaList",  os.path.join(ADDON_PATH, 'representerIcon.png'), 5000)
                     thelist = stringUtils.replaceStringElem(thelist, i, theentry)
                     existInList = True     
     if existInList != True:
@@ -333,10 +344,18 @@ def isMediaList(url, cType='Other'):
 def delNotInMediaList(delList, thelist):
     for i in delList:
         try:
+            artistPath = (thelist[i]).strip().split('|')[3].format(i)
+            path = completePath(STRM_LOC) + (thelist[i]).strip().split('|')[0].format(i)
+            path = completePath(path) + stringUtils.cleanByDictReplacements(artistPath)
+            itemPath = (thelist[i].decode('utf-8')).strip().split('|')[1].replace('++RenamedTitle++', '').format(i).format(i)
+            path = completePath(path) + stringUtils.cleanByDictReplacements(itemPath)
+            print ("remove folder: %s" % itemPath)
+            shutil.rmtree(completePath(path), ignore_errors=True)
+        except IndexError:    
             path = completePath(STRM_LOC) + (thelist[i]).strip().split('|')[0].format(i)
             itemPath = (thelist[i].decode('utf-8')).strip().split('|')[1].replace('++RenamedTitle++', '').format(i).format(i)
             print ("remove folder: %s" % itemPath)
-            shutil.rmtree(completePath(path) + stringUtils.cleanByDictReplacements(itemPath) , ignore_errors=True)
+            shutil.rmtree(completePath(path) + stringUtils.cleanByDictReplacements(itemPath), ignore_errors=True)
         except OSError:
                 print ("Unable to remove folder: %s" % itemPath)
 
