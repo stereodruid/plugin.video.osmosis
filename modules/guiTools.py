@@ -29,7 +29,6 @@ import urllib, urllib2, cookielib, requests
 
 from BeautifulSoup import BeautifulStoneSoup, BeautifulSoup, BeautifulSOAP
 import SimpleDownloader as downloader
-import pyxbmct
 import utils
 import xbmc
 import xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs

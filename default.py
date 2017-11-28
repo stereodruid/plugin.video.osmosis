@@ -225,18 +225,18 @@ if __name__ == "__main__":
 
         if not fileSys.writeTutList("select:PluginType"):
             tutWin = ["Adding content to your library",
-                      "Welcome, this is your first time using OSMOSIS. Here, you can select the content type you want to add: ",
-                      "Video Plugins: Select to add Movies,TV-Shows, YouTube Videos ",
-                      "Music Plugins: Select to add Music"]             
-            dialoge.PopupWindow(tutWin)
+                      "Welcome, this is your first time using OSMOSIS. Here, you can select the content type you want to add:",
+                      "Video Plugins: Select to add Movies, TV-Shows, YouTube Videos",
+                      "Music Plugins: Select to add Music"]
+            xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
     elif mode == 1:   
         create.fillPlugins(url)
         if not fileSys.writeTutList("select:Addon"):
             tutWin = ["Adding content to your library",
-                      "Here, you can select the Add-on: ",
-                        "The selected Add-on should provide Video/Music content in the right structure ",
-                    "Take a look at ++ Naming video files/TV shows ++ http://kodi.wiki/view/naming_video_files/TV_shows" ]               
-            dialoge.PopupWindow(tutWin)
+                      "Here, you can select the Add-on:",
+                      "The selected Add-on should provide Video/Music content in the right structure.",
+                      "Take a look at ++ Naming video files/TV shows ++ http://kodi.wiki/view/naming_video_files/TV_shows."]
+            xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
         try:
             xbmcplugin.setContent(int(sys.argv[1]), 'movies')
             xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -330,11 +330,11 @@ if __name__ == "__main__":
     elif mode == 101:
         create.fillPluginItems(url)
         if not fileSys.writeTutList("select:AddonNavi"):
-            tutWin = ["Adding content to your library ",
-                       "Search for your Movie, TV-Show or Music. ", 
-                       "Mark/select content, do not play a Movie or enter a TV-Show.  ",   
-                       "Open context menu on the selected and select *create strms*."]                            
-            dialoge.PopupWindow(tutWin)
+            tutWin = ["Adding content to your library",
+                      "Search for your Movie, TV-Show or Music.",
+                      "Mark/select content, do not play a Movie or enter a TV-Show.",
+                      "Open context menu on the selected and select *create strms*."]
+            xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
 
         try:
             xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -348,10 +348,10 @@ if __name__ == "__main__":
             selectAction = ['No, continue with original Title!', 'Rename Title!']
             if not fileSys.writeTutList("select:Rename"):
                 tutWin = ["Adding content to your library",
-                    "You can rename your Movie, TV-Show or Music title. ", 
-                    "To make your scraper recognize the content, some times it is necessary to rename the title ",
-                    "Be careful, wrong title can also cause that your scraper can't recognize your content."]                
-                dialoge.PopupWindow(tutWin)
+                          "You can rename your Movie, TV-Show or Music title.",
+                          "To make your scraper recognize the content, some times it is necessary to rename the title.",
+                          "Be careful, wrong title can also cause that your scraper can't recognize your content."]
+                xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
             choice = guiTools.selectDialog(selectAction, header = 'Title for Folder and MediaList entry')
             if choice != -1:
                 if choice == 1 or name == None or name == "":
@@ -359,10 +359,10 @@ if __name__ == "__main__":
             
                 if not fileSys.writeTutList("select:ContentTypeLang"):
                     tutWin = ["Adding content to your library",
-                              "Now select your content type. ", 
-                              "Select language or YouTube type  ",
-                              "Wait for done message."]                
-                    dialoge.PopupWindow(tutWin) 
+                              "Now select your content type.",
+                              "Select language or YouTube type.",
+                              "Wait for done message."]
+                    xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
 
                 cType = guiTools.getType(url)
                 if filetype == 'file':             

@@ -20,7 +20,6 @@ import os, re
 from BeautifulSoup import BeautifulStoneSoup, BeautifulSoup, BeautifulSOAP
 import SimpleDownloader as downloader
 from modules import stringUtils
-import pyxbmct
 import utils
 import xbmc, xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
 

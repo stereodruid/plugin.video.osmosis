@@ -19,7 +19,6 @@ import os
 
 from BeautifulSoup import BeautifulStoneSoup, BeautifulSoup, BeautifulSOAP
 import SimpleDownloader as downloader
-import pyxbmct
 import xbmc
 import xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
 import urllib
