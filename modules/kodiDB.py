@@ -320,8 +320,6 @@ def writeThump(mediaId, mediaType, imageType, artPath):
 
 def manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, database=str(os.path.join(KMDBPATH))):
     try:
-        utils.addon_log("insertQuery = " + insertQuery)
-        utils.addon_log("insertArgs = " + str(insertArgs))
         dID = None
         if DATABASE_MYSQL == "false":
             connectMDB = sqlite3.connect(database)

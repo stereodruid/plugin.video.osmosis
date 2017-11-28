@@ -280,7 +280,7 @@ if __name__ == "__main__":
             
             props = None
             infoLabels = {}
-            if mediatype:
+            if mediaType:
                 if mediaType == 'show':
                     sTVShowTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
                     sTVShowTitle = stringUtils.unicodetoascii(sTVShowTitle)
