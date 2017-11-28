@@ -69,7 +69,7 @@ def strm_update():
                 listLen = len(thelist)
                 j = 100 / len(thelist)
                 for i in range(len(thelist)):
-                    cType , name, url = ((thelist[i]).strip().split('|'))
+                    cType , name, url = (thelist[i]).strip().split('|', 2)
 
                     try:
                         plugin_id = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
