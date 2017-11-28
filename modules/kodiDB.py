@@ -20,7 +20,6 @@ import sys
 import time, datetime
 from BeautifulSoup import BeautifulStoneSoup, BeautifulSoup, BeautifulSOAP
 import SimpleDownloader as downloader
-import pyxbmct
 from modules import stringUtils
 from modules import guiTools
 from modules import fileSys

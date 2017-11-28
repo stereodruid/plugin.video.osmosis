@@ -23,7 +23,6 @@ import shutil
 
 from BeautifulSoup import BeautifulStoneSoup, BeautifulSoup, BeautifulSOAP
 import SimpleDownloader as downloader
-import pyxbmct
 import utils
 import codecs
 from modules import stringUtils
