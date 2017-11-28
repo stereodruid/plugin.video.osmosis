@@ -179,7 +179,7 @@ def musicDatabase(pstrAlbumName, pstrArtistName, pstrSongTitle, pstrPath, purlLi
     artistID = writeArtist(pstrArtistName)
     albumID = writeAlbums(pstrAlbumName,pstrArtistName)
     songID = writeSong(pathID, albumID, pstrArtistName, pstrSongTitle, duration, track)   
-    songArtistRel = writeSongArtist(artistID, songID,"1", pstrArtistName,"0")
+    songArtistRel = writeSongArtist(artistID, songID, 1, pstrArtistName, 0)
     writeAlbumArtist(artistID, albumID,pstrArtistName)
     writeThump(artistID, "artist", "thumb", artPath)
     writeThump(albumID, "album", "thumb", artPath)
@@ -243,7 +243,7 @@ def createMusicDB():
 def writeIntoSongTable (pstrSongTitle, songID, pstrArtistName, pstrAlbumName, albumID, path, pathID, purlLink, roleID, artistID, songArtistRel, delSong):
     selectQuery = ("""SELECT id FROM songs WHERE songID="%s" AND artistID="%s" AND albumID="%s";""")
     selectArgs = (songID, artistID, albumID)
-    insertQuery = ("INSERT INTO songs (strSongTitle, songID, strArtistName, strAlbumName, albumID, strPath, pathID, strURL, roleID, artistID, songArtistRel, delSong) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);")
+    insertQuery = ("""INSERT INTO songs (strSongTitle, songID, strArtistName, strAlbumName, albumID, strPath, pathID, strURL, roleID, artistID, songArtistRel, delSong) VALUES ("%s", %d, "%s", "%s", %d, "%s", %d, "%s", %d, %d, "%s", "%s");""")
     insertArgs = (pstrSongTitle, songID, pstrArtistName, pstrAlbumName, albumID, path, pathID, purlLink, roleID, artistID, songArtistRel, delSong)
     
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, str(os.path.join(MusicDB_LOC)))
@@ -252,7 +252,7 @@ def writePath(path):
     completePath = fileSys.completePath(path)
     selectQuery = ("""SELECT idPath FROM path WHERE strPath= "%s";""")
     selectArgs = (completePath)
-    insertQuery = ("INSERT INTO path (strPath) VALUES (%s);")
+    insertQuery = ("""INSERT INTO path (strPath) VALUES ("%s");""")
     insertArgs = (completePath)
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
@@ -262,26 +262,26 @@ def writeAlbums(album, artist, firstReleaseType='album'):
     artistCol = "strArtistDisp" if kodi_version >= 18 else "strArtists"
     selectQuery = ("""SELECT idAlbum FROM album WHERE strAlbum="%s";""")
     selectArgs =  (album)
-    insertQuery = ("INSERT INTO album (strAlbum, %s, strReleaseType, lastScraped) VALUES (%s, %s, %s, %s);")
+    insertQuery = ("""INSERT INTO album (strAlbum, %s, strReleaseType, lastScraped) VALUES ("%s", "%s", "%s", "%s");""")
     insertArgs =  (artistCol, album, artist, firstReleaseType, lastScraped)
     
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
 def writeSong(pathID, albumID, artist, songName, duration, track="NULL"):
     dateAdded = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    dateYear = datetime.datetime.now().strftime("%Y")
+    dateYear = int(datetime.datetime.now().strftime("%Y"))
     artistCol = "strArtistDisp" if kodi_version >= 18 else "strArtists"
     selectQuery = ("""SELECT idSong FROM song WHERE strTitle="%s";""")
     selectArgs =  (songName)
-    insertQuery = ("INSERT INTO song (iYear, dateAdded, idAlbum, idPath, %s, strTitle, strFileName, iTrack, strGenres, iDuration, iTimesPlayed, iStartOffset, iEndOffset, userrating, comment, mood, votes) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);")
-    insertArgs =  (artistCol, dateYear, dateAdded, albumID, pathID, artist, songName, songName + ".strm", track, "osmosis", duration, "0", "0", "0", "5", "osmosis", "osmosis", "100")
+    insertQuery = ("""INSERT INTO song (iYear, dateAdded, idAlbum, idPath, %s, strTitle, strFileName, iTrack, strGenres, iDuration, iTimesPlayed, iStartOffset, iEndOffset, userrating, comment, mood, votes) VALUES (%d, "%s", %d, %d, "%s", "%s", "%s", %d, "%s", %d, %d, %d, %d, %d, "%s", "%s", %d);""")
+    insertArgs =  (artistCol, dateYear, dateAdded, albumID, pathID, artist, songName, songName + ".strm", track, "osmosis", duration, 0, 0, 0, 5, "osmosis", "osmosis", 100)
     
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
 def writeRole(strRole):
     selectQuery = ("""SELECT idRole FROM role WHERE strRole="%s";""")
     selectArgs =  (strRole)
-    insertQuery = ("INSERT INTO role (strRole) VALUES (%s);")
+    insertQuery = ("""INSERT INTO role (strRole) VALUES ("%s");""")
     insertArgs =  (strRole)
     
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
@@ -289,48 +289,50 @@ def writeRole(strRole):
 def writeArtist(strArtist):
     selectQuery = ("""SELECT idArtist FROM artist WHERE strArtist="%s";""")
     selectArgs =  (strArtist)
-    insertQuery = ("INSERT INTO artist (strArtist) VALUES (%s);")
+    insertQuery = ("""INSERT INTO artist (strArtist) VALUES ("%s");""")
     insertArgs =  (strArtist)
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
            
-def writeSongArtist(artistID, songID,roleID, pstrAartistName, orderID):
-    selectQuery = ("""SELECT idSong FROM song_artist WHERE idSong="%s";""")
+def writeSongArtist(artistID, songID, roleID, pstrAartistName, orderID):
+    selectQuery = ("""SELECT idSong FROM song_artist WHERE idSong=%d;""")
     selectArgs =  (songID)
-    insertQuery = ("INSERT INTO song_artist (idArtist, idSong, idRole, iOrder,strArtist) VALUES (%s, %s, %s, %s, %s);")
+    insertQuery = ("""INSERT INTO song_artist (idArtist, idSong, idRole, iOrder, strArtist) VALUES (%d, %d, %d, %d, "%s");""")
     insertArgs = (artistID, songID, roleID, orderID, pstrAartistName)
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
 def writeAlbumArtist(artistID, albumID,pstrAartistName):
-    selectQuery = ("""SELECT idAlbum FROM album_artist WHERE idAlbum="%s";""")
+    selectQuery = ("""SELECT idAlbum FROM album_artist WHERE idAlbum=%d;""")
     selectArgs =  (albumID)
-    insertQuery = ("INSERT INTO album_artist (idArtist, idAlbum, strArtist) VALUES (%s, %s, %s);")
+    insertQuery = ("""INSERT INTO album_artist (idArtist, idAlbum, strArtist) VALUES (%d, %d, "%s");""")
     insertArgs = (artistID, albumID, pstrAartistName)
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
 def writeThump(mediaId, mediaType, imageType, artPath):
-    selectQuery = ("""SELECT media_id FROM art WHERE media_type="%s" AND media_id="%s";""")
+    selectQuery = ("""SELECT media_id FROM art WHERE media_type="%s" AND media_id=%d;""")
     selectArgs =  (mediaType, mediaId)
-    insertQuery = ("INSERT INTO art (media_id, media_type, type, url) VALUES (%s, %s, %s, %s);")
+    insertQuery = ("""INSERT INTO art (media_id, media_type, type, url) VALUES (%d, "%s", "%s", "%s");""")
     insertArgs =  (mediaId, mediaType,imageType, artPath)
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
 def manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, database=str(os.path.join(KMDBPATH))):
     try:
+        utils.addon_log("insertQuery = " + insertQuery)
+        utils.addon_log("insertArgs = " + str(insertArgs))
         dID = None
         if DATABASE_MYSQL == "false":
             connectMDB = sqlite3.connect(database)
             connectMDB.text_factory = str
             cursor = connectMDB.cursor()
             if selectArgs:
-                searchResult = cursor.execute(selectQuery, selectArgs).fetchone();
+                searchResult = cursor.execute(selectQuery % selectArgs).fetchone();
             else:
                 searchResult = cursor.execute(selectQuery).fetchone();
             if not searchResult :
-                cursor.execute(insertQuery, insertArgs)
+                cursor.execute(insertQuery % insertArgs)
                 connectMDB.commit()
                 dID = cursor.lastrowid
             else:
@@ -351,7 +353,7 @@ def manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, database=st
                 cursor.execute(selectQuery)
                 searchResult = cursor.fetchone()
             if not searchResult :
-                cursor.execute(insertQuery, insertArgs)
+                cursor.execute(insertQuery % insertArgs)
                 connectMDB.commit()
                 dID = cursor.lastrowid
             else:

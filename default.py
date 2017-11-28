@@ -21,7 +21,6 @@ import urlparse
 import SimpleDownloader as downloader
 import re 
 from modules import create, kodiDB
-from modules import dialoge
 from modules import fileSys
 from modules import guiTools
 from modules import urlUtils
@@ -281,44 +280,48 @@ if __name__ == "__main__":
             
             props = None
             infoLabels = {}
-            if mediaType == 'show':
-                sTVShowTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
-                sTVShowTitle = stringUtils.unicodetoascii(sTVShowTitle)
-                iSeason = int(episode[1:episode.index('e')])
-                iEpisode = int(episode[episode.index('e') + 1:])
-                props = kodiDB.getKodiEpisodeID(sTVShowTitle, iSeason, iEpisode)
-
-                infoLabels['tvShowTitle'] = sTVShowTitle
-                infoLabels['season'] = iSeason
-                infoLabels['episode'] = iEpisode
-                infoLabels['mediatype'] = 'episode'
-                if props:
-                    infoLabels['title'] = props[0][2]
-                    infoLabels['aired'] = props[0][3]
+            if mediatype:
+                if mediaType == 'show':
+                    sTVShowTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
+                    sTVShowTitle = stringUtils.unicodetoascii(sTVShowTitle)
+                    iSeason = int(episode[1:episode.index('e')])
+                    iEpisode = int(episode[episode.index('e') + 1:])
+                    props = kodiDB.getKodiEpisodeID(sTVShowTitle, iSeason, iEpisode)
+        
+                    infoLabels['tvShowTitle'] = sTVShowTitle
+                    infoLabels['season'] = iSeason
+                    infoLabels['episode'] = iEpisode
+                    infoLabels['mediatype'] = 'episode'
+                    if props:
+                        infoLabels['title'] = props[0][2]
+                        infoLabels['aired'] = props[0][3]
+                else:
+                    sTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
+                    props = kodiDB.getKodiMovieID(sTitle)
+                    infoLabels['title'] = sTitle
+                    infoLabels['mediatype'] = 'movie'
+                    if props:
+                        infoLabels['premiered'] = props[0][2]
+                        infoLabels['genre'] = props[0][3]
+    
+                if len(infoLabels) > 0:
+                    item.setInfo('video', infoLabels)
+        
+                # Exec play process
+                xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
+                # Wait until the media is started in player
+                counter = 0
+                while meta.find("video") == -1:
+                    meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
+                    time.sleep(1)
+                    counter += 1
+                    if counter >= 30:
+                        raise            
+        
+                getAndMarkResumePoint(props, mediaType == 'show')
             else:
-                sTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
-                props = kodiDB.getKodiMovieID(sTitle)
-                infoLabels['title'] = sTitle
-                infoLabels['mediatype'] = 'movie'
-                if props:
-                    infoLabels['premiered'] = props[0][2]
-                    infoLabels['genre'] = props[0][3]
-
-            if len(infoLabels) > 0:
-                item.setInfo('video', infoLabels)
-
-            # Exec play process
-            xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
-            # Wait until the media is started in player
-            counter = 0
-            while meta.find("video") == -1:
-                meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
-                time.sleep(1)
-                counter += 1
-                if counter >= 30:
-                    raise            
-
-            getAndMarkResumePoint(props, mediaType == 'show')
+                # Exec play process
+                xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
         except:
             pass 
     elif mode == 100:
