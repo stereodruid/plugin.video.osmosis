@@ -211,7 +211,9 @@ def createMusicDB():
                 connectMDB = sqlite3.connect(str(os.path.join(MusicDB_LOC)))
                 cursor = connectMDB.cursor()
                 cursor.execute(sql_command)
-                
+                cursor.close()
+                connectMDB.close()
+
                 while not xbmcvfs.exists(MusicDB_LOC):
                     True
         else:
@@ -241,29 +243,29 @@ def createMusicDB():
         pass    
 
 def writeIntoSongTable (pstrSongTitle, songID, pstrArtistName, pstrAlbumName, albumID, path, pathID, purlLink, roleID, artistID, songArtistRel, delSong):
-    selectQuery = ("""SELECT id FROM songs WHERE songID="%s" AND artistID="%s" AND albumID="%s";""")
-    selectArgs = (songID, artistID, albumID)
-    insertQuery = ("""INSERT INTO songs (strSongTitle, songID, strArtistName, strAlbumName, albumID, strPath, pathID, strURL, roleID, artistID, songArtistRel, delSong) VALUES ("%s", %d, "%s", "%s", %d, "%s", %d, "%s", %d, %d, "%s", "%s");""")
-    insertArgs = (pstrSongTitle, songID, pstrArtistName, pstrAlbumName, albumID, path, pathID, purlLink, roleID, artistID, songArtistRel, delSong)
+    selectQuery = ("SELECT id FROM songs WHERE songID=? AND artistID=? AND albumID=?;")
+    selectArgs = (songID, artistID, albumID,)
+    insertQuery = ("INSERT INTO songs (strSongTitle, songID, strArtistName, strAlbumName, albumID, strPath, pathID, strURL, roleID, artistID, songArtistRel, delSong) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")
+    insertArgs = (pstrSongTitle, songID, pstrArtistName, pstrAlbumName, albumID, path, pathID, purlLink, roleID, artistID, songArtistRel, delSong,)
     
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, str(os.path.join(MusicDB_LOC)))
     
 def writePath(path):
     completePath = fileSys.completePath(path)
-    selectQuery = ("""SELECT idPath FROM path WHERE strPath= "%s";""")
-    selectArgs = (completePath)
-    insertQuery = ("""INSERT INTO path (strPath) VALUES ("%s");""")
-    insertArgs = (completePath)
+    selectQuery = ("SELECT idPath FROM path WHERE strPath= ?;")
+    selectArgs = (completePath,)
+    insertQuery = ("INSERT INTO path (strPath) VALUES (?);")
+    insertArgs = (completePath,)
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
 def writeAlbums(album, artist, firstReleaseType='album'):
     lastScraped = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     artistCol = "strArtistDisp" if kodi_version >= 18 else "strArtists"
-    selectQuery = ("""SELECT idAlbum FROM album WHERE strAlbum="%s";""")
-    selectArgs =  (album)
-    insertQuery = ("""INSERT INTO album (strAlbum, %s, strReleaseType, lastScraped) VALUES ("%s", "%s", "%s", "%s");""")
-    insertArgs =  (artistCol, album, artist, firstReleaseType, lastScraped)
+    selectQuery = ("SELECT idAlbum FROM album WHERE strAlbum=?;")
+    selectArgs =  (album,)
+    insertQuery = ("INSERT INTO album (strAlbum, " + artistCol + ", strReleaseType, lastScraped) VALUES (?, ?, ?, ?);")
+    insertArgs =  (album, artist, firstReleaseType, lastScraped,)
     
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
@@ -271,66 +273,68 @@ def writeSong(pathID, albumID, artist, songName, duration, track="NULL"):
     dateAdded = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     dateYear = int(datetime.datetime.now().strftime("%Y"))
     artistCol = "strArtistDisp" if kodi_version >= 18 else "strArtists"
-    selectQuery = ("""SELECT idSong FROM song WHERE strTitle="%s";""")
-    selectArgs =  (songName)
-    insertQuery = ("""INSERT INTO song (iYear, dateAdded, idAlbum, idPath, %s, strTitle, strFileName, iTrack, strGenres, iDuration, iTimesPlayed, iStartOffset, iEndOffset, userrating, comment, mood, votes) VALUES (%d, "%s", %d, %d, "%s", "%s", "%s", %d, "%s", %d, %d, %d, %d, %d, "%s", "%s", %d);""")
-    insertArgs =  (artistCol, dateYear, dateAdded, albumID, pathID, artist, songName, songName + ".strm", track, "osmosis", duration, 0, 0, 0, 5, "osmosis", "osmosis", 100)
+    selectQuery = ("SELECT idSong FROM song WHERE strTitle=?;")
+    selectArgs =  (songName,)
+    insertQuery = ("INSERT INTO song (iYear, dateAdded, idAlbum, idPath, " + artistCol + ", strTitle, strFileName, iTrack, strGenres, iDuration, iTimesPlayed, iStartOffset, iEndOffset, userrating, comment, mood, votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")
+    insertArgs =  (dateYear, dateAdded, albumID, pathID, artist, songName, songName + ".strm", track, 'osmosis', duration, 0, 0, 0, 5, 'osmosis', 'osmosis', 100,)
     
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
 def writeRole(strRole):
-    selectQuery = ("""SELECT idRole FROM role WHERE strRole="%s";""")
-    selectArgs =  (strRole)
-    insertQuery = ("""INSERT INTO role (strRole) VALUES ("%s");""")
-    insertArgs =  (strRole)
+    selectQuery = ("SELECT idRole FROM role WHERE strRole=?;")
+    selectArgs =  (strRole,)
+    insertQuery = ("INSERT INTO role (strRole) VALUES (?);")
+    insertArgs =  (strRole,)
     
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
 def writeArtist(strArtist):
-    selectQuery = ("""SELECT idArtist FROM artist WHERE strArtist="%s";""")
-    selectArgs =  (strArtist)
-    insertQuery = ("""INSERT INTO artist (strArtist) VALUES ("%s");""")
-    insertArgs =  (strArtist)
+    selectQuery = ("SELECT idArtist FROM artist WHERE strArtist=?;")
+    selectArgs =  (strArtist,)
+    insertQuery = ("INSERT INTO artist (strArtist) VALUES (?);")
+    insertArgs =  (strArtist,)
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
            
 def writeSongArtist(artistID, songID, roleID, pstrAartistName, orderID):
-    selectQuery = ("""SELECT idSong FROM song_artist WHERE idSong=%d;""")
-    selectArgs =  (songID)
-    insertQuery = ("""INSERT INTO song_artist (idArtist, idSong, idRole, iOrder, strArtist) VALUES (%d, %d, %d, %d, "%s");""")
-    insertArgs = (artistID, songID, roleID, orderID, pstrAartistName)
+    selectQuery = ("SELECT idSong FROM song_artist WHERE idSong=?;")
+    selectArgs =  (songID,)
+    insertQuery = ("INSERT INTO song_artist (idArtist, idSong, idRole, iOrder, strArtist) VALUES (?, ?, ?, ?, ?);")
+    insertArgs = (artistID, songID, roleID, orderID, pstrAartistName,)
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
 def writeAlbumArtist(artistID, albumID,pstrAartistName):
-    selectQuery = ("""SELECT idAlbum FROM album_artist WHERE idAlbum=%d;""")
-    selectArgs =  (albumID)
-    insertQuery = ("""INSERT INTO album_artist (idArtist, idAlbum, strArtist) VALUES (%d, %d, "%s");""")
-    insertArgs = (artistID, albumID, pstrAartistName)
+    selectQuery = ("SELECT idAlbum FROM album_artist WHERE idAlbum=?;")
+    selectArgs =  (albumID,)
+    insertQuery = ("INSERT INTO album_artist (idArtist, idAlbum, strArtist) VALUES (?, ?, ?);")
+    insertArgs = (artistID, albumID, pstrAartistName,)
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
 def writeThump(mediaId, mediaType, imageType, artPath):
-    selectQuery = ("""SELECT media_id FROM art WHERE media_type="%s" AND media_id=%d;""")
-    selectArgs =  (mediaType, mediaId)
-    insertQuery = ("""INSERT INTO art (media_id, media_type, type, url) VALUES (%d, "%s", "%s", "%s");""")
-    insertArgs =  (mediaId, mediaType,imageType, artPath)
+    selectQuery = ("SELECT media_id FROM art WHERE media_type=? AND media_id=?;")
+    selectArgs =  (mediaType, mediaId,)
+    insertQuery = ("INSERT INTO art (media_id, media_type, type, url) VALUES (?, ?, ?, ?);")
+    insertArgs =  (mediaId, mediaType,imageType, artPath,)
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
 def manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, database=str(os.path.join(KMDBPATH))):
     try:
+        utils.addon_log("insertQuery = " + insertQuery)
+        utils.addon_log("insertArgs = " + str(insertArgs))
         dID = None
         if DATABASE_MYSQL == "false":
             connectMDB = sqlite3.connect(database)
             connectMDB.text_factory = str
             cursor = connectMDB.cursor()
             if selectArgs:
-                searchResult = cursor.execute(selectQuery % selectArgs).fetchone();
+                searchResult = cursor.execute(selectQuery, selectArgs).fetchone();
             else:
                 searchResult = cursor.execute(selectQuery).fetchone();
             if not searchResult :
-                cursor.execute(insertQuery % insertArgs)
+                cursor.execute(insertQuery, insertArgs)
                 connectMDB.commit()
                 dID = cursor.lastrowid
             else:
@@ -345,13 +349,13 @@ def manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, database=st
             connectMDB = mysql.connector.Connect(**config)
             cursor = connectMDB.cursor()
             if selectArgs:
-                cursor.execute(selectQuery % selectArgs)
+                cursor.execute(selectQuery, selectArgs)
                 searchResult = cursor.fetchone()
             else:
                 cursor.execute(selectQuery)
                 searchResult = cursor.fetchone()
             if not searchResult :
-                cursor.execute(insertQuery % insertArgs)
+                cursor.execute(insertQuery, insertArgs)
                 connectMDB.commit()
                 dID = cursor.lastrowid
             else:
@@ -384,13 +388,13 @@ def writeMoviePath(path):
         
         cursor = connectMDB.cursor()
 
-        if not cursor.execute("""select "%s" from "%s" where strPath="%s";""" % ("idPath","path", str(os.path.join(path + "\\")))).fetchone() :
-            sql_path = """INSERT INTO path (strPath) VALUES ("%s");""" % (str(os.path.join(path + "\\")))
+        if not cursor.execute("select '%s' from '%s' where strPath='%s';" % ('idPath', 'path', str(os.path.join(path + '\\')))).fetchone() :
+            sql_path = "INSERT INTO path (strPath) VALUES ('%s');" % (str(os.path.join(path + '\\')))
             cursor.execute(sql_path)
             connectMDB.commit()
             dID = cursor.lastrowid
         else:
-            dID = cursor.execute("""select "%s" from "%s" where strPath="%s";""" % ("idPath","path", str(os.path.join(path + "\\")))).fetchone()[0]  
+            dID = cursor.execute("select '%s' from '%s' where strPath='%s';" % ("idPath", "path", str(os.path.join(path + '\\')))).fetchone()[0]  
 
         cursor.close()
         connectMDB.close()
@@ -514,8 +518,8 @@ def createMovDB():
     try:        
         if DATABASE_MYSQL == "false":
             connectMDB = sqlite3.connect(str(os.path.join(MODBPATH)))
-            sql_strm_ref = """CREATE TABLE stream_ref (id INTEGER PRIMARY KEY, mov_id INTEGER NOT NULL, provider TEXT NOT NULL, url TEXT NOT NULL);"""
-            sql_movtable = """CREATE TABLE movies (id INTEGER PRIMARY KEY, title TEXT NOT NULL, filePath TEXT NOT NULL);"""
+            sql_strm_ref = "CREATE TABLE stream_ref (id INTEGER PRIMARY KEY, mov_id INTEGER NOT NULL, provider TEXT NOT NULL, url TEXT NOT NULL);"
+            sql_movtable = "CREATE TABLE movies (id INTEGER PRIMARY KEY, title TEXT NOT NULL, filePath TEXT NOT NULL);"
             cursor = connectMDB.cursor()  
             cursor.execute(sql_movtable)
             cursor.execute(sql_strm_ref)
@@ -527,8 +531,8 @@ def createMovDB():
             Config.BUFFERED = True
             config = Config.dataBaseVal().copy()        
             connectMDB = mysql.connector.Connect(**config)
-            sql_strm_ref = """CREATE TABLE stream_ref (id INTEGER PRIMARY KEY AUTO_INCREMENT, mov_id INTEGER NOT NULL, provider TEXT NOT NULL, url TEXT NOT NULL);"""
-            sql_movtable = """CREATE TABLE movies (id INTEGER PRIMARY KEY AUTO_INCREMENT, title TEXT NOT NULL, filePath TEXT NOT NULL);"""
+            sql_strm_ref = "CREATE TABLE stream_ref (id INTEGER PRIMARY KEY AUTO_INCREMENT, mov_id INTEGER NOT NULL, provider TEXT NOT NULL, url TEXT NOT NULL);"
+            sql_movtable = "CREATE TABLE movies (id INTEGER PRIMARY KEY AUTO_INCREMENT, title TEXT NOT NULL, filePath TEXT NOT NULL);"
             cursor = connectMDB.cursor()  
             cursor.execute(sql_movtable)
             cursor.execute(sql_strm_ref)
@@ -543,8 +547,8 @@ def createShowDB():
     try:        
         if DATABASE_MYSQL == "false":
             connectMDB = sqlite3.connect(str(os.path.join(SHDBPATH)))
-            sql_strm_ref = """CREATE TABLE stream_ref (id INTEGER PRIMARY KEY, show_id INTEGER NOT NULL, seasonEpisode TEXT NOT NULL, provider TEXT NOT NULL, url TEXT NOT NULL);"""
-            sql_showtable = """CREATE TABLE shows (id INTEGER PRIMARY KEY, showTitle TEXT NOT NULL, filePath TEXT NOT NULL);"""
+            sql_strm_ref = "CREATE TABLE stream_ref (id INTEGER PRIMARY KEY, show_id INTEGER NOT NULL, seasonEpisode TEXT NOT NULL, provider TEXT NOT NULL, url TEXT NOT NULL);"
+            sql_showtable = "CREATE TABLE shows (id INTEGER PRIMARY KEY, showTitle TEXT NOT NULL, filePath TEXT NOT NULL);"
             cursor = connectMDB.cursor()  
             cursor.execute(sql_showtable)
             cursor.execute(sql_strm_ref)
@@ -556,8 +560,8 @@ def createShowDB():
             Config.BUFFERED = True
             config = Config.dataBaseVal().copy()        
             connectMDB = mysql.connector.Connect(**config)
-            sql_strm_ref = """CREATE TABLE stream_ref (id INTEGER PRIMARY KEY AUTO_INCREMENT, show_id INTEGER NOT NULL, seasonEpisode TEXT NOT NULL, provider TEXT NOT NULL, url TEXT NOT NULL);"""
-            sql_showtable = """CREATE TABLE shows (id INTEGER PRIMARY KEY AUTO_INCREMENT, showTitle TEXT NOT NULL, filePath TEXT NOT NULL);"""
+            sql_strm_ref = "CREATE TABLE stream_ref (id INTEGER PRIMARY KEY AUTO_INCREMENT, show_id INTEGER NOT NULL, seasonEpisode TEXT NOT NULL, provider TEXT NOT NULL, url TEXT NOT NULL);"
+            sql_showtable = "CREATE TABLE shows (id INTEGER PRIMARY KEY AUTO_INCREMENT, showTitle TEXT NOT NULL, filePath TEXT NOT NULL);"
             cursor = connectMDB.cursor()  
             cursor.execute(sql_showtable)
             cursor.execute(sql_strm_ref)
@@ -576,13 +580,13 @@ def movieExists(title, path):
             connectMDB = sqlite3.connect(str(os.path.join(MODBPATH)))
             cursor = connectMDB.cursor()
             
-            if not cursor.execute("""select "%s" from "%s" where title="%s";""" % ("title","movies", title)).fetchone() :
-                sql_path = """INSERT INTO movies (title, filePath) VALUES ("%s", "%s");""" % (title, path)
+            if not cursor.execute("select '%s' from '%s' where title='%s';" % ('title', 'movies', title)).fetchone() :
+                sql_path = "INSERT INTO movies (title, filePath) VALUES ('%s', '%s');" % (title, path)
                 cursor.execute(sql_path)
                 connectMDB.commit()
                 dID = cursor.lastrowid
             else:
-                dID = cursor.execute("""select "%s" from "%s" where title="%s";""" % ("id","movies", title)).fetchone()[0]
+                dID = cursor.execute("select '%s' from '%s' where title='%s';" % ('id', 'movies', title)).fetchone()[0]
         else:
             Config.DatabaseTYpe = 'Movies'
             Config.BUFFERED = True
@@ -590,15 +594,15 @@ def movieExists(title, path):
             connectMDB = mysql.connector.Connect(**config)
             cursor = connectMDB.cursor()
             
-            query = ("""SELECT title FROM movies WHERE title = "%s";""")
+            query = ("SELECT title FROM movies WHERE title = '%s';")
             cursor.execute(query % title)
             
             if not cursor.fetchone() :
-                cursor.execute("INSERT INTO movies (title, filePath) VALUES (%s, %s);", (title, path))
+                cursor.execute("INSERT INTO movies (title, filePath) VALUES ('%s', '%s');", (title, path))
                 connectMDB.commit()
                 dID = cursor.lastrowid
             else:
-                query = ("""SELECT id FROM movies WHERE title ="%s";""")                
+                query = ("SELECT id FROM movies WHERE title ='%s';")                
                 cursor.execute(query % title)
                 dID = cursor.fetchone()[0]
 
@@ -618,13 +622,13 @@ def showExists(title, path):
             connectMDB = sqlite3.connect(str(os.path.join(SHDBPATH)))
             cursor = connectMDB.cursor()
             
-            if not cursor.execute("""select "%s" from "%s" where showTitle="%s";""" % ("showTitle","shows", title)).fetchone() :
-                sql_path = """INSERT INTO shows (showTitle, filePath) VALUES ("%s", "%s");""" % (title, path)
+            if not cursor.execute("select '%s' from '%s' where showTitle='%s';" % ("showTitle","shows", title)).fetchone() :
+                sql_path = "INSERT INTO shows (showTitle, filePath) VALUES ('%s', '%s');" % (title, path)
                 cursor.execute(sql_path)
                 connectMDB.commit()
                 dID = cursor.lastrowid
             else:
-                dID = cursor.execute("""select "%s" from "%s" where showTitle="%s";""" % ("id","shows", title)).fetchone()[0]
+                dID = cursor.execute("select '%s' from '%s' where showTitle='%s';" % ("id","shows", title)).fetchone()[0]
         else:
             Config.DatabaseTYpe = 'TVShows'
             Config.BUFFERED = True
@@ -632,7 +636,7 @@ def showExists(title, path):
             connectMDB = mysql.connector.Connect(**config)
             cursor = connectMDB.cursor()
             
-            query = ("""SELECT showTitle FROM shows WHERE showTitle="%s";""")
+            query = ("SELECT showTitle FROM shows WHERE showTitle='%s';")
             cursor.execute(query % title)
             
             if not cursor.fetchone() :
@@ -640,7 +644,7 @@ def showExists(title, path):
                 connectMDB.commit()
                 dID = cursor.lastrowid
             else:
-                query = ("""SELECT id FROM shows WHERE showTitle="%s";""")                
+                query = ("SELECT id FROM shows WHERE showTitle='%s';")                
                 cursor.execute(query % title)
                 dID = cursor.fetchone()[0]
 
@@ -660,7 +664,7 @@ def movieStreamExists(movieID, provider, url):
             cursor = connectMDB.cursor()
             if url.find("?url=plugin") != -1:
                 url = url.strip().replace("?url=plugin", "plugin", 1)
-            entry = cursor.execute("""SELECT "%s", "%s" FROM "%s" WHERE mov_id="%s" AND provider="%s";""" % ("mov_id","url", "stream_ref", movieID, provider)).fetchone()
+            entry = cursor.execute("SELECT '%s', '%s' FROM '%s' WHERE mov_id='%s' AND provider='%s';" % ("mov_id","url", "stream_ref", movieID, provider)).fetchone()
         else:
             Config.DatabaseTYpe = 'Movies'
             Config.BUFFERED = True
@@ -669,23 +673,23 @@ def movieStreamExists(movieID, provider, url):
             cursor = connectMDB.cursor()
             if url.find("?url=plugin") != -1:
                 url = url.strip().replace("?url=plugin", "plugin", 1)
-            query = ("""SELECT mov_id FROM stream_ref WHERE mov_id='%s' AND provider="%s" """)
+            query = ("SELECT mov_id FROM stream_ref WHERE mov_id='%s' AND provider='%s' ")
             selectStm = (movieID, provider)
             cursor.execute(query % selectStm)
             entry = cursor.fetchone()
         
         if not entry:
-            sql_path = """INSERT INTO stream_ref (mov_id, provider, url) VALUES ("%s", "%s", "%s");""" % (movieID, provider, url)
+            sql_path = "INSERT INTO stream_ref (mov_id, provider, url) VALUES ('%s', '%s', '%s');" % (movieID, provider, url)
             cursor.execute(sql_path)
             connectMDB.commit()
             dID = cursor.lastrowid
         else:
             if str(entry[1]) != url:
-                sql_path = """UPDATE stream_ref SET url = "%s" WHERE mov_id = "%s";""" % (url, movieID)
+                sql_path = "UPDATE stream_ref SET url = '%s' WHERE mov_id = '%s';" % (url, movieID)
                 cursor.execute(sql_path)
                 connectMDB.commit()
 
-            dID = cursor.execute("""SELECT "%s" FROM "%s" WHERE mov_id="%s" AND url="%s";""" % ("mov_id","stream_ref", movieID, url)).fetchone()[0] 
+            dID = cursor.execute("SELECT '%s' FROM '%s' WHERE mov_id='%s' AND url='%s';" % ("mov_id","stream_ref", movieID, url)).fetchone()[0] 
 
         cursor.close()
         connectMDB.close()
@@ -703,7 +707,7 @@ def episodeStreamExists(showID, seEp, provider, url):
             cursor = connectMDB.cursor()
             if url.find("?url=plugin") != -1:
                 url = url.strip().replace("?url=plugin", "plugin", 1)
-            entry = cursor.execute("""SELECT "%s", "%s" FROM "%s" WHERE show_id="%s" AND seasonEpisode="%s" AND provider="%s";""" % ("show_id", "url", "stream_ref", showID, seEp, provider)).fetchone()
+            entry = cursor.execute("SELECT '%s', '%s' FROM '%s' WHERE show_id='%s' AND seasonEpisode='%s' AND provider='%s';" % ("show_id", "url", "stream_ref", showID, seEp, provider)).fetchone()
         else:
             Config.DatabaseTYpe = 'TVShows'
             Config.BUFFERED = True
@@ -712,22 +716,22 @@ def episodeStreamExists(showID, seEp, provider, url):
             cursor = connectMDB.cursor()
             if url.find("?url=plugin") != -1:
                 url = url.strip().replace("?url=plugin", "plugin", 1)
-            query = ("""SELECT show_id FROM stream_ref WHERE show_id="%s" AND seasonEpisode="%s" AND provider="%s";""")
+            query = ("SELECT show_id FROM stream_ref WHERE show_id='%s' AND seasonEpisode='%s' AND provider='%s';")
             selectStm = (showID, seEp, provider)
             cursor.execute(query % selectStm)
             entry = cursor.fetchone()
         
         if not entry:
-            sql_path = """INSERT INTO stream_ref (show_id, seasonEpisode, provider, url) VALUES ("%s", "%s", "%s", "%s");""" % (showID, seEp, provider, url)
+            sql_path = "INSERT INTO stream_ref (show_id, seasonEpisode, provider, url) VALUES ('%s', '%s', '%s', '%s');" % (showID, seEp, provider, url)
             cursor.execute(sql_path)
             connectMDB.commit()
             dID = cursor.lastrowid
         else:
             if str(entry[1]) != url:
-                sql_path = """UPDATE stream_ref SET url = "%s" WHERE show_id="%s" AND seasonEpisode="%s" AND provider="%s";""" % (url, showID, seEp, provider)
+                sql_path = "UPDATE stream_ref SET url = '%s' WHERE show_id='%s' AND seasonEpisode='%s' AND provider='%s';" % (url, showID, seEp, provider)
                 cursor.execute(sql_path)
                 connectMDB.commit()
-            dID = cursor.execute("""SELECT "%s" FROM "%s" WHERE show_id="%s" AND seasonEpisode="%s" AND provider="%s";""" % ("show_id","stream_ref", showID, seEp, provider)).fetchone()[0] 
+            dID = cursor.execute("SELECT '%s' FROM '%s' WHERE show_id='%s' AND seasonEpisode='%s' AND provider='%s';" % ("show_id","stream_ref", showID, seEp, provider)).fetchone()[0] 
 
         cursor.close()
         connectMDB.close()
@@ -743,11 +747,11 @@ def getVideo(ID, seasonEpisodes="n.a"):
             if seasonEpisodes == "n.a":
                 connectMDB = sqlite3.connect(str(os.path.join(MODBPATH)))
                 cursor = connectMDB.cursor()
-                provList = cursor.execute("""SELECT "%s" , "%s" FROM "%s" WHERE mov_id="%s";""" % ("url", "provider","stream_ref", ID)).fetchall()
+                provList = cursor.execute("SELECT '%s' , '%s' FROM '%s' WHERE mov_id='%s';" % ("url", "provider","stream_ref", ID)).fetchall()
             else:
                 connectMDB = sqlite3.connect(str(os.path.join(SHDBPATH)))
                 cursor = connectMDB.cursor()
-                provList = cursor.execute("""SELECT "%s" , "%s" FROM "%s" WHERE show_id="%s" AND seasonEpisode="%s";""" % ("url", "provider","stream_ref", ID, seasonEpisodes)).fetchall()
+                provList = cursor.execute("SELECT '%s' , '%s' FROM '%s' WHERE show_id='%s' AND seasonEpisode='%s';" % ("url", "provider","stream_ref", ID, seasonEpisodes)).fetchall()
         else:
             if seasonEpisodes == "n.a":
                 Config.DatabaseTYpe = 'Movies'
@@ -755,7 +759,7 @@ def getVideo(ID, seasonEpisodes="n.a"):
                 config = Config.dataBaseVal().copy()
                 connectMDB = mysql.connector.Connect(**config)
                 cursor = connectMDB.cursor()
-                query = ("""SELECT url, provider FROM stream_ref WHERE mov_id= "%s";""")
+                query = ("SELECT url, provider FROM stream_ref WHERE mov_id= '%s';")
                 selectStm = (ID)
                 cursor.execute(query % selectStm)
                 provList = cursor.fetchall()
@@ -765,7 +769,7 @@ def getVideo(ID, seasonEpisodes="n.a"):
                 config = Config.dataBaseVal().copy()
                 connectMDB = mysql.connector.Connect(**config)
                 cursor = connectMDB.cursor()
-                query = ("""SELECT url, provider  FROM stream_ref WHERE show_id='%s' AND seasonEpisode="%s";""")
+                query = ("SELECT url, provider  FROM stream_ref WHERE show_id='%s' AND seasonEpisode='%s';")
                 selectStm = (ID, seasonEpisodes)
                 cursor.execute(query % selectStm)
                 provList = cursor.fetchall()
@@ -784,29 +788,29 @@ def getPlayedURLResumePoint(url):
         if DATABASE_MYSQL == "false":
             connectMDB = sqlite3.connect(str(os.path.join(KMODBPATH)))
             cursor = connectMDB.cursor()
-            if cursor.execute("""SELECT "%s" FROM "%s" WHERE strFilename="%s";""" % ("idFile","files", url)).fetchone():
-                dbURLID = cursor.execute("""SELECT "%s" FROM "%s" WHERE strFilename="%s";""" % ("idFile","files", url)).fetchone()[0]
-                if cursor.execute("""SELECT "%s", "%s" FROM "%s" WHERE idFile="%s";""" % ("timeInSeconds", "totalTimeInSeconds","bookmark", dbURLID)).fetchone():
-                    urlResumePoint = cursor.execute("""SELECT "%s", "%s", "%s" FROM "%s" WHERE idFile="%s";""" % ("timeInSeconds","totalTimeInSeconds", "idBookmark","bookmark", dbURLID)).fetchall()
+            if cursor.execute("SELECT '%s' FROM '%s' WHERE strFilename='%s';" % ("idFile","files", url)).fetchone():
+                dbURLID = cursor.execute("SELECT '%s' FROM '%s' WHERE strFilename='%s';" % ("idFile","files", url)).fetchone()[0]
+                if cursor.execute("SELECT '%s', '%s' FROM '%s' WHERE idFile='%s';" % ("timeInSeconds", "totalTimeInSeconds","bookmark", dbURLID)).fetchone():
+                    urlResumePoint = cursor.execute("SELECT '%s', '%s', '%s' FROM '%s' WHERE idFile='%s';" % ("timeInSeconds","totalTimeInSeconds", "idBookmark","bookmark", dbURLID)).fetchall()
         else:
             Config.DatabaseTYpe = 'KMovies'
             Config.BUFFERED = True
             config = Config.dataBaseVal().copy()
             connectMDB = mysql.connector.Connect(**config)
             cursor = connectMDB.cursor()
-            query = ("""SELECT idFile FROM files WHERE strFilename="%s";""")
+            query = ("SELECT idFile FROM files WHERE strFilename='%s';")
             selectStm = (url)
             cursor.execute(query % selectStm)
             dbidFile = cursor.fetchone()
             if dbidFile:
                 cursor.execute(query % selectStm)
                 dbURLID = cursor.fetchone()[0]
-                query = ("""SELECT timeInSeconds, totalTimeInSeconds FROM bookmark WHERE idFile="%s";""")
+                query = ("SELECT timeInSeconds, totalTimeInSeconds FROM bookmark WHERE idFile='%s';")
                 selectStm = (dbURLID)
                 cursor.execute(query % selectStm)
                 dbresume = cursor.fetchone()
                 if dbresume:
-                    query = ("""SELECT timeInSeconds, totalTimeInSeconds, idBookmark FROM bookmark WHERE idFile="%s";""")
+                    query = ("SELECT timeInSeconds, totalTimeInSeconds, idBookmark FROM bookmark WHERE idFile='%s';")
                     selectStm = (dbURLID)
                     cursor.execute(query % selectStm)
                     urlResumePoint = cursor.fetchall()
@@ -824,11 +828,11 @@ def delBookMark(bookmarkID, fileID):
         if DATABASE_MYSQL == "false":
             connectMDB = sqlite3.connect(str(os.path.join(KMODBPATH)))
             cursor = connectMDB.cursor()
-            if cursor.execute("""SELECT "%s" FROM "%s" WHERE idFile="%s";""" % ("idBookmark","bookmark", fileID)).fetchone():
-                cursor.execute("""DELETE FROM "%s" WHERE idFile="%s";""" % ("bookmark", fileID))
+            if cursor.execute("SELECT '%s' FROM '%s' WHERE idFile='%s';" % ("idBookmark","bookmark", fileID)).fetchone():
+                cursor.execute("DELETE FROM '%s' WHERE idFile='%s';" % ("bookmark", fileID))
                 time.sleep(1)
-            if cursor.execute("""SELECT "%s" FROM "%s" WHERE idBookmark="%s";""" % ("idBookmark","bookmark", bookmarkID)).fetchone():
-                cursor.execute("""DELETE FROM "%s" WHERE idBookmark="%s";""" % ("bookmark", bookmarkID))
+            if cursor.execute("SELECT '%s' FROM '%s' WHERE idBookmark='%s';" % ("idBookmark","bookmark", bookmarkID)).fetchone():
+                cursor.execute("DELETE FROM '%s' WHERE idBookmark='%s';" % ("bookmark", bookmarkID))
             connectMDB.commit()
         else:
             Config.DatabaseTYpe = 'KMovies'
@@ -836,22 +840,22 @@ def delBookMark(bookmarkID, fileID):
             config = Config.dataBaseVal().copy()
             connectMDB = mysql.connector.Connect(**config)
             cursor = connectMDB.cursor()
-            query = ("""SELECT idBookmark FROM bookmark WHERE idFile="%s";""")
+            query = ("SELECT idBookmark FROM bookmark WHERE idFile='%s';")
             selectStm = (fileID)
             cursor.execute(query % selectStm)
             dbmovFileID = cursor.fetchone()[0]
             if dbmovFileID:
-                query = ("""DELETE FROM bookmark WHERE idFile="%s";""")
+                query = ("DELETE FROM bookmark WHERE idFile='%s';")
                 selectStm = (fileID)
                 cursor.execute(query % selectStm)
                 connectMDB.commit()
                 time.sleep(1)
-            query = ("""SELECT idBookmark FROM bookmark WHERE idBookmark="%s";""")
+            query = ("SELECT idBookmark FROM bookmark WHERE idBookmark='%s';")
             selectStm = (bookmarkID)
             cursor.execute(query % selectStm)
             dbID = cursor.fetchone()
             if dbID:
-                query = ("""DELETE FROM bookmark WHERE idBookmark="%s";""")
+                query = ("DELETE FROM bookmark WHERE idBookmark='%s';")
                 selectStm = (bookmarkID)
                 cursor.execute(query % selectStm)
                 connectMDB.commit()
@@ -866,7 +870,7 @@ def delBookMark(bookmarkID, fileID):
 def getKodiMovieID(sTitle):
     try:
         kodiMovID = None
-        query = """SELECT %s, %s, %s, %s FROM %s WHERE c00 LIKE "%s";""" % ("idMovie", "idFile", "premiered", "c14", "movie", sTitle)
+        query = "SELECT %s, %s, %s, %s FROM %s WHERE c00 LIKE '%s';" % ("idMovie", "idFile", "premiered", "c14", "movie", sTitle)
         if DATABASE_MYSQL == "false":
             connectMDB = sqlite3.connect(str(os.path.join(KMODBPATH)))
             cursor = connectMDB.cursor()
@@ -892,7 +896,7 @@ def getKodiMovieID(sTitle):
 def getKodiEpisodeID(sTVShowTitle, iSeason, iEpisode):
     try:
         kodiMovID = None
-        queue = """SELECT episode.idEpisode, episode.idFile, episode.c00, episode.c05 FROM episode inner join tvshow on tvshow.idShow = episode.idShow WHERE episode.c12 = %s and episode.c13 = %s and tvshow.c00 like "%s";""" % (iSeason, iEpisode, sTVShowTitle)
+        queue = "SELECT episode.idEpisode, episode.idFile, episode.c00, episode.c05 FROM episode inner join tvshow on tvshow.idShow = episode.idShow WHERE episode.c12 = %s and episode.c13 = %s and tvshow.c00 like '%s';" % (iSeason, iEpisode, sTVShowTitle)
         if DATABASE_MYSQL == "false":
             connectMDB = sqlite3.connect(str(os.path.join(KMODBPATH)))
             cursor = connectMDB.cursor()
