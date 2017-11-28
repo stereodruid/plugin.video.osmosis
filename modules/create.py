@@ -221,7 +221,6 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
                 guiTools.addDir(label, file, 101, art, plot, '', '', '')
 
 def removeItemsFromMediaList(action='list'):
-    from modules import dialoge
     utils.addon_log('removingitemsdialog')
     thelist = fileSys.readMediaList(purge=False)
     items = []
@@ -229,12 +228,15 @@ def removeItemsFromMediaList(action='list'):
         splits = entry.strip().split('|')
         plugin = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), splits[2])
         items.append(stringUtils.getStrmname(splits[1]) + " (" + fileSys.getAddonname(plugin.group(1)) + ")")
-    dialog = dialoge.MultiChoiceDialog("Select items", items)
-    dialog.doModal()
 
-    fileSys.removeMediaList(dialog.selected)
-        
-    xbmcgui.Dialog().notification("Finished deleting:", "{0}".format(", ".join(str(label) for label in dialog.selectedLabels)))
+    dialog = xbmcgui.Dialog()
+    selectedItems = dialog.multiselect("Select items", items)
+
+    if selectedItems is not None:
+        fileSys.removeMediaList(selectedItems)
+        selectedLabels = [item for index, item in enumerate(items) if index in selectedItems] if selectedItems is not None else []
+        xbmcgui.Dialog().notification("Finished deleting:", "{0}".format(", ".join(str(label) for label in selectedLabels)))
+
     del dialog
     
 def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
@@ -264,8 +266,8 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                 track = detailInfo.get('track', 0) if detailInfo.get('track', 0) > 0 else index + 1
                 duration = detailInfo.get('duration', 0)
                 if duration == 0:
-				    duration = 200
-				
+                    duration = 200
+                
                 try:
                     if filetype == 'directory':
                         dirList.append(jsonUtils.requestList(file, 'music').get('files', []))
