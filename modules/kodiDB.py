@@ -170,7 +170,7 @@ class Config(object):
                 'buffered': cls.BUFFERED,
                 }
     
-def musicDatabase(pstrAlbumName, pstrArtistName, pstrSongTitle, pstrPath, purlLink, track, duration, artPath):
+def musicDatabase(pstrAlbumName, pstrArtistName, pstrSongTitle, pstrPath, purlLink, track, duration, artPath, fileModTime=None):
     path = str(os.path.join(STRM_LOC, pstrPath))
     
     # Write to music db and get id's
@@ -179,7 +179,7 @@ def musicDatabase(pstrAlbumName, pstrArtistName, pstrSongTitle, pstrPath, purlLi
     artistID = writeArtist(pstrArtistName)
     genreID = writeGenre('osmosis')
     albumID = writeAlbums(pstrAlbumName,pstrArtistName)
-    songID = writeSong(pathID, albumID, pstrArtistName, pstrSongTitle, duration, track)   
+    songID = writeSong(pathID, albumID, pstrArtistName, pstrSongTitle, duration, track, fileModTime)   
     songArtistRel = writeSongArtist(artistID, songID, 1, pstrArtistName, 0)
     writeSongGenre(genreID, songID)
     writeAlbumArtist(artistID, albumID,pstrArtistName)
@@ -271,8 +271,9 @@ def writeAlbums(album, artist, firstReleaseType='album'):
     
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
-def writeSong(pathID, albumID, artist, songName, duration, track):
-    dateAdded = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+def writeSong(pathID, albumID, artist, songName, duration, track, fileModTime):
+    dateAdded = datetime.datetime.fromtimestamp(fileModTime) if fileModTime else datetime.datetime.now()
+    dateAdded = dateAdded.strftime("%Y-%m-%d %H:%M:%S")
     dateYear = int(datetime.datetime.now().strftime("%Y"))
     artistCol = "strArtistDisp" if kodi_version >= 18 else "strArtists"
     selectQuery = ("SELECT idSong FROM song WHERE strTitle=?;")

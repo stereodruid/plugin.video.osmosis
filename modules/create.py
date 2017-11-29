@@ -110,7 +110,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
     else: 
         details.append("palyableSingleMedia")
         details.append(url)
-        
+
     thisDialog.dialogeBG.close()
     thisDialog.dialogeBG = None  
     if strm_type.find('Cinema') != -1 or strm_type.find('YouTube') != -1 or strm_type.find('Movies') != -1:
@@ -344,8 +344,8 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                 albumartist = artist
                 fileSys.rewriteMediaList(url, strm_name, albumartist, cType)
         for i in albumList:
-            fileSys.writeSTRM(path, stringUtils.cleanStrms(i[1].rstrip(".")) , i[2] + "|" + i[1])
-            kodiDB.musicDatabase(i[3], i[4], i[1], i[0], i[2], i[5], i[6], aThumb)
+            fullpath, fileModTime = fileSys.writeSTRM(path, stringUtils.cleanStrms(i[1].rstrip(".")) , i[2] + "|" + i[1])
+            kodiDB.musicDatabase(i[3], i[4], i[1], i[0], i[2], i[5], i[6], aThumb, fileModTime)
         thisDialog.dialogeBG.close()
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)

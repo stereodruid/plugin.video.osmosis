@@ -76,12 +76,13 @@ def writeSTRM(path, file, url):
 #         if url.find("plugin://plugin.video.osmosis/?url=plugin") == -1:
 #             url = url.strip().replace("?url=plugin", "plugin://plugin.video.osmosis/?url=plugin", 1)
     utils.addon_log('writeSTRM')
-    makeSTRM(path, file, url)
+    return makeSTRM(path, file, url)
     
 def makeSTRM(filepath, filename, url):
     utils.addon_log('makeSTRM')
     
     isSMB = False
+    mtime = None
     try:
         filepath = stringUtils.multiRstrip(filepath.decode("utf-8"))
         filename = filename.decode("utf-8")
@@ -110,7 +111,6 @@ def makeSTRM(filepath, filename, url):
 #                 return fullpath
         if True:
             atime = None
-            mtime = None
             if fullpath.find('Audio') > 0:
                 try:
                     if xbmcvfs.exists(fullpath.decode("utf-8")):
@@ -155,7 +155,7 @@ def makeSTRM(filepath, filename, url):
         utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
         print ("Unexpected error:"), sys.exc_info()[1]
         pass
-    return fullpath
+    return fullpath, mtime
     
 def updateStream(strm_Fullpath, replace_text):
     utils.addon_log('updateStream')
