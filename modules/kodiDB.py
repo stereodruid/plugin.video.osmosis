@@ -250,7 +250,7 @@ def writeIntoSongTable (pstrSongTitle, songID, pstrArtistName, pstrAlbumName, al
     insertQuery = ("INSERT INTO songs (strSongTitle, songID, strArtistName, strAlbumName, albumID, strPath, pathID, strURL, roleID, artistID, songArtistRel, delSong) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")
     insertArgs = (pstrSongTitle, songID, pstrArtistName, pstrAlbumName, albumID, path, pathID, purlLink, roleID, artistID, songArtistRel, delSong,)
     
-    return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, str(os.path.join(MusicDB_LOC)))
+    return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, MusicDB_LOC)
     
 def writePath(path):
     completePath = fileSys.completePath(path)
@@ -338,46 +338,24 @@ def writeThump(mediaId, mediaType, imageType, artPath):
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
-def manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, database=str(os.path.join(KMDBPATH))):
+def manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, database=KMDBPATH):
+    dID = None
     try:
-        utils.addon_log("insertQuery = " + insertQuery)
-        utils.addon_log("insertArgs = " + str(insertArgs))
-        dID = None
-        if DATABASE_MYSQL == "false":
-            connectMDB = sqlite3.connect(database)
-            connectMDB.text_factory = str
-            cursor = connectMDB.cursor()
-            if selectArgs:
-                searchResult = cursor.execute(selectQuery, selectArgs).fetchone();
-            else:
-                searchResult = cursor.execute(selectQuery).fetchone();
-            if not searchResult and insertArgs:
-                cursor.execute(insertQuery, insertArgs)
-                connectMDB.commit()
-                dID = cursor.lastrowid
-            else:
-                dID = searchResult[0]
+        con, cursor = openDB(database, 'KMusic' if database == KMDBPATH else 'Music')    
+
+        if selectArgs:
+            cursor.execute(selectQuery, selectArgs)
+            searchResult = cursor.fetchone()
         else:
-            if database == str(os.path.join(KMDBPATH)):
-                Config.DATABASETYPE = 'KMusic'
-            else:
-                Config.DATABASETYPE = 'Music'
-            Config.BUFFERED = True
-            config = Config.dataBaseVal().copy()
-            connectMDB = mysql.connector.Connect(**config)
-            cursor = connectMDB.cursor()
-            if selectArgs:
-                cursor.execute(selectQuery, selectArgs)
-                searchResult = cursor.fetchone()
-            else:
-                cursor.execute(selectQuery)
-                searchResult = cursor.fetchone()
-            if not searchResult :
-                cursor.execute(insertQuery, insertArgs)
-                connectMDB.commit()
-                dID = cursor.lastrowid
-            else:
-                dID = searchResult[0]
+            cursor.execute(selectQuery)
+            searchResult = cursor.fetchone()
+
+        if not searchResult :
+            cursor.execute(insertQuery, insertArgs)
+            con.commit()
+            dID = cursor.lastrowid
+        else:
+            dID = searchResult[0]
                 
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)
@@ -390,37 +368,29 @@ def manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, database=st
     
     finally:
         cursor.close()
-        connectMDB.close()
-        return dID
+        con.close()
+    
+    return dID
 
 def writeMoviePath(path):
+    pathID = None
     try:
-        dID = None
-        if DATABASE_MYSQL == "false":
-            connectMDB = sqlite3.connect(str(os.path.join(MODBPATH)))
-        else:
-            Config.DATABASETYPE = 'Movies'
-            Config.BUFFERED = True
-            config = Config.dataBaseVal().copy()
-            connectMDB = mysql.connector.Connect(**config)
-        
-        cursor = connectMDB.cursor()
+        con, cursor = openDB(MODBPATH, 'Movies')
 
-        if not cursor.execute("select '%s' from '%s' where strPath='%s';" % ('idPath', 'path', str(os.path.join(path + '\\')))).fetchone() :
-            sql_path = "INSERT INTO path (strPath) VALUES ('%s');" % (str(os.path.join(path + '\\')))
-            cursor.execute(sql_path)
-            connectMDB.commit()
-            dID = cursor.lastrowid
+        if not cursor.execute("select idPath from path where strPath like ?;", (fileSys.completePath(path)),).fetchone():
+            query = "INSERT INTO path (strPath) VALUES (?);"
+            cursor.execute(query, (fileSys.completePath(path),))
+            con.commit()
+            pathID = cursor.lastrowid
         else:
-            dID = cursor.execute("select '%s' from '%s' where strPath='%s';" % ("idPath", "path", str(os.path.join(path + '\\')))).fetchone()[0]  
-
-        cursor.close()
-        connectMDB.close()
-        return dID      
+            pathID = cursor.execute("select idPath from path where strPath like ?;", (fileSys.completePath(path),)).fetchone()[0]                
     except:
-        cursor.close()
-        connectMDB.close() 
         pass
+    finally:
+        cursor.close()
+        con.close()
+
+    return pathID
 
 def valDB(database):
     if DATABASE_MYSQL == "false":
@@ -870,6 +840,7 @@ def getKodiEpisodeID(sTVShowTitle, iSeason, iEpisode):
 def openDB(sqliteDB, mysqlDB):
     if DATABASE_MYSQL == "false":            
         con = sqlite3.connect(str(os.path.join(sqliteDB)))
+        con.text_factory = str
         cursor = con.cursor()
     else:
         Config.DATABASETYPE = mysqlDB
