@@ -177,9 +177,11 @@ def musicDatabase(pstrAlbumName, pstrArtistName, pstrSongTitle, pstrPath, purlLi
     roleID = writeRole("Artist")
     pathID = writePath(path)
     artistID = writeArtist(pstrArtistName)
+    genreID = writeGenre('osmosis')
     albumID = writeAlbums(pstrAlbumName,pstrArtistName)
     songID = writeSong(pathID, albumID, pstrArtistName, pstrSongTitle, duration, track)   
     songArtistRel = writeSongArtist(artistID, songID, 1, pstrArtistName, 0)
+    writeSongGenre(genreID, songID)
     writeAlbumArtist(artistID, albumID,pstrArtistName)
     writeThump(artistID, "artist", "thumb", artPath)
     writeThump(albumID, "album", "thumb", artPath)
@@ -264,19 +266,19 @@ def writeAlbums(album, artist, firstReleaseType='album'):
     artistCol = "strArtistDisp" if kodi_version >= 18 else "strArtists"
     selectQuery = ("SELECT idAlbum FROM album WHERE strAlbum=?;")
     selectArgs =  (album,)
-    insertQuery = ("INSERT INTO album (strAlbum, " + artistCol + ", strReleaseType, lastScraped) VALUES (?, ?, ?, ?);")
-    insertArgs =  (album, artist, firstReleaseType, lastScraped,)
+    insertQuery = ("INSERT INTO album (strAlbum, {}, strReleaseType, strGenres) VALUES (?, ?, ?, ?);".format(artistCol))
+    insertArgs =  (album, artist, firstReleaseType, 'osmosis',)
     
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
-def writeSong(pathID, albumID, artist, songName, duration, track="NULL"):
+def writeSong(pathID, albumID, artist, songName, duration, track):
     dateAdded = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     dateYear = int(datetime.datetime.now().strftime("%Y"))
     artistCol = "strArtistDisp" if kodi_version >= 18 else "strArtists"
     selectQuery = ("SELECT idSong FROM song WHERE strTitle=?;")
     selectArgs =  (songName,)
     insertQuery = ("INSERT INTO song (iYear, dateAdded, idAlbum, idPath, " + artistCol + ", strTitle, strFileName, iTrack, strGenres, iDuration, iTimesPlayed, iStartOffset, iEndOffset, userrating, comment, mood, votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")
-    insertArgs =  (dateYear, dateAdded, albumID, pathID, artist, songName, songName + ".strm", track, 'osmosis', duration, 0, 0, 0, 5, 'osmosis', 'osmosis', 100,)
+    insertArgs =  (dateYear, dateAdded, albumID, pathID, artist, songName, songName + ".strm", track, 'osmosis', duration, 0, 0, 0, 0, 'osmosis', 'osmosis', 0,)
     
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
@@ -295,6 +297,14 @@ def writeArtist(strArtist):
     insertArgs =  (strArtist,)
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
+
+def writeGenre(strGenre):
+    selectQuery = ("SELECT idGenre FROM genre WHERE strGenre=?;")
+    selectArgs =  (strGenre,)
+    insertQuery = ("INSERT INTO genre (strGenre) VALUES (?);")
+    insertArgs =  (strGenre,)
+
+    return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
            
 def writeSongArtist(artistID, songID, roleID, pstrAartistName, orderID):
     selectQuery = ("SELECT idSong FROM song_artist WHERE idSong=?;")
@@ -304,11 +314,19 @@ def writeSongArtist(artistID, songID, roleID, pstrAartistName, orderID):
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
+def writeSongGenre(genreID, songID):
+    selectQuery = ("SELECT idSong FROM song_genre WHERE idGenre=? and idSong=?;")
+    selectArgs =  (genreID, songID,)
+    insertQuery = ("INSERT INTO song_genre (idGenre, idSong, iOrder) VALUES (?, ?, ?);")
+    insertArgs = (genreID, songID, 0,)
+
+    return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
+
 def writeAlbumArtist(artistID, albumID,pstrAartistName):
     selectQuery = ("SELECT idAlbum FROM album_artist WHERE idAlbum=?;")
     selectArgs =  (albumID,)
-    insertQuery = ("INSERT INTO album_artist (idArtist, idAlbum, strArtist) VALUES (?, ?, ?);")
-    insertArgs = (artistID, albumID, pstrAartistName,)
+    insertQuery = ("INSERT INTO album_artist (idArtist, idAlbum, iOrder, strArtist) VALUES (?, ?, ?, ?);")
+    insertArgs = (artistID, albumID, 0, pstrAartistName,)
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
@@ -333,7 +351,7 @@ def manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, database=st
                 searchResult = cursor.execute(selectQuery, selectArgs).fetchone();
             else:
                 searchResult = cursor.execute(selectQuery).fetchone();
-            if not searchResult :
+            if not searchResult and insertArgs:
                 cursor.execute(insertQuery, insertArgs)
                 connectMDB.commit()
                 dID = cursor.lastrowid
