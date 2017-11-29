@@ -70,10 +70,10 @@ def getAndMarkResumePoint(props, isTVShow):
     urlsResumePoint = kodiDB.getPlayedURLResumePoint(checkURL)
 
     if urlsResumePoint: 
-        conTime = utils.zeitspanne(int(urlsResumePoint[0][0]))               
+        conTime = utils.zeitspanne(int(urlsResumePoint[0]))               
         resume = ["Jump to position : %s " % (str(conTime[5])), "Start from beginning!"]
         if guiTools.selectDialog(resume, header = 'OSMOSIS: Would you like to continue?') == 0:
-            xbmc.Player().seekTime(int(urlsResumePoint[0][0]) - 5)
+            xbmc.Player().seekTime(int(urlsResumePoint[0]) - 5)
 
     watched = 0
     while xbmc.Player().isPlaying():
@@ -83,17 +83,17 @@ def getAndMarkResumePoint(props, isTVShow):
     time.sleep(1)
     
     if props:
-        ID = props[0][0]
-        fileID = props[0][1]
+        ID = props[0]
+        fileID = props[1]
         pos = 0
         total = 0
         urlsWatchedPoint = kodiDB.getPlayedURLResumePoint(checkURL)
         if urlsWatchedPoint:
-            pos = urlsWatchedPoint[0][0]
-            total = urlsWatchedPoint[0][1]
+            pos = urlsWatchedPoint[0]
+            total = urlsWatchedPoint[1]
             done = False
         elif urlsResumePoint and not urlsWatchedPoint:
-            kodiDB.delBookMark(urlsResumePoint[0][2], fileID)
+            kodiDB.delBookMark(urlsResumePoint[2], fileID)
             done = True
         elif not urlsResumePoint and not urlsWatchedPoint:
             done = True if watched > 50 else False
@@ -293,16 +293,16 @@ if __name__ == "__main__":
                     infoLabels['episode'] = iEpisode
                     infoLabels['mediatype'] = 'episode'
                     if props:
-                        infoLabels['title'] = props[0][2]
-                        infoLabels['aired'] = props[0][3]
+                        infoLabels['title'] = props[2]
+                        infoLabels['aired'] = props[3]
                 else:
                     sTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
                     props = kodiDB.getKodiMovieID(sTitle)
                     infoLabels['title'] = sTitle
                     infoLabels['mediatype'] = 'movie'
                     if props:
-                        infoLabels['premiered'] = props[0][2]
-                        infoLabels['genre'] = props[0][3]
+                        infoLabels['premiered'] = props[2]
+                        infoLabels['genre'] = props[3]
     
                 if len(infoLabels) > 0:
                     item.setInfo('video', infoLabels)
