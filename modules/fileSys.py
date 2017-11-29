@@ -87,7 +87,7 @@ def makeSTRM(filepath, filename, url):
         filename = filename.decode("utf-8")
         filepath = completePath(os.path.join(STRM_LOC, filepath))
 
-        if not xbmcvfs.exists(filepath):         
+        if not xbmcvfs.exists(filepath):
             dirs = filepath.replace(STRM_LOC,'').split("\\") if filepath.find("\\") != -1 else filepath.replace(STRM_LOC,'').split("/")
             dirs = filter(None, dirs)
 
@@ -113,12 +113,14 @@ def makeSTRM(filepath, filename, url):
             mtime = None
             if fullpath.find('Audio') > 0:
                 try:
-                    atime = os.path.getatime(fullpath.decode("utf-8"))
-                    mtime = os.path.getmtime(fullpath.decode("utf-8"))
+                    if xbmcvfs.exists(fullpath.decode("utf-8")):
+                        atime = os.path.getatime(fullpath.decode("utf-8"))
+                        mtime = os.path.getmtime(fullpath.decode("utf-8"))
                 except:
-                    atime = os.path.getatime(fullpath.encode("utf-8"))
-                    mtime = os.path.getmtime(fullpath.encode("utf-8"))
-                    pass
+                    if xbmcvfs.exists(fullpath.encode("utf-8")):
+                        atime = os.path.getatime(fullpath.encode("utf-8"))
+                        mtime = os.path.getmtime(fullpath.encode("utf-8"))
+                        pass
 
             if isSMB:
                 try:
