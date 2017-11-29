@@ -277,7 +277,7 @@ def writeSong(pathID, albumID, artist, songName, duration, track):
     artistCol = "strArtistDisp" if kodi_version >= 18 else "strArtists"
     selectQuery = ("SELECT idSong FROM song WHERE strTitle=?;")
     selectArgs =  (songName,)
-    insertQuery = ("INSERT INTO song (iYear, dateAdded, idAlbum, idPath, " + artistCol + ", strTitle, strFileName, iTrack, strGenres, iDuration, iTimesPlayed, iStartOffset, iEndOffset, userrating, comment, mood, votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")
+    insertQuery = ("INSERT INTO song (iYear, dateAdded, idAlbum, idPath, {}, strTitle, strFileName, iTrack, strGenres, iDuration, iTimesPlayed, iStartOffset, iEndOffset, userrating, comment, mood, votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);".format(artistCol))
     insertArgs =  (dateYear, dateAdded, albumID, pathID, artist, songName, songName + ".strm", track, 'osmosis', duration, 0, 0, 0, 0, 'osmosis', 'osmosis', 0,)
     
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
