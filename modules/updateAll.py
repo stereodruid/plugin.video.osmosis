@@ -58,7 +58,7 @@ def readMediaList(purge=False):
     except:
         pass
 
-def strm_update():   
+def strm_update():
     try:
         if xbmcvfs.exists(MediaList_LOC):
             thelist = readMediaList()
@@ -69,8 +69,10 @@ def strm_update():
                 listLen = len(thelist)
                 j = 100 / len(thelist)
                 for i in range(len(thelist)):
-                    cType , name, url = (thelist[i]).strip().split('|', 2)
-
+                    try:
+                        cType , name, url = (thelist[i]).strip().split('|', 3)
+                    except ValueError:
+                        cType , name, url, _ = (thelist[i]).strip().split('|', 3) 
                     try:
                         plugin_id = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
                         if plugin_id:
