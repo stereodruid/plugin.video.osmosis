@@ -109,26 +109,40 @@ def makeSTRM(filepath, filename, url):
 #             else:
 #                 return fullpath
         if True:
+            atime = None
+            mtime = None
+            if fullpath.find('Audio') > 0:
+                try:
+                    atime = os.path.getatime(fullpath.decode("utf-8"))
+                    mtime = os.path.getmtime(fullpath.decode("utf-8"))
+                except:
+                    atime = os.path.getatime(fullpath.encode("utf-8"))
+                    mtime = os.path.getmtime(fullpath.encode("utf-8"))
+                    pass
+
             if isSMB:
                 try:
-                    fle = xbmcvfs.File(fullpath.decode("utf-8"), 'w')
+                    fullpath = fullpath.decode("utf-8")
+                    fle = xbmcvfs.File(fullpath, 'w')
                 except:
-                    fle = xbmcvfs.File(fullpath.encode("utf-8"), 'w')
+                    fullpath = fullpath.encode("utf-8")
+                    fle = xbmcvfs.File(fullpath, 'w')
                     pass
-        
-                fle.write("%s" % str(url))
-                fle.close()
-                del fle
             else:
                 try:
-                    fle = open(fullpath.decode("utf-8"), "w")
+                    fullpath = fullpath.decode("utf-8")
+                    fle = open(fullpath, "w")
                 except:
-                    fle = open(fullpath.encode("utf-8"), "w")
+                    fullpath = fullpath.encode("utf-8")
+                    fle = open(fullpath, "w")
                     pass
-        
-                fle.write("%s" % url)
-                fle.close()
-                del fle
+
+            fle.write("%s" % url)
+            fle.close()
+            del fle
+                
+            if atime is not None and mtime is not None:
+                os.utime(fullpath, (atime, mtime))
                   
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)
