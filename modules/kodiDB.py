@@ -21,6 +21,7 @@ import sys
 import datetime
 from modules import guiTools
 from modules import fileSys
+from modules import stringUtils
 import xbmc
 import xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
 import sqlite3
