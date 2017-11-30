@@ -132,7 +132,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         except:
             thisDialog.dialogeBG.close()
             thisDialog.dialogeBG = None
-            guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". Se your Kodi.log!"))
+            guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". See your Kodi.log!"))
             utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
             print ("Unexpected error:"), sys.exc_info()[0]
             raise
@@ -147,7 +147,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         except:
             thisDialog.dialogeBG.close()
             thisDialog.dialogeBG = None
-            guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". Se your Kodi.log!"))
+            guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". See your Kodi.log!"))
             utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
             print ("Unexpected error:"), sys.exc_info()[0]
             raise
@@ -162,7 +162,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         except:
             thisDialog.dialogeBG.close()
             thisDialog.dialogeBG = None
-            guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". Se your Kodi.log!"))
+            guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". See your Kodi.log!"))
             utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
             print ("Unexpected error:"), sys.exc_info()[0]
             raise
@@ -312,7 +312,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                     print ("No valid integer in line.")
                 except:
                     thisDialog.dialogeBG.close()
-                    guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". Se your Kodi.log!"))
+                    guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". See your Kodi.log!"))
                     utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
                     print ("Unexpected error:"), sys.exc_info()[0]
                     raise
@@ -355,7 +355,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
         print ("No valid integer in line.")
     except:
         thisDialog.dialogeBG.close()
-        guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". Se your Kodi.log!"))
+        guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". See your Kodi.log!"))
         utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
         print ("Unexpected error:"), sys.exc_info()[0]
         raise
@@ -408,7 +408,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
                 except ValueError:
                     print ("No valid integer in line.")
                 except:
-                    guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". Se your Kodi.log!"))
+                    guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". See your Kodi.log!"))
                     utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
                     print ("Unexpected error:"), sys.exc_info()[0]
                     raise
@@ -470,7 +470,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
         except ValueError:
             print ("No valid integer in line.")
         except:
-            guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". Se your Kodi.log!"))
+            guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". See your Kodi.log!"))
             utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
             print ("Unexpected error:"), sys.exc_info()[0]
             raise

@@ -172,19 +172,19 @@ def createMusicDB():
     try:
         con, cursor = openDB(MusicDB_LOC, 'Music')
 
-        query =  "CREATE TABLE songs (id INTEGER PRIMARY KEY{}, \
-                                                     strSongTitle VARCHAR(30), \
-                                                     strArtistName VARCHAR(30), \
-                                                     strAlbumName VARCHAR(30), \
-                                                     strPath VARCHAR(30), \
-                                                     strURL VARCHAR(300), \
-                                                     roleID VARCHAR(30), \
-                                                     pathID VARCHAR(30), \
-                                                     artistID VARCHAR(30), \
-                                                     albumID VARCHAR(30), \
-                                                     songID VARCHAR(30), \
-                                                     songArtistRel VARCHAR(30), \
-                                                     delSong CHAR(1));"
+        query = "CREATE TABLE songs (id INTEGER PRIMARY KEY{}, \
+                strSongTitle VARCHAR(30), \
+                strArtistName VARCHAR(30), \
+                strAlbumName VARCHAR(30), \
+                strPath VARCHAR(30), \
+                strURL VARCHAR(300), \
+                roleID VARCHAR(30), \
+                pathID VARCHAR(30), \
+                artistID VARCHAR(30), \
+                albumID VARCHAR(30), \
+                songID VARCHAR(30), \
+                songArtistRel VARCHAR(30), \
+                delSong CHAR(1));"
 
         query = query.format('' if DATABASE_MYSQL == "false" else ' AUTO_INCREMENT')
 
