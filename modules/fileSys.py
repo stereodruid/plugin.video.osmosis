@@ -101,7 +101,6 @@ def makeSTRM(filepath, filename, url):
         if not STRM_LOC.startswith("smb:"):  
             fullpath = os.path.normpath(xbmc.translatePath(os.path.join(filepath,  filename))) +'.strm'
         else:
-            isSMB = True 
             fullpath = filepath + "/" + filename + ".strm"
 
 #         if xbmcvfs.exists(fullpath):
@@ -110,41 +109,28 @@ def makeSTRM(filepath, filename, url):
 #             else:
 #                 return fullpath
         if True:
-            atime = None
             if fullpath.find('Audio') > 0:
                 try:
                     if xbmcvfs.exists(fullpath.decode("utf-8")):
-                        atime = os.path.getatime(fullpath.decode("utf-8"))
-                        mtime = os.path.getmtime(fullpath.decode("utf-8"))
+                        return fullpath, None
                 except:
                     if xbmcvfs.exists(fullpath.encode("utf-8")):
-                        atime = os.path.getatime(fullpath.encode("utf-8"))
-                        mtime = os.path.getmtime(fullpath.encode("utf-8"))
-                        pass
+                        return fullpath, None
 
-            if isSMB:
-                try:
-                    fullpath = fullpath.decode("utf-8")
-                    fle = xbmcvfs.File(fullpath, 'w')
-                except:
-                    fullpath = fullpath.encode("utf-8")
-                    fle = xbmcvfs.File(fullpath, 'w')
-                    pass
-            else:
-                try:
-                    fullpath = fullpath.decode("utf-8")
-                    fle = open(fullpath, "w")
-                except:
-                    fullpath = fullpath.encode("utf-8")
-                    fle = open(fullpath, "w")
-                    pass
+            try:
+                fullpath = fullpath.decode("utf-8")
+                fle = xbmcvfs.File(fullpath, 'w')
+            except:
+                fullpath = fullpath.encode("utf-8")
+                fle = xbmcvfs.File(fullpath, 'w')
+                pass
 
-            fle.write("%s" % url)
+            fle.write(bytearray(url, encoding="utf-8"))
             fle.close()
             del fle
                 
-            if atime is not None and mtime is not None:
-                os.utime(fullpath, (atime, mtime))
+            if fullpath.find('Audio') > 0:
+                mtime = os.path.getmtime(fullpath)
                   
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)
@@ -155,6 +141,7 @@ def makeSTRM(filepath, filename, url):
         utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
         print ("Unexpected error:"), sys.exc_info()[1]
         pass
+
     return fullpath, mtime
     
 def updateStream(strm_Fullpath, replace_text):

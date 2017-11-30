@@ -171,7 +171,7 @@ class Config(object):
                 }
     
 def musicDatabase(pstrAlbumName, pstrArtistName, pstrSongTitle, pstrPath, purlLink, track, duration, artPath, fileModTime=None):
-    path = str(os.path.join(STRM_LOC, pstrPath))
+    path = fileSys.completePath(os.path.join(STRM_LOC, pstrPath))
     
     # Write to music db and get id's
     roleID = writeRole("Artist")
@@ -253,11 +253,10 @@ def writeIntoSongTable (pstrSongTitle, songID, pstrArtistName, pstrAlbumName, al
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, MusicDB_LOC)
     
 def writePath(path):
-    completePath = fileSys.completePath(path)
     selectQuery = ("SELECT idPath FROM path WHERE strPath= ?;")
-    selectArgs = (completePath,)
+    selectArgs = (path,)
     insertQuery = ("INSERT INTO path (strPath) VALUES (?);")
-    insertArgs = (completePath,)
+    insertArgs = (path,)
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
