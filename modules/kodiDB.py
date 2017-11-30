@@ -18,7 +18,6 @@
 
 import os
 import sys
-import re
 import datetime
 from modules import guiTools
 from modules import fileSys
@@ -231,7 +230,7 @@ def writeSong(pathID, albumID, artist, songName, duration, track, fileModTime):
 
     selectQuery = ("SELECT idSong FROM song WHERE strTitle LIKE ?;")
     selectArgs =  (songName,)
-    songNameFile = re.sub('[\/:*?<>|!@#$"]', '', songName)
+    songNameFile = stringUtils.cleanStrmFilesys(songName)
     insertQuery = ("INSERT INTO song (iYear, dateAdded, idAlbum, idPath, {}, strTitle, strFileName, iTrack, strGenres, iDuration, iTimesPlayed, iStartOffset, iEndOffset, userrating, comment, mood, votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);".format(artistCol))
     insertArgs =  (dateYear, dateAdded, albumID, pathID, artist, songName, songNameFile + ".strm", track, 'osmosis', duration, 0, 0, 0, 0, 'osmosis', 'osmosis', 0,)
     
