@@ -350,9 +350,10 @@ def delNotInMediaList(delList, thelist):
             path = completePath(STRM_LOC) + (thelist[i]).strip().split('|')[0].format(i)
             path = completePath(path) + stringUtils.cleanByDictReplacements(artistPath)
             itemPath = (thelist[i].decode('utf-8')).strip().split('|')[1].replace('++RenamedTitle++', '').format(i).format(i)
-            path = completePath(path) + stringUtils.cleanByDictReplacements(itemPath)
-            print ("remove folder: %s" % itemPath)
-            shutil.rmtree(completePath(path), ignore_errors=True)
+            path = completePath(completePath(path) + stringUtils.cleanByDictReplacements(itemPath))
+            print ("remove folder: %s" % path)
+            shutil.rmtree(path, ignore_errors=True)
+            xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": 1}')
         except IndexError:    
             path = completePath(STRM_LOC) + (thelist[i]).strip().split('|')[0].format(i)
             itemPath = (thelist[i].decode('utf-8')).strip().split('|')[1].replace('++RenamedTitle++', '').format(i).format(i)
