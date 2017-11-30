@@ -138,7 +138,7 @@ def makeSTRM(filepath, filename, url):
     except ValueError:
         print ("No valid integer in line.")
     except:
-        guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". Se your Kodi.log!"))
+        guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". See your Kodi.log!"))
         utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
         print ("Unexpected error:"), sys.exc_info()[1]
         pass
