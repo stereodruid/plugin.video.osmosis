@@ -230,8 +230,9 @@ def writeSong(pathID, albumID, artist, songName, duration, track, fileModTime):
 
     selectQuery = ("SELECT idSong FROM song WHERE strTitle LIKE ?;")
     selectArgs =  (songName,)
+    songNameFile = stringUtils.cleanStrmFilesys(songName)
     insertQuery = ("INSERT INTO song (iYear, dateAdded, idAlbum, idPath, {}, strTitle, strFileName, iTrack, strGenres, iDuration, iTimesPlayed, iStartOffset, iEndOffset, userrating, comment, mood, votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);".format(artistCol))
-    insertArgs =  (dateYear, dateAdded, albumID, pathID, artist, songName, songName + ".strm", track, 'osmosis', duration, 0, 0, 0, 0, 'osmosis', 'osmosis', 0,)
+    insertArgs =  (dateYear, dateAdded, albumID, pathID, artist, songName, songNameFile + ".strm", track, 'osmosis', duration, 0, 0, 0, 0, 'osmosis', 'osmosis', 0,)
     
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 

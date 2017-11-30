@@ -85,6 +85,7 @@ def makeSTRM(filepath, filename, url):
     mtime = None
     try:
         filepath = stringUtils.multiRstrip(filepath.decode("utf-8"))
+        filename = stringUtils.cleanStrmFilesys(filename)
         filename = filename.decode("utf-8")
         filepath = completePath(os.path.join(STRM_LOC, filepath))
 
