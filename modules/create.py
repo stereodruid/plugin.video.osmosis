@@ -222,6 +222,15 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
 
 def removeItemsFromMediaList(action='list'):
     utils.addon_log('removingitemsdialog')
+
+    selectedItems = getMediaListDialog()
+
+    if selectedItems is not None:
+        fileSys.removeMediaList(selectedItems)
+        selectedLabels = [item for index, item in enumerate(items) if index in selectedItems] if selectedItems is not None else []
+        xbmcgui.Dialog().notification("Finished deleting:", "{0}".format(", ".join(str(label) for label in selectedLabels)))
+
+def getMediaListDialog():
     thelist = fileSys.readMediaList(purge=False)
     items = []
     for entry in thelist:
@@ -230,14 +239,7 @@ def removeItemsFromMediaList(action='list'):
         items.append(stringUtils.getStrmname(splits[1]) + " (" + fileSys.getAddonname(plugin.group(1)) + ")")
 
     dialog = xbmcgui.Dialog()
-    selectedItems = dialog.multiselect("Select items", items)
-
-    if selectedItems is not None:
-        fileSys.removeMediaList(selectedItems)
-        selectedLabels = [item for index, item in enumerate(items) if index in selectedItems] if selectedItems is not None else []
-        xbmcgui.Dialog().notification("Finished deleting:", "{0}".format(", ".join(str(label) for label in selectedLabels)))
-
-    del dialog
+    return dialog.multiselect("Select items", items)
     
 def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
     albumList = []
