@@ -216,11 +216,9 @@ if __name__ == "__main__":
     if mode == None:
         utils.addon_log("getSources")
         guiTools.getSources()
-        try:
-            xbmcplugin.setContent(int(sys.argv[1]), 'movies')
-            xbmcplugin.endOfDirectory(int(sys.argv[1]))
-        except:
-            pass
+
+        xbmcplugin.setContent(int(sys.argv[1]), 'movies')
+        xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
         if not fileSys.writeTutList("select:PluginType"):
             tutWin = ["Adding content to your library",
@@ -250,7 +248,9 @@ if __name__ == "__main__":
     elif mode == 666:
         updateAll.strm_update() 
     elif mode == 4:
-        create.removeItemsFromMediaList('list') 
+        selectedItems = create.getMediaListDialog()
+        if selectedItems and len(selectedItems) > 0:
+            updateAll.strm_update(selectedItems)
     elif mode == 5:
         create.removeItemsFromMediaList('list')
     elif mode == 10:
@@ -397,4 +397,4 @@ if __name__ == "__main__":
     elif mode == 201:
         utils.addon_log("write single strm")
         # create.fillPluginItems(url)
-# makeSTRM(name, name, url)
+        # makeSTRM(name, name, url)

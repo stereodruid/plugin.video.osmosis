@@ -76,18 +76,19 @@ def writeSTRM(path, file, url):
 #         if url.find("plugin://plugin.video.osmosis/?url=plugin") == -1:
 #             url = url.strip().replace("?url=plugin", "plugin://plugin.video.osmosis/?url=plugin", 1)
     utils.addon_log('writeSTRM')
-    makeSTRM(path, file, url)
+    return makeSTRM(path, file, url)
     
 def makeSTRM(filepath, filename, url):
     utils.addon_log('makeSTRM')
     
     isSMB = False
+    mtime = None
     try:
         filepath = stringUtils.multiRstrip(filepath.decode("utf-8"))
         filename = filename.decode("utf-8")
         filepath = completePath(os.path.join(STRM_LOC, filepath))
 
-        if not xbmcvfs.exists(filepath):         
+        if not xbmcvfs.exists(filepath):
             dirs = filepath.replace(STRM_LOC,'').split("\\") if filepath.find("\\") != -1 else filepath.replace(STRM_LOC,'').split("/")
             dirs = filter(None, dirs)
 
@@ -100,7 +101,6 @@ def makeSTRM(filepath, filename, url):
         if not STRM_LOC.startswith("smb:"):  
             fullpath = os.path.normpath(xbmc.translatePath(os.path.join(filepath,  filename))) +'.strm'
         else:
-            isSMB = True 
             fullpath = filepath + "/" + filename + ".strm"
 
 #         if xbmcvfs.exists(fullpath):
@@ -109,40 +109,28 @@ def makeSTRM(filepath, filename, url):
 #             else:
 #                 return fullpath
         if True:
-            atime = None
-            mtime = None
             if fullpath.find('Audio') > 0:
                 try:
-                    atime = os.path.getatime(fullpath.decode("utf-8"))
-                    mtime = os.path.getmtime(fullpath.decode("utf-8"))
+                    if xbmcvfs.exists(fullpath.decode("utf-8")):
+                        return fullpath, None
                 except:
-                    atime = os.path.getatime(fullpath.encode("utf-8"))
-                    mtime = os.path.getmtime(fullpath.encode("utf-8"))
-                    pass
+                    if xbmcvfs.exists(fullpath.encode("utf-8")):
+                        return fullpath, None
 
-            if isSMB:
-                try:
-                    fullpath = fullpath.decode("utf-8")
-                    fle = xbmcvfs.File(fullpath, 'w')
-                except:
-                    fullpath = fullpath.encode("utf-8")
-                    fle = xbmcvfs.File(fullpath, 'w')
-                    pass
-            else:
-                try:
-                    fullpath = fullpath.decode("utf-8")
-                    fle = open(fullpath, "w")
-                except:
-                    fullpath = fullpath.encode("utf-8")
-                    fle = open(fullpath, "w")
-                    pass
+            try:
+                fullpath = fullpath.decode("utf-8")
+                fle = xbmcvfs.File(fullpath, 'w')
+            except:
+                fullpath = fullpath.encode("utf-8")
+                fle = xbmcvfs.File(fullpath, 'w')
+                pass
 
-            fle.write("%s" % url)
+            fle.write(bytearray(url, encoding="utf-8"))
             fle.close()
             del fle
                 
-            if atime is not None and mtime is not None:
-                os.utime(fullpath, (atime, mtime))
+            if fullpath.find('Audio') > 0:
+                mtime = os.path.getmtime(fullpath)
                   
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)
@@ -153,7 +141,8 @@ def makeSTRM(filepath, filename, url):
         utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
         print ("Unexpected error:"), sys.exc_info()[1]
         pass
-    return fullpath
+
+    return fullpath, mtime
     
 def updateStream(strm_Fullpath, replace_text):
     utils.addon_log('updateStream')
@@ -361,9 +350,10 @@ def delNotInMediaList(delList, thelist):
             path = completePath(STRM_LOC) + (thelist[i]).strip().split('|')[0].format(i)
             path = completePath(path) + stringUtils.cleanByDictReplacements(artistPath)
             itemPath = (thelist[i].decode('utf-8')).strip().split('|')[1].replace('++RenamedTitle++', '').format(i).format(i)
-            path = completePath(path) + stringUtils.cleanByDictReplacements(itemPath)
-            print ("remove folder: %s" % itemPath)
-            shutil.rmtree(completePath(path), ignore_errors=True)
+            path = completePath(completePath(path) + stringUtils.cleanByDictReplacements(itemPath))
+            print ("remove folder: %s" % path)
+            shutil.rmtree(path, ignore_errors=True)
+            xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": 1}')
         except IndexError:    
             path = completePath(STRM_LOC) + (thelist[i]).strip().split('|')[0].format(i)
             itemPath = (thelist[i].decode('utf-8')).strip().split('|')[1].replace('++RenamedTitle++', '').format(i).format(i)

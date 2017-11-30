@@ -73,38 +73,27 @@ else: FAV = []
 DIRS = []
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
 
-def addItem(labels="n.a"):
-    if labels != 'n.a':    
-        try:
-            utils.addon_log('addItem')
-            u = "plugin://plugin.video.osmosis/?url=" + "&mode=" + str(5) + "&fanart=" + urllib.quote_plus(iconRemove)
-            ok = True
-            liz = xbmcgui.ListItem(labels, iconImage=iconRemove, thumbnailImage=iconRemove)
-            liz.setInfo(type="Video", infoLabels={ "Title": labels,"Genre": "actionRemove"})
-            liz.setProperty("Fanart_Image", FANART)
-            ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
-            xbmcplugin.endOfDirectory(int(sys.argv[1]), updateListing=True)        
-        except:#            
-            pass
+def addItem(label, mode, icon):
+    utils.addon_log('addItem')
+    u = "plugin://plugin.video.osmosis/?url=" + "&mode=" + str(mode) + "&fanart=" + urllib.quote_plus(icon)
+    liz = xbmcgui.ListItem(label, iconImage=icon, thumbnailImage=icon)
+    liz.setInfo(type="Video", infoLabels={ "Title": label,"Genre": "actionRemove"})
+    liz.setProperty("Fanart_Image", FANART)
+
+    xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)     
         
-def addFunction(labels= 'n.a' ):
-    if labels != 'n.a':    
-        try:
-            utils.addon_log('addItem')
-            u = "plugin://plugin.video.osmosis/?url=" + "&mode=" + str(666) + "&fanart=" + urllib.quote_plus(iconRemove)
-            ok = True
-            liz = xbmcgui.ListItem(labels, iconImage=updateIcon, thumbnailImage=updateIcon)
-            liz.setInfo(type="Video", infoLabels={ "Title": labels,"Genre": "actionRemove"})
-            liz.setProperty("Fanart_Image", FANART)
-            ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
-            #xbmcplugin.endOfDirectory(int(sys.argv[1]), updateListing=True)        
-        except:#          
-            pass
+def addFunction(labels):
+    utils.addon_log('addItem')
+    u = "plugin://plugin.video.osmosis/?url=" + "&mode=" + str(666) + "&fanart=" + urllib.quote_plus(updateIcon)
+    liz = xbmcgui.ListItem(labels, iconImage=updateIcon, thumbnailImage=updateIcon)
+    liz.setInfo(type="Video", infoLabels={ "Title": labels,"Genre": "actionRemove"})
+    liz.setProperty("Fanart_Image", FANART)
+
+    xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
             
 def addDir(name,url,mode,art,plot,genre,date,credits,showcontext=False):
     utils.addon_log('addDir')
     u=sys.argv[0]+"?url="+urllib.quote_plus(stringUtils.uni(url))+"&mode="+str(mode)+"&name="+urllib.quote_plus(stringUtils.uni(name))+"&fanart="+urllib.quote_plus(art.get('fanart',''))
-    ok=True
     contextMenu = []
     thumbArt = art.get('thumb',None)
     if thumbArt == None:
@@ -114,17 +103,12 @@ def addDir(name,url,mode,art,plot,genre,date,credits,showcontext=False):
     liz.setArt(art)
     contextMenu.append(('Create Strms','XBMC.RunPlugin(%s&mode=200&name=%s)'%(u, name)))
     liz.addContextMenuItems(contextMenu)
-    try:
-        ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
-    except:
-        pass
-    
-    return ok
+
+    xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
       
 def addLink(name,url,mode,art,plot,genre,date,showcontext,playlist,regexs,total,setCookie=""): 
     utils.addon_log('addLink') 
     u=sys.argv[0]+"?url="+urllib.quote_plus(stringUtils.uni(url))+"&mode="+str(mode)+"&name="+urllib.quote_plus(stringUtils.uni(name))+"&fanart="+urllib.quote_plus(art.get('fanart',''))
-    ok = True
     contextMenu =[]
     thumbArt = art.get('thumb',None)
     if thumbArt == None:
@@ -136,8 +120,8 @@ def addLink(name,url,mode,art,plot,genre,date,showcontext,playlist,regexs,total,
     contextMenu.append(('Create Strm','XBMC.RunPlugin(%s&mode=200&name=%s&filetype=file)'%(u, name)))
     liz.addContextMenuItems(contextMenu)
     xbmcplugin.setContent(int(sys.argv[1]), 'movies')
-    ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,totalItems=total)
-    return ok
+
+    xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,totalItems=total)
 
 def getSources():
     utils.addon_log('getSources')
@@ -146,8 +130,9 @@ def getSources():
     addDir('Video Plugins', 'video', 1, art, 'description', 'genre', 'date', 'credits')
     addDir('Music Plugins', 'audio', 1, art, 'description', 'genre', 'date', 'credits')
     addDir('UPNP Servers', 'upnp://', 2, art, 'description', 'genre', 'date', 'credits')
-    addFunction('Update')
-    addItem(labels="Remove Media")
+    addItem('Update', 4, updateIcon)
+    addFunction('Update all')
+    addItem("Remove Media", 5, iconRemove)
     #ToDo Add label
 
 def getType(url):
