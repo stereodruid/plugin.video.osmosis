@@ -130,6 +130,9 @@ def cleanStrms(text, formater=''):
         text = text
     return text
 
+def cleanStrmFilesys(string):
+    return re.sub('[\/:*?<>|!@#$"]', '', string)
+
 def multiRstrip(text):
     replaceRstrip = ['.', ',', '-', '_', ' ', '#', '+', '`', '&', '%', '!', '?']
     for i in replaceRstrip:
