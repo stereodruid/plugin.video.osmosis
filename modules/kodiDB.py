@@ -147,7 +147,7 @@ class Config(object):
     
 def musicDatabase(pstrAlbumName, pstrArtistName, pstrSongTitle, pstrPath, purlLink, track, duration, artPath, fileModTime=None):
     path = fileSys.completePath(os.path.join(STRM_LOC, pstrPath))
-    
+
     # Write to music db and get id's
     roleID = writeRole("Artist")
     pathID = writePath(path)
@@ -198,28 +198,30 @@ def createMusicDB():
         con.close()  
 
 def writeIntoSongTable (pstrSongTitle, songID, pstrArtistName, pstrAlbumName, albumID, path, pathID, purlLink, roleID, artistID, songArtistRel, delSong):
-    selectQuery = ("SELECT id FROM songs WHERE songID=? AND artistID=? AND albumID=?;")
-    selectArgs = (songID, artistID, albumID,)
-    insertQuery = ("INSERT INTO songs (strSongTitle, songID, strArtistName, strAlbumName, albumID, strPath, pathID, strURL, roleID, artistID, songArtistRel, delSong) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")
-    insertArgs = (pstrSongTitle, songID, pstrArtistName, pstrAlbumName, albumID, path, pathID, purlLink, roleID, artistID, songArtistRel, delSong,)
+    selectQuery = "SELECT id FROM songs WHERE songID='{}' AND artistID='{}' AND albumID='{}';"
+    selectArgs =  (songID, artistID, albumID)
+    insertQuery = "INSERT INTO songs (strSongTitle, songID, strArtistName, strAlbumName, albumID, strPath, pathID, strURL, roleID, artistID, songArtistRel, delSong) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}');"
+    path = path if DATABASE_MYSQL == "false" else path.replace('\\', '\\\\')
+    insertArgs =  (pstrSongTitle.replace("'","''"), songID, pstrArtistName, pstrAlbumName, albumID, path, pathID, purlLink, roleID, artistID, songArtistRel, delSong)
     
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, MusicDB_LOC)
     
 def writePath(path):
-    selectQuery = ("SELECT idPath FROM path WHERE strPath LIKE ?;")
-    selectArgs = (path,)
-    insertQuery = ("INSERT INTO path (strPath) VALUES (?);")
-    insertArgs = (path,)
+    selectQuery = "SELECT idPath FROM path WHERE strPath LIKE '{}';"
+    selectArgs =  (path,) if DATABASE_MYSQL == "false" else (path).replace('\\', '\\\\')
+    insertQuery = "INSERT INTO path (strPath) VALUES ('{}');"
+    insertArgs =  (path,) if DATABASE_MYSQL == "false" else (path).replace('\\', '\\\\')
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
 def writeAlbums(album, artist, firstReleaseType='album'):
     lastScraped = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     artistCol = "strArtistDisp" if kodi_version >= 18 else "strArtists"
-    selectQuery = ("SELECT idAlbum FROM album WHERE strAlbum LIKE ?;")
-    selectArgs =  (album,)
-    insertQuery = ("INSERT INTO album (strAlbum, {}, strReleaseType, strGenres) VALUES (?, ?, ?, ?);".format(artistCol))
-    insertArgs =  (album, artist, firstReleaseType, 'osmosis',)
+    selectQuery = "SELECT idAlbum FROM album WHERE strAlbum LIKE '{}';"
+    selectArgs =  (album)
+    insertQuery = "INSERT INTO album (strAlbum, {}, strReleaseType, strGenres)".format(artistCol)
+    insertQuery = (insertQuery + " VALUES ('{}', '{}', '{}', '{}');")
+    insertArgs =  (album, artist, firstReleaseType, 'osmosis')
     
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
@@ -229,88 +231,107 @@ def writeSong(pathID, albumID, artist, songName, duration, track, fileModTime):
     dateYear = int(datetime.datetime.now().strftime("%Y"))
     artistCol = "strArtistDisp" if kodi_version >= 18 else "strArtists"
 
-    selectQuery = ("SELECT idSong FROM song WHERE strTitle LIKE ?;")
-    selectArgs =  (songName,)
+    selectQuery = "SELECT idSong FROM song WHERE {}".format(artistCol) + " LIKE '{}' AND strTitle LIKE '{}';"
+    selectArgs =  (artist, songName.replace("'","''"))
     songNameFile = stringUtils.cleanStrmFilesys(songName)
-    insertQuery = ("INSERT INTO song (iYear, dateAdded, idAlbum, idPath, {}, strTitle, strFileName, iTrack, strGenres, iDuration, iTimesPlayed, iStartOffset, iEndOffset, userrating, comment, mood, votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);".format(artistCol))
-    insertArgs =  (dateYear, dateAdded, albumID, pathID, artist, songName, songNameFile + ".strm", track, 'osmosis', duration, 0, 0, 0, 0, 'osmosis', 'osmosis', 0,)
+    insertQuery = "INSERT INTO song (iYear, dateAdded, idAlbum, idPath, {}, strTitle, strFileName, iTrack, strGenres, iDuration, iTimesPlayed, iStartOffset, iEndOffset, userrating, comment, mood, votes)".format(artistCol)
+    insertQuery =  (insertQuery +" VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}');")
+    insertArgs =  (dateYear, dateAdded, albumID, pathID, artist, songName.replace("'","''"), songNameFile.replace("'","''") + ".strm", track, 'osmosis', duration, 0, 0, 0, 0, 'osmosis', 'osmosis', 0,)
     
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
 def writeRole(strRole):
-    selectQuery = ("SELECT idRole FROM role WHERE strRole LIKE ?;")
+    selectQuery = "SELECT idRole FROM role WHERE strRole LIKE '{}';"
     selectArgs =  (strRole,)
-    insertQuery = ("INSERT INTO role (strRole) VALUES (?);")
+    insertQuery = "INSERT INTO role (strRole) VALUES ('{}');"
     insertArgs =  (strRole,)
     
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
 def writeArtist(strArtist):
-    selectQuery = ("SELECT idArtist FROM artist WHERE strArtist LIKE ?;")
+    selectQuery = "SELECT idArtist FROM artist WHERE strArtist LIKE '{}';"
     selectArgs =  (strArtist,)
-    insertQuery = ("INSERT INTO artist (strArtist) VALUES (?);")
+    insertQuery = "INSERT INTO artist (strArtist) VALUES ('{}');"
     insertArgs =  (strArtist,)
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
 def writeGenre(strGenre):
-    selectQuery = ("SELECT idGenre FROM genre WHERE strGenre LIKE ?;")
+    selectQuery = "SELECT idGenre FROM genre WHERE strGenre LIKE '{}';"
     selectArgs =  (strGenre,)
-    insertQuery = ("INSERT INTO genre (strGenre) VALUES (?);")
+    insertQuery = "INSERT INTO genre (strGenre) VALUES ('{}');"
     insertArgs =  (strGenre,)
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
            
 def writeSongArtist(artistID, songID, roleID, pstrAartistName, orderID):
-    selectQuery = ("SELECT idSong FROM song_artist WHERE idSong=?;")
-    selectArgs =  (songID,)
-    insertQuery = ("INSERT INTO song_artist (idArtist, idSong, idRole, iOrder, strArtist) VALUES (?, ?, ?, ?, ?);")
-    insertArgs = (artistID, songID, roleID, orderID, pstrAartistName,)
+    selectQuery = "SELECT idSong FROM song_artist WHERE idSong='{}';"
+    selectArgs =  (songID)
+    insertQuery = "INSERT INTO song_artist (idArtist, idSong, idRole, iOrder, strArtist) VALUES ('{}', '{}', '{}', '{}', '{}');"
+    insertArgs =  (artistID, songID, roleID, orderID, pstrAartistName)
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
 def writeSongGenre(genreID, songID):
-    selectQuery = ("SELECT idSong FROM song_genre WHERE idGenre=? and idSong=?;")
-    selectArgs =  (genreID, songID,)
-    insertQuery = ("INSERT INTO song_genre (idGenre, idSong, iOrder) VALUES (?, ?, ?);")
-    insertArgs = (genreID, songID, 0,)
+    selectQuery = "SELECT idSong FROM song_genre WHERE idGenre='{}' and idSong='{}';"
+    selectArgs =  (genreID, songID)
+    insertQuery = "INSERT INTO song_genre (idGenre, idSong, iOrder) VALUES ('{}', '{}', '{}');"
+    insertArgs =  (genreID, songID, 0)
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
 def writeAlbumArtist(artistID, albumID,pstrAartistName):
-    selectQuery = ("SELECT idAlbum FROM album_artist WHERE idAlbum=?;")
-    selectArgs =  (albumID,)
-    insertQuery = ("INSERT INTO album_artist (idArtist, idAlbum, iOrder, strArtist) VALUES (?, ?, ?, ?);")
-    insertArgs = (artistID, albumID, 0, pstrAartistName,)
+    selectQuery = "SELECT idAlbum FROM album_artist WHERE idAlbum='{}';"
+    selectArgs =  (albumID)
+    insertQuery = "INSERT INTO album_artist (idArtist, idAlbum, iOrder, strArtist) VALUES ('{}', '{}', '{}', '{}');"
+    insertArgs =  (artistID, albumID, 0, pstrAartistName)
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
 def writeThump(mediaId, mediaType, imageType, artPath):
-    selectQuery = ("SELECT media_id FROM art WHERE media_type LIKE ? AND media_id=?;")
-    selectArgs =  (mediaType, mediaId,)
-    insertQuery = ("INSERT INTO art (media_id, media_type, type, url) VALUES (?, ?, ?, ?);")
-    insertArgs =  (mediaId, mediaType,imageType, artPath,)
+    selectQuery = "SELECT media_id FROM art WHERE media_type LIKE '{}' AND media_id='{}';"
+    selectArgs =  (mediaType, mediaId)
+    insertQuery = "INSERT INTO art (media_id, media_type, type, url) VALUES ('{}', '{}', '{}', '{}');"
+    insertArgs =  (mediaId, mediaType,imageType, artPath)
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
 def manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, database=KMDBPATH):
     dID = None
+
     try:
         con, cursor = openDB(database, 'KMusic' if database == KMDBPATH else 'Music')    
 
-        if selectArgs:
-            cursor.execute(selectQuery, selectArgs)
-            searchResult = cursor.fetchone()
-        else:
-            cursor.execute(selectQuery)
-            searchResult = cursor.fetchone()
+        try:		
+            if selectArgs:
+                cursor.execute(selectQuery.format(selectArgs,))
+                searchResult = cursor.fetchone()
+            else:
+                cursor.execute(selectQuery)
+                searchResult = cursor.fetchone()
 
-        if not searchResult :
-            cursor.execute(insertQuery, insertArgs)
-            con.commit()
-            dID = cursor.lastrowid
-        else:
-            dID = searchResult[0]
+        except:
+            if selectArgs:
+                cursor.execute(selectQuery.format(*(selectArgs)))
+                searchResult = cursor.fetchone()
+            else:
+                cursor.execute(selectQuery)
+                searchResult = cursor.fetchone()
+        try:
+            if not searchResult :
+                cursor.execute(insertQuery.format(insertArgs,))
+                con.commit()
+                dID = cursor.lastrowid
+            else:
+                dID = searchResult[0]
+
+        except:
+            if not searchResult :
+                cursor.execute(insertQuery.format(*(insertArgs)))
+                con.commit()
+                dID = cursor.lastrowid
+            else:
+                dID = searchResult[0]
                 
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)
@@ -332,13 +353,16 @@ def writeMoviePath(path):
     try:
         con, cursor = openDB(MODBPATH, 'Movies')
 
-        if not cursor.execute("SELECT idPath FROM path WHERE strPath LIKE ?;", (fileSys.completePath(path)),).fetchone():
-            query = "INSERT INTO path (strPath) VALUES (?);"
+        cursor.execute("SELECT idPath FROM path WHERE strPath LIKE '{}';".format(fileSys.completePath(path)),)
+        result = cursor.fetchone()
+        if not result:
+            query = "INSERT INTO path (strPath) VALUES ('{}');"
             cursor.execute(query, (fileSys.completePath(path),))
             con.commit()
             pathID = cursor.lastrowid
         else:
-            pathID = cursor.execute("SELECT idPath FROM path WHERE strPath LIKE ?;", (fileSys.completePath(path),)).fetchone()[0]                
+            cursor.execute("SELECT idPath FROM path WHERE strPath LIKE '{}';".format(fileSys.completePath(path),))                
+            pathID = cursor.fetchone()[0]
     except:
         pass
     finally:
@@ -351,7 +375,8 @@ def valDB(database):
     con, cursor = openDB(database, database)
 
     if DATABASE_MYSQL == "false":
-        result = cursor.execute("SELECT * FROM sqlite_master WHERE name LIKE 'stream_ref' and type LIKE 'table';").fetchall()
+        cursor.execute("SELECT * FROM sqlite_master WHERE name LIKE 'stream_ref' and type LIKE 'table';")
+        result = cursor.fetchall()
 
         cursor.close()
         con.close()
@@ -362,7 +387,8 @@ def valDB(database):
         else:
             query = "SHOW TABLES LIKE 'stream_ref';"
 
-        result = cursor.execute(query).fetchone()
+        cursor.execute(query)
+        result = cursor.fetchone()
         
         cursor.close()
         con.close()
@@ -475,12 +501,13 @@ def movieExists(title, path):
     dbMovieID = None
     try:
         con, cursor = openDB(MODBPATH, 'Movies')
-        path = fileSys.completePath(path)
+        path = fileSys.completePath(path) if DATABASE_MYSQL == "false" else fileSys.completePath(path).replace('\\', '\\\\') 
         dID = None
 
-        dbMovie = cursor.execute("SELECT id, title FROM movies WHERE title LIKE ?;", (title,)).fetchone()            
+        cursor.execute("SELECT id, title FROM movies WHERE title LIKE '{}';".format(title,))
+        dbMovie = cursor.fetchone()            
         if dbMovie is None:
-            cursor.execute("INSERT INTO movies (title, filePath) VALUES (?, ?);", (title, path,))
+            cursor.execute("INSERT INTO movies (title, filePath) VALUES ('{}', '{}');".format(title, path,))
             con.commit()
             dbMovieID = cursor.lastrowid
         else:
@@ -501,16 +528,16 @@ def movieStreamExists(movieID, provider, url):
 
         if url.find("?url=plugin") != -1:
             url = url.strip().replace("?url=plugin", "plugin", 1)
-
-        query = "SELECT mov_id, url FROM stream_ref WHERE mov_id=? AND provider LIKE ?;"
-        dbMovie = cursor.execute(query, (movieID, provider,)).fetchone()
+        query = "SELECT mov_id, url FROM stream_ref WHERE mov_id='{}' AND provider LIKE '{}';"
+        cursor.execute(query.format(movieID, provider,))
+        dbMovie = cursor.fetchone()
         
         if dbMovie is None:
-            cursor.execute("INSERT INTO stream_ref (mov_id, provider, url) VALUES (?, ?, ?);", (movieID, provider, url,))
+            cursor.execute("INSERT INTO stream_ref (mov_id, provider, url) VALUES ('{}', '{}', '{}');".format(movieID, provider, url,))
             con.commit()
         else:
             if str(entry[1]) != url:
-                cursor.execute("UPDATE stream_ref SET url=? WHERE mov_id=?;", (url, movieID,))
+                cursor.execute("UPDATE stream_ref SET url='{}' WHERE mov_id='{}';".format(url, movieID,))
                 con.commit() 
     except:
         pass
@@ -523,10 +550,11 @@ def showExists(title, path):
     try:
         con, cursor = openDB(SHDBPATH, 'TVShows')
 
-        dbShow = cursor.execute("SELECT id, showTitle FROM shows WHERE showTitle LIKE ?;", (title,)).fetchone()
+        cursor.execute("SELECT id, showTitle FROM shows WHERE showTitle LIKE '{}';".format(title,))
+        dbShow = cursor.fetchone()
         if dbShow is None:
             path = fileSys.completePath(path)
-            cursor.execute("INSERT INTO shows (showTitle, filePath) VALUES (?, ?);", (title, path,))
+            cursor.execute("INSERT INTO shows (showTitle, filePath) VALUES ('{}', '{}');".format(title, path,))
             con.commit()
             dbShowID = cursor.lastrowid
         else:
@@ -547,18 +575,18 @@ def episodeStreamExists(showID, seEp, provider, url):
 
         if url.find("?url=plugin") > -1:
             url = url.strip().replace("?url=plugin", "plugin", 1)
-
-        query = "SELECT show_id, url FROM stream_ref WHERE show_id=? AND seasonEpisode LIKE ? AND provider LIKE ?;" 
-        dbShow = cursor.execute(query, (showID, seEp, provider,)).fetchone()
+        query = "SELECT show_id, url FROM stream_ref WHERE show_id='{}' AND seasonEpisode LIKE '{}' AND provider LIKE '{}';" 
+        cursor.execute(query.format(showID, seEp, provider,))
+        dbShow = cursor.fetchone()
         
         if dbShow is None:
-            query = "INSERT INTO stream_ref (show_id, seasonEpisode, provider, url) VALUES (?, ?, ?, ?);"
-            cursor.execute(query, (showID, seEp, provider, url,))
+            query = "INSERT INTO stream_ref (show_id, seasonEpisode, provider, url) VALUES ('{}', '{}', '{}', '{}');"
+            cursor.execute(query.format(showID, seEp, provider, url,))
             con.commit()
         else:
             if str(dbShow[1]) != url:
-                query = "UPDATE stream_ref SET url=? WHERE show_id=? AND seasonEpisode LIKE ? AND provider LIKE ?;"
-                cursor.execute(query, (url, showID, seEp, provider,))
+                query = "UPDATE stream_ref SET url='{}' WHERE show_id='{}' AND seasonEpisode LIKE '{}' AND provider LIKE '{}';"
+                cursor.execute(query.format(url, showID, seEp, provider,))
                 con.commit()
     except:
         pass
@@ -574,13 +602,14 @@ def getVideo(ID, seasonEpisode=None):
         con, cursor = openDB(**args)
                 
         if seasonEpisode is None:
-            query = "SELECT url, provider FROM stream_ref WHERE mov_id=?;"
+            query = "SELECT url, provider FROM stream_ref WHERE mov_id='{}';"
             args = (ID,)
         else:
-            query = "SELECT url, provider FROM stream_ref WHERE show_id=? AND seasonEpisode LIKE ?;"
-            args = (ID, seasonEpisode,)
+            query = "SELECT url, provider FROM stream_ref WHERE show_id='{}' AND seasonEpisode LIKE '{}';"
+            args = (ID, seasonEpisode)
     
-        provList = cursor.execute(query, args).fetchall()       
+        cursor.execute(query.format(*args))      
+        provList = cursor.fetchall()
     except:
         pass
     finally:
@@ -589,21 +618,23 @@ def getVideo(ID, seasonEpisode=None):
 
     return provList    
 
-def getPlayedURLResumePoint(url):
+def getPlayedURLResumePoint(url): 
     urlResumePoint = None
 
     try:
         con, cursor = openDB(KMODBPATH, 'KMovies')
 
-        query = ("SELECT idFile FROM files WHERE strFilename LIKE ?;")
-        args = (url,)
+        query = "SELECT idFile FROM files WHERE strFilename LIKE '{}';"
+        args =  (url)
 
-        dbfile = cursor.execute(query, args).fetchone()
+        cursor.execute(query.format(args))
+        dbfile = cursor.fetchone()
         if dbfile:
             dbfileID = dbfile[0]
-            query = ("SELECT timeInSeconds, totalTimeInSeconds, idBookmark FROM bookmark WHERE idFile=?;")
-            args = (dbfileID,)
-            urlResumePoint = cursor.execute(query, args).fetchone()
+            query = "SELECT timeInSeconds, totalTimeInSeconds, idBookmark FROM bookmark WHERE idFile='{}';"
+            args =  (dbfileID)
+            cursor.execute(query.format(args))
+            urlResumePoint = cursor.fetchone()
     except:
         pass
     finally:
@@ -616,18 +647,20 @@ def delBookMark(bookmarkID, fileID):
     try:
         con, cursor = openDB(KMODBPATH, 'KMovies')
 
-        selectquery = ('SELECT idBookmark FROM bookmark WHERE {}=?;')
-        deletequery = ('DELETE FROM bookmark WHERE {}=?;')
-        args = (fileID,)
+        selectquery = "SELECT idBookmark FROM bookmark WHERE idFile='{}';"
+        deletequery = "DELETE FROM bookmark WHERE idFile='{}';"
+        args = (fileID)
 
-        dbbookmark = cursor.execute(selectquery.format('idFile'), args).fetchone()
+        cursor.execute(selectquery.format('idFile').format(args))
+        dbbookmark = cursor.fetchone()
         if dbbookmark:
-            cursor.execute(deletequery.format('idFile'), args)
+            cursor.execute(deletequery('idFile').format(args))
 
-        args = (bookmarkID,)
-        dbbookmark = cursor.execute(selectquery.format('idBookmark'), args).fetchone()
+        args = (bookmarkID)
+        cursor.execute(selectquery('idBookmark').format(args))
+        dbbookmark = cursor.fetchone()
         if dbbookmark:
-            cursor.execute(deletequery.format('idBookmark'), args)
+            cursor.execute(deletequery('idBookmark').format(args))
 
         con.commit()
     except:
@@ -643,10 +676,11 @@ def getKodiMovieID(sTitle):
         con, cursor = openDB(KMODBPATH, 'KMovies')
 
         # c00 = title; c14 = genre
-        query = "SELECT idMovie, idFile, premiered, c14 FROM movie WHERE c00 LIKE ?;"
-        args = (sTitle,)
+        query = "SELECT idMovie, idFile, premiered, c14 FROM movie WHERE c00 LIKE '{}';"
+        args = (sTitle)
         
-        dbMovie = cursor.execute(query, args).fetchone()
+        cursor.execute(query.format(args))
+        dbMovie = cursor.fetchone()
     except:
         pass
     finally:
@@ -662,10 +696,11 @@ def getKodiEpisodeID(sTVShowTitle, iSeason, iEpisode):
         con, cursor = openDB(KMODBPATH, 'KMovies')
 
         # episode.c00 = title; episode.c05 = aired; episode.c12 = season; episode.c13 = episode; tvshow.c00 = title
-        query = "SELECT episode.idEpisode, episode.idFile, episode.c00, episode.c05 FROM episode INNER JOIN tvshow ON tvshow.idShow = episode.idShow WHERE episode.c12 = ? and episode.c13 = ? and tvshow.c00 LIKE ?;" 
-        args = (iSeason, iEpisode, sTVShowTitle,)
+        query = "SELECT episode.idEpisode, episode.idFile, episode.c00, episode.c05 FROM episode INNER JOIN tvshow ON tvshow.idShow = episode.idShow WHERE episode.c12 = '{}' and episode.c13 = '{}' and tvshow.c00 LIKE '{}';" 
+        args = (iSeason, iEpisode, sTVShowTitle)
         
-        dbEpisode = cursor.execute(query, args).fetchone()
+        cursor.execute(query.format(*args))
+        dbEpisode = cursor.fetchone()
     except:
         pass
     finally:
