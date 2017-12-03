@@ -223,7 +223,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
 def removeItemsFromMediaList(action='list'):
     utils.addon_log('removingitemsdialog')
 
-    selectedItems = getMediaListDialog()
+    selectedItems, items = getMediaListDialog()
 
     if selectedItems is not None:
         fileSys.removeMediaList(selectedItems)
@@ -239,7 +239,7 @@ def getMediaListDialog():
         items.append(stringUtils.getStrmname(splits[1]) + " (" + fileSys.getAddonname(plugin.group(1)) + ")")
 
     dialog = xbmcgui.Dialog()
-    return dialog.multiselect("Select items", items)
+    return dialog.multiselect("Select items", items), items
     
 def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
     albumList = []

@@ -21,6 +21,7 @@ import sys
 import datetime
 from modules import guiTools
 from modules import fileSys
+from modules import stringUtils
 import xbmc
 import xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
 import sqlite3
@@ -500,8 +501,9 @@ def movieStreamExists(movieID, provider, url):
 
         if url.find("?url=plugin") != -1:
             url = url.strip().replace("?url=plugin", "plugin", 1)
-            query = "SELECT mov_id, url FROM stream_ref WHERE mov_id=? AND provider LIKE ?;"
-            dbMovie = cursor.execute(query, (movieID, provider,)).fetchone()
+
+        query = "SELECT mov_id, url FROM stream_ref WHERE mov_id=? AND provider LIKE ?;"
+        dbMovie = cursor.execute(query, (movieID, provider,)).fetchone()
         
         if dbMovie is None:
             cursor.execute("INSERT INTO stream_ref (mov_id, provider, url) VALUES (?, ?, ?);", (movieID, provider, url,))
@@ -545,8 +547,9 @@ def episodeStreamExists(showID, seEp, provider, url):
 
         if url.find("?url=plugin") > -1:
             url = url.strip().replace("?url=plugin", "plugin", 1)
-            query = "SELECT show_id, url FROM stream_ref WHERE show_id=? AND seasonEpisode LIKE ? AND provider LIKE ?;" 
-            dbShow = cursor.execute(query, (showID, seEp, provider,)).fetchone()
+
+        query = "SELECT show_id, url FROM stream_ref WHERE show_id=? AND seasonEpisode LIKE ? AND provider LIKE ?;" 
+        dbShow = cursor.execute(query, (showID, seEp, provider,)).fetchone()
         
         if dbShow is None:
             query = "INSERT INTO stream_ref (show_id, seasonEpisode, provider, url) VALUES (?, ?, ?, ?);"

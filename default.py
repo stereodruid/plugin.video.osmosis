@@ -248,7 +248,7 @@ if __name__ == "__main__":
     elif mode == 666:
         updateAll.strm_update() 
     elif mode == 4:
-        selectedItems = create.getMediaListDialog()
+        selectedItems, items = create.getMediaListDialog()
         if selectedItems and len(selectedItems) > 0:
             updateAll.strm_update(selectedItems)
     elif mode == 5:
