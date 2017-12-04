@@ -348,29 +348,6 @@ def manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, database=KM
     
     return dID
 
-def writeMoviePath(path):
-    pathID = None
-    try:
-        con, cursor = openDB(MODBPATH, 'Movies')
-
-        cursor.execute("SELECT idPath FROM path WHERE strPath LIKE '{}';".format(fileSys.completePath(path)),)
-        result = cursor.fetchone()
-        if not result:
-            query = "INSERT INTO path (strPath) VALUES ('{}');"
-            cursor.execute(query, (fileSys.completePath(path),))
-            con.commit()
-            pathID = cursor.lastrowid
-        else:
-            cursor.execute("SELECT idPath FROM path WHERE strPath LIKE '{}';".format(fileSys.completePath(path),))                
-            pathID = cursor.fetchone()[0]
-    except:
-        pass
-    finally:
-        cursor.close()
-        con.close()
-
-    return pathID
-
 def valDB(database):
     con, cursor = openDB(database, database)
 
