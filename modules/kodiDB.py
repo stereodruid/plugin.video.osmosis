@@ -528,6 +528,7 @@ def movieStreamExists(movieID, provider, url):
 
         if url.find("?url=plugin") != -1:
             url = url.strip().replace("?url=plugin", "plugin", 1)
+
         query = "SELECT mov_id, url FROM stream_ref WHERE mov_id='{}' AND provider LIKE '{}';"
         cursor.execute(query.format(movieID, provider,))
         dbMovie = cursor.fetchone()
@@ -647,20 +648,22 @@ def delBookMark(bookmarkID, fileID):
     try:
         con, cursor = openDB(KMODBPATH, 'KMovies')
 
-        selectquery = "SELECT idBookmark FROM bookmark WHERE idFile='{}';"
-        deletequery = "DELETE FROM bookmark WHERE idFile='{}';"
-        args = (fileID)
+        selectquery = "SELECT idBookmark FROM bookmark WHERE {0[0]} = {0[1]};"
+        deletequery = "DELETE FROM bookmark WHERE {0[0]} = {0[1]};"
+        args = ('idFile', fileID)
 
-        cursor.execute(selectquery.format('idFile').format(args))
+        cursor.execute(selectquery.format(args))
         dbbookmark = cursor.fetchone()
-        if dbbookmark:
-            cursor.execute(deletequery('idFile').format(args))
 
-        args = (bookmarkID)
-        cursor.execute(selectquery('idBookmark').format(args))
-        dbbookmark = cursor.fetchone()
         if dbbookmark:
-            cursor.execute(deletequery('idBookmark').format(args))
+            cursor.execute(deletequery.format(args))
+
+        args = ('idBookmark', bookmarkID)
+        cursor.execute(selectquery.format(args))
+        dbbookmark = cursor.fetchone()
+
+        if dbbookmark:
+            cursor.execute(deletequery.format(args))
 
         con.commit()
     except:
