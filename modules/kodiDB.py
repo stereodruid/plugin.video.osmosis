@@ -191,8 +191,6 @@ def createMusicDB():
 
         cursor.execute(query)
         con.commit()         
-    except:
-        pass
     finally:
         cursor.close()
         con.close()
@@ -303,14 +301,12 @@ def writeIntoSongTable (strSongTitle, iSongID, strArtistName, strAlbumName, iAlb
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, MusicDB_LOC)
 
 def manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, database=KMDBPATH):
-        dID = None
+    dID = None
+    try:
+        con, cursor = openDB(database, 'KMusic' if database == KMDBPATH else 'Music')
 
-    #try:
-        con, cursor = openDB(database, 'KMusic' if database == KMDBPATH else 'Music')    
-        
         if selectArgs:
             selectQuery = selectQuery.format(*selectArgs)
-            utils.addon_log("manageDbRecord: selectQuery = " + selectQuery)
             cursor.execute(selectQuery)
         else:
             cursor.execute(selectQuery)
@@ -319,26 +315,16 @@ def manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, database=KM
 
         if not searchResult:
             insertQuery = insertQuery.format(*insertArgs)
-            utils.addon_log("manageDbRecord: insertQuery = " + insertQuery)
             cursor.execute(insertQuery)
             con.commit()
             dID = cursor.lastrowid
         else:
-            dID = searchResult[0]                
-    #except IOError as (errno, strerror):
-    #    print ("I/O error({0}): {1}").format(errno, strerror)
-    #except ValueError:
-    #    print ("No valid integer in line.")
-    #except:
-    #    guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". See your Kodi.log!"))
-    #    utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
-    #    print ("Unexpected error:"), sys.exc_info()[1]
-    
-    #finally:
+            dID = searchResult[0]
+    finally:
         cursor.close()
         con.close()
     
-        return dID
+    return dID
 
 def valDB(database):
     con, cursor = openDB(database, database)
@@ -441,8 +427,6 @@ def createMovDB():
         cursor.execute(sql_strm_ref)
         cursor.execute(sql_movtable)
         con.commit()         
-    except:
-        pass
     finally:
         cursor.close()
         con.close()
@@ -460,8 +444,6 @@ def createShowDB():
         cursor.execute(sql_strm_ref)
         cursor.execute(sql_showtable)
         con.commit()         
-    except:
-        pass
     finally:
         cursor.close()
         con.close()
@@ -481,8 +463,6 @@ def movieExists(title, path):
             dbMovieID = cursor.lastrowid
         else:
             dbMovieID = dbMovie[0]
-    except:
-        pass
     finally:
         cursor.close()
         con.close()
@@ -506,8 +486,6 @@ def movieStreamExists(movieID, provider, url):
             if str(entry[1]) != url:
                 cursor.execute("UPDATE stream_ref SET url='{}' WHERE mov_id = {};".format(url, movieID))
                 con.commit() 
-    except:
-        pass
     finally:
         cursor.close()
         con.close()
@@ -527,8 +505,6 @@ def showExists(title, path):
             dbShowID = cursor.lastrowid
         else:
             dbShowID = dbShow[0]
-    except:
-        pass
     finally:
         cursor.close()
         con.close()
@@ -552,8 +528,6 @@ def episodeStreamExists(showID, seEp, provider, url):
             if str(dbShow[1]) != url:
                 cursor.execute("UPDATE stream_ref SET url = '{}' WHERE show_id = {} AND seasonEpisode LIKE '{}' AND provider LIKE '{}';".format(url, showID, seEp, provider))
                 con.commit()
-    except:
-        pass
     finally:
         cursor.close()
         con.close()
@@ -574,8 +548,6 @@ def getVideo(ID, seasonEpisode=None):
     
         cursor.execute(query.format(*args))      
         provList = cursor.fetchall()
-    except:
-        pass
     finally:
         cursor.close()
         con.close()
@@ -595,8 +567,6 @@ def getPlayedURLResumePoint(url):
             dbfileID = dbfile[0]
             cursor.execute("SELECT timeInSeconds, totalTimeInSeconds, idBookmark FROM bookmark WHERE idFile = {};".format(dbfileID))
             urlResumePoint = cursor.fetchone()
-    except:
-        pass
     finally:
         cursor.close()
         con.close()
@@ -625,8 +595,6 @@ def delBookMark(bookmarkID, fileID):
             cursor.execute(deletequery.format(*args))
 
         con.commit()
-    except:
-        pass
     finally:
         cursor.close()
         con.close()
@@ -640,8 +608,6 @@ def getKodiMovieID(sTitle):
         # c00 = title; c14 = genre       
         cursor.execute("SELECT idMovie, idFile, premiered, c14 FROM movie WHERE c00 LIKE '{}';".format(sTitle))
         dbMovie = cursor.fetchone()
-    except:
-        pass
     finally:
         cursor.close()
         con.close()
@@ -659,8 +625,6 @@ def getKodiEpisodeID(sTVShowTitle, iSeason, iEpisode):
         
         cursor.execute(query.format(iSeason, iEpisode, sTVShowTitle))
         dbEpisode = cursor.fetchone()
-    except:
-        pass
     finally:
         cursor.close()
         con.close()
@@ -680,10 +644,3 @@ def openDB(sqliteDB, mysqlDB):
         cursor = con.cursor()
 
     return con, cursor
-
-def executeQuery(cursor, query, args):
-    if DATABASE_MYSQL == "false":
-        query = query.format
-    else:
-        return
-    return
