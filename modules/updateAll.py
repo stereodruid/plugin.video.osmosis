@@ -61,21 +61,17 @@ def readMediaList(purge=False):
 def strm_update(selectedItems=None):
     try:
         if xbmcvfs.exists(MediaList_LOC):
-            thelist = readMediaList()
+            thelist = readMediaList() if selectedItems is None else selectedItems
             if len(thelist) > 0:
                 dialogeBG = xbmcgui.DialogProgressBG()
                 dialogeBG.create("OSMOSIS: " ,  'Total Update-Progress:')
 
-                listLen = len(thelist) if selectedItems is None else len(selectedItems)
-                j = 100 / len(thelist)
-                for i in range(len(thelist)):
-                    if selectedItems is not None and i not in selectedItems:
-                        continue
+                listLen = len(thelist)
+                step = j = 100 / listLen
+                for entry in thelist:
+                    splits = entry.strip().split('|')
+                    cType, name, url = splits[0], splits[1], splits[2]
 
-                    try:
-                        cType , name, url = (thelist[i]).strip().split('|', 3)
-                    except ValueError:
-                        cType , name, url, _ = (thelist[i]).strip().split('|', 3) 
                     try:
                         plugin_id = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
                         if plugin_id:
@@ -83,8 +79,8 @@ def strm_update(selectedItems=None):
                             if module and hasattr(module, 'update'):
                                 url = module.update(name, url, 'video', thelist)
     
-                        dialogeBG.update( j, "OSMOSIS total update process: " , "Current Item: " + name.replace('++RenamedTitle++','') + " Items left: " + str(listLen) )
-                        j = j + 100 / len(thelist)
+                        dialogeBG.update(j, "OSMOSIS total update process: " , "Current Item: " + name.replace('++RenamedTitle++','') + " Items left: " + str(listLen))
+                        j += step
     
                         create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
                         listLen -= 1
