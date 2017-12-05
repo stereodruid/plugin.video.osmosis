@@ -245,7 +245,7 @@ def writeSong(iPathID, iAlbumID, strArtist, strTitle, iDuration, iTrack, tFileMo
     strDateAdded = tDateAdded.strftime("%Y-%m-%d %H:%M:%S")
     iYear = int(datetime.datetime.now().strftime("%Y"))
     artistCol = "strArtistDisp" if kodi_version >= 18 else "strArtists"
-    strTitle = strTitle.replace("'","''")
+    strTitle = stringUtils.invCommas(strTitle)
     strFileName = stringUtils.cleanStrmFilesys(strTitle)
     strFileName += ".strm"
 
@@ -450,6 +450,7 @@ def createShowDB():
     
 def movieExists(title, path):
     dbMovieID = None
+    title = stringUtils.invCommas(title)
     try:
         con, cursor = openDB(MODBPATH, 'Movies')
 
@@ -492,6 +493,7 @@ def movieStreamExists(movieID, provider, url):
 
 def showExists(title, path):
     dbShowID = None
+    title = stringUtils.invCommas(title)
     try:
         con, cursor = openDB(SHDBPATH, 'TVShows')
 
@@ -556,6 +558,7 @@ def getVideo(ID, seasonEpisode=None):
 
 def getPlayedURLResumePoint(url): 
     urlResumePoint = None
+    url = stringUtils.invCommas(url)
 
     try:
         con, cursor = openDB(KMODBPATH, 'KMovies')
@@ -601,6 +604,7 @@ def delBookMark(bookmarkID, fileID):
 
 def getKodiMovieID(sTitle):
     dbMovie = None
+    sTitle = stringUtils.invCommas(sTitle)
 
     try:
         con, cursor = openDB(KMODBPATH, 'KMovies')
@@ -616,6 +620,7 @@ def getKodiMovieID(sTitle):
 
 def getKodiEpisodeID(sTVShowTitle, iSeason, iEpisode):
     dbEpisode = None
+    sTVShowTitle = stringUtils.invCommas(sTVShowTitle)
 
     try:
         con, cursor = openDB(KMODBPATH, 'KMovies')
