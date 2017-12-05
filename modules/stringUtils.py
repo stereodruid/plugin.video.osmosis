@@ -215,3 +215,7 @@ def getMovieStrmPath(strmTypePath, mediaListEntry_name, movie_name=''):
 
 def getStrmname(strm_name):
     return strm_name.strip().replace('++RenamedTitle++', '')
+
+def invCommas(string):
+   string = string.replace("'","''")
+   return string
