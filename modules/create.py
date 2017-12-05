@@ -508,7 +508,7 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
     dbEpisode = kodiDB.writeShow(episode)
     
     if dbEpisode is not None:
-        fileSys.writeSTRM(os.path.join(stringUtils.cleanStrms(dbEpisode.get('path')), stringUtils.cleanStrms(dbEpisode.get('tvShowTitle'))), dbEpisode.get('strSeasonEpisode'), "plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=show&episode=" + dbEpisode.get('strSeasonEpisode') + "&showid=" + str(dbEpisode.get('showid')) + "|" + dbEpisode.get('tvShowTitle'))
+        fileSys.writeSTRM(os.path.join(stringUtils.cleanStrms(dbEpisode.get('path')), stringUtils.cleanStrms(dbEpisode.get('tvShowTitle'))), dbEpisode.get('strSeasonEpisode'), "plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=show&episode=" + dbEpisode.get('strSeasonEpisode') + "&showid=" + str(dbEpisode.get('showID')) + "|" + dbEpisode.get('tvShowTitle'))
     return pagesDone
     
 def getData(url, fanart):
