@@ -314,18 +314,19 @@ def make_sure_path_exists(path):
             else:
                 output_file.write(linje.strip())
 
-def removeMediaList(Item_remove):
+def removeMediaList(delList):
     utils.addon_log('Removing items')
-    thelist = []
     thefile = xbmc.translatePath(os.path.join(profile, 'MediaList.xml'))
       
     if xbmcvfs.exists(thefile):
+        delNotInMediaList(delList)
+
         fle = open(thefile, "r")
         thelist = fle.readlines()
         fle.close()
         del fle
-        delNotInMediaList(Item_remove, thelist)
-        thelist = [i for j, i in enumerate(thelist) if j not in Item_remove]
+        
+        thelist = [entry for entry in thelist if entry not in delList]
         
         fle = open(thefile, "w")
         fle.write(''.join(thelist).strip())
@@ -333,35 +334,32 @@ def removeMediaList(Item_remove):
         del fle
 
 def readMediaList(purge=False):
-        # try:
-        if xbmcvfs.exists(MediaList_LOC):
-            fle = open(MediaList_LOC, "r")
-            thelist = fle.readlines()
-            fle.close()
-            return thelist
-                          
-def isMediaList(url, cType='Other'):
-    utils.addon_log('isMediaList')
-    # parse MediaList for url return bool if found
+    if xbmcvfs.exists(MediaList_LOC):
+        fle = open(MediaList_LOC, "r")
+        thelist = fle.readlines()
+        fle.close()
+        return thelist
 
-def delNotInMediaList(delList, thelist):
-    for i in delList:
+def delNotInMediaList(delList):
+    for entry in delList:
         try:
-            artistPath = (thelist[i]).strip().split('|')[3].format(i)
-            path = completePath(STRM_LOC) + (thelist[i]).strip().split('|')[0].format(i)
-            path = completePath(path) + stringUtils.cleanByDictReplacements(artistPath)
-            itemPath = (thelist[i].decode('utf-8')).strip().split('|')[1].replace('++RenamedTitle++', '').format(i).format(i)
+            splits = entry.split('|')
+            type = splits[0]
+            isAudio = True if type.lower().find('audio') > -1 else False
+            path = completePath(STRM_LOC) + type
+
+            if isAudio and len(splits) > 3:
+                path = completePath(path) + stringUtils.cleanByDictReplacements(splits[3])
+
+            itemPath = stringUtils.getStrmname(splits[1])
             path = completePath(completePath(path) + stringUtils.cleanByDictReplacements(itemPath))
-            print ("remove folder: %s" % path)
+            utils.addon_log("remove: %s" % path)
             shutil.rmtree(path, ignore_errors=True)
-            xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": 1}')
-        except IndexError:    
-            path = completePath(STRM_LOC) + (thelist[i]).strip().split('|')[0].format(i)
-            itemPath = (thelist[i].decode('utf-8')).strip().split('|')[1].replace('++RenamedTitle++', '').format(i).format(i)
-            print ("remove folder: %s" % itemPath)
-            shutil.rmtree(completePath(path) + stringUtils.cleanByDictReplacements(itemPath), ignore_errors=True)
+
+            if isAudio:
+                xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": 1}')
         except OSError:
-                print ("Unable to remove folder: %s" % itemPath)
+                print ("Unable to remove: %s" % path)
 
 def completePath(filepath):
     if filepath.find("\\") != -1 and not filepath.endswith("\\"):
