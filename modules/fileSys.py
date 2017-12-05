@@ -155,6 +155,7 @@ def updateStream(strm_Fullpath, replace_text):
     while os.stat(strm_Fullpath).st_size == 0:
         with open(strm_Fullpath, 'w') as newF:
             newF.write(replace_text)
+
 def isInMediaList(mediaTitle, url, cType='Other'):
     utils.addon_log('isInMediaList')
     existInList = False

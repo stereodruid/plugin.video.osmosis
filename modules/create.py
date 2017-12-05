@@ -120,9 +120,9 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             dbMovList = kodiDB.writeMovie(movieList)
             j = 100 / len(dbMovList) if len(dbMovList) > 0 else 1
             # Write strms for all values in movieList
-            for i in dbMovList:
-                thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing Movies: ",  " Video: " + i[1].rstrip("."))
-                fileSys.writeSTRM(stringUtils.cleanStrms(i[0].rstrip(".")), stringUtils.cleanStrms((i[1].rstrip("."))) , "plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=movie&id=" + str(i[2]) + "|" + i[1])
+            for entry in dbMovList:
+                thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing Movies: ",  " Video: " + entry.get('title'))
+                fileSys.writeSTRM(stringUtils.cleanStrms(entry.get('path')), stringUtils.cleanStrms(entry.get('title')) , "plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=movie&id=" + str(entry.get('movieID')) + "|" + entry.get('title'))
 
                 j = j + 100 / len(movieList)
                 
@@ -377,31 +377,25 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
     while pagesDone < int(PAGINGMovies):
         if not contentList[0] == "palyableSingleMedia":
             for detailInfo in contentList:
-                file = detailInfo['file'].replace("\\\\", "\\")
-                filetype = detailInfo['filetype']
-                label = detailInfo['label'].strip()
-                thumbnail = detailInfo.get('thumbnail', '')
-                fanart = detailInfo.get('fanart', '')
-                description = detailInfo.get('description', '')
-                provGeneral = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), file)
-                provXST = re.search('%s(.*)'"\&function"'' % (r"site="), file)
+                file = detailInfo.get('file').replace("\\\\", "\\") if detailInfo.get('file', None) is not None else None
+                filetype = detailInfo.get('filetype', None)
+                label = detailInfo.get('label').strip() if detailInfo.get('label', None) is not None else None
             
-                try:                        
-                    if provGeneral:
-                        listName = fileSys.getAddonname(provGeneral.group(1))
-                        if provXST:
-                            listName = listName + ": " + provXST.group(1)               
-                    
-                    if label and strm_name:                                              
-                        label = stringUtils.cleanByDictReplacements(label)           
-                        if HIDE_tile_in_OV == "true" and not label.find("[OV]") == -1:  
-                            get_title_with_OV = 0
+                try:                    
+                    if label and strm_name:
+                        label = stringUtils.cleanByDictReplacements(label)
+                        if HIDE_tile_in_OV == "true" and label.find("[OV]") > -1:
+                            get_title_with_OV = False
                         else:
-                            get_title_with_OV = 1
+                            get_title_with_OV = True
+
+                        provider = getProvider(file)
 
                         thisDialog.dialogeBG.update(j, ADDON_NAME + ": Getting Movies: ",  " Video: " + label)
-                        if filetype == 'file' and get_title_with_OV == 1:
-                            movieList.append([stringUtils.getMovieStrmPath(strm_type, strm_name, label), stringUtils.cleanByDictReplacements(stringUtils.getStrmname(label)), file, listName])
+                        if filetype is not None and filetype == 'file' and get_title_with_OV == True:
+                            m_path = stringUtils.getMovieStrmPath(strm_type, strm_name, label)
+                            m_title = stringUtils.cleanByDictReplacements(stringUtils.getStrmname(label))
+                            movieList.append({'path': m_path, 'title':  m_title, 'url': file, 'provider': provider})
                         j = j + len(contentList) * int(PAGINGMovies) / 100
                 except IOError as (errno, strerror):
                     print ("I/O error({0}): {1}").format(errno, strerror)
@@ -419,17 +413,25 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
             else:
                 pagesDone = int(PAGINGMovies)            
         else:
-            provGeneral = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), contentList[1])
-            provXST = re.search('%s(.*)'"\&function"'' % (r"site="), contentList[1])
-
-            if provGeneral:
-                listName = provGeneral.group(1)
-                if provXST:
-                    listName = listName + ": " + provXST.group(1)
-            movieList.append([stringUtils.getMovieStrmPath(strm_type, strm_name), stringUtils.cleanByDictReplacements(stringUtils.getStrmname(strm_name)), contentList[1], listName])
+            provider = getProvider(contentList[1])
+            m_path = stringUtils.getMovieStrmPath(strm_type, strm_name)
+            m_title = stringUtils.cleanByDictReplacements(stringUtils.getStrmname(strm_name))
+            movieList.append({'path': m_path, 'title':  m_title, 'url': contentList[1], 'provider': provider})
             pagesDone = int(PAGINGMovies)
 
     return movieList
+
+def getProvider(entry):
+    provider = None
+    provGeneral = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), entry)
+    provXST = re.search('%s(.*)'"\&function"'' % (r"site="), entry)
+
+    if provGeneral:
+        provider = provGeneral.group(1)
+        if provXST:
+            provider += ": " + provXST.group(1)
+
+    return provider
  
 def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
     dirList = []
@@ -439,21 +441,16 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
         strm_type = strm_type.replace('Shows-Collection', 'TV-Shows')
         try:
             for detailInfo in showList:
-                filetype = detailInfo.get('filetype', '')
-                if filetype != '':
-                    file = detailInfo.get('file', '').strip()
-                    episode = detailInfo.get('episode', -1)
-                    season = detailInfo.get('season', -1)
-                    label = detailInfo.get('label', None).strip()       
-    
-                    if not fileSys.isInMediaList(stringUtils.getStrmname(strm_name), file, strm_type) and label != None and label != ">>>" and label != "" and file.find("playMode=play") == "-1":            
-                        fileSys.writeMediaList(files, label, strm_type)
-                    
+                filetype = detailInfo.get('filetype', None)
+                file = detailInfo.get('file', None)
+                episode = detailInfo.get('episode', -1)
+                season = detailInfo.get('season', -1)
+
+                if filetype is not None:
                     if filetype == 'directory':
                         dirList.append(jsonUtils.requestList(file, 'video').get('files', []))
-                        continue
-    
-                    if season > -1 and episode > -1 and filetype == 'file': 
+                        continue    
+                    elif season > -1 and episode > -1 and filetype == 'file': 
                         episodesList.append(detailInfo)
                 
             step = float(100.0 / len(episodesList) if len(episodesList) > 0 else 1)
@@ -483,37 +480,21 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
             dirList = []                
 
 def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
+    episode = None
     try:
-        episodeList = []
-
         utils.addon_log("detailInfo: " + str(episode_item))
-        file = episode_item['file']
-        filetype = episode_item['filetype'].replace("\\\\", "\\")
-        label = episode_item['label']
-        thumbnail = episode_item.get('thumbnail','')
-        fanart = episode_item.get('fanart','')
-        description = stringUtils.cleanLabels(episode_item.get('description',''))
-        episode = str(episode_item['episode'])
-        season = str(episode_item['season'])
-        showtitle = stringUtils.removeHTMLTAGS(episode_item.get('showtitle', ''))
-        provGeneral = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), file)
-        provXST = re.search('%s(.*)'"\&function"'' % (r"site="), file)
-        listName = strm_name
-        strm_name = str(stringUtils.cleanByDictReplacements(strm_name.strip()))
-        episodesHDF = re.search('Folge.(\\d+)&', file)
-        
-        if provGeneral:
-            listName = fileSys.getAddonname(provGeneral.group(1))
-            if provXST:
-                listName = listName + ": " + provXST.group(1)
-        
-        if file.find("hdfilme") != -1 and episodesHDF:
-            episode = re.search('Folge.(\\d+)&', file).group(1)
+        file = episode_item.get('file', None)
+        episode = episode_item.get('episode', -1)
+        season = episode_item.get('season', -1)
+        strSeasonEpisode = 's' + str(season) + 'e' + str(episode)
+        showtitle = stringUtils.removeHTMLTAGS(episode_item.get('showtitle')) if episode_item.get('showtitle', None) is not None else None
+        strm_name = stringUtils.cleanByDictReplacements(strm_name)
+        provider = getProvider(file)
     
-        if strm_name.find("++RenamedTitle++") != -1 or showtitle == '':
+        if strm_name.find("++RenamedTitle++") > -1 or showtitle == '':
             showtitle = stringUtils.getStrmname(strm_name)
-        if showtitle != "" and strm_type != "":
-            episodeList.append([strm_type, str('s' + season), str('e' + episode), file, stringUtils.cleanByDictReplacements(showtitle.strip()), listName])                   
+        if showtitle is not None and showtitle != "" and strm_type != "":
+            episode = {'path': strm_type, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': stringUtils.cleanByDictReplacements(showtitle), 'provider': provider}                   
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)
     except ValueError:
@@ -524,10 +505,10 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
         print ("Unexpected error:"), sys.exc_info()[0]
         raise
 
-    dbEpisode = kodiDB.writeShow(episodeList)
+    dbEpisode = kodiDB.writeShow(episode)
     
-    for i in dbEpisode:        
-        fileSys.writeSTRM(os.path.join(stringUtils.cleanStrms((i[0].rstrip("."))),stringUtils.cleanStrms(i[1].rstrip("."))), stringUtils.cleanStrms(i[3] + i[4]) , "plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=show&episode=" + i[3] + i[4] + "&showid=" + str(i[2]) + "|" + i[1])
+    if dbEpisode is not None:
+        fileSys.writeSTRM(os.path.join(stringUtils.cleanStrms(dbEpisode.get('path')), stringUtils.cleanStrms(dbEpisode.get('tvShowTitle'))), dbEpisode.get('strSeasonEpisode'), "plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=show&episode=" + dbEpisode.get('strSeasonEpisode') + "&showid=" + str(dbEpisode.get('showid')) + "|" + dbEpisode.get('tvShowTitle'))
     return pagesDone
     
 def getData(url, fanart):

@@ -361,27 +361,26 @@ def writeMovie(movieList):
         xbmcvfs.delete(db)
         createMovDB() 
         
-    for i in movieList:
-        if i:
-            try:
-                movID = movieExists(i[1], i[0])
-                movieStreamExists(movID, i[3], i[2])
-                if not movID in dbMovieList:
-                    dbMovieList.append([ i[0], i[1], movID, i[3]])
-            except IOError as (errno, strerror):
-                print ("I/O error({0}): {1}").format(errno, strerror)
-            except ValueError:
-                print ("No valid integer in line.") 
-            except:
-                guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". See your Kodi.log!"))
-                utils.addon_log("Unexpected error: " + str(movID) +" "+ str(i[3]) + " "+ str( url))
-                print ("Unexpected error:"), sys.exc_info()[1]
-                pass
+    for entry in movieList:
+        try:
+            movID = movieExists(entry.get('title'), entry.get('path'))
+            if movID is not None:
+                movieStreamExists(movID, entry.get('provider'), entry.get('url'))
+                dbMovieList.append({'path': entry.get('path'), 'title': entry.get('title'), 'movieID': movID, 'provider': entry.get('provider')})
+        except IOError as (errno, strerror):
+            print ("I/O error({0}): {1}").format(errno, strerror)
+        except ValueError:
+            print ("No valid integer in line.") 
+        except:
+            guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". See your Kodi.log!"))
+            utils.addon_log("Unexpected error: " + str(movID) +" "+ str(i[3]) + " "+ str( url))
+            print ("Unexpected error:"), sys.exc_info()[1]
+            pass
 
     return dbMovieList
 
-def writeShow(showList):
-    dbShowList = []
+def writeShow(episode):
+    dbEpisode = None
     if DATABASE_MYSQL == "false":
         if not xbmcvfs.exists(SHDBPATH):
             createShowDB()
@@ -395,24 +394,23 @@ def writeShow(showList):
             xbmcvfs.delete(SHDBPATH_MYSQL)
             createShowDB()
         
-    for i in showList:
-        if i:
-            try:
-                showID = showExists(i[4], i[0])
-                episodeStreamExists(showID, i[1] + i[2], i[5], i[3])
-                if not showID in dbShowList:
-                    dbShowList.append([i[0], i[4], showID, i[1], i[2]])
-            except IOError as (errno, strerror):
-                print ("I/O error({0}): {1}").format(errno, strerror)
-            except ValueError:
-                print ("No valid integer in line.") 
-            except:
-                guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". See your Kodi.log!"))
-                utils.addon_log("Unexpected error: " + str(showID) +" "+ str(i[4]) + " "+ str( url))
-                print ("Unexpected error:"), sys.exc_info()[1]
-                pass
+    if episode is not None:
+        try:
+            showID = showExists(episode.get('tvShowTitle'), episode.get('path'))
+            if showID is not None:
+                episodeStreamExists(showID, episode.get('strSeasonEpisode'), episode.get('provider'), episode.get('url'))
+                dbEpisode = {'path': episode.get('path'), 'tvShowTitle': episode.get('tvShowTitle'), 'showID': showID, 'strSeasonEpisode': episode.get('strSeasonEpisode')}
+        except IOError as (errno, strerror):
+            print ("I/O error({0}): {1}").format(errno, strerror)
+        except ValueError:
+            print ("No valid integer in line.") 
+        except:
+            guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". See your Kodi.log!"))
+            utils.addon_log("Unexpected error: " + str(showID) +" "+ str(i[4]) + " "+ str( url))
+            print ("Unexpected error:"), sys.exc_info()[1]
+            pass
 
-    return dbShowList
+    return dbEpisode
 
 def createMovDB():
     try:
@@ -450,9 +448,10 @@ def createShowDB():
     
 def movieExists(title, path):
     dbMovieID = None
-    title = stringUtils.invCommas(title)
     try:
         con, cursor = openDB(MODBPATH, 'Movies')
+
+        title = stringUtils.invCommas(title)
 
         cursor.execute("SELECT id, title FROM movies WHERE title LIKE '{}';".format(title))
         dbMovie = cursor.fetchone()
@@ -493,9 +492,10 @@ def movieStreamExists(movieID, provider, url):
 
 def showExists(title, path):
     dbShowID = None
-    title = stringUtils.invCommas(title)
     try:
         con, cursor = openDB(SHDBPATH, 'TVShows')
+
+        title = stringUtils.invCommas(title)
 
         cursor.execute("SELECT id, showTitle FROM shows WHERE showTitle LIKE '{}';".format(title))
         dbShow = cursor.fetchone()
@@ -558,10 +558,11 @@ def getVideo(ID, seasonEpisode=None):
 
 def getPlayedURLResumePoint(url): 
     urlResumePoint = None
-    url = stringUtils.invCommas(url)
 
     try:
         con, cursor = openDB(KMODBPATH, 'KMovies')
+
+        url = stringUtils.invCommas(url)
 
         cursor.execute("SELECT idFile FROM files WHERE strFilename LIKE '{}';".format(url))
         dbfile = cursor.fetchone()
@@ -604,10 +605,11 @@ def delBookMark(bookmarkID, fileID):
 
 def getKodiMovieID(sTitle):
     dbMovie = None
-    sTitle = stringUtils.invCommas(sTitle)
 
     try:
         con, cursor = openDB(KMODBPATH, 'KMovies')
+
+        sTitle = stringUtils.invCommas(sTitle)
 
         # c00 = title; c14 = genre       
         cursor.execute("SELECT idMovie, idFile, premiered, c14 FROM movie WHERE c00 LIKE '{}';".format(sTitle))
@@ -620,10 +622,11 @@ def getKodiMovieID(sTitle):
 
 def getKodiEpisodeID(sTVShowTitle, iSeason, iEpisode):
     dbEpisode = None
-    sTVShowTitle = stringUtils.invCommas(sTVShowTitle)
 
     try:
         con, cursor = openDB(KMODBPATH, 'KMovies')
+
+        sTVShowTitle = stringUtils.invCommas(sTVShowTitle)
 
         # episode.c00 = title; episode.c05 = aired; episode.c12 = season; episode.c13 = episode; tvshow.c00 = title
         query = "SELECT episode.idEpisode, episode.idFile, episode.c00, episode.c05 FROM episode INNER JOIN tvshow ON tvshow.idShow = episode.idShow WHERE episode.c12 = {} and episode.c13 = {} and tvshow.c00 LIKE '{}';"
