@@ -21,7 +21,6 @@ import urllib, urllib2, cookielib, requests
 
 from BeautifulSoup import BeautifulStoneSoup, BeautifulSoup, BeautifulSOAP
 import SimpleDownloader as downloader
-import pyxbmct
 import utils
 import xbmc
 import xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
@@ -52,6 +51,8 @@ source_file = os.path.join(home, 'source_file')
 functions_dir = profile
 downloader = downloader.SimpleDownloader()
 debug = addon.getSetting('debug')
+folder_medialistentry_movie = REAL_SETTINGS.getSetting('folder_medialistentry_movie')
+folder_movie = REAL_SETTINGS.getSetting('folder_movie')
 
 if os.path.exists(favorites) == True:
     FAV = open(favorites).read()
@@ -129,6 +130,9 @@ def cleanStrms(text, formater=''):
         text = text
     return text
 
+def cleanStrmFilesys(string):
+    return re.sub('[\/:*?<>|!@#$"]', '', string)
+
 def multiRstrip(text):
     replaceRstrip = ['.', ',', '-', '_', ' ', '#', '+', '`', '&', '%', '!', '?']
     for i in replaceRstrip:
@@ -152,6 +156,39 @@ def removeHTMLTAGS(text):
 
 def removeNonAscii(s): return "".join(filter(lambda x: ord(x) < 128, s))
 
+def unicodetoascii(text):
+
+    TEXT = (text.
+            replace('\xe2\x80\x99', "'").
+            replace('\xc3\xa9', 'e').
+            replace('\xe2\x80\x90', '-').
+            replace('\xe2\x80\x91', '-').
+            replace('\xe2\x80\x92', '-').
+            replace('\xe2\x80\x93', '-').
+            replace('\xe2\x80\x94', '-').
+            replace('\xe2\x80\x94', '-').
+            replace('\xe2\x80\x98', "'").
+            replace('\xe2\x80\x9b', "'").
+            replace('\xe2\x80\x9c', '"').
+            replace('\xe2\x80\x9c', '"').
+            replace('\xe2\x80\x9d', '"').
+            replace('\xe2\x80\x9e', '"').
+            replace('\xe2\x80\x9f', '"').
+            replace('\xe2\x80\xa6', '...').
+            replace('\xe2\x80\xb2', "'").
+            replace('\xe2\x80\xb3', "'").
+            replace('\xe2\x80\xb4', "'").
+            replace('\xe2\x80\xb5', "'").
+            replace('\xe2\x80\xb6', "'").
+            replace('\xe2\x80\xb7', "'").
+            replace('\xe2\x81\xba', "+").
+            replace('\xe2\x81\xbb', "-").
+            replace('\xe2\x81\xbc', "=").
+            replace('\xe2\x81\xbd', "(").
+            replace('\xe2\x81\xbe', ")")
+            )
+    return TEXT
+
 def removeStringElem(lst, string=''):
     return ([x for x in lst if x != string])
     
@@ -166,3 +203,19 @@ def cleanByDictReplacements(string):
                         ":": ' ','"?"': '','"':''}
 
     return utils.multiple_reSub(string, dictReplacements)
+
+def getMovieStrmPath(strmTypePath, mediaListEntry_name, movie_name=''):
+    if folder_medialistentry_movie and folder_medialistentry_movie == 'true':
+        mediaListEntry_name = cleanByDictReplacements(getStrmname(mediaListEntry_name)) if mediaListEntry_name.find('++RenamedTitle++') == -1 else getStrmname(mediaListEntry_name)
+        strmTypePath = os.path.join(strmTypePath, mediaListEntry_name)
+    if movie_name != '' and folder_movie and folder_movie == 'true':
+        movie_name = cleanByDictReplacements(getStrmname(movie_name))
+        strmTypePath = os.path.join(strmTypePath, movie_name)
+    return strmTypePath
+
+def getStrmname(strm_name):
+    return strm_name.strip().replace('++RenamedTitle++', '')
+
+def invCommas(string):
+   string = string.replace("'","''")
+   return string

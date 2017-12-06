@@ -29,7 +29,6 @@ import urllib, urllib2, cookielib, requests
 
 from BeautifulSoup import BeautifulStoneSoup, BeautifulSoup, BeautifulSOAP
 import SimpleDownloader as downloader
-import pyxbmct
 import utils
 import xbmc
 import xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
@@ -74,72 +73,66 @@ else: FAV = []
 DIRS = []
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
 
-def addItem(labels="n.a"):
-    if labels != 'n.a':    
-        try:
-            utils.addon_log('addItem')
-            u = "plugin://plugin.video.osmosis/?url=" + "&mode=" + str(5) + "&fanart=" + urllib.quote_plus(iconRemove)
-            ok = True
-            liz = xbmcgui.ListItem(labels, iconImage=iconRemove, thumbnailImage=iconRemove)
-            liz.setInfo(type="Video", infoLabels={ "Title": labels,"Genre": "actionRemove"})
-            liz.setProperty("Fanart_Image", FANART)
-            ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
-            xbmcplugin.endOfDirectory(int(sys.argv[1]), updateListing=True)        
-        except:#            
-            pass
+def addItem(label, mode, icon):
+    utils.addon_log('addItem')
+    u = "plugin://plugin.video.osmosis/?url=" + "&mode=" + str(mode) + "&fanart=" + urllib.quote_plus(icon)
+    liz = xbmcgui.ListItem(label, iconImage=icon, thumbnailImage=icon)
+    liz.setInfo(type="Video", infoLabels={ "Title": label,"Genre": "actionRemove"})
+    liz.setProperty("Fanart_Image", FANART)
+
+    xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)     
         
-def addFunction(labels= 'n.a' ):
-    if labels != 'n.a':    
-        try:
-            utils.addon_log('addItem')
-            u = "plugin://plugin.video.osmosis/?url=" + "&mode=" + str(666) + "&fanart=" + urllib.quote_plus(iconRemove)
-            ok = True
-            liz = xbmcgui.ListItem(labels, iconImage=updateIcon, thumbnailImage=updateIcon)
-            liz.setInfo(type="Video", infoLabels={ "Title": labels,"Genre": "actionRemove"})
-            liz.setProperty("Fanart_Image", FANART)
-            ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
-            #xbmcplugin.endOfDirectory(int(sys.argv[1]), updateListing=True)        
-        except:#          
-            pass
+def addFunction(labels):
+    utils.addon_log('addItem')
+    u = "plugin://plugin.video.osmosis/?url=" + "&mode=" + str(666) + "&fanart=" + urllib.quote_plus(updateIcon)
+    liz = xbmcgui.ListItem(labels, iconImage=updateIcon, thumbnailImage=updateIcon)
+    liz.setInfo(type="Video", infoLabels={ "Title": labels,"Genre": "actionRemove"})
+    liz.setProperty("Fanart_Image", FANART)
+
+    xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
             
-def addDir(name,url,mode,iconimage,fanart,description,genre,date,credits,showcontext=False):
+def addDir(name,url,mode,art,plot,genre,date,credits,showcontext=False):
     utils.addon_log('addDir')
-    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&fanart="+urllib.quote_plus(fanart)
-    ok=True
+    u=sys.argv[0]+"?url="+urllib.quote_plus(stringUtils.uni(url))+"&mode="+str(mode)+"&name="+urllib.quote_plus(stringUtils.uni(name))+"&fanart="+urllib.quote_plus(art.get('fanart',''))
     contextMenu = []
-    liz=xbmcgui.ListItem(name, iconImage=iconimage, thumbnailImage=iconimage)
-    liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": description, "Genre": genre, "dateadded": date, "credits": credits })
-    liz.setProperty("Fanart_Image", fanart)
+    thumbArt = art.get('thumb',None)
+    if thumbArt == None:
+        thumbArt = art.get('fanart',None)
+    liz=xbmcgui.ListItem(name, iconImage=thumbArt, thumbnailImage=thumbArt)
+    liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": plot, "Genre": genre, "dateadded": date, "credits": credits })
+    liz.setArt(art)
     contextMenu.append(('Create Strms','XBMC.RunPlugin(%s&mode=200&name=%s)'%(u, name)))
     liz.addContextMenuItems(contextMenu)
-    try:
-        ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
-    except:
-        pass
-    
-    return ok
+
+    xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
       
-def addLink(name,url,mode,iconimage,fanart,description,genre,date,showcontext,playlist,regexs,total,setCookie=""): 
+def addLink(name,url,mode,art,plot,genre,date,showcontext,playlist,regexs,total,setCookie=""): 
     utils.addon_log('addLink') 
-    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&fanart="+urllib.quote_plus(fanart)
-    ok = True
+    u=sys.argv[0]+"?url="+urllib.quote_plus(stringUtils.uni(url))+"&mode="+str(mode)+"&name="+urllib.quote_plus(stringUtils.uni(name))+"&fanart="+urllib.quote_plus(art.get('fanart',''))
     contextMenu =[]
-    liz=xbmcgui.ListItem(name, iconImage=iconimage, thumbnailImage=iconimage)
-    liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": description, "Genre": genre, "dateadded": date })
-    liz.setProperty("Fanart_Image", fanart)
+    thumbArt = art.get('thumb',None)
+    if thumbArt == None:
+        thumbArt = art.get('fanart',None)
+    liz=xbmcgui.ListItem(name, iconImage=thumbArt, thumbnailImage=thumbArt)
+    liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": plot, "Genre": genre, "dateadded": date })
+    liz.setArt(art)
     liz.setProperty('IsPlayable', 'true')
-    contextMenu.append(('Create Strm','XBMC.RunPlugin(%s&mode=200&name=%s)'%(u, name)))
+    contextMenu.append(('Create Strm','XBMC.RunPlugin(%s&mode=200&name=%s&filetype=file)'%(u, name)))
     liz.addContextMenuItems(contextMenu)
-    ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,totalItems=total)
-    return ok
+    xbmcplugin.setContent(int(sys.argv[1]), 'movies')
+
+    xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,totalItems=total)
 
 def getSources():
     utils.addon_log('getSources')
-    addDir('Video Plugins', 'video', 1, folderIcon, FANART, 'description', 'genre', 'date', 'credits')
-    addDir('Music Plugins', 'audio', 1, folderIcon, FANART, 'description', 'genre', 'date', 'credits')
-    addDir('UPNP Servers', 'upnp://', 2, folderIcon, FANART, 'description', 'genre', 'date', 'credits')
-    addFunction('Update')
-    addItem(labels="Remove Media")
+    xbmcplugin.setContent(int(sys.argv[1]), 'movies')
+    art = {'fanart': FANART, 'thumb': folderIcon}
+    addDir('Video Plugins', 'video', 1, art, 'description', 'genre', 'date', 'credits')
+    addDir('Music Plugins', 'audio', 1, art, 'description', 'genre', 'date', 'credits')
+    addDir('UPNP Servers', 'upnp://', 2, art, 'description', 'genre', 'date', 'credits')
+    addItem('Update', 4, updateIcon)
+    addFunction('Update all')
+    addItem("Remove Media", 5, iconRemove)
     #ToDo Add label
 
 def getType(url):
@@ -149,7 +142,10 @@ def getType(url):
         Types = ['Movies', 'TV-Shows', 'YouTube','Other']
     
     selectType = selectDialog(Types, header ='Select category')
-       
+
+    if selectType == -1:
+        return -1
+        
     if selectType == 3:
         subType = ['(Music)', '(Movies)','(TV-Shows)']
         selectOption = selectDialog(subType, header ='Select Video type:')
@@ -157,9 +153,12 @@ def getType(url):
     else:
         subType = ['(en)', '(de)','(sp)','(tr)', 'Other']
         selectOption = selectDialog(subType, header ='Select language tag')
-        
+
+    if selectOption == -1:
+        return -1
+
     if selectType >= 0 and selectOption >= 0:
-        return Types[selectType]+ subType[selectOption]
+        return Types[selectType] + subType[selectOption]
 
 def selectDialog(list, header=ADDON_NAME, autoclose=0):
     if len(list) > 0:
@@ -172,39 +171,37 @@ def editDialog(nameToChange):
 #Before executing the code below we need to know the movie original title (string variable originaltitle) and the year (string variable year). They can be obtained from the infolabels of the listitem. The code filters the database for items with the same original title and the same year, year-1 and year+1 to avoid errors identifying the media.
 def markMovie(movID, pos, total, done):
     if done:
-        #int(100 * float(pos)/ float(total)) >= 95
         try:
             xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetMovieDetails", "params": {"movieid" : %s, "playcount" : 1 }, "id": 1 }' % movID)
+            xbmc.executebuiltin("XBMC.Container.Refresh")
         except:
             print("markMovie: Movie not in DB!?")
             pass  
     else:    
-        if xbmc.getCondVisibility('Library.HasContent(Movies)'):
+        if xbmc.getCondVisibility('Library.HasContent(Movies)') and pos > 0 and total > 0:
             try:
                 xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetMovieDetails", "params": {"movieid" : %s, "resume" : {"position":%s,"total":%s} }, "id": 1 }' % (movID, pos, total))
+                xbmc.executebuiltin("XBMC.Container.Refresh")
             except:
                 print("markMovie: Movie not in DB!?")
                 pass
 
-def markSeries(sShowTitle,sEpisode,sSeason):
-    if xbmc.getCondVisibility('Library.HasContent(TVShows)'):
+def markSeries(shoID, pos, total, done):
+    if done:
         try:
-            print("Check if tvshow episode exists in library when marking as watched")
-            cleaned_title= (re.sub('[^-a-zA-Z0-9_.()\\\/ ]+', '',  sShowTitle)).rstrip().lstrip()
-            meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["title", "plot", "votes", "rating", "writer", "firstaired", "playcount", "runtime", "director", "productioncode", "season", "episode", "originaltitle", "showtitle", "lastplayed", "fanart", "thumbnail", "file", "resume", "tvshowid", "dateadded", "uniqueid"]}, "id": 1}' % (sSeason, sEpisode))
-            meta = json.loads(meta)
-            meta = meta['result']['episodes']
-            try:
-                gotIt = [i for i in meta if (cleaned_title in i['showtitle'].rstrip() or i['showtitle'].rstrip() in cleaned_title)][0]
-            except:
-                print("markSeries: Original title not found")
-                pass
-            if gotIt:               
-                player = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
-            xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % str(gotIt['episodeid']))
+            xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % shoID)
+            xbmc.executebuiltin("XBMC.Container.Refresh")
         except:
-            print("markSeries: Show not in DB!?")
+            print("markMovie: Episode not in DB!?")
             pass
+    else:    
+        if xbmc.getCondVisibility('Library.HasContent(TVShows)') and pos > 0 and total > 0:
+            try:
+                xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "resume" : {"position":%s,"total":%s} }, "id": 1 }' % (shoID, pos, total))
+                xbmc.executebuiltin("XBMC.Container.Refresh")
+            except:
+                print("markSeries: Show not in DB!?")
+                pass
 # Functions not in usee yet:
 def handle_wait(time_to_wait, header, title):
     dlg = xbmcgui.DialogProgress()
@@ -256,9 +253,3 @@ def yesnoDialog(str1, str2='', header=ADDON_NAME, yes='', no=''):
 def browse(type, heading, shares, mask='', useThumbs=False, treatAsFolder=False, path='', enableMultiple=False):
     retval = xbmcgui.Dialog().browse(type, heading, shares, mask, useThumbs, treatAsFolder, path, enableMultiple)
     return retval
-
-def checkGuiA():
-    try:
-        return True
-    except:
-        pass

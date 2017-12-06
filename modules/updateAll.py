@@ -45,10 +45,8 @@ ADDON_SETTINGS = REAL_SETTINGS.getAddonInfo('profile')
 # PC Settings Info
 MediaList_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS, 'MediaList.xml'))
 Automatic_Update_Time = REAL_SETTINGS.getSetting('Automatic_Update_Time') 
-supportES = REAL_SETTINGS.getSetting('supportES') 
 represent = os.path.join(ADDON_PATH, 'icon.png')
 itime = 900000000000000  # in miliseconds  
-guiFix = False
 
 def readMediaList(purge=False):
     try:
@@ -60,44 +58,33 @@ def readMediaList(purge=False):
     except:
         pass
 
-def guIFix(bVal):
-    if supportES == "false":
-        return True
-    if not bVal:
-    # Sleep/wait for to avoid freeze
-        return guiTools.checkGuiA() 
-
-def strm_update():
-    guIFix(False)
-   
-    #xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (ADDON_NAME, "Updating!" , itime, represent))
+def strm_update(selectedItems=None):
     try:
-        #kodiDB.musicDatabase()
         if xbmcvfs.exists(MediaList_LOC):
-            thelist = readMediaList()
+            thelist = readMediaList() if selectedItems is None else selectedItems
             if len(thelist) > 0:
                 dialogeBG = xbmcgui.DialogProgressBG()
                 dialogeBG.create("OSMOSIS: " ,  'Total Update-Progress:')
 
                 listLen = len(thelist)
-                j = 100 / len(thelist)
-                for i in range(len(thelist)):                     
-                    cType , name, url = ((thelist[i]).strip().split('|', 2))
-                    # time.sleep(2) # delays for 2 seconds just to make sure Hodor can read the message 
-#                        pDialog.update(j, ADDON_NAME + " Update: " + name.decode('utf-8')) 
+                step = j = 100 / listLen
+                for entry in thelist:
+                    splits = entry.strip().split('|')
+                    cType, name, url = splits[0], splits[1], splits[2]
+
                     try:
-                        r_pluginname = re.search('plugin:\/\/([^\/]*)', url)
-                        if r_pluginname:
-                            module = moduleUtil.getModule(r_pluginname.group(1))
+                        plugin_id = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
+                        if plugin_id:
+                            module = moduleUtil.getModule(plugin_id.group(1))
                             if module and hasattr(module, 'update'):
                                 url = module.update(name, url, 'video', thelist)
-
-                        dialogeBG.update( j, "OSMOSIS total update process: " , "Current Item: " + name.replace('++RenamedTitle++','') + " Items left: " + str(listLen) )
-                        j = j + 100 / len(thelist)
-                        #xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (name, " Items left: " + str(listLen) , itime, represent))
+    
+                        dialogeBG.update(j, "OSMOSIS total update process: " , "Current Item: " + name.replace('++RenamedTitle++','') + " Items left: " + str(listLen))
+                        j += step
+    
                         create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
                         listLen -= 1
-                    except:  #
+                    except:
                         pass
                 dialogeBG.close()
                 xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (ADDON_NAME, "Next update in: " + Automatic_Update_Time + "h" , 5000, represent))
@@ -106,7 +93,7 @@ def strm_update():
     except ValueError:
         print ("No valid integer in line.")
     except:
-        guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". Se your Kodi.log!"))
+        guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1])+ (". See your Kodi.log!"))
         utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
         print ("Unexpected error:"), sys.exc_info()[1]
         pass

@@ -18,13 +18,15 @@ import os, sys
 import urllib
 import time
 import urlparse
-import SimpleDownloader as downloader 
+import SimpleDownloader as downloader
+import re 
 from modules import create, kodiDB
-from modules import dialoge
 from modules import fileSys
 from modules import guiTools
 from modules import urlUtils
 from modules import updateAll
+from modules import moduleUtil
+from modules import stringUtils
 
 import utils
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin, xbmcvfs
@@ -62,11 +64,45 @@ debug = addon.getSetting('debug')
 DIRS = []
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
 
+def getAndMarkResumePoint(props, isTVShow):
+    #search bookmarks for the ID and get the played time if exists
+    checkURL = str(sys.argv[0].replace(r'|', sys.argv[2] + r'|'))
+    urlsResumePoint = kodiDB.getPlayedURLResumePoint(checkURL)
+
+    if urlsResumePoint: 
+        conTime = utils.zeitspanne(int(urlsResumePoint[0]))               
+        resume = ["Jump to position : %s " % (str(conTime[5])), "Start from beginning!"]
+        if guiTools.selectDialog(resume, header = 'OSMOSIS: Would you like to continue?') == 0:
+            xbmc.Player().seekTime(int(urlsResumePoint[0]) - 5)
+
+    watched = 0
+    while xbmc.Player().isPlaying():
+        watched = xbmc.Player().getTime() * 100 / xbmc.Player().getTotalTime()
+        time.sleep(1)
+
+    time.sleep(1)
+    
+    if props:
+        ID = props[0]
+        fileID = props[1]
+        pos = 0
+        total = 0
+        urlsWatchedPoint = kodiDB.getPlayedURLResumePoint(checkURL)
+        if urlsWatchedPoint:
+            pos = urlsWatchedPoint[0]
+            total = urlsWatchedPoint[1]
+            done = False
+        elif urlsResumePoint and not urlsWatchedPoint:
+            kodiDB.delBookMark(urlsResumePoint[2], fileID)
+            done = True
+        elif not urlsResumePoint and not urlsWatchedPoint:
+            done = True if watched > 50 else False
+        else:
+            done = False
+    
+        guiTools.markMovie(ID, pos, total, done) if isTVShow == False else guiTools.markSeries(ID, pos, total, done)
+
 if __name__ == "__main__":
-    try:
-        xbmcplugin.setContent(int(sys.argv[1]), 'movies')
-    except:
-        pass
     try:
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_UNSORTED)
     except:
@@ -127,6 +163,11 @@ if __name__ == "__main__":
         movID = None
         pass
     try:
+        shoID = urllib.unquote_plus(params["showid"])
+    except:
+        shoID = None
+        pass    
+    try:
         showID = urllib.unquote_plus(params["showid"])
     except:
         showID = None
@@ -161,6 +202,10 @@ if __name__ == "__main__":
         regexs = params["regexs"]
     except:
         pass
+    try:
+        filetype = params.get("filetype", "directory")
+    except:
+        pass
     
     utils.addon_log("Mode: " + str(mode))
  
@@ -171,26 +216,26 @@ if __name__ == "__main__":
     if mode == None:
         utils.addon_log("getSources")
         guiTools.getSources()
-        try:
-            xbmcplugin.endOfDirectory(int(sys.argv[1]))
-        except:
-            pass
+
+        xbmcplugin.setContent(int(sys.argv[1]), 'movies')
+        xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
         if not fileSys.writeTutList("select:PluginType"):
             tutWin = ["Adding content to your library",
-                      "Welcome, this is your first time using OSMOSIS. Here, you can select the content type you want to add: ",
-                      "Video Plugins: Select to add Movies,TV-Shows, YouTube Videos ",
-                      "Music Plugins: Select to add Music"]             
-            dialoge.PopupWindow(tutWin)
+                      "Welcome, this is your first time using OSMOSIS. Here, you can select the content type you want to add:",
+                      "Video Plugins: Select to add Movies, TV-Shows, YouTube Videos",
+                      "Music Plugins: Select to add Music"]
+            xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
     elif mode == 1:   
         create.fillPlugins(url)
         if not fileSys.writeTutList("select:Addon"):
             tutWin = ["Adding content to your library",
-                      "Here, you can select the Add-on: ",
-                        "The selected Add-on should provide Video/Music content in the right structure ",
-                    "Take a look at ++ Naming video files/TV shows ++ http://kodi.wiki/view/naming_video_files/TV_shows" ]               
-            dialoge.PopupWindow(tutWin)
+                      "Here, you can select the Add-on:",
+                      "The selected Add-on should provide Video/Music content in the right structure.",
+                      "Take a look at ++ Naming video files/TV shows ++ http://kodi.wiki/view/naming_video_files/TV_shows."]
+            xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
         try:
+            xbmcplugin.setContent(int(sys.argv[1]), 'movies')
             xbmcplugin.endOfDirectory(int(sys.argv[1]))
         except:
             pass
@@ -203,7 +248,9 @@ if __name__ == "__main__":
     elif mode == 666:
         updateAll.strm_update() 
     elif mode == 4:
-        create.removeItemsFromMediaList('list') 
+        selectedItems = create.getMediaListDialog()
+        if selectedItems is not None:
+            updateAll.strm_update(selectedItems)
     elif mode == 5:
         create.removeItemsFromMediaList('list')
     elif mode == 10:
@@ -212,9 +259,9 @@ if __name__ == "__main__":
         #purl = url.split('|')[1]
         if mediaType:
             try:
-                #Play Movies:
-                if movID:       
-                    providers = kodiDB.getVideo(movID)
+                #Play Movies/TV-Shows:
+                if movID or showID:       
+                    providers = kodiDB.getVideo(movID) if movID else kodiDB.getVideo(showID, episode)
                     if len(providers) == 1:
                         url = providers[0][0]
                     else:
@@ -224,74 +271,57 @@ if __name__ == "__main__":
                         # Get/Set Provider
                         #url = urllib.unquote_plus(providers[guiTools.selectDialog(selectProvider, header = 'OSMOSIS: Select provider!')][0]).decode('utf-8')
                         url = providers[guiTools.selectDialog(selectProvider, header = 'OSMOSIS: Select provider!')][0].decode('utf-8') 
-                #Play Tv-Shows:
-                elif showID:
-                    providers = kodiDB.getVideo(showID, episode)
-                    if len(providers) == 1:
-                        url = providers[0][0]
-                    else:       
-                        selectProvider = []
-                        for i in providers:
-                            selectProvider.append(i[1])
-                        # Get/Set Provider
-                        #url = urllib.unquote_plus(providers[guiTools.selectDialog(selectProvider, header = 'OSMOSIS: Select provider!')][0]).decode('utf-8')
-                        url = providers[guiTools.selectDialog(selectProvider, header = 'OSMOSIS: Select provider!')][0].decode('utf-8') 
             except:
                 pass
-         
-        # Gest infos from selectet media
-        item = xbmcgui.ListItem(path=url)
-        sPatToItem = xbmc.getInfoLabel("ListItem.path")
-        sTitle = xbmc.getInfoLabel("ListItem.title")
-       
+
         try:
-            # Exec play process
-            xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
-            # Wait until the media is started in player
-            while meta.find("video") == -1:
-                meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
-                time.sleep(1)
+            # Get infos from selectet media
+            item = xbmcgui.ListItem(path=url)
             
-                   
-            if xbmc.getInfoLabel("VideoPlayer.TVShowTitle") != "":
-                guiTools.markSeries(xbmc.getInfoLabel("VideoPlayer.TVShowTitle"),xbmc.getInfoLabel("VideoPlayer.Episode"),xbmc.getInfoLabel("VideoPlayer.Season"))
-            else:
-                #search bookmarks for the ID and get the played time if exists
-                checkURL = str(sys.argv[0].replace(r'|', sys.argv[2] + r'|'))
-                urlsResumePoint = kodiDB.getPlayedURLResumePoint(checkURL)
-                
-                movProps =  kodiDB.getKodiMovieID(xbmc.getInfoLabel("VideoPlayer.Title"), sTitle)               
-                movID = movProps[0][0]
-                movFileID = movProps[0][1]
-                meta = "video"
-                   
-                if urlsResumePoint: 
-                    conTime = utils.zeitspanne(int(urlsResumePoint[0][0]))               
-                    resume = ["Jump to position : %s " % (str(conTime[5])), "Start form beginning!"] 
-                    if guiTools.selectDialog(resume, header = 'OSMOSIS: Would you like to continue?') == 0:
-                        xbmc.Player().seekTime(int(urlsResumePoint[0][0]))
-                
-                while meta.find("video") != -1:
+            props = None
+            infoLabels = {}
+            if mediaType:
+                if mediaType == 'show':
+                    sTVShowTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
+                    sTVShowTitle = stringUtils.unicodetoascii(sTVShowTitle)
+                    iSeason = int(episode[1:episode.index('e')])
+                    iEpisode = int(episode[episode.index('e') + 1:])
+                    props = kodiDB.getKodiEpisodeID(sTVShowTitle, iSeason, iEpisode)
+        
+                    infoLabels['tvShowTitle'] = sTVShowTitle
+                    infoLabels['season'] = iSeason
+                    infoLabels['episode'] = iEpisode
+                    infoLabels['mediatype'] = 'episode'
+                    if props:
+                        infoLabels['title'] = props[2]
+                        infoLabels['aired'] = props[3]
+                else:
+                    sTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
+                    props = kodiDB.getKodiMovieID(sTitle)
+                    infoLabels['title'] = sTitle
+                    infoLabels['mediatype'] = 'movie'
+                    if props:
+                        infoLabels['premiered'] = props[2]
+                        infoLabels['genre'] = props[3]
+    
+                if len(infoLabels) > 0:
+                    item.setInfo('video', infoLabels)
+        
+                # Exec play process
+                xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
+                # Wait until the media is started in player
+                counter = 0
+                while meta.find("video") == -1:
                     meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
                     time.sleep(1)
-                
-                time.sleep(1)   
-                urlsWatchedPoint = kodiDB.getPlayedURLResumePoint(checkURL)
-                if urlsWatchedPoint:
-                    pos = urlsWatchedPoint[0][0]
-                    total = urlsWatchedPoint[0][1]
-                    done = False
-                elif urlsResumePoint and not urlsWatchedPoint:
-                    pos = urlsResumePoint[0][1]
-                    total = urlsResumePoint[0][1]
-                    kodiDB.delBookMark(urlsResumePoint[0][2], movFileID)
-                    done = True
-                else:
-                    done = False
-              
-                if movID:
-                    guiTools.markMovie(movID, pos, total, done)
-                        
+                    counter += 1
+                    if counter >= 30:
+                        raise            
+        
+                getAndMarkResumePoint(props, mediaType == 'show')
+            else:
+                # Exec play process
+                xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
         except:
             pass 
     elif mode == 100:
@@ -303,11 +333,11 @@ if __name__ == "__main__":
     elif mode == 101:
         create.fillPluginItems(url)
         if not fileSys.writeTutList("select:AddonNavi"):
-            tutWin = ["Adding content to your library ",
-                       "Search for your Movie, TV-Show or Music. ", 
-                       "Mark/select content, do not play a Movie or enter a TV-Show.  ",   
-                       "Open context menu on the selected and select *create strms*."]                            
-            dialoge.PopupWindow(tutWin)
+            tutWin = ["Adding content to your library",
+                      "Search for your Movie, TV-Show or Music.",
+                      "Mark/select content, do not play a Movie or enter a TV-Show.",
+                      "Open context menu on the selected and select *create strms*."]
+            xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
 
         try:
             xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -321,25 +351,40 @@ if __name__ == "__main__":
             selectAction = ['No, continue with original Title!', 'Rename Title!']
             if not fileSys.writeTutList("select:Rename"):
                 tutWin = ["Adding content to your library",
-                    "You can rename your Movie, TV-Show or Music title. ", 
-                    "To make your scraper recognize the content, some times it is necessary to rename the title ",
-                    "Be careful, wrong title can also cause that your scraper can't recognize your content."]                
-                dialoge.PopupWindow(tutWin)
-            if guiTools.selectDialog(selectAction, header = 'Title for Folder and MediaList entry') == 1 or name == None or name == "":
-                name = guiTools.editDialog(name).lstrip().rstrip() + "++RenamedTitle++"
+                          "You can rename your Movie, TV-Show or Music title.",
+                          "To make your scraper recognize the content, some times it is necessary to rename the title.",
+                          "Be careful, wrong title can also cause that your scraper can't recognize your content."]
+                xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
+            choice = guiTools.selectDialog(selectAction, header = 'Title for Folder and MediaList entry')
+            if choice != -1:
+                if choice == 1 or name == None or name == "":
+                    name = guiTools.editDialog(name).strip() + "++RenamedTitle++"
             
-            if not fileSys.writeTutList("select:ContentTypeLang"):
-                tutWin = ["Adding content to your library",
-                          "Now select your content type. ", 
-                          "Select language or YouTube type  ",
-                          "Wait for done message."]                
-                dialoge.PopupWindow(tutWin)   
-            cType = guiTools.getType(url)
+                if not fileSys.writeTutList("select:ContentTypeLang"):
+                    tutWin = ["Adding content to your library",
+                              "Now select your content type.",
+                              "Select language or YouTube type.",
+                              "Wait for done message."]
+                    xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
 
-            fileSys.writeMediaList(url, name, cType)
-            dialog.notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False) 
-            create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
-            dialog.notification('Writing items...', "Done", xbmcgui.NOTIFICATION_INFO, 5000, False)
+                cType = guiTools.getType(url)
+                if filetype == 'file':             
+                    url += '&playMode=play' 
+                if cType != -1:
+                    fileSys.writeMediaList(url, name, cType)
+                    dialog.notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False)
+
+                    try:
+                        plugin_id = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
+                        if plugin_id:                            
+                            module = moduleUtil.getModule(plugin_id.group(1))
+                            if module and hasattr(module, 'create'):
+                                url = module.create(name, url, 'video')
+                    except:
+                        pass
+                    
+                    create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
+                    dialog.notification('Writing items...', "Done", xbmcgui.NOTIFICATION_INFO, 5000, False)
         except IOError as (errno, strerror):
             print ("I/O error({0}): {1}").format(errno, strerror)
         except ValueError:

@@ -1,52 +1,73 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <strings>
-	<string id="31000">Medien</string>
 	<string id="32000">Allgemien</string>
-	<string id="30002">Konfigurationsmanager öffnen</string> 
-	<string id="31004">NFO's anlegen (In Kürze):</string>
-	<string id="34012">Unterstützung für Exodus und xStream: Wenn du diese Funktion aktivierst, erlaubst du das OSMOSIS, Programmcode von Exodus und xStream ändern darf:</string>
-	<string id="32003">Medien Speicherort:</string>
-	<string id="30310">Stream-Limit pro Konfiguration:</string>
-	<string id="32005">Veraltete Streams erneuern(empfohlen):</string>
-	<string id="32008">Lösche veraltete Streams:</string>
-	<string id="30305">Youtube/RSS Miniaturansichten (In Kürze):</string>
-	<string id="31001">Anzahl der Seiten aus Kategorie (Serien) </string>
-	<string id="31002">Anzahl der Seiten aus Kategorie (Filme)</string>
-	<string id="32100">Service:</string>
-	<string id="33001">Aktualisierung bei Start</string>
-	<string id="33002">Automatische Aktualisierung:</string>
-	<string id="33003">Update alle (Stunde/n):</string>
-	<string id="33004">Update zur definierten Uhrzeit(0:00 zum deaktivieren): </string>
-	<string id="34009">Datenbank scannen wenn fertig:</string>
-	<string id="34010">Datenbank bereinigen wenn fertig:</string>
-	<string id="34011">Medien Speicherort immer bereinigen(löscht alle Dateien im Ordner):</string>
-	<string id="32006">Interne Stream Referenz nutzen:</string>
+	<string id="32003">Medien Speicherort</string>
+	<string id="32006">Interne Stream Referenz nutzen</string>
+	<string id="32008">Lösche veraltete Streams</string>
+	<string id="32005">Veraltete Streams erneuern (empfohlen)</string>
+	<string id="32009">Datenbank scannen, wenn fertig</string>
+	<string id="32010">Datenbank bereinigen, wenn fertig</string>
+	<string id="32011">Medien Speicherort immer bereinigen (löscht alle Dateien im Ordner)</string>
+	<!-- 32012 -->
+	<string id="32013">Keine Streams hinzufügen, die in "[OV]" vorhanden sind (z. B. AMAZON VOD)</string>
+	<string id="32014">Kodi verwendet eine MYSQL-Datenbank</string>
+	<string id="32015">Kodi's SQLite-DBs automatisch ermitteln</string>
+	
+	<string id="31000">Medien</string>
+	<string id="31004">NFO's anlegen (In Kürze)</string>
+	<string id="31001">Anzahl der zu durchsuchenden Ebenen (Serien)</string>
+	<string id="31002">Anzahl der zu durchsuchenden Ebenen (Filme)</string>
+	<string id="31003">Pro MediaList-Eintrag die Streams in einem Oberordner speichern (Filme)</string>
+	<string id="31005">Jede Stream-Datei in eigenem Ordner speichern (Filme)</string>
+	
 	<string id="33000">Update Konfiguration</string>
-	<string id="35000">Musikdatenbank</string>
-	<string id="35001">Musik-DB Benutzername"</string>
-    <string id="35002">Musik-DB Dateiname</string>
-    <string id="35003">Musik-DB Passwort</string>
-    <string id="35004">Musik-DB Speicherort</string>
-    <string id="35005">Musik-DB IP-Adresse</string>
-    <string id="38000">Kodi Filmdatenbank</string>
-	<string id="38001">Film-DB Benutzername"</string>
-    <string id="38002">Film-DB Dateiname</string>
-    <string id="38003">Film-DB Passwort</string>
-    <string id="38004">Film-DB Speicherort</string>
-    <string id="38005">Film-DB IP-Adresse</string>
-    <string id="36000">Filmdatenbank</string>
-	<string id="36001">Film-DB Benutzername"</string>
-    <string id="36002">Film-DB Dateiname</string>
-    <string id="36003">Film-DB Passwort</string>
-    <string id="36004">Film-DB Speicherort</string>
-    <string id="36005">Film-DB IP-Adresse</string>
-    <string id="37000">Seriendatenbank</string>
-	<string id="37001">Serien-DB Benutzername"</string>
-    <string id="37002">Serien-DB Dateiname</string>
-    <string id="37003">Serien-DB Passwort</string>
-    <string id="37004">Serien-DB Speicherort</string>
-    <string id="37005">Serien-DB IP-Adresse</string>
+	<string id="33001">Aktualisierung bei Start</string>
+	<string id="33002">Automatische Aktualisierung</string>
+	<string id="33003">Update alle (Stunde/n)</string>
+	<string id="33004">Update zur definierten Uhrzeit (0:00 zum Deaktivieren)</string>
+	
+	<string id="38000">Kodi Filmdatenbank</string>
+	<string id="38001">Film-DB Benutzername (MYSQL)</string>
+    <string id="38002">Film-DB Passwort (MYSQL)</string>
+    <string id="38003">Film-DB Datenbank (MYSQL)</string>
+    <string id="38004">Film-DB Speicherort (SQLITE3)</string>
+    <string id="38005">Film-DB IP-Adresse (MYSQL)</string>
+	<string id="38006">Film-DB Port (MYSQL)</string>
+	
+	<string id="35000">Kodi Musikdatenbank</string>
+	<string id="35001">Musik-DB Benutzername (MYSQL)</string>
+    <string id="35002">Musik-DB Passwort (MYSQL)</string>
+    <string id="35003">Musik-DB Datenbank (MYSQL)</string>
+    <string id="35004">Musik-DB Speicherort (SQLITE3)</string>
+    <string id="35005">Musik-DB IP-Adresse (MYSQL)</string>
+	<string id="35006">Musik-DB Port (MYSQL)</string>
+    
+    <string id="37000">Osmosis Seriendatenbank</string>
+	<string id="37001">Serien-DB Benutzername (MYSQL)</string>
+    <string id="37002">Serien-DB Passwort (MYSQL)</string>
+    <string id="37003">Serien-DB Datenbank (MYSQL)</string>
+    <string id="37004">Serien-DB Speicherort (SQLITE3)</string>
+    <string id="37005">Serien-DB IP-Adresse (MYSQL)</string>
+	<string id="37006">Serien-DB Port (MYSQL)</string>
+	
+	<string id="36000">Osmosis Filmdatenbank</string>
+	<string id="36001">Film-DB Benutzername (MYSQL)</string>
+    <string id="36002">Film-DB Passwort (MYSQL)</string>
+    <string id="36003">Film-DB Datenbank (MYSQL)</string>
+    <string id="36004">Film-DB Speicherort (SQLITE3)</string>
+    <string id="36005">Film-DB IP-Adresse (MYSQL)</string>
+	<string id="36006">Film-DB Port (MYSQL)</string>
+	
+	<string id="34000">Osmosis Musikdatenbank</string>
+	<string id="34001">Musik-DB Benutzername (MYSQL)</string>
+    <string id="34002">Musik-DB Passwort (MYSQL)</string>
+    <string id="34003">Musik-DB Datenbank (MYSQL)</string>
+    <string id="34004">Musik-DB Speicherort (SQLITE3)</string>
+    <string id="34005">Musik-DB IP-Adresse (MYSQL)</string>
+	<string id="34006">Musik-DB Port (MYSQL)</string>
+    
+	<string id="30310">Stream-Limit pro Konfiguration</string>	
+	<string id="30305">Youtube/RSS Miniaturansichten (In Kürze)</string>
+	<string id="32100">Service</string>		
+	<string id="30002">Konfigurationsmanager öffnen</string> 
 </strings>
-
-
-
