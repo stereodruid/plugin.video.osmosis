@@ -543,7 +543,7 @@ def getVideo(ID, seasonEpisode=None):
                 
         if seasonEpisode is None:
             query = "SELECT url, provider FROM stream_ref WHERE mov_id = {};"
-            args = (ID)
+            args = (ID,)
         else:
             query = "SELECT url, provider FROM stream_ref WHERE show_id = {} AND seasonEpisode LIKE '{}';"
             args = (ID, seasonEpisode)
