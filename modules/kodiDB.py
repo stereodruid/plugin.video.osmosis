@@ -457,7 +457,8 @@ def movieExists(title, path):
         dbMovie = cursor.fetchone()
 
         if dbMovie is None:
-            path = fileSys.completePath(path) if DATABASE_MYSQL == "false" else fileSys.completePath(path).replace('\\', '\\\\') 
+            path = fileSys.completePath(path) if DATABASE_MYSQL == "false" else fileSys.completePath(path).replace('\\', '\\\\')
+            path = stringUtils.invCommas(path)
             cursor.execute("INSERT INTO movies (title, filePath) VALUES ('{}', '{}');".format(title, path))
             con.commit()
             dbMovieID = cursor.lastrowid
@@ -478,7 +479,7 @@ def movieStreamExists(movieID, provider, url):
 
         cursor.execute("SELECT mov_id, url FROM stream_ref WHERE mov_id = {} AND provider LIKE '{}';".format(movieID, provider))
         dbMovie = cursor.fetchone()
-        
+
         if dbMovie is None:
             cursor.execute("INSERT INTO stream_ref (mov_id, provider, url) VALUES ({}, '{}', '{}');".format(movieID, provider, url))
             con.commit()
@@ -501,7 +502,8 @@ def showExists(title, path):
         dbShow = cursor.fetchone()
 
         if dbShow is None:
-            path = fileSys.completePath(path) if DATABASE_MYSQL == "false" else fileSys.completePath(path).replace('\\', '\\\\') 
+            path = fileSys.completePath(path) if DATABASE_MYSQL == "false" else fileSys.completePath(path).replace('\\', '\\\\')
+            path = stringUtils.invCommas(path)
             cursor.execute("INSERT INTO shows (showTitle, filePath) VALUES ('{}', '{}');".format(title, path))
             con.commit()
             dbShowID = cursor.lastrowid
