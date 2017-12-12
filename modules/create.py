@@ -329,7 +329,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                 except:
                     pass             
         else:
-            albumList.append([os.path.join(strm_type, stringUtils.getStrmname(strm_name) , label.strip()), str(stringUtils.cleanByDictReplacements(label.strip())), link])
+            albumList.append([os.path.join(strm_type, stringUtils.getStrmname(strm_name) , label), stringUtils.cleanByDictReplacements(label), link])
             pagesDone = int(PAGINGalbums)
 
     try:
@@ -487,14 +487,12 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
         episode = episode_item.get('episode', -1)
         season = episode_item.get('season', -1)
         strSeasonEpisode = 's' + str(season) + 'e' + str(episode)
-        showtitle = stringUtils.removeHTMLTAGS(episode_item.get('showtitle')) if episode_item.get('showtitle', None) is not None else None
-        strm_name = stringUtils.cleanByDictReplacements(strm_name)
+        showtitle = episode_item.get('showtitle', None)
         provider = getProvider(file)
-    
-        if strm_name.find("++RenamedTitle++") > -1 or showtitle == '':
-            showtitle = stringUtils.getStrmname(strm_name)
+
         if showtitle is not None and showtitle != "" and strm_type != "":
-            episode = {'path': strm_type, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': stringUtils.cleanByDictReplacements(showtitle), 'provider': provider}                   
+            path = os.path.join(strm_type, stringUtils.cleanStrmFilesys(showtitle))
+            episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': showtitle, 'provider': provider}                   
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)
     except ValueError:
@@ -508,7 +506,7 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
     dbEpisode = kodiDB.writeShow(episode)
     
     if dbEpisode is not None:
-        fileSys.writeSTRM(os.path.join(stringUtils.cleanStrms(dbEpisode.get('path')), stringUtils.cleanStrms(dbEpisode.get('tvShowTitle'))), dbEpisode.get('strSeasonEpisode'), "plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=show&episode=" + dbEpisode.get('strSeasonEpisode') + "&showid=" + str(dbEpisode.get('showID')) + "|" + dbEpisode.get('tvShowTitle'))
+        fileSys.writeSTRM(dbEpisode.get('path'), dbEpisode.get('strSeasonEpisode'), "plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=show&episode=" + dbEpisode.get('strSeasonEpisode') + "&showid=" + str(dbEpisode.get('showID')) + "|" + dbEpisode.get('tvShowTitle'))
     return pagesDone
     
 def getData(url, fanart):

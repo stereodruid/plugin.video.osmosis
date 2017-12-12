@@ -353,7 +353,7 @@ def delNotInMediaList(delList):
                 path = completePath(path) + stringUtils.cleanByDictReplacements(splits[3])
 
             itemPath = stringUtils.getStrmname(splits[1])
-            path = completePath(completePath(path) + stringUtils.cleanByDictReplacements(itemPath))
+            path = completePath(completePath(path) + stringUtils.cleanStrmFilesys(itemPath))
             utils.addon_log("remove: %s" % path)
             shutil.rmtree(path, ignore_errors=True)
 
