@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.osmosis" name="OSMOSIS" version="1.2.7"
-	provider-name="Stereodruid">
+<addon id="plugin.video.osmosis" name="OSMOSIS" version="1.3.1"
+	provider-name="Stereodruid, Maven85, gisom112">
 	<requires>
 		<import addon="xbmc.python" version="2.1.0" />
 		<import addon="script.module.t0mm0.common" version="2.0.0" />
@@ -16,7 +16,6 @@
 		<import addon="script.module.simplejson" />
 		<import addon="script.common.plugin.cache" version="2.5.2" />
 		<import addon="script.module.metahandler" version="2.9.0" />
-		<import addon="script.module.pyxbmct" version="1.1" />
 		<import addon="service.watchdog" version="0.9.7" />
 <!-- 		<import addon="script.module.pydevd" version="4.4.0"/> -->
 	</requires>
@@ -33,8 +32,7 @@
 		</description>
 		<disclaimer lang="en"></disclaimer>
 		<summary lang="de">
-			Erstellt Strm-Dateien die mit einem Scraper zur Datenbank hinzugefügt werden
-			können.
+			Erstellt Strm-Dateien die mit einem Scraper zur Datenbank hinzugefügt werden können.
 		</summary>
 		<description lang="de">
 			Erstellt Strm-Dateien die von Kodi-Plugins bereitgestellt werden wie zB Youtube, die mit einem Scraper zur
