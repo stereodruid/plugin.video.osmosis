@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="plugin.video.osmosis" name="OSMOSIS" version="1.3.1"
-	provider-name="Stereodruid">
+	provider-name="Stereodruid, Maven85, gisom112">
 	<requires>
 		<import addon="xbmc.python" version="2.1.0" />
 		<import addon="script.module.t0mm0.common" version="2.0.0" />
