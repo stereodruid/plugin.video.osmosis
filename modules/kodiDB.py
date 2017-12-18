@@ -352,15 +352,16 @@ def valDB(database):
 def writeMovie(movieList):
     dbMovieList = []
 
-    db = MODBPATH if DATABASE_MYSQL == "false" else MODBPATH_MYSQL
-    table = MODBPATH if DATABASE_MYSQL == "false" else 'Movies'
+    if DATABASE_MYSQL == "false":
+        if not xbmcvfs.exists(MODBPATH):
+            createMovDB()
+        elif not valDB(MODBPATH):
+            xbmcvfs.delete(MODBPATH)
+            createMovDB()
+    else:
+        if not valDB('Movies'):
+            createMovDB()
 
-    if not xbmcvfs.exists(db):
-        createMovDB()
-    elif not valDB(table):
-        xbmcvfs.delete(db)
-        createMovDB() 
-        
     for entry in movieList:
         try:
             movID = movieExists(entry.get('title'), entry.get('path'))
@@ -381,19 +382,17 @@ def writeMovie(movieList):
 
 def writeShow(episode):
     dbEpisode = None
+
     if DATABASE_MYSQL == "false":
         if not xbmcvfs.exists(SHDBPATH):
             createShowDB()
         elif not valDB(SHDBPATH):
             xbmcvfs.delete(SHDBPATH)
-            createShowDB()       
+            createShowDB()
     else:
-        if not xbmcvfs.exists(SHDBPATH_MYSQL):
+        if not valDB('TVShows'):
             createShowDB()
-        elif not valDB('TVShows'):
-            xbmcvfs.delete(SHDBPATH_MYSQL)
-            createShowDB()
-        
+
     if episode is not None:
         try:
             showID = showExists(episode.get('tvShowTitle'), episode.get('path'))
