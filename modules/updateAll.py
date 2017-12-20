@@ -32,7 +32,7 @@ ADDON_PATH = addon.getAddonInfo('path')
 ADDON_SETTINGS = addon.getAddonInfo('profile')
 # PC Settings Info
 MediaList_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS, 'MediaList.xml'))
-Automatic_Update_Time = REAL_SETTINGS.getSetting('Automatic_Update_Time')
+Automatic_Update_Time = addon.getSetting('Automatic_Update_Time')
 represent = os.path.join(ADDON_PATH, 'icon.png')
 
 
