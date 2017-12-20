@@ -81,7 +81,7 @@ else: FAV = []
 DIRS = []
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
 
-def fillPlugins(cType='video'):    
+def fillPlugins(cType='video'):
     json_query = ('{"jsonrpc":"2.0","method":"Addons.GetAddons","params":{"type":"xbmc.addon.%s","properties":["name","path","thumbnail","description","fanart","summary", "extrainfo"]}, "id": 1 }' % cType)
     json_details = jsonUtils.sendJSON(json_query)
     for addon in sorted(json_details["addons"], key=lambda json: json['name'].lower()):
@@ -185,8 +185,6 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             try:
                 album = detail['album'].strip()
                 artist = stringUtils.cleanByDictReplacements(", ".join(artist.strip() for artist in detailInfo['artist']) if isinstance(detailInfo['artist'], (list, tuple)) else detailInfo['artist'].strip())
-                title = detail['title'].strip()
-                type = detail['type'].strip()
                 filename = str(strm_name + ' - ' + label).strip()
             except:
                 filename = str(strm_name + ' - ' + label).strip()
@@ -197,8 +195,6 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             try:
                 album = detail['album'].strip()
                 artist = stringUtils.cleanByDictReplacements(", ".join(artist.strip() for artist in detailInfo['artist']) if isinstance(detailInfo['artist'], (list, tuple)) else detailInfo['artist'].strip())
-                title = stringUtils.cleanByDictReplacements(detail['title'].strip())
-                type = stringUtils.cleanByDictReplacements(detail['type'].strip())
                 filename = stringUtils.cleanByDictReplacements(label.strip())
             except:
                 filename = stringUtils.cleanByDictReplacements(label.strip())
@@ -264,7 +260,6 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                 label = stringUtils.cleanLabels(detailInfo['label'].strip())
                 thumb = art.get('thumb','')
                 fanart = art.get('fanart','')
-                description = detailInfo.get('description', '')
                 track = detailInfo.get('track', 0) if detailInfo.get('track', 0) > 0 else index + 1
                 duration = detailInfo.get('duration', 0)
                 if duration == 0:
@@ -294,11 +289,8 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                             except IndexError:
                                 if artistList[0] != artistList[1]:
                                     artist = 'Various Artists'
-                        title = stringUtils.cleanByDictReplacements(detailInfo['title'].strip())
-                        type = stringUtils.cleanByDictReplacements(detailInfo['type'].strip())
-                        filename = stringUtils.cleanByDictReplacements(label.strip())
+
                     except:
-                        filename = stringUtils.cleanByDictReplacements(label.strip())
                         pass
 
                     thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing File: ",  " Title: " + label)
@@ -321,7 +313,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
             contentList = []
             if pagesDone < int(PAGINGalbums) and len(dirList) > 0:
                 contentList = [item for sublist in dirList for item in sublist]
-                dirList = []            
+                dirList = []
 
             if False:     
                 try:
@@ -335,7 +327,6 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
     try:
         # Write strms for all values in albumList
         thelist = fileSys.readMediaList(purge=False)
-        items = []
         for entry in thelist:
             splits = entry.strip().split('|')
             splitsstrm = splits[0]
@@ -365,7 +356,6 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
 
 def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
     movieList = []
-    listName = strm_name
     pagesDone = 0
     file = ''
     filetype = ''
@@ -449,8 +439,8 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
                 if filetype is not None:
                     if filetype == 'directory':
                         dirList.append(jsonUtils.requestList(file, 'video').get('files', []))
-                        continue    
-                    elif season > -1 and episode > -1 and filetype == 'file': 
+                        continue
+                    elif season > -1 and episode > -1 and filetype == 'file':
                         episodesList.append(detailInfo)
                 
             step = float(100.0 / len(episodesList) if len(episodesList) > 0 else 1)
@@ -492,7 +482,7 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
 
         if showtitle is not None and showtitle != "" and strm_type != "":
             path = os.path.join(strm_type, stringUtils.cleanStrmFilesys(showtitle))
-            episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': showtitle, 'provider': provider}                   
+            episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': showtitle, 'provider': provider}
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)
     except ValueError:

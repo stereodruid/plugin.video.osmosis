@@ -19,7 +19,7 @@ import urllib
 import time
 import urlparse
 import SimpleDownloader as downloader
-import re 
+import re
 from modules import create, kodiDB
 from modules import fileSys
 from modules import guiTools
@@ -70,7 +70,7 @@ def getAndMarkResumePoint(props, isTVShow):
     urlsResumePoint = kodiDB.getPlayedURLResumePoint(checkURL)
 
     if urlsResumePoint: 
-        conTime = utils.zeitspanne(int(urlsResumePoint[0]))               
+        conTime = utils.zeitspanne(int(urlsResumePoint[0]))
         resume = ["Jump to position : %s " % (str(conTime[5])), "Start from beginning!"]
         if guiTools.selectDialog(resume, header = 'OSMOSIS: Would you like to continue?') == 0:
             xbmc.Player().seekTime(int(urlsResumePoint[0]) - 5)
@@ -99,7 +99,7 @@ def getAndMarkResumePoint(props, isTVShow):
             done = True if watched > 50 else False
         else:
             done = False
-    
+
         guiTools.markMovie(ID, pos, total, done) if isTVShow == False else guiTools.markSeries(ID, pos, total, done)
 
 if __name__ == "__main__":
@@ -260,7 +260,7 @@ if __name__ == "__main__":
         if mediaType:
             try:
                 #Play Movies/TV-Shows:
-                if movID or showID:       
+                if movID or showID:
                     providers = kodiDB.getVideo(movID) if movID else kodiDB.getVideo(showID, episode)
                     if len(providers) == 1:
                         url = providers[0][0]
@@ -269,7 +269,6 @@ if __name__ == "__main__":
                         for i in providers:
                             selectProvider.append(i[1])
                         # Get/Set Provider
-                        #url = urllib.unquote_plus(providers[guiTools.selectDialog(selectProvider, header = 'OSMOSIS: Select provider!')][0]).decode('utf-8')
                         url = providers[guiTools.selectDialog(selectProvider, header = 'OSMOSIS: Select provider!')][0].decode('utf-8') 
             except:
                 pass
@@ -322,7 +321,7 @@ if __name__ == "__main__":
             else:
                 # Exec play process
                 xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
-        except:
+        except Exception:
             pass 
     elif mode == 100:
         create.fillPlugins(url)
@@ -368,15 +367,15 @@ if __name__ == "__main__":
                     xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
 
                 cType = guiTools.getType(url)
-                if filetype == 'file':             
-                    url += '&playMode=play' 
+                if filetype == 'file':
+                    url += '&playMode=play'
                 if cType != -1:
                     fileSys.writeMediaList(url, name, cType)
                     dialog.notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False)
 
                     try:
                         plugin_id = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
-                        if plugin_id:                            
+                        if plugin_id:
                             module = moduleUtil.getModule(plugin_id.group(1))
                             if module and hasattr(module, 'create'):
                                 url = module.create(name, url, 'video')

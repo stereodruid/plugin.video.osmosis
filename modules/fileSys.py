@@ -21,8 +21,6 @@ import sys
 import re
 import shutil
 
-from BeautifulSoup import BeautifulStoneSoup, BeautifulSoup, BeautifulSOAP
-import SimpleDownloader as downloader
 import utils
 import codecs
 from modules import stringUtils
@@ -31,42 +29,17 @@ import errno
 import xbmc
 import xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
 
-
 try:
     import json
 except:
     import simplejson as json
 
-
 addon_id = 'plugin.video.osmosis'
 addon = xbmcaddon.Addon(addon_id)
-addon_version = addon.getAddonInfo('version')
-ADDON_NAME = addon.getAddonInfo('name')
 REAL_SETTINGS = xbmcaddon.Addon(id=addon_id)
 ADDON_SETTINGS = REAL_SETTINGS.getAddonInfo('profile')
-ADDON_PATH = REAL_SETTINGS.getAddonInfo('path')
 MediaList_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS, 'MediaList.xml'))
-STRM_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS, 'STRM_LOC'))
 profile = xbmc.translatePath(addon.getAddonInfo('profile').decode('utf-8'))
-home = xbmc.translatePath(addon.getAddonInfo('path').decode('utf-8'))
-favorites = os.path.join(profile, 'favorites')
-history = os.path.join(profile, 'history')
-dialog = xbmcgui.Dialog()
-icon = os.path.join(home, 'icon.png')
-iconRemove = os.path.join(home, 'iconRemove.png')
-FANART = os.path.join(home, 'fanart.jpg')
-source_file = os.path.join(home, 'source_file')
-functions_dir = profile
-downloader = downloader.SimpleDownloader()
-debug = addon.getSetting('debug')
-
-if os.path.exists(favorites) == True:
-    FAV = open(favorites).read()
-else: FAV = []
-if os.path.exists(favorites) == True:
-    FAV = open(favorites).read()
-else: FAV = []
-
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
 addonList = {}
 
@@ -210,7 +183,7 @@ def writeMediaList(url, name, cType='Other', cleanName=True):
                 splitPlugin = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), splits[2])
                 mediaPlugin = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
                 if mediaPlugin and splitPlugin and mediaPlugin.group(1) == splitPlugin.group(1):
-                    xbmcgui.Dialog().notification(str(i), "Adding to MediaList",  os.path.join(ADDON_PATH, 'representerIcon.png'), 5000)
+                    xbmcgui.Dialog().notification(str(i), "Adding to MediaList",  os.path.join(ADDON_PATH, 'resources/representerIcon.png'), 5000)
                     thelist = stringUtils.replaceStringElem(thelist, i, theentry)
                     existInList = True     
     if existInList != True:
@@ -246,7 +219,6 @@ def rewriteMediaList(url, name, albumartist, cType='Other', cleanName=True):
                 splitPlugin = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), splits[2])
                 mediaPlugin = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
                 if mediaPlugin and splitPlugin and mediaPlugin.group(1) == splitPlugin.group(1):
-                    #xbmcgui.Dialog().notification(str(i), "Adding to MediaList",  os.path.join(ADDON_PATH, 'representerIcon.png'), 5000)
                     thelist = stringUtils.replaceStringElem(thelist, i, theentry)
                     existInList = True     
     if existInList != True:
