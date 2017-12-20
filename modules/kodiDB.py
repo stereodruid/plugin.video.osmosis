@@ -364,10 +364,11 @@ def writeMovie(movieList):
 
     for entry in movieList:
         try:
-            movID = movieExists(entry.get('title'), entry.get('path'))
+            kmovName = kmovieExists(entry.get('title'), entry.get('imdbnumber'))
+            movID = movieExists(kmovName, entry.get('path'))
             if movID is not None:
                 movieStreamExists(movID, entry.get('provider'), entry.get('url'))
-                dbMovieList.append({'path': entry.get('path'), 'title': entry.get('title'), 'movieID': movID, 'provider': entry.get('provider')})
+                dbMovieList.append({'path': entry.get('path'), 'title': kmovName, 'movieID': movID, 'provider': entry.get('provider')})
         except IOError as (errno, strerror):
             print ("I/O error({0}): {1}").format(errno, strerror)
         except ValueError:
@@ -444,6 +445,27 @@ def createShowDB():
     finally:
         cursor.close()
         con.close()
+    
+def kmovieExists(title, imdbnumber):
+    dbMovieName = None
+    try:
+        con, cursor = openDB(KMODBPATH, 'KMovies')
+
+        #title = stringUtils.invCommas(title)
+        cursor.execute("SELECT strFileName FROM movie_view WHERE uniqueid_value LIKE '{}';".format(imdbnumber))
+
+        dbMovieName = cursor.fetchone()
+
+        if dbMovieName is None:
+            dbMovieName = title
+        else:
+            dbMovieName = dbMovieName[0]
+        dbMovieName = stringUtils.cleanTitle(dbMovieName)
+    finally:
+        cursor.close()
+        con.close()
+
+    return dbMovieName
     
 def movieExists(title, path):
     dbMovieID = None
