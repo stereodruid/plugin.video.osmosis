@@ -348,6 +348,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
                 file = detailInfo.get('file').replace("\\\\", "\\") if detailInfo.get('file', None) is not None else None
                 filetype = detailInfo.get('filetype', None)
                 label = detailInfo.get('label').strip() if detailInfo.get('label', None) is not None else None
+                imdbnumber = detailInfo.get('imdbnumber').strip() if detailInfo.get('imdbnumber', None) is not None else None
 
                 try:
                     if label and strm_name:
@@ -363,7 +364,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
                         if filetype is not None and filetype == 'file' and get_title_with_OV == True:
                             m_path = stringUtils.getMovieStrmPath(strm_type, strm_name, label)
                             m_title = stringUtils.cleanByDictReplacements(stringUtils.getStrmname(label))
-                            movieList.append({'path': m_path, 'title':  m_title, 'url': file, 'provider': provider})
+                            movieList.append({'path': m_path, 'title':  m_title, 'url': file, 'provider': provider, 'imdbnumber': imdbnumber})
                         j = j + len(contentList) * int(PAGINGMovies) / 100
                 except IOError as (errno, strerror):
                     print ("I/O error({0}): {1}").format(errno, strerror)

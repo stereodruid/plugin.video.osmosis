@@ -197,3 +197,7 @@ def getStrmname(strm_name):
 def invCommas(string):
    string = string.replace("'", "''")
    return string
+
+def cleanTitle(string):
+   string = string.replace(".strm", "")
+   return string
