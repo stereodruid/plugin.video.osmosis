@@ -352,21 +352,23 @@ def valDB(database):
 def writeMovie(movieList):
     dbMovieList = []
 
-    db = MODBPATH if DATABASE_MYSQL == "false" else MODBPATH_MYSQL
-    table = MODBPATH if DATABASE_MYSQL == "false" else 'Movies'
+    if DATABASE_MYSQL == "false":
+        if not xbmcvfs.exists(MODBPATH):
+            createMovDB()
+        elif not valDB(MODBPATH):
+            xbmcvfs.delete(MODBPATH)
+            createMovDB()
+    else:
+        if not valDB('Movies'):
+            createMovDB()
 
-    if not xbmcvfs.exists(db):
-        createMovDB()
-    elif not valDB(table):
-        xbmcvfs.delete(db)
-        createMovDB() 
-        
     for entry in movieList:
         try:
-            movID = movieExists(entry.get('title'), entry.get('path'))
+            kmovName = kmovieExists(entry.get('title'), entry.get('imdbnumber'))
+            movID = movieExists(kmovName, entry.get('path'))
             if movID is not None:
                 movieStreamExists(movID, entry.get('provider'), entry.get('url'))
-                dbMovieList.append({'path': entry.get('path'), 'title': entry.get('title'), 'movieID': movID, 'provider': entry.get('provider')})
+                dbMovieList.append({'path': entry.get('path'), 'title': kmovName, 'movieID': movID, 'provider': entry.get('provider')})
         except IOError as (errno, strerror):
             print ("I/O error({0}): {1}").format(errno, strerror)
         except ValueError:
@@ -381,19 +383,17 @@ def writeMovie(movieList):
 
 def writeShow(episode):
     dbEpisode = None
+
     if DATABASE_MYSQL == "false":
         if not xbmcvfs.exists(SHDBPATH):
             createShowDB()
         elif not valDB(SHDBPATH):
             xbmcvfs.delete(SHDBPATH)
-            createShowDB()       
+            createShowDB()
     else:
-        if not xbmcvfs.exists(SHDBPATH_MYSQL):
+        if not valDB('TVShows'):
             createShowDB()
-        elif not valDB('TVShows'):
-            xbmcvfs.delete(SHDBPATH_MYSQL)
-            createShowDB()
-        
+
     if episode is not None:
         try:
             showID = showExists(episode.get('tvShowTitle'), episode.get('path'))
@@ -446,6 +446,27 @@ def createShowDB():
         cursor.close()
         con.close()
     
+def kmovieExists(title, imdbnumber):
+    dbMovieName = None
+    try:
+        con, cursor = openDB(KMODBPATH, 'KMovies')
+
+        #title = stringUtils.invCommas(title)
+        cursor.execute("SELECT strFileName FROM movie_view WHERE uniqueid_value LIKE '{}';".format(imdbnumber))
+
+        dbMovieName = cursor.fetchone()
+
+        if dbMovieName is None:
+            dbMovieName = title
+        else:
+            dbMovieName = dbMovieName[0]
+        dbMovieName = stringUtils.cleanTitle(dbMovieName)
+    finally:
+        cursor.close()
+        con.close()
+
+    return dbMovieName
+    
 def movieExists(title, path):
     dbMovieID = None
     try:
@@ -457,7 +478,8 @@ def movieExists(title, path):
         dbMovie = cursor.fetchone()
 
         if dbMovie is None:
-            path = fileSys.completePath(path) if DATABASE_MYSQL == "false" else fileSys.completePath(path).replace('\\', '\\\\') 
+            path = fileSys.completePath(path) if DATABASE_MYSQL == "false" else fileSys.completePath(path).replace('\\', '\\\\')
+            path = stringUtils.invCommas(path)
             cursor.execute("INSERT INTO movies (title, filePath) VALUES ('{}', '{}');".format(title, path))
             con.commit()
             dbMovieID = cursor.lastrowid
@@ -478,7 +500,7 @@ def movieStreamExists(movieID, provider, url):
 
         cursor.execute("SELECT mov_id, url FROM stream_ref WHERE mov_id = {} AND provider LIKE '{}';".format(movieID, provider))
         dbMovie = cursor.fetchone()
-        
+
         if dbMovie is None:
             cursor.execute("INSERT INTO stream_ref (mov_id, provider, url) VALUES ({}, '{}', '{}');".format(movieID, provider, url))
             con.commit()
@@ -501,7 +523,8 @@ def showExists(title, path):
         dbShow = cursor.fetchone()
 
         if dbShow is None:
-            path = fileSys.completePath(path) if DATABASE_MYSQL == "false" else fileSys.completePath(path).replace('\\', '\\\\') 
+            path = fileSys.completePath(path) if DATABASE_MYSQL == "false" else fileSys.completePath(path).replace('\\', '\\\\')
+            path = stringUtils.invCommas(path)
             cursor.execute("INSERT INTO shows (showTitle, filePath) VALUES ('{}', '{}');".format(title, path))
             con.commit()
             dbShowID = cursor.lastrowid
@@ -543,7 +566,7 @@ def getVideo(ID, seasonEpisode=None):
                 
         if seasonEpisode is None:
             query = "SELECT url, provider FROM stream_ref WHERE mov_id = {};"
-            args = (ID)
+            args = (ID,)
         else:
             query = "SELECT url, provider FROM stream_ref WHERE show_id = {} AND seasonEpisode LIKE '{}';"
             args = (ID, seasonEpisode)

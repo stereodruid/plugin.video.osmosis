@@ -1,9 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import utils
+
 
 def getModule(orig_pluginname):
     extension = None
     if orig_pluginname and orig_pluginname != "":
-        pluginname = orig_pluginname.replace('.','_')
+        pluginname = orig_pluginname.replace('.', '_')
         try:
             extension = __import__('modules.extensions.%s' % pluginname, fromlist=[pluginname])
         except ImportError:

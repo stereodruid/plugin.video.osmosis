@@ -18,41 +18,18 @@
 import os
 import time
 from modules import updateAll
-from modules import guiTools
-import utils
-import xbmc, xbmcgui, xbmcaddon, xbmcvfs
+import xbmc, xbmcaddon, xbmcvfs
 import re
 
-# Debug option pydevd:
-if False:
-    import pydevd
-    pydevd.settrace(stdoutToServer=True, stderrToServer=True)
-
-global thelist
-thelist = None
-
-# Plugin Info
 ADDON_ID = 'plugin.video.osmosis'
 REAL_SETTINGS = xbmcaddon.Addon(id=ADDON_ID)
-ADDON_ID = REAL_SETTINGS.getAddonInfo('id')
-ADDON_NAME = REAL_SETTINGS.getAddonInfo('name').decode('utf-8')
-ADDON_PATH = REAL_SETTINGS.getAddonInfo('path')
-ADDON_SETTINGS = REAL_SETTINGS.getAddonInfo('profile')
-ADDON_VERSION = REAL_SETTINGS.getAddonInfo('version')
-# PC Settings Info
-MediaList_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS, 'MediaList.xml'))
-STRM_LOC = REAL_SETTINGS.getSetting('STRM_LOC')
-Path_Type = REAL_SETTINGS.getSetting('Path_Type')
-Clear_Strms = REAL_SETTINGS.getSetting('Clear_Strms') == 'true'
 Automatic_Update_Time = REAL_SETTINGS.getSetting('Automatic_Update_Time') 
 Update_at_startup = REAL_SETTINGS.getSetting('Update_at_startup')
 Automatic_Update_Delay = REAL_SETTINGS.getSetting('Automatic_Update_Delay')
 Automatic_Update_Run = REAL_SETTINGS.getSetting('Automatic_Update_Run')
 USE_MYSQL = REAL_SETTINGS.getSetting('USE_MYSQL')
 Find_SQLite_DB = REAL_SETTINGS.getSetting('Find_SQLite_DB')
-represent = os.path.join(ADDON_PATH, 'icon.png')
 toseconds = 0.0
-itime = 5000000000  # in miliseconds 
 
 def setDBs(files, path):
     dbtypes = ['video', 'music']
@@ -100,11 +77,9 @@ if __name__ == "__main__":
             toseconds = toseconds + 10.0
             
             if ((toseconds >= float(Automatic_Update_Time) * 60 * 60)):
-                guiFix = updateAll.guIFix(guiFix)
                 updateAll.strm_update()
                 toseconds = 0.0
                 monitor.waitForAbort(60)
         elif (time.strftime("%H:%M") == Timed_Update_Run) and Timed_Update_Run != "0:00":
-            guiFix = updateAll.guIFix(guiFix)
             updateAll.strm_update()
             monitor.waitForAbort(60)

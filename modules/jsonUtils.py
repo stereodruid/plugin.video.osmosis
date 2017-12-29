@@ -15,54 +15,14 @@
 
 # -*- coding: utf-8 -*-
 
-import os, re
-
-from BeautifulSoup import BeautifulStoneSoup, BeautifulSoup, BeautifulSOAP
-import SimpleDownloader as downloader
 from modules import stringUtils
 import utils
-import xbmc, xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
-
+import xbmc
 
 try:
-   if sys.version_info >=  (2, 7):
-       import json as _json
-   else:
-        import simplejson as _json 
+    import json
 except:
     import simplejson as json
-
-
-addnon_id = 'plugin.video.osmosis'
-addon = xbmcaddon.Addon(addnon_id)
-addon_version = addon.getAddonInfo('version')
-ADDON_NAME = addon.getAddonInfo('name')
-REAL_SETTINGS = xbmcaddon.Addon(id=addnon_id)
-ADDON_SETTINGS = REAL_SETTINGS.getAddonInfo('profile')
-MediaList_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'MediaList.xml'))
-STRM_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'STRM_LOC'))
-profile = xbmc.translatePath(addon.getAddonInfo('profile').decode('utf-8'))
-home = xbmc.translatePath(addon.getAddonInfo('path').decode('utf-8'))
-favorites = os.path.join(profile, 'favorites')
-history = os.path.join(profile, 'history')
-dialog = xbmcgui.Dialog()
-icon = os.path.join(home, 'icon.png')
-iconRemove = os.path.join(home, 'iconRemove.png')
-FANART = os.path.join(home, 'fanart.jpg')
-source_file = os.path.join(home, 'source_file')
-functions_dir = profile
-downloader = downloader.SimpleDownloader()
-debug = addon.getSetting('debug')
-
-if os.path.exists(favorites) == True:
-    FAV = open(favorites).read()
-else: FAV = []
-if os.path.exists(favorites) == True:
-    FAV = open(favorites).read()
-else: FAV = []
-
-DIRS = []
-STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
 
 def requestItem(file, fletype='video'):
     utils.addon_log("requestItem, file = " + file)

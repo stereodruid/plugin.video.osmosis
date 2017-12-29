@@ -14,64 +14,30 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 # -*- coding: utf-8 -*-
-from datetime import datetime
-from datetime import timedelta
-from modules import stringUtils
-#from modules import fileSys
-import time
-import os, sys, re, traceback
-import random
-import shutil
-import string
-import time, datetime
-import unicodedata
-import urllib, urllib2, cookielib, requests
 
-from BeautifulSoup import BeautifulStoneSoup, BeautifulSoup, BeautifulSOAP
-import SimpleDownloader as downloader
+from modules import stringUtils
+import os, sys
+import time
+import urllib
+
 import utils
 import xbmc
-import xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
-
+import xbmcplugin, xbmcgui, xbmcaddon
 
 try:
     import json
 except:
     import simplejson as json
 
-
-addnon_id = 'plugin.video.osmosis'
-addon = xbmcaddon.Addon(addnon_id)
-addon_version = addon.getAddonInfo('version')
+addon_id = 'plugin.video.osmosis'
+addon = xbmcaddon.Addon(addon_id)
 ADDON_NAME = addon.getAddonInfo('name')
-REAL_SETTINGS = xbmcaddon.Addon(id=addnon_id)
-ADDON_SETTINGS = REAL_SETTINGS.getAddonInfo('profile')
-MediaList_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'MediaList.xml'))
-STRM_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS,'STRM_LOC'))
-profile = xbmc.translatePath(addon.getAddonInfo('profile').decode('utf-8'))
 home = xbmc.translatePath(addon.getAddonInfo('path').decode('utf-8'))
-favorites = os.path.join(profile, 'favorites')
-history = os.path.join(profile, 'history')
-dialog = xbmcgui.Dialog()
 icon = os.path.join(home, 'icon.png')
-iconRemove = os.path.join(home, 'iconRemove.png')
+iconRemove = os.path.join(home, 'resources/iconRemove.png')
 FANART = os.path.join(home, 'fanart.jpg')
-folderIcon= represent = os.path.join(home, 'folderIcon.png')
-updateIcon= represent = os.path.join(home, 'updateIcon.png')
-source_file = os.path.join(home, 'source_file')
-functions_dir = profile
-downloader = downloader.SimpleDownloader()
-debug = addon.getSetting('debug')
-
-if os.path.exists(favorites) == True:
-    FAV = open(favorites).read()
-else: FAV = []
-if os.path.exists(favorites) == True:
-    FAV = open(favorites).read()
-else: FAV = []
-
-DIRS = []
-STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
+folderIcon = os.path.join(home, 'resources/folderIcon.png')
+updateIcon = os.path.join(home, 'resources/updateIcon.png')
 
 def addItem(label, mode, icon):
     utils.addon_log('addItem')
