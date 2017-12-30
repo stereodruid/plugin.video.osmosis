@@ -2,6 +2,7 @@
   <strings>
 	<string id="32000">General</string>
 	<string id="32003">Stream Folder</string>
+	<string id="32004">MedienList.xml Folder</string>
 	<string id="32006">Internal Strm link references</string>
 	<string id="32008">Delete old strms before generating new ones</string>
 	<string id="32005">Update old strms before generating new ones</string>

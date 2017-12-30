@@ -229,6 +229,8 @@ if __name__ == "__main__":
             updateAll.strm_update(selectedItems)
     elif mode == 5:
         create.removeItemsFromMediaList('list')
+    elif mode == 6:
+        xbmc.executebuiltin('InstallAddon(service.watchdog)')
     elif mode == 10:
         meta = ""
         # Split url to get tags
@@ -252,7 +254,6 @@ if __name__ == "__main__":
         try:
             # Get infos from selectet media
             item = xbmcgui.ListItem(path=url)
-
             props = None
             infoLabels = {}
             if mediaType:

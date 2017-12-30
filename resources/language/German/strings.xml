@@ -2,6 +2,7 @@
 <strings>
 	<string id="32000">Allgemien</string>
 	<string id="32003">Medien Speicherort</string>
+	<string id="32004">MedienList.xml Speicherort</string>
 	<string id="32006">Interne Stream Referenz nutzen</string>
 	<string id="32008">Lösche veraltete Streams</string>
 	<string id="32005">Veraltete Streams erneuern (empfohlen)</string>

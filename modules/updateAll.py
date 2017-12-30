@@ -31,7 +31,9 @@ ADDON_NAME = addon.getAddonInfo('name')
 ADDON_PATH = addon.getAddonInfo('path')
 ADDON_SETTINGS = addon.getAddonInfo('profile')
 # PC Settings Info
-MediaList_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS, 'MediaList.xml'))
+REAL_SETTINGS = xbmcaddon.Addon(id=addon_id)
+MEDIALIST_PATH = REAL_SETTINGS.getSetting('MediaList_LOC')
+MediaList_LOC = xbmc.translatePath(os.path.join(MEDIALIST_PATH, 'MediaList.xml'))
 Automatic_Update_Time = addon.getSetting('Automatic_Update_Time')
 represent = os.path.join(ADDON_PATH, 'icon.png')
 
@@ -39,8 +41,8 @@ represent = os.path.join(ADDON_PATH, 'icon.png')
 def readMediaList(purge=False):
     try:
         if xbmcvfs.exists(MediaList_LOC):
-            fle = open(MediaList_LOC, "r")
-            thelist = fle.readlines()
+            fle = xbmcvfs.File(MediaList_LOC, "r")
+            thelist = fle.read().splitlines()
             fle.close()
             return thelist
     except:

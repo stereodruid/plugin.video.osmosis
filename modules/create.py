@@ -463,8 +463,8 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
         provider = getProvider(file)
 
         if showtitle is not None and showtitle != "" and strm_type != "":
-            path = os.path.join(strm_type, stringUtils.cleanStrmFilesys(showtitle))
-            episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': showtitle, 'provider': provider}
+            path = os.path.join(strm_type, stringUtils.cleanStrmFilesys(showtitle)) if strm_name.find('++RenamedTitle++') == -1 else os.path.join(strm_type, stringUtils.getStrmname(strm_name))
+            episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': showtitle, 'provider': provider} if strm_name.find('++RenamedTitle++') == -1 else {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': stringUtils.getStrmname(strm_name), 'provider': provider}
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)
     except ValueError:
