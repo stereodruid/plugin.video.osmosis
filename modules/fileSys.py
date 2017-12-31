@@ -80,8 +80,7 @@ def makeSTRM(filepath, filename, url):
             else:
 			    fullpath = filepath + "/" + filename + ".strm"    
         else:
-            fullpath = filepath + "/" + filename + ".strm"
-            		
+            fullpath = filepath + "/" + filename + ".strm"            		
 #         if xbmcvfs.exists(fullpath):
 #             if addon.getSetting('Clear_Strms') == 'true':
 #                 x = 0 #xbmcvfs.delete(fullpath)
