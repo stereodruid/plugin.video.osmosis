@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from modules import stringUtils, jsonUtils
+from modules import stringUtils, jsonUtils, fileSys
 import os
 import xbmc, xbmcaddon
 
