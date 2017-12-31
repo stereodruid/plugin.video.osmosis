@@ -99,6 +99,8 @@ def getSources():
     addItem('Update', 4, updateIcon)
     addFunction('Update all')
     addItem("Remove Media", 5, iconRemove)
+    if xbmc.getCondVisibility('System.HasAddon(service.watchdog)') != 1:
+	    addItem("Install Watchdog", 6, icon)
     #ToDo Add label
 
 def getType(url):

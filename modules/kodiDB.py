@@ -579,7 +579,7 @@ def getVideo(ID, seasonEpisode=None):
 
     return provList    
 
-def getPlayedURLResumePoint(url): 
+def getPlayedURLResumePoint(url):
     urlResumePoint = None
 
     try:

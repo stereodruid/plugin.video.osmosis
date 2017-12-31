@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from modules import stringUtils, jsonUtils
+from modules import stringUtils, jsonUtils, fileSys
 import os
 import xbmc, xbmcaddon
 
 ADDON_ID = 'plugin.video.osmosis'
 REAL_SETTINGS = xbmcaddon.Addon(id=ADDON_ID)
-profile = xbmc.translatePath(REAL_SETTINGS.getAddonInfo('profile').decode('utf-8'))
+MEDIALIST_PATH = REAL_SETTINGS.getSetting('MediaList_LOC').decode('utf-8')
 
 
 def update(strm_name, url, media_type, thelist):
@@ -20,7 +20,8 @@ def update(strm_name, url, media_type, thelist):
                     if entry.split("|")[1] == strm_name:
                         newentry = '|'.join([entry.split("|")[0], entry.split("|")[1].decode("utf-8"), serverurl]) + '\n'
                         thelist = stringUtils.replaceStringElem(thelist, entry, newentry)
-                        thefile = xbmc.translatePath(os.path.join(profile, 'MediaList.xml'))
+                        thefile = fileSys.completePath(os.path.join(MEDIALIST_PATH))
+                        thefile = xbmc.translatePath(os.path.join(thefile, 'MediaList.xml'))
                         with open(thefile.decode("utf-8"), 'w') as output_file:
                             for linje in thelist:
                                 if not linje.startswith('\n'):
