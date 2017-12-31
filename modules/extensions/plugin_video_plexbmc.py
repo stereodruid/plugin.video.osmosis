@@ -20,7 +20,7 @@ def update(strm_name, url, media_type, thelist):
                     if entry.split("|")[1] == strm_name:
                         newentry = '|'.join([entry.split("|")[0], entry.split("|")[1].decode("utf-8"), serverurl]) + '\n'
                         thelist = stringUtils.replaceStringElem(thelist, entry, newentry)
-                        thefile = completePath(os.path.join(MEDIALIST_PATH))
+                        thefile = fileSys.completePath(os.path.join(MEDIALIST_PATH))
                         thefile = xbmc.translatePath(os.path.join(thefile, 'MediaList.xml'))
                         with open(thefile.decode("utf-8"), 'w') as output_file:
                             for linje in thelist:
