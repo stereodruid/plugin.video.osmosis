@@ -480,7 +480,7 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
 
     if dbEpisode is not None:
         if NOE0_STRMS_EXPORT == "true" and "e0" in dbEpisode.get('strSeasonEpisode'):
-            return
+            return pagesDone
         else:
             fileSys.writeSTRM(dbEpisode.get('path'), dbEpisode.get('strSeasonEpisode'), "plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=show&episode=" + dbEpisode.get('strSeasonEpisode') + "&showid=" + str(dbEpisode.get('showID')) + "|" + dbEpisode.get('tvShowTitle'))
     return pagesDone
