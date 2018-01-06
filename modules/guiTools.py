@@ -134,7 +134,7 @@ def selectDialog(list, header=ADDON_NAME, autoclose=0):
         return select
 def editDialog(nameToChange): 
     dialog = xbmcgui.Dialog()
-    select = dialog.input(nameToChange, type=xbmcgui.INPUT_ALPHANUM)
+    select = dialog.input(nameToChange, type=xbmcgui.INPUT_ALPHANUM, defaultt=nameToChange)
     return select
 #Before executing the code below we need to know the movie original title (string variable originaltitle) and the year (string variable year). They can be obtained from the infolabels of the listitem. The code filters the database for items with the same original title and the same year, year-1 and year+1 to avoid errors identifying the media.
 def markMovie(movID, pos, total, done):
