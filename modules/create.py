@@ -37,6 +37,7 @@ HIDE_tile_in_OV = REAL_SETTINGS.getSetting('Hide_tilte_in_OV')
 PAGINGTVshows = REAL_SETTINGS.getSetting('paging_tvshows')
 PAGINGMovies = REAL_SETTINGS.getSetting('paging_movies')
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
+NOE0_STRMS_EXPORT = REAL_SETTINGS.getSetting('noE0_Strms_Export')
 
 thisDialog = sys.modules[__name__]
 thisDialog.dialogeBG = None
@@ -463,8 +464,8 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
         provider = getProvider(file)
 
         if showtitle is not None and showtitle != "" and strm_type != "":
-            path = os.path.join(strm_type, stringUtils.cleanStrmFilesys(showtitle))
-            episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': showtitle, 'provider': provider}
+            path = os.path.join(strm_type, stringUtils.cleanStrmFilesys(showtitle)) if strm_name.find('++RenamedTitle++') == -1 else os.path.join(strm_type, stringUtils.getStrmname(strm_name))
+            episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': showtitle, 'provider': provider} if strm_name.find('++RenamedTitle++') == -1 else {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': stringUtils.getStrmname(strm_name), 'provider': provider}
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)
     except ValueError:
@@ -478,7 +479,10 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
     dbEpisode = kodiDB.writeShow(episode)
 
     if dbEpisode is not None:
-        fileSys.writeSTRM(dbEpisode.get('path'), dbEpisode.get('strSeasonEpisode'), "plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=show&episode=" + dbEpisode.get('strSeasonEpisode') + "&showid=" + str(dbEpisode.get('showID')) + "|" + dbEpisode.get('tvShowTitle'))
+        if NOE0_STRMS_EXPORT == "true" and "e0" in dbEpisode.get('strSeasonEpisode'):
+            return pagesDone
+        else:
+            fileSys.writeSTRM(dbEpisode.get('path'), dbEpisode.get('strSeasonEpisode'), "plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=show&episode=" + dbEpisode.get('strSeasonEpisode') + "&showid=" + str(dbEpisode.get('showID')) + "|" + dbEpisode.get('tvShowTitle'))
     return pagesDone
 
 

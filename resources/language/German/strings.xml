@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <strings>
-	<string id="32000">Allgemien</string>
+	<string id="32000">Allgemein</string>
 	<string id="32003">Medien Speicherort</string>
+	<string id="32004">MedienList.xml Speicherort</string>
 	<string id="32006">Interne Stream Referenz nutzen</string>
 	<string id="32008">Lösche veraltete Streams</string>
 	<string id="32005">Veraltete Streams erneuern (empfohlen)</string>
@@ -12,6 +13,7 @@
 	<string id="32013">Keine Streams hinzufügen, die in "[OV]" vorhanden sind (z. B. AMAZON VOD)</string>
 	<string id="32014">Kodi verwendet eine MYSQL-Datenbank</string>
 	<string id="32015">Kodi's SQLite-DBs automatisch ermitteln</string>
+	<string id="32016">Keine E0 (Trailer) Episoden exportieren</string>
 	
 	<string id="31000">Medien</string>
 	<string id="31004">NFO's anlegen (In Kürze)</string>

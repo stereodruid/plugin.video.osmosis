@@ -2,6 +2,7 @@
   <strings>
 	<string id="32000">General</string>
 	<string id="32003">Stream Folder</string>
+	<string id="32004">MedienList.xml Folder</string>
 	<string id="32006">Internal Strm link references</string>
 	<string id="32008">Delete old strms before generating new ones</string>
 	<string id="32005">Update old strms before generating new ones</string>
@@ -12,6 +13,7 @@
 	<string id="32013">Do not add streams which are in "[OV]" (e. g. AMAZON VOD)</string>
 	<string id="32014">Kodi is using MYSQL-Database</string>
 	<string id="32015">Detect Kodi's SQLite DBs automatically</string>
+	<string id="32016">Do not export E0 (Trailer) Episodes</string>
 	
 	<string id="31000">Content</string>
 	<string id="31004">Write NFOs (ComingSoon)</string>
