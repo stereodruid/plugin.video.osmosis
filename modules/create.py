@@ -92,16 +92,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
     if strm_type.find('Cinema') != -1 or strm_type.find('YouTube') != -1 or strm_type.find('Movies') != -1:
         try:
             initialize_DialogBG("Movie", "Adding")
-            movieList = addMovies(details, strm_name, strm_type)
-            dbMovList = kodiDB.writeMovie(movieList)
-            j = 100 / len(dbMovList) if len(dbMovList) > 0 else 1
-            # Write strms for all values in movieList
-            for entry in dbMovList:
-                thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing Movies: ", " Video: " + entry.get('title'))
-                fileSys.writeSTRM(stringUtils.cleanStrms(entry.get('path')), stringUtils.cleanStrms(entry.get('title')) , "plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=movie&id=" + str(entry.get('movieID')) + "|" + entry.get('title'))
-
-                j = j + 100 / len(movieList)
-
+            addMovies(details, strm_name, strm_type)
             thisDialog.dialogeBG.close()
             thisDialog.dialogeBG = None
             return
@@ -316,7 +307,8 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                 albumartist = artist
                 fileSys.rewriteMediaList(url, strm_name, albumartist, cType)
         for i in albumList:
-            fullpath, fileModTime = fileSys.writeSTRM(path, stringUtils.cleanStrms(i[1].rstrip(".")) , i[2] + "|" + i[1])
+            strm_link = i[2] + "|" + i[1] if addon.getSetting('Link_Type') == '0' else i[2]
+            fullpath, fileModTime = fileSys.writeSTRM(path, stringUtils.cleanStrms(i[1].rstrip(".")) , strm_link)
             kodiDB.musicDatabase(i[3], i[4], i[1], i[0], i[2], i[5], i[6], aThumb, fileModTime)
         thisDialog.dialogeBG.close()
     except IOError as (errno, strerror):
@@ -341,7 +333,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
     j = len(contentList) * int(PAGINGMovies) / 100
 
     if len(contentList) == 0:
-        return contentList
+        return
 
     while pagesDone < int(PAGINGMovies):
         if not contentList[0] == "palyableSingleMedia":
@@ -389,7 +381,17 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
             movieList.append({'path': m_path, 'title':  m_title, 'url': contentList[1], 'provider': provider})
             pagesDone = int(PAGINGMovies)
 
-    return movieList
+    if addon.getSetting('Link_Type') == '0':
+        movieList = kodiDB.writeMovie(movieList)
+
+    j = 100 / len(movieList) if len(movieList) > 0 else 1
+    # Write strms for all values in movieList
+    for movie in movieList:
+        thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing Movies: ", movie.get('title'))
+        strm_link = "plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=movie&id=" + str(movie.get('movieID')) + "|" + movie.get('title') if addon.getSetting('Link_Type') == '0' else movie.get('url')
+        fileSys.writeSTRM(stringUtils.cleanStrms(movie.get('path')), stringUtils.cleanStrms(movie.get('title')), strm_link)
+
+        j = j + 100 / len(movieList)
 
 
 def getProvider(entry):
@@ -423,7 +425,8 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
                         dirList.append(jsonUtils.requestList(file, 'video').get('files', []))
                         continue
                     elif season > -1 and episode > -1 and filetype == 'file':
-                        episodesList.append(detailInfo)
+                        if NOE0_STRMS_EXPORT == "false" or NOE0_STRMS_EXPORT == "true" and episode > 0:
+                            episodesList.append(detailInfo)
 
             step = float(100.0 / len(episodesList) if len(episodesList) > 0 else 1)
             if pagesDone == 0:
@@ -454,35 +457,26 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
 
 def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
     episode = None
-    try:
-        utils.addon_log("detailInfo: " + str(episode_item))
-        file = episode_item.get('file', None)
-        episode = episode_item.get('episode', -1)
-        season = episode_item.get('season', -1)
-        strSeasonEpisode = 's' + str(season) + 'e' + str(episode)
-        showtitle = episode_item.get('showtitle', None)
-        provider = getProvider(file)
 
-        if showtitle is not None and showtitle != "" and strm_type != "":
-            path = os.path.join(strm_type, stringUtils.cleanStrmFilesys(showtitle)) if strm_name.find('++RenamedTitle++') == -1 else os.path.join(strm_type, stringUtils.getStrmname(strm_name))
-            episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': showtitle, 'provider': provider} if strm_name.find('++RenamedTitle++') == -1 else {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': stringUtils.getStrmname(strm_name), 'provider': provider}
-    except IOError as (errno, strerror):
-        print ("I/O error({0}): {1}").format(errno, strerror)
-    except ValueError:
-        print ("No valid integer in line.")
-    except:
-        guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1]) + (". See your Kodi.log!"))
-        utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
-        print ("Unexpected error:"), sys.exc_info()[0]
-        raise
+    utils.addon_log("detailInfo: " + str(episode_item))
+    file = episode_item.get('file', None)
+    episode = episode_item.get('episode', -1)
+    season = episode_item.get('season', -1)
+    strSeasonEpisode = 's' + str(season) + 'e' + str(episode)
+    showtitle = episode_item.get('showtitle', None)
+    provider = getProvider(file)
 
-    dbEpisode = kodiDB.writeShow(episode)
+    if showtitle is not None and showtitle != "" and strm_type != "":
+        path = os.path.join(strm_type, stringUtils.cleanStrmFilesys(showtitle)) if strm_name.find('++RenamedTitle++') == -1 else os.path.join(strm_type, stringUtils.getStrmname(strm_name))
+        episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': showtitle, 'provider': provider} if strm_name.find('++RenamedTitle++') == -1 else {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': stringUtils.getStrmname(strm_name), 'provider': provider}
 
-    if dbEpisode is not None:
-        if NOE0_STRMS_EXPORT == "true" and "e0" in dbEpisode.get('strSeasonEpisode'):
-            return pagesDone
-        else:
-            fileSys.writeSTRM(dbEpisode.get('path'), dbEpisode.get('strSeasonEpisode'), "plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=show&episode=" + dbEpisode.get('strSeasonEpisode') + "&showid=" + str(dbEpisode.get('showID')) + "|" + dbEpisode.get('tvShowTitle'))
+        if addon.getSetting('Link_Type') == '0':
+            episode = kodiDB.writeShow(episode)
+
+        if episode is not None:
+            strm_link = 'plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=show&episode=' + episode.get('strSeasonEpisode') + '&showid=' + str(episode.get('showID')) + '|' + episode.get('tvShowTitle') if addon.getSetting('Link_Type') == '0' else episode.get('url')
+            fileSys.writeSTRM(episode.get('path'), episode.get('strSeasonEpisode'), strm_link)
+
     return pagesDone
 
 
