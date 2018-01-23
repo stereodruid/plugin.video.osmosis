@@ -96,6 +96,7 @@ def autoselectVideostream(playerid):
                 selectedresolution = stream.get('height')
 
         xbmc.Player().setVideoStream(selectedstream)
+        xbmc.Player().seekTime(0)
 
 
 if __name__ == "__main__":
@@ -310,9 +311,9 @@ if __name__ == "__main__":
                 activePlayers = []
                 while len(activePlayers) == 0:
                     activePlayers = json.loads(xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')).get('result', [])
-                    time.sleep(1)
+                    xbmc.sleep(100)
                     counter += 1
-                    if counter >= 30:
+                    if counter >= 300:
                         raise
 
                 if addon.getSetting('autoselect_videostream') == 'true':
