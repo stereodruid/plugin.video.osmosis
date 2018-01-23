@@ -18,6 +18,7 @@ import os, sys
 import urllib
 import time
 import re
+import json
 from modules import create
 from modules import kodiDB
 from modules import fileSys
@@ -232,9 +233,6 @@ if __name__ == "__main__":
     elif mode == 6:
         xbmc.executebuiltin('InstallAddon(service.watchdog)')
     elif mode == 10:
-        meta = ""
-        # Split url to get tags
-        # purl = url.split('|')[1]
         if mediaType:
             try:
                 # Play Movies/TV-Shows:
@@ -285,10 +283,12 @@ if __name__ == "__main__":
 
                 # Exec play process
                 xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
+
                 # Wait until the media is started in player
                 counter = 0
-                while meta.find("video") == -1:
-                    meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
+                activePlayers = []
+                while len(activePlayers) == 0:
+                    activePlayers = json.loads(xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')).get('result', [])
                     time.sleep(1)
                     counter += 1
                     if counter >= 30:

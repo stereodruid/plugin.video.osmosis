@@ -425,7 +425,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
                         dirList.append(jsonUtils.requestList(file, 'video').get('files', []))
                         continue
                     elif season > -1 and episode > -1 and filetype == 'file':
-                        if NOE0_STRMS_EXPORT == "false" or NOE0_STRMS_EXPORT == "true" and episode > 0:
+                        if NOE0_STRMS_EXPORT == "false" or episode > 0:
                             episodesList.append(detailInfo)
 
             step = float(100.0 / len(episodesList) if len(episodesList) > 0 else 1)
