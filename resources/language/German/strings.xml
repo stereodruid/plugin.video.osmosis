@@ -14,6 +14,8 @@
 	<string id="32014">Kodi verwendet eine MYSQL-Datenbank</string>
 	<string id="32015">Kodi's SQLite-DBs automatisch ermitteln</string>
 	<string id="32016">Keine E0 (Trailer) Episoden exportieren</string>
+	<string id="32017">Videospur automatisch auswählen</string>
+	<string id="32018">Max. Auflösung</string>
 	
 	<string id="31000">Medien</string>
 	<string id="31004">NFO's anlegen (In Kürze)</string>

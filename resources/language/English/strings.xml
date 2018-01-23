@@ -14,6 +14,8 @@
 	<string id="32014">Kodi is using MYSQL-Database</string>
 	<string id="32015">Detect Kodi's SQLite DBs automatically</string>
 	<string id="32016">Do not export E0 (Trailer) Episodes</string>
+	<string id="32017">Automatically select video stream</string>
+	<string id="32018">Max. resolution</string>
 	
 	<string id="31000">Content</string>
 	<string id="31004">Write NFOs (ComingSoon)</string>

@@ -34,8 +34,8 @@ import xbmc, xbmcaddon, xbmcgui, xbmcplugin
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
-addnon_id = 'plugin.video.osmosis'
-addon = xbmcaddon.Addon(addnon_id)
+addon_id = 'plugin.video.osmosis'
+addon = xbmcaddon.Addon(addon_id)
 home = xbmc.translatePath(addon.getAddonInfo('path').decode('utf-8'))
 FANART = os.path.join(home, 'fanart.jpg')
 
@@ -77,6 +77,25 @@ def getAndMarkResumePoint(props, isTVShow):
             done = False
 
         guiTools.markMovie(ID, pos, total, done) if isTVShow == False else guiTools.markSeries(ID, pos, total, done)
+
+
+def autoselectVideostream(playerid):
+    query = ('{"jsonrpc":"2.0","method":"Player.GetProperties", "params":{"playerid":%d,"properties":["videostreams"]}, "id": 1}') % (playerid)
+    streams = json.loads(xbmc.executeJSONRPC(query)).get('result', {}).get('videostreams', [])
+
+    if len(streams) > 1:
+        resolutions = [360, 480, 540, 720, 1080, 0]
+        maxresolution = resolutions[int(addon.getSetting('maxresolution'))]
+
+        selectedstream = 0
+        selectedresolution = None
+
+        for stream in streams:
+            if selectedresolution is None or stream.get('height') <= maxresolution or (maxresolution == 0 and selectedresolution <= stream.get('height')):
+                selectedstream = stream.get('index')
+                selectedresolution = stream.get('height')
+
+        xbmc.Player().setVideoStream(selectedstream)
 
 
 if __name__ == "__main__":
@@ -233,6 +252,8 @@ if __name__ == "__main__":
     elif mode == 6:
         xbmc.executebuiltin('InstallAddon(service.watchdog)')
     elif mode == 10:
+        # Split url to get tags
+        # purl = url.split('|')[1]
         if mediaType:
             try:
                 # Play Movies/TV-Shows:
@@ -293,6 +314,9 @@ if __name__ == "__main__":
                     counter += 1
                     if counter >= 30:
                         raise
+
+                if addon.getSetting('autoselect_videostream') == 'true':
+                    autoselectVideostream(activePlayers[0].get('playerid'))
 
                 getAndMarkResumePoint(props, mediaType == 'show')
             else:
