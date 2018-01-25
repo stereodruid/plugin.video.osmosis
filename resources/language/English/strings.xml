@@ -28,7 +28,7 @@
 	<string id="33001">Update at startup</string>
 	<string id="33002">Automatic Update</string>
 	<string id="33003">Update Every (Hours)</string>
-	<string id="33004">Force Update at (0:00 to disable)</string>
+	<string id="33004">Force Update at (00:00 to disable)</string>
 	
 	<string id="38000">Kodi Movie database</string>
 	<string id="38001">Movie-DB username (MYSQL)</string>

@@ -16,7 +16,7 @@
 		<setting label="32016" type="bool" id="noE0_Strms_Export" default="false"/>
 		<setting label="32013" type="bool" id="Hide_tilte_in_OV" default="false"/>
 		<setting label="32017" type="bool" id="autoselect_videostream" default="false"/>
-		<setting label="32018" type="enum" id="maxresolution" values="360p|480p|540p|720p|1080p|Max" default="4" subsetting="true" enable="eq(-1,true)"/>
+		<setting label="32018" type="enum" id="maxresolution" values="360p|480p|540p|720p|1080p|Max" default="5" subsetting="true" enable="eq(-1,true)"/>
 	 </category>
 	<category label="31000">   
 		<!-- <setting label="31004" type="bool" id="Write_NFOS" default="false" /> -->
@@ -29,7 +29,7 @@
 		<setting label="33001" type="bool" id="Update_at_startup" default="true"/>
 		<setting label="33002" type="bool" id="Automatic_Update_Run" default="true" />
 		<setting label="33003" type="select" id="Automatic_Update_Time" subsetting="true" visible="eq(-1,true)" values="1|3|6|12|24|48|72" default="6" option="int"/>
-		<setting label="33004" id="update_time" type="time" default="0:00"/>
+		<setting label="33004" type="time" id="update_time" default="00:00" enable="eq(-2,false)"/>
 	</category>
 	<category label="38000">
 		<setting label="38001" type="text" id="KMovie-DB username" />

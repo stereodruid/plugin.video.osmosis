@@ -28,7 +28,7 @@
 	<string id="33001">Aktualisierung bei Start</string>
 	<string id="33002">Automatische Aktualisierung</string>
 	<string id="33003">Update alle (Stunde/n)</string>
-	<string id="33004">Update zur definierten Uhrzeit (0:00 zum Deaktivieren)</string>
+	<string id="33004">Update zur definierten Uhrzeit (00:00 zum Deaktivieren)</string>
 	
 	<string id="38000">Kodi Filmdatenbank</string>
 	<string id="38001">Film-DB Benutzername (MYSQL)</string>
