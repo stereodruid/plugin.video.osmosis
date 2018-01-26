@@ -17,7 +17,10 @@
 
 import SimpleDownloader as downloader
 import urllib
+import xbmcaddon
 
+addon = xbmcaddon.Addon()
+addon_id = addon.getAddonInfo('id')
 downloader = downloader.SimpleDownloader()
 
 
@@ -36,7 +39,7 @@ def stripUnquoteURL(url):
 
 def getURL(par):
     try:
-        if par.startswith('?url=plugin://plugin.video.osmosis/'):
+        if par.startswith('?url=plugin://%s/' % (addon_id)):
             url = par.split('?url=')[1]
         else:
             url = par.split('?url=')[1]

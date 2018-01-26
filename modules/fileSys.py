@@ -34,23 +34,16 @@ try:
 except:
     import simplejson as json
 
-addon_id = 'plugin.video.osmosis'
-addon = xbmcaddon.Addon(addon_id)
+addon = xbmcaddon.Addon()
 ADDON_PATH = addon.getAddonInfo('path')
-REAL_SETTINGS = xbmcaddon.Addon(id=addon_id)
-ADDON_SETTINGS = REAL_SETTINGS.getAddonInfo('profile')
 profile = xbmc.translatePath(addon.getAddonInfo('profile').decode('utf-8'))
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
-MEDIALIST_PATH = REAL_SETTINGS.getSetting('MediaList_LOC')
+MEDIALIST_PATH = addon.getSetting('MediaList_LOC')
 MediaList_LOC = xbmc.translatePath(os.path.join(MEDIALIST_PATH, 'MediaList.xml'))
 addonList = {}
 
 
 def writeSTRM(path, file, url):
-    # ToDo: OriginalPlugin option
-#     if addon.getSetting('Link_Type') == '0':
-#         if url.find("plugin://plugin.video.osmosis/?url=plugin") == -1:
-#             url = url.strip().replace("?url=plugin", "plugin://plugin.video.osmosis/?url=plugin", 1)
     utils.addon_log('writeSTRM')
     return makeSTRM(path, file, url)
 

@@ -15,7 +15,7 @@
 
 # -*- coding: utf-8 -*-
 import os, sys
-import urllib
+import urllib, urlparse
 import time
 import re
 import json
@@ -34,8 +34,7 @@ import xbmc, xbmcaddon, xbmcgui, xbmcplugin
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
-addon_id = 'plugin.video.osmosis'
-addon = xbmcaddon.Addon(addon_id)
+addon = xbmcaddon.Addon()
 home = xbmc.translatePath(addon.getAddonInfo('path').decode('utf-8'))
 FANART = os.path.join(home, 'fanart.jpg')
 
@@ -117,7 +116,7 @@ if __name__ == "__main__":
     except:
         pass
 
-    params = utils.get_params()
+    params = dict(urlparse.parse_qsl(sys.argv[2][1:]))
     name = None
     guiElem = None
     del_item = None

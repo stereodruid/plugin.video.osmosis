@@ -5,9 +5,8 @@ from modules import stringUtils, jsonUtils, fileSys
 import os
 import xbmc, xbmcaddon
 
-ADDON_ID = 'plugin.video.osmosis'
-REAL_SETTINGS = xbmcaddon.Addon(id=ADDON_ID)
-MEDIALIST_PATH = REAL_SETTINGS.getSetting('MediaList_LOC').decode('utf-8')
+addon = xbmcaddon.Addon()
+MEDIALIST_PATH = addon.getSetting('MediaList_LOC').decode('utf-8')
 
 
 def update(strm_name, url, media_type, thelist):

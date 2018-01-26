@@ -49,9 +49,6 @@ def readMediaList(purge=False):
 
 def strm_update(selectedItems=None, actor=0):
     try:
-        if actor != actor_update_manual:
-            addon = xbmcaddon.Addon()
-
         if xbmcvfs.exists(MediaList_LOC):
             thelist = readMediaList() if selectedItems is None else selectedItems
             if len(thelist) > 0:

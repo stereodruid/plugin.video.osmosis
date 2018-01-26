@@ -15,12 +15,10 @@
 
 # -*- coding: utf-8 -*-
 import os, re
-
 import utils
 import xbmcaddon
 
-addon_id = 'plugin.video.osmosis'
-addon = xbmcaddon.Addon(id=addon_id)
+addon = xbmcaddon.Addon()
 folder_medialistentry_movie = addon.getSetting('folder_medialistentry_movie')
 folder_movie = addon.getSetting('folder_movie')
 
@@ -197,6 +195,7 @@ def getStrmname(strm_name):
 def invCommas(string):
    string = string.replace("'", "''")
    return string
+
 
 def cleanTitle(string):
    string = string.replace(".strm", "")
