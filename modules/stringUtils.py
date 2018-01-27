@@ -64,7 +64,7 @@ def cleanLabels(text, formater=''):
 
     text = utils.multiple_reSub(text, dictresub)
     text = utils.multiple_replace(text, *replacements)
-    text = re.sub('[\/:*?<>|!@#$/:]', '', text)
+    text = re.sub('[\/:*?<>|!@#$/:,]', '', text)
     text = re.sub('\(.\d*\)', "", text)
     if formater == 'title':
         text = text.title().replace("'S", "'s")
