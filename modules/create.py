@@ -29,15 +29,14 @@ from modules import kodiDB
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
-addon_id = 'plugin.video.osmosis'
-addon = xbmcaddon.Addon(addon_id)
+addon = xbmcaddon.Addon()
+addon_id = addon.getAddonInfo('id')
 ADDON_NAME = addon.getAddonInfo('name')
-REAL_SETTINGS = xbmcaddon.Addon(id=addon_id)
-HIDE_tile_in_OV = REAL_SETTINGS.getSetting('Hide_tilte_in_OV')
-PAGINGTVshows = REAL_SETTINGS.getSetting('paging_tvshows')
-PAGINGMovies = REAL_SETTINGS.getSetting('paging_movies')
+HIDE_tile_in_OV = addon.getSetting('Hide_tilte_in_OV')
+PAGINGTVshows = addon.getSetting('paging_tvshows')
+PAGINGMovies = addon.getSetting('paging_movies')
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
-NOE0_STRMS_EXPORT = REAL_SETTINGS.getSetting('noE0_Strms_Export')
+NOE0_STRMS_EXPORT = addon.getSetting('noE0_Strms_Export')
 
 thisDialog = sys.modules[__name__]
 thisDialog.dialogeBG = None
@@ -60,14 +59,14 @@ def fillPlugins(cType='video'):
     json_query = ('{"jsonrpc":"2.0","method":"Addons.GetAddons","params":{"type":"xbmc.addon.%s","properties":["name","path","thumbnail","description","fanart","summary", "extrainfo"]}, "id": 1 }' % cType)
     json_details = jsonUtils.sendJSON(json_query)
     for addon in sorted(json_details["addons"], key=lambda json: json['name'].lower()):
-        utils.addon_log('fillPlugins entry: ' + str(addon))
+        utils.addon_log('fillPlugins entry: %s' % (addon))
         addontypes = []
         for info in addon['extrainfo']:
             if info['key'] == 'provides':
                 addontypes = info['value'].split(" ")
                 break
 
-        if cType in addontypes and not addon['addonid'] == 'plugin.video.osmosis':
+        if cType in addontypes and not addon['addonid'] == addon_id:
             art = {'thumb': addon['thumbnail'], 'fanart': addon['fanart']}
             guiTools.addDir(addon['name'], 'plugin://' + addon['addonid'], 101, art, addon['description'], cType, 'date', 'credits')
 
@@ -138,23 +137,23 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         filetype = detail['filetype']
         label = stringUtils.cleanLabels(detail['label'])
         file = detail['file'].replace("\\\\", "\\")
-        strm_name = str(stringUtils.cleanByDictReplacements(strm_name.strip()))
+        strm_name = stringUtils.cleanByDictReplacements(strm_name.strip())
         plot = stringUtils.cleanLabels(detail.get('plot', ''))
         art = detail.get('art', {})
 
         if addon.getSetting('Link_Type') == '0':
-            link = sys.argv[0] + "?url=" + urllib.quote_plus(stringUtils.uni(file)) + "&mode=" + str(10) + "&name=" + urllib.quote_plus(stringUtils.uni(label)) + "&fanart=" + urllib.quote_plus(art.get('fanart', ''))
+            link = '%s?url=%s&mode=%d&name=%s&fanart=%s' % (sys.argv[0], urllib.quote_plus(stringUtils.uni(file)), 10, urllib.quote_plus(stringUtils.uni(label)), urllib.quote_plus(art.get('fanart', '')))
         else:
             link = file
 
         if strm_type == 'Audio-Single':
-            path = os.path.join('Singles', str(strm_name))
+            path = os.path.join('Singles', strm_name)
             try:
                 album = detail['album'].strip()
                 artist = stringUtils.cleanByDictReplacements(", ".join(artist.strip() for artist in detailInfo['artist']) if isinstance(detailInfo['artist'], (list, tuple)) else detailInfo['artist'].strip())
-                filename = str(strm_name + ' - ' + label).strip()
+                filename = (strm_name + ' - ' + label).strip()
             except:
-                filename = str(strm_name + ' - ' + label).strip()
+                filename = (strm_name + ' - ' + label).strip()
 
         if strm_type.find('Audio-Album') != -1:
             path = os.path.join(strm_type, strm_name)
@@ -168,7 +167,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
 
         if strm_type in ['Other']:
             path = os.path.join('Other', strm_name)
-            filename = str(strm_name + ' - ' + label)
+            filename = (strm_name + ' - ' + label)
 
         if filetype == 'file':
             if strm:
@@ -241,7 +240,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                         continue
 
                     if addon.getSetting('Link_Type') == '0':
-                        link = sys.argv[0] + "?url=" + urllib.quote_plus(file) + "&mode=" + str(10) + "&name=" + urllib.quote_plus(label) + "&fanart=" + urllib.quote_plus(fanart)
+                        link = +"%s?url=%s&mode=%d&name=%s&fanart=%s" % (sys.argv[0], urllib.quote_plus(file), 10, urllib.quote_plus(label), urllib.quote_plus(fanart))
                     else:
                         link = file
 
@@ -388,7 +387,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
     # Write strms for all values in movieList
     for movie in movieList:
         thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing Movies: ", movie.get('title'))
-        strm_link = "plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=movie&id=" + str(movie.get('movieID')) + "|" + movie.get('title') if addon.getSetting('Link_Type') == '0' else movie.get('url')
+        strm_link = "plugin://%s/?url=plugin&mode=10&mediaType=movie&id=%d|%s" % (addon_id, movie.get('movieID'), movie.get('title')) if addon.getSetting('Link_Type') == '0' else movie.get('url')
         fileSys.writeSTRM(stringUtils.cleanStrms(movie.get('path')), stringUtils.cleanStrms(movie.get('title')), strm_link)
 
         j = j + 100 / len(movieList)
@@ -425,14 +424,14 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
                         dirList.append(jsonUtils.requestList(file, 'video').get('files', []))
                         continue
                     elif season > -1 and episode > -1 and filetype == 'file':
-                        if NOE0_STRMS_EXPORT == "false" or NOE0_STRMS_EXPORT == "true" and episode > 0:
+                        if NOE0_STRMS_EXPORT == "false" or episode > 0:
                             episodesList.append(detailInfo)
 
             step = float(100.0 / len(episodesList) if len(episodesList) > 0 else 1)
             if pagesDone == 0:
                 thisDialog.dialogeBG.update(int(step), "Initialisation of TV-Shows: " + stringUtils.getStrmname(strm_name))
             else:
-                thisDialog.dialogeBG.update(int(step), "Page: " + str(pagesDone) + " " + stringUtils.getStrmname(strm_name))
+                thisDialog.dialogeBG.update(int(step), "Page: %d %s" % (pagesDone, stringUtils.getStrmname(strm_name)))
             for index, episode in enumerate(episodesList):
                 pagesDone = getEpisode(episode, strm_name, strm_type, pagesDone=pagesDone)
                 thisDialog.dialogeBG.update(int(step * (index + 1)))
@@ -458,11 +457,11 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
 def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
     episode = None
 
-    utils.addon_log("detailInfo: " + str(episode_item))
+    utils.addon_log("detailInfo: %s" % (episode_item))
     file = episode_item.get('file', None)
     episode = episode_item.get('episode', -1)
     season = episode_item.get('season', -1)
-    strSeasonEpisode = 's' + str(season) + 'e' + str(episode)
+    strSeasonEpisode = 's%de%d' % (season, episode)
     showtitle = episode_item.get('showtitle', None)
     provider = getProvider(file)
 
@@ -474,11 +473,7 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
             episode = kodiDB.writeShow(episode)
 
         if episode is not None:
-            strm_link = 'plugin://plugin.video.osmosis/?url=plugin&mode=10&mediaType=show&episode=' + episode.get('strSeasonEpisode') + '&showid=' + str(episode.get('showID')) + '|' + episode.get('tvShowTitle') if addon.getSetting('Link_Type') == '0' else episode.get('url')
+            strm_link = 'plugin://%s/?url=plugin&mode=10&mediaType=show&episode=%s&showid=%d|%s' % (addon_id, episode.get('strSeasonEpisode'), episode.get('showID'), episode.get('tvShowTitle')) if addon.getSetting('Link_Type') == '0' else episode.get('url')
             fileSys.writeSTRM(episode.get('path'), episode.get('strSeasonEpisode'), strm_link)
 
     return pagesDone
-
-
-def getData(url, fanart):
-    utils.addon_log('getData, url = ' + cType)

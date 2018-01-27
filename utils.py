@@ -22,7 +22,8 @@ from modules import stringUtils
 import xbmc, xbmcaddon, xbmcvfs
 import xml.etree.ElementTree as ET
 
-addon = xbmcaddon.Addon('plugin.video.osmosis')
+addon = xbmcaddon.Addon()
+addon_id = addon.getAddonInfo('id')
 addon_version = addon.getAddonInfo('version')
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
 
@@ -101,7 +102,7 @@ def createSongNFO(filepath, filename , strm_ty='type', artists='none', albums='n
 
 def addon_log(string):
     # if debug == 'true':
-    xbmc.log("[plugin.video.osmosis-%s]: %s" % (addon_version, string))
+    xbmc.log("[%s-%s]: %s" % (addon_id, addon_version, string))
 
 
 def zeitspanne(sekunden):
@@ -114,30 +115,3 @@ def zeitspanne(sekunden):
     timePlayed = datetime.time(hours, minutes, seconds)
     return weeks, days, hours, minutes, seconds, timePlayed
 
-
-def get_params():
-    try:
-        addon_log('get_params')
-        param = []
-        paramstring = sys.argv[2]
-        addon_log('paramstring = ' + paramstring)
-        if len(paramstring) >= 2:
-            params = sys.argv[2]
-            cleanedparams = params.replace('?', '')
-            if (params[len(params) - 1] == '/'):
-                params = params[0:len(params) - 2]
-            pairsofparams = cleanedparams.split('&')
-            param = {}
-            for i in range(len(pairsofparams)):
-                splitparams = {}
-                splitparams = pairsofparams[i].split('=')
-                if (len(splitparams)) == 2:
-                    param[splitparams[0]] = splitparams[1]
-        addon_log('param = ' + str(param))
-        return param
-    except:
-        pass
-
-
-def getCommunitySources(browse=False):
-    addon_log('getCommunitySources')

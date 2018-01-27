@@ -3,7 +3,7 @@
 #
 # This file is part of OSMOSIS
 #
-# OSMOSIS is free software: you can redistribute it. 
+# OSMOSIS is free software: you can redistribute it.
 # You can modify it for private use only.
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -13,23 +13,16 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-
 # -*- coding: utf-8 -*-
 import os
 import time
-from modules import updateAll
 import xbmc, xbmcaddon, xbmcvfs
 import re
 
-ADDON_ID = 'plugin.video.osmosis'
-REAL_SETTINGS = xbmcaddon.Addon(id=ADDON_ID)
-Automatic_Update_Time = REAL_SETTINGS.getSetting('Automatic_Update_Time') 
-Update_at_startup = REAL_SETTINGS.getSetting('Update_at_startup')
-Automatic_Update_Delay = REAL_SETTINGS.getSetting('Automatic_Update_Delay')
-Automatic_Update_Run = REAL_SETTINGS.getSetting('Automatic_Update_Run')
-USE_MYSQL = REAL_SETTINGS.getSetting('USE_MYSQL')
-Find_SQLite_DB = REAL_SETTINGS.getSetting('Find_SQLite_DB')
-toseconds = 0.0
+addon = xbmcaddon.Addon()
+addon_id = addon.getAddonInfo('id')
+startup_time = None
+
 
 def setDBs(files, path):
     dbtypes = ['video', 'music']
@@ -48,38 +41,43 @@ def setDBs(files, path):
 
         if dbname is not None:
             dbpath = xbmc.translatePath(os.path.join(path, dbname))
-            dbsetting = REAL_SETTINGS.getSetting('KMovie-DB path') if dbtype == 'video' else REAL_SETTINGS.getSetting('KMusic-DB path')
+            dbsetting = addon.getSetting('KMovie-DB path') if dbtype == 'video' else addon.getSetting('KMusic-DB path')
             if dbpath != dbsetting:
-                REAL_SETTINGS.setSetting('KMovie-DB path', dbpath) if dbtype == 'video' else REAL_SETTINGS.setSetting('KMusic-DB path', dbpath)
+                addon.setSetting('KMovie-DB path', dbpath) if dbtype == 'video' else addon.setSetting('KMusic-DB path', dbpath)
+
 
 if __name__ == "__main__":
-    if USE_MYSQL == 'false' and Find_SQLite_DB == 'true':
+    if addon.getSetting('USE_MYSQL') == 'false' and addon.getSetting('Find_SQLite_DB') == 'true':
         path = xbmc.translatePath(os.path.join("special://home/", 'userdata/Database/'))
         if xbmcvfs.exists(path):
             dirs, files = xbmcvfs.listdir(path)
             setDBs(files, path)
-        
-    if Update_at_startup == "true":                        
-        updateAll.strm_update()
- 
-    monitor = xbmc.Monitor()
-    while not monitor.abortRequested():
-        # Sleep/wait for abort for 10 seconds
-        if monitor.waitForAbort(10):
-            # Abort was requested while waiting. We should exit
-            break  
-        Automatic_Update_Run = REAL_SETTINGS.getSetting('Automatic_Update_Run')
-        Timed_Update_Run = REAL_SETTINGS.getSetting('update_time')           
-        if Automatic_Update_Run == "true":
-            Timed_Update_Run = "0:00"
-            Automatic_Update_Time = REAL_SETTINGS.getSetting('Automatic_Update_Time')
-            Automatic_Update_Run = REAL_SETTINGS.getSetting('Automatic_Update_Run')
-            toseconds = toseconds + 10.0
-            
-            if ((toseconds >= float(Automatic_Update_Time) * 60 * 60)):
-                updateAll.strm_update()
-                toseconds = 0.0
-                monitor.waitForAbort(60)
-        elif (time.strftime("%H:%M") == Timed_Update_Run) and Timed_Update_Run != "0:00":
-            updateAll.strm_update()
-            monitor.waitForAbort(60)
+
+        if addon.getSetting('Update_at_startup') == "true":
+            xbmc.executebuiltin('XBMC.RunPlugin(plugin://%s/?url=&mode=666)' % (addon_id))
+
+        monitor = xbmc.Monitor()
+        while not monitor.abortRequested():
+            # Sleep/wait for abort for 10 seconds
+            if monitor.waitForAbort(10):
+                # Abort was requested while waiting. We should exit
+                break
+
+            if addon.getSetting('Automatic_Update_Run') == "true":
+                if startup_time is None:
+                    startup_time = time.time()
+
+                next_peridoc_update = startup_time + float(addon.getSetting('Automatic_Update_Time')) * 60 * 60
+                if (next_peridoc_update <= time.time()):
+                    startup_time = time.time()
+                    xbmc.executebuiltin('XBMC.RunPlugin(plugin://%s/?url=&mode=666&updateActor=1)' % (addon_id))
+                    monitor.waitForAbort(60)
+            else:
+                if startup_time is not None:
+                    startup_time = None
+
+                Timed_Update_Run = addon.getSetting('update_time')[:5] if addon.getSetting('update_time') != '' else addon.getSetting('update_time')
+                if Timed_Update_Run != '' and Timed_Update_Run != "00:00":
+                    if time.strftime("%H:%M") == Timed_Update_Run:
+                        xbmc.executebuiltin('XBMC.RunPlugin(plugin://%s/?url=&mode=666&updateActor=2)' % (addon_id))
+                        monitor.waitForAbort(60)

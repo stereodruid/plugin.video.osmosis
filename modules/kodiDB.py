@@ -28,15 +28,13 @@ import sqlite3
 import mysql.connector
 import utils
 
-# Addon
-addon_id = 'plugin.video.osmosis'
-addon = xbmcaddon.Addon(addon_id)
-ADDON_SETTINGS = addon.getAddonInfo('profile')
-MusicDB_LOC = xbmc.translatePath(os.path.join(ADDON_SETTINGS, 'Musik.db'))
-MODBPATH = xbmc.translatePath(os.path.join(ADDON_SETTINGS, 'Movies.db'))
-SHDBPATH = xbmc.translatePath(os.path.join(ADDON_SETTINGS, 'Shows.db'))
-MODBPATH_MYSQL = xbmc.translatePath(os.path.join(ADDON_SETTINGS, 'Movies'))
-SHDBPATH_MYSQL = xbmc.translatePath(os.path.join(ADDON_SETTINGS, 'TVShows'))
+addon = xbmcaddon.Addon()
+profile = addon.getAddonInfo('profile')
+MusicDB_LOC = xbmc.translatePath(os.path.join(profile, 'Musik.db'))
+MODBPATH = xbmc.translatePath(os.path.join(profile, 'Movies.db'))
+SHDBPATH = xbmc.translatePath(os.path.join(profile, 'Shows.db'))
+MODBPATH_MYSQL = xbmc.translatePath(os.path.join(profile, 'Movies'))
+SHDBPATH_MYSQL = xbmc.translatePath(os.path.join(profile, 'TVShows'))
 STRM_LOC = xbmc.translatePath(os.path.join(addon.getSetting('STRM_LOC')))
 DATABASE_MYSQL = addon.getSetting('USE_MYSQL')
 

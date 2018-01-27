@@ -14,6 +14,8 @@
 	<string id="32014">Kodi verwendet eine MYSQL-Datenbank</string>
 	<string id="32015">Kodi's SQLite-DBs automatisch ermitteln</string>
 	<string id="32016">Keine E0 (Trailer) Episoden exportieren</string>
+	<string id="32017">Videospur automatisch auswählen</string>
+	<string id="32018">Max. Auflösung</string>
 	
 	<string id="31000">Medien</string>
 	<string id="31004">NFO's anlegen (In Kürze)</string>
@@ -26,7 +28,7 @@
 	<string id="33001">Aktualisierung bei Start</string>
 	<string id="33002">Automatische Aktualisierung</string>
 	<string id="33003">Update alle (Stunde/n)</string>
-	<string id="33004">Update zur definierten Uhrzeit (0:00 zum Deaktivieren)</string>
+	<string id="33004">Update zur definierten Uhrzeit (00:00 zum Deaktivieren)</string>
 	
 	<string id="38000">Kodi Filmdatenbank</string>
 	<string id="38001">Film-DB Benutzername (MYSQL)</string>

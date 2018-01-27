@@ -25,17 +25,15 @@ import utils
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
 import re
 
-addon_id = 'plugin.video.osmosis'
-addon = xbmcaddon.Addon(id=addon_id)
-ADDON_NAME = addon.getAddonInfo('name')
+addon = xbmcaddon.Addon()
 ADDON_PATH = addon.getAddonInfo('path')
-ADDON_SETTINGS = addon.getAddonInfo('profile')
-# PC Settings Info
-REAL_SETTINGS = xbmcaddon.Addon(id=addon_id)
-MEDIALIST_PATH = REAL_SETTINGS.getSetting('MediaList_LOC')
+MEDIALIST_PATH = addon.getSetting('MediaList_LOC')
 MediaList_LOC = xbmc.translatePath(os.path.join(MEDIALIST_PATH, 'MediaList.xml'))
-Automatic_Update_Time = addon.getSetting('Automatic_Update_Time')
 represent = os.path.join(ADDON_PATH, 'icon.png')
+
+actor_update_manual = 0
+actor_update_periodictime = 1
+actor_update_fixtime = 2
 
 
 def readMediaList(purge=False):
@@ -49,7 +47,7 @@ def readMediaList(purge=False):
         pass
 
 
-def strm_update(selectedItems=None):
+def strm_update(selectedItems=None, actor=0):
     try:
         if xbmcvfs.exists(MediaList_LOC):
             thelist = readMediaList() if selectedItems is None else selectedItems
@@ -77,8 +75,13 @@ def strm_update(selectedItems=None):
                         listLen -= 1
                     except:
                         pass
+
                 dialogeBG.close()
-                xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (ADDON_NAME, "Next update in: " + Automatic_Update_Time + "h" , 5000, represent))
+                if actor == actor_update_periodictime:
+                    xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (addon.getAddonInfo('name'), "Next update in: " + addon.getSetting('Automatic_Update_Time') + "h" , 5000, represent))
+                elif actor == actor_update_fixtime:
+                    next_run = addon.getSetting('update_time')[:5]
+                    xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (addon.getAddonInfo('name'), "Next update: " + next_run + "h" , 5000, represent))
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)
     except ValueError:

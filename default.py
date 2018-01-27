@@ -15,9 +15,10 @@
 
 # -*- coding: utf-8 -*-
 import os, sys
-import urllib
+import urllib, urlparse
 import time
 import re
+import json
 from modules import create
 from modules import kodiDB
 from modules import fileSys
@@ -33,8 +34,7 @@ import xbmc, xbmcaddon, xbmcgui, xbmcplugin
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
-addnon_id = 'plugin.video.osmosis'
-addon = xbmcaddon.Addon(addnon_id)
+addon = xbmcaddon.Addon()
 home = xbmc.translatePath(addon.getAddonInfo('path').decode('utf-8'))
 FANART = os.path.join(home, 'fanart.jpg')
 
@@ -78,6 +78,26 @@ def getAndMarkResumePoint(props, isTVShow):
         guiTools.markMovie(ID, pos, total, done) if isTVShow == False else guiTools.markSeries(ID, pos, total, done)
 
 
+def autoselectVideostream(playerid):
+    query = ('{"jsonrpc":"2.0","method":"Player.GetProperties", "params":{"playerid":%d,"properties":["videostreams"]}, "id": 1}') % (playerid)
+    streams = json.loads(xbmc.executeJSONRPC(query)).get('result', {}).get('videostreams', [])
+
+    if len(streams) > 1:
+        resolutions = [360, 480, 540, 720, 1080, 0]
+        maxresolution = resolutions[int(addon.getSetting('maxresolution'))]
+
+        selectedstream = 0
+        selectedresolution = None
+
+        for stream in streams:
+            if selectedresolution is None or stream.get('height') <= maxresolution or (maxresolution == 0 and selectedresolution <= stream.get('height')):
+                selectedstream = stream.get('index')
+                selectedresolution = stream.get('height')
+
+        xbmc.Player().setVideoStream(selectedstream)
+        xbmc.Player().seekTime(0)
+
+
 if __name__ == "__main__":
     try:
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_UNSORTED)
@@ -96,7 +116,7 @@ if __name__ == "__main__":
     except:
         pass
 
-    params = utils.get_params()
+    params = dict(urlparse.parse_qsl(sys.argv[2][1:]))
     name = None
     guiElem = None
     del_item = None
@@ -232,7 +252,6 @@ if __name__ == "__main__":
     elif mode == 6:
         xbmc.executebuiltin('InstallAddon(service.watchdog)')
     elif mode == 10:
-        meta = ""
         # Split url to get tags
         # purl = url.split('|')[1]
         if mediaType:
@@ -285,14 +304,19 @@ if __name__ == "__main__":
 
                 # Exec play process
                 xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
+
                 # Wait until the media is started in player
                 counter = 0
-                while meta.find("video") == -1:
-                    meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')
-                    time.sleep(1)
+                activePlayers = []
+                while len(activePlayers) == 0:
+                    activePlayers = json.loads(xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')).get('result', [])
+                    xbmc.sleep(100)
                     counter += 1
-                    if counter >= 30:
+                    if counter >= 300:
                         raise
+
+                if addon.getSetting('autoselect_videostream') == 'true':
+                    autoselectVideostream(activePlayers[0].get('playerid'))
 
                 getAndMarkResumePoint(props, mediaType == 'show')
             else:
