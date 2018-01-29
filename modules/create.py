@@ -135,10 +135,10 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
 
     for detail in details:
         filetype = detail['filetype']
-        label = stringUtils.cleanLabels(detail['label'])
+        label = detail['label']
         file = detail['file'].replace("\\\\", "\\")
         strm_name = stringUtils.cleanByDictReplacements(strm_name.strip())
-        plot = stringUtils.cleanLabels(detail.get('plot', ''))
+        plot = detail.get('plot', '')
         art = detail.get('art', {})
 
         if addon.getSetting('Link_Type') == '0':
@@ -226,7 +226,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                 art = detailInfo.get('art', {})
                 file = detailInfo['file'].replace("\\\\", "\\").encode('utf-8')
                 filetype = detailInfo['filetype']
-                label = stringUtils.cleanLabels(detailInfo['label'].strip())
+                label = detailInfo['label'].strip()
                 thumb = art.get('thumb', '')
                 fanart = art.get('fanart', '')
                 track = detailInfo.get('track', 0) if detailInfo.get('track', 0) > 0 else index + 1

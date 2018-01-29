@@ -59,12 +59,12 @@ def cleanLabels(text, formater=''):
                    (u"\n", u""), (u"\r", u""),
                    (u"\t", u""), (u"\ ", u''),
                    (u"/ ", u''), (u"\\", u'/'),
-                   (u"//", u'/'), (u'plugin.video.', u''), (u':', u''),
+                   (u"//", u'/'), (u'plugin.video.', u''),
                    (u'plugin.audio.', u''))
 
     text = utils.multiple_reSub(text, dictresub)
     text = utils.multiple_replace(text, *replacements)
-    text = re.sub('[\/:*?<>|!@#$/:,]', '', text)
+    text = re.sub('[\/*?<>|!]', '', text)
     text = re.sub('\(.\d*\)', "", text)
     if formater == 'title':
         text = text.title().replace("'S", "'s")
@@ -94,7 +94,7 @@ def cleanStrms(text, formater=''):
 
 
 def cleanStrmFilesys(string):
-    return re.sub('[\/:*?<>|!@#$"]', '', string)
+    return re.sub('\/:*?<>|!"', '', string)
 
 
 def multiRstrip(text):
