@@ -53,9 +53,8 @@ def makeSTRM(filepath, filename, url):
 
     mtime = None
     try:
+        filename = stringUtils.cleanStrmFilesys(filename.decode("utf-8"))
         filepath = stringUtils.multiRstrip(filepath.decode("utf-8"))
-        filename = stringUtils.cleanStrmFilesys(filename)
-        filename = filename.decode("utf-8")
         filepath = completePath(os.path.join(STRM_LOC, filepath))
 
         if not xbmcvfs.exists(filepath):
@@ -69,14 +68,15 @@ def makeSTRM(filepath, filename, url):
                     xbmcvfs.mkdir(filepath)
 
         if not STRM_LOC.startswith("smb:") and not STRM_LOC.startswith('nfs:'):
-			fullpath = os.path.normpath(xbmc.translatePath(os.path.join(filepath, filename))) + '.strm'
+            fullpath = '%s.strm' % (os.path.normpath(xbmc.translatePath(os.path.join(filepath, filename))))
         else:
-            fullpath = filepath + "/" + filename + ".strm"
+            fullpath = '%s/%s.strm' % (filepath, filename)
 #         if xbmcvfs.exists(fullpath):
 #             if addon.getSetting('Clear_Strms') == 'true':
 #                 x = 0 #xbmcvfs.delete(fullpath)
 #             else:
 #                 return fullpath
+
         if True:
             if fullpath.find('Audio') > 0:
                 try:

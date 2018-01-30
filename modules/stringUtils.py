@@ -94,7 +94,7 @@ def cleanStrms(text, formater=''):
 
 
 def cleanStrmFilesys(string):
-    return re.sub('\/:*?<>|!"', '', string)
+    return re.sub('[\/:*?<>|!"]', '', string)
 
 
 def multiRstrip(text):
@@ -173,7 +173,7 @@ def cleanByDictReplacements(string):
                         '  ' : ' ', '\(de\)':'', '\(en\)':'',
                         "\(TVshow\)":"", 'Movies' : '', 'Filme' : '',
                         'Movie' : '', "'.'" : ' ', '\(\)' : '',
-                        ":": ' ', '"?"': '', '"':''}
+                        '"?"': '', '"':''}
 
     return utils.multiple_reSub(string, dictReplacements)
 
@@ -185,7 +185,7 @@ def getMovieStrmPath(strmTypePath, mediaListEntry_name, movie_name=''):
     if movie_name != '' and folder_movie and folder_movie == 'true':
         movie_name = cleanByDictReplacements(getStrmname(movie_name))
         strmTypePath = os.path.join(strmTypePath, movie_name)
-    return strmTypePath
+    return cleanStrmFilesys(strmTypePath)
 
 
 def getStrmname(strm_name):

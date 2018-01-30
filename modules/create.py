@@ -344,7 +344,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
 
                 try:
                     if label and strm_name:
-                        label = stringUtils.cleanByDictReplacements(label)
+                        label = stringUtils.cleanLabels(label)
                         if HIDE_tile_in_OV == "true" and label.find("[OV]") > -1:
                             get_title_with_OV = False
                         else:
@@ -355,7 +355,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
                         thisDialog.dialogeBG.update(j, ADDON_NAME + ": Getting Movies: ", " Video: " + label)
                         if filetype is not None and filetype == 'file' and get_title_with_OV == True:
                             m_path = stringUtils.getMovieStrmPath(strm_type, strm_name, label)
-                            m_title = stringUtils.cleanByDictReplacements(stringUtils.getStrmname(label))
+                            m_title = stringUtils.getStrmname(label)
                             movieList.append({'path': m_path, 'title':  m_title, 'url': file, 'provider': provider, 'imdbnumber': imdbnumber})
                         j = j + len(contentList) * int(PAGINGMovies) / 100
                 except IOError as (errno, strerror):
@@ -376,7 +376,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
         else:
             provider = getProvider(contentList[1])
             m_path = stringUtils.getMovieStrmPath(strm_type, strm_name)
-            m_title = stringUtils.cleanByDictReplacements(stringUtils.getStrmname(strm_name))
+            m_title = stringUtils.getStrmname(strm_name)
             movieList.append({'path': m_path, 'title':  m_title, 'url': contentList[1], 'provider': provider})
             pagesDone = int(PAGINGMovies)
 
@@ -388,6 +388,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
     for movie in movieList:
         thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing Movies: ", movie.get('title'))
         strm_link = "plugin://%s/?url=plugin&mode=10&mediaType=movie&id=%d|%s" % (addon_id, movie.get('movieID'), movie.get('title')) if addon.getSetting('Link_Type') == '0' else movie.get('url')
+        utils.addon_log("write movie = %s" % (movie))
         fileSys.writeSTRM(stringUtils.cleanStrms(movie.get('path')), stringUtils.cleanStrms(movie.get('title')), strm_link)
 
         j = j + 100 / len(movieList)
@@ -466,7 +467,8 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
     provider = getProvider(file)
 
     if showtitle is not None and showtitle != "" and strm_type != "":
-        path = os.path.join(strm_type, stringUtils.cleanStrmFilesys(showtitle)) if strm_name.find('++RenamedTitle++') == -1 else os.path.join(strm_type, stringUtils.getStrmname(strm_name))
+        path = os.path.join(strm_type, showtitle) if strm_name.find('++RenamedTitle++') == -1 else os.path.join(strm_type, stringUtils.getStrmname(strm_name))
+        path = stringUtils.cleanStrmFilesys(path)
         episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': showtitle, 'provider': provider} if strm_name.find('++RenamedTitle++') == -1 else {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': stringUtils.getStrmname(strm_name), 'provider': provider}
 
         if addon.getSetting('Link_Type') == '0':
