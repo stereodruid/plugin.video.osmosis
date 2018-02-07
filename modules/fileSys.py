@@ -129,9 +129,7 @@ def updateStream(strm_Fullpath, replace_text):
 def isInMediaList(mediaTitle, url, cType='Other'):
     utils.addon_log('isInMediaList')
     existInList = False
-    thelist = []
-    thefile = completePath(os.path.join(MEDIALIST_PATH))
-    thefile = xbmc.translatePath(os.path.join(thefile, 'MediaList.xml'))
+    thefile = xbmc.translatePath(os.path.join(MEDIALIST_PATH, 'MediaList.xml'))
 
     if not xbmcvfs.exists(profile):
         xbmcvfs.mkdirs(profile)
@@ -146,9 +144,9 @@ def isInMediaList(mediaTitle, url, cType='Other'):
     if len(thelist) > 0:
         for i in thelist:
             splits = i.strip().split('|')
-            if splits[1] == mediaTitle:
-                splitPlugin = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), splits[2])
-                mediaPlugin = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
+            if stringUtils.getStrmname(splits[1]) == stringUtils.getStrmname(mediaTitle):
+                splitPlugin = re.search('plugin:\/\/([^\/\?]*)', splits[2])
+                mediaPlugin = re.search('plugin:\/\/([^\/\?]*)', url)
                 if mediaPlugin and splitPlugin and mediaPlugin.group(1) == splitPlugin.group(1):
                     existInList = True
 
@@ -158,13 +156,10 @@ def isInMediaList(mediaTitle, url, cType='Other'):
         return False
 
 
-def writeMediaList(url, name, cType='Other', cleanName=True):
+def writeMediaList(url, name, cType='Other', cleanName=True, albumartist=None):
     utils.addon_log('writeMediaList')
     existInList = False
-    thelist = []
-    thefile = completePath(os.path.join(MEDIALIST_PATH))
-    thefile = xbmc.translatePath(os.path.join(thefile, 'MediaList.xml'))
-    theentry = '|'.join([cType, name.decode("utf-8"), url]) + '\n'
+    thefile = xbmc.translatePath(os.path.join(MEDIALIST_PATH, 'MediaList.xml'))
 
     if not xbmcvfs.exists(profile):
         xbmcvfs.mkdirs(profile)
@@ -180,54 +175,24 @@ def writeMediaList(url, name, cType='Other', cleanName=True):
     if len(thelist) > 0 :
         for i in thelist:
             splits = i.strip().split('|')
-            if stringUtils.getStrmname(splits[1]) == stringUtils.getStrmname(name):
-                splitPlugin = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), splits[2])
-                mediaPlugin = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
-                if mediaPlugin and splitPlugin and mediaPlugin.group(1) == splitPlugin.group(1):
+            if stringUtils.getStrmname(splits[1]).lower() == stringUtils.getStrmname(name).lower():
+                existInList = True
+                if splits[2].find(url) == -1:
+                    splits[2] = '%s<next>%s' % (splits[2], url)
+                    if albumartist:
+                        splits[4] = albumartist.decode('utf-8')
+
+                    newentry = '%s\n' % ('|'.join(splits))
                     xbmcgui.Dialog().notification(str(i), "Adding to MediaList", os.path.join(ADDON_PATH, 'resources/representerIcon.png'), 5000)
-                    thelist = stringUtils.replaceStringElem(thelist, i, theentry)
-                    existInList = True
+                    thelist = stringUtils.replaceStringElem(thelist, i, newentry)
+
     if existInList != True:
-        thelist.append(theentry)
+        newentry = [cType, name.decode("utf-8"), url]
+        if albumartist:
+            newentry.append(albumartist.decode('utf-8'))
 
-    output_file = xbmcvfs.File(thefile.decode("utf-8"), 'w')
-    for linje in thelist:
-        if not linje.startswith('\n'):
-            output_file.write(linje.strip().encode('utf-8') + '\n')
-        else:
-            output_file.write(linje.strip())
-
-
-def rewriteMediaList(url, name, albumartist, cType='Other', cleanName=True):
-    utils.addon_log('writeMediaList')
-    existInList = False
-    thelist = []
-    thefile = completePath(os.path.join(MEDIALIST_PATH))
-    thefile = xbmc.translatePath(os.path.join(thefile, 'MediaList.xml'))
-    theentry = '|'.join([cType, name.decode("utf-8"), url, albumartist.decode('utf-8')]) + '\n'
-
-    if not xbmcvfs.exists(profile):
-        xbmcvfs.mkdirs(profile)
-    if not xbmcvfs.exists(thefile):
-        xbmcvfs.File(thefile, 'w').close()
-
-    fle = xbmcvfs.File(thefile, 'r')
-    thelist = fle.read().split('\n')
-    fle.close()
-    del fle
-
-    thelist = [x for x in thelist if x != '']
-    if len(thelist) > 0:
-        for i in thelist:
-            splits = i.strip().split('|')
-            if stringUtils.getStrmname(splits[1]) == stringUtils.getStrmname(name):
-                splitPlugin = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), splits[2])
-                mediaPlugin = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
-                if mediaPlugin and splitPlugin and mediaPlugin.group(1) == splitPlugin.group(1):
-                    thelist = stringUtils.replaceStringElem(thelist, i, theentry)
-                    existInList = True
-    if existInList != True:
-        thelist.append(theentry)
+        newentry = '%s\n' % ('|'.join(newentry))
+        thelist.append(newentry)
 
     output_file = xbmcvfs.File(thefile.decode("utf-8"), 'w')
     for linje in thelist:

@@ -241,7 +241,7 @@ if __name__ == "__main__":
         updateAll.strm_update()
     elif mode == 4:
         selectedItems = create.getMediaListDialog()
-        if selectedItems is not None:
+        if selectedItems:
             updateAll.strm_update(selectedItems)
     elif mode == 5:
         create.removeItemsFromMediaList('list')

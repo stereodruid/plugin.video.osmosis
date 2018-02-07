@@ -199,11 +199,13 @@ def getMediaListDialog():
     items = []
     for entry in thelist:
         splits = entry.strip().split('|')
-        plugin = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), splits[2])
-        items.append(stringUtils.getStrmname(splits[1]) + " (" + fileSys.getAddonname(plugin.group(1)) + ")")
+        matches = re.findall("plugin:\/\/([^\/\?]*)", splits[2])
+        if matches:
+            pluginnames = [fileSys.getAddonname(plugin) for plugin in matches]
+            items.append(stringUtils.getStrmname(splits[1]) + " (%s)" % (', '.join(pluginnames)))
 
     selectedItemsIndex = xbmcgui.Dialog().multiselect("Select items", items)
-    return [thelist[index] for index in selectedItemsIndex] if selectedItemsIndex is not None else []
+    return [thelist[index] for index in selectedItemsIndex] if selectedItemsIndex else None
 
 
 def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
@@ -304,7 +306,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                 url = splits[2]
                 cType = splits[0]
                 albumartist = artist
-                fileSys.rewriteMediaList(url, strm_name, albumartist, cType)
+                fileSys.writeMediaList(url, strm_name, albumartist, cType)
         for i in albumList:
             strm_link = i[2] + "|" + i[1] if addon.getSetting('Link_Type') == '0' else i[2]
             fullpath, fileModTime = fileSys.writeSTRM(path, stringUtils.cleanStrms(i[1].rstrip(".")) , strm_link)
