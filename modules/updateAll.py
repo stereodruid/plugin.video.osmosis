@@ -50,7 +50,7 @@ def readMediaList(purge=False):
 def strm_update(selectedItems=None, actor=0):
     try:
         if xbmcvfs.exists(MediaList_LOC):
-            thelist = readMediaList() if selectedItems is None else selectedItems
+            thelist = selectedItems if selectedItems else readMediaList()
             if len(thelist) > 0:
                 dialogeBG = xbmcgui.DialogProgressBG()
                 dialogeBG.create("OSMOSIS: " , 'Total Update-Progress:')
@@ -62,11 +62,11 @@ def strm_update(selectedItems=None, actor=0):
                     cType, name, url = splits[0], splits[1], splits[2]
 
                     try:
-                        plugin_id = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
+                        plugin_id = re.search('plugin:\/\/([^\/\?]*)', url)
                         if plugin_id:
                             module = moduleUtil.getModule(plugin_id.group(1))
                             if module and hasattr(module, 'update'):
-                                url = module.update(name, url, 'video', thelist)
+                                url = module.update(name, url, 'video', readMediaList() if selectedItems else thelist)
 
                         dialogeBG.update(j, "OSMOSIS total update process: " , "Current Item: " + name.replace('++RenamedTitle++', '') + " Items left: " + str(listLen))
                         j += step
