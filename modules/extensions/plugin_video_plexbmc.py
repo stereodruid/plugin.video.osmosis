@@ -3,7 +3,7 @@
 
 from modules import stringUtils, jsonUtils, fileSys
 import os
-import xbmc, xbmcaddon
+import xbmc, xbmcaddon, xbmcvfs
 
 addon = xbmcaddon.Addon()
 
@@ -18,7 +18,7 @@ def update(strm_name, url, media_type, thelist):
                     splits = entry.split("|")
                     if splits[1] == strm_name:
                         splits[2] = serverurl
-                        newentry = '%s\n' % ('|'.join(splits))
+                        newentry = '|'.join(splits)
                         thelist = stringUtils.replaceStringElem(thelist, entry, newentry)
                         thefile = xbmc.translatePath(os.path.join(addon.getSetting('MediaList_LOC'), 'MediaList.xml'))
 
