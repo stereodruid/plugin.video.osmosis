@@ -167,7 +167,7 @@ def writeMediaList(url, name, cType='Other', cleanName=True, albumartist=None):
         xbmcvfs.File(thefile, 'w').close()
 
     fle = xbmcvfs.File(thefile, 'r')
-    thelist = fle.read().split('\n')
+    thelist = fle.read().splitlines()
     fle.close()
     del fle
 
@@ -182,7 +182,7 @@ def writeMediaList(url, name, cType='Other', cleanName=True, albumartist=None):
                     if albumartist:
                         splits[4] = albumartist.decode('utf-8')
 
-                    newentry = '%s\n' % ('|'.join(splits))
+                    newentry = '|'.join(splits)
                     xbmcgui.Dialog().notification(str(i), "Adding to MediaList", os.path.join(ADDON_PATH, 'resources/representerIcon.png'), 5000)
                     thelist = stringUtils.replaceStringElem(thelist, i, newentry)
 
@@ -191,15 +191,12 @@ def writeMediaList(url, name, cType='Other', cleanName=True, albumartist=None):
         if albumartist:
             newentry.append(albumartist.decode('utf-8'))
 
-        newentry = '%s\n' % ('|'.join(newentry))
+        newentry = '|'.join(newentry)
         thelist.append(newentry)
 
     output_file = xbmcvfs.File(thefile.decode("utf-8"), 'w')
-    for linje in thelist:
-        if not linje.startswith('\n'):
-            output_file.write(linje.strip().encode('utf-8') + '\n')
-        else:
-            output_file.write(linje.strip())
+    for index, linje in enumerate(thelist):
+        output_file.write(('%s\n' if index < len(thelist) - 1 else '%s') % linje.strip().encode('utf-8'))
 
 
 def writeTutList(step):

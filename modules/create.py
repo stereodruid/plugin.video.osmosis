@@ -204,6 +204,7 @@ def getMediaListDialog():
             pluginnames = [fileSys.getAddonname(plugin) for plugin in matches]
             items.append(stringUtils.getStrmname(splits[1]) + " (%s)" % (', '.join(pluginnames)))
 
+    items = sorted(items, key=lambda k: k)
     selectedItemsIndex = xbmcgui.Dialog().multiselect("Select items", items)
     return [thelist[index] for index in selectedItemsIndex] if selectedItemsIndex else None
 

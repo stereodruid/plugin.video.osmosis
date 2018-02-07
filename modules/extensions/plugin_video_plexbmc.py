@@ -6,27 +6,26 @@ import os
 import xbmc, xbmcaddon
 
 addon = xbmcaddon.Addon()
-MEDIALIST_PATH = addon.getSetting('MediaList_LOC').decode('utf-8')
 
 
 def update(strm_name, url, media_type, thelist):
     plex_details = jsonUtils.requestList("plugin://plugin.video.plexbmc", media_type).get('files', [])
     for plex_detail in plex_details:
-        if strm_name.replace('++RenamedTitle++', '') == stringUtils.cleanLabels(plex_detail['label']):
+        if stringUtils.getStrmname(strm_name) == stringUtils.cleanLabels(plex_detail['label']):
             serverurl = plex_detail['file']
             if url != serverurl:
                 for entry in thelist:
-                    if entry.split("|")[1] == strm_name:
-                        newentry = '|'.join([entry.split("|")[0], entry.split("|")[1].decode("utf-8"), serverurl]) + '\n'
+                    splits = entry.split("|")
+                    if splits[1] == strm_name:
+                        splits[2] = serverurl
+                        newentry = '%s\n' % ('|'.join(splits))
                         thelist = stringUtils.replaceStringElem(thelist, entry, newentry)
-                        thefile = fileSys.completePath(os.path.join(MEDIALIST_PATH))
-                        thefile = xbmc.translatePath(os.path.join(thefile, 'MediaList.xml'))
-                        with open(thefile.decode("utf-8"), 'w') as output_file:
-                            for linje in thelist:
-                                if not linje.startswith('\n'):
-                                    output_file.write(linje.strip().encode('utf-8') + '\n')
-                                else:
-                                    output_file.write(linje.strip())
+                        thefile = xbmc.translatePath(os.path.join(addon.getSetting('MediaList_LOC'), 'MediaList.xml'))
+
+                        output_file = xbmcvfs.File(thefile.decode("utf-8"), 'w')
+                        for index, linje in enumerate(thelist):
+                            output_file.write(('%s\n' if index < len(thelist) - 1 else '%s') % linje.strip().encode('utf-8'))
+
                         return serverurl
             else:
                 break
