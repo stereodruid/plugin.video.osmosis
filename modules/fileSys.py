@@ -63,6 +63,7 @@ def makeSTRM(filepath, filename, url):
 
             filepath = STRM_LOC
             for dir in dirs:
+                dir = stringUtils.cleanStrmFilesys(dir)
                 filepath = completePath(os.path.join(filepath, dir))
                 if not xbmcvfs.exists(filepath):
                     xbmcvfs.mkdir(filepath)
