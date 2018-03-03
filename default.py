@@ -117,6 +117,8 @@ if __name__ == "__main__":
         pass
 
     params = dict(urlparse.parse_qsl(sys.argv[2][1:]))
+    utils.addon_log("params = %s" % (params))
+
     name = None
     guiElem = None
     del_item = None
@@ -134,11 +136,11 @@ if __name__ == "__main__":
     cType = None
 
 #     try:
-#         markName = urllib.unquote_plus(params["url"]).decode('utf-8').split('|')[1]
+#         markName = params["url"].decode('utf-8').split('|')[1]
 #     except:
 #         pass
     try:
-        url = urllib.unquote_plus(params["url"]).decode('utf-8')
+        url = params["url"].decode('utf-8')
     except:
         try:
             url = urlUtils.getURL(sys.argv[2])
@@ -146,40 +148,40 @@ if __name__ == "__main__":
             pass
         pass
     try:
-        name = urllib.unquote_plus(params["name"])
+        name = params["name"]
     except:
         name = None
     try:
-        iconimage = urllib.unquote_plus(params["iconimage"])
+        iconimage = params["iconimage"]
     except:
         pass
     try:
-        movID = urllib.unquote_plus(params["id"])
+        movID = params["id"]
     except:
         movID = None
         pass
     try:
-        shoID = urllib.unquote_plus(params["showid"])
+        shoID = params["showid"]
     except:
         shoID = None
         pass
     try:
-        showID = urllib.unquote_plus(params["showid"])
+        showID = params["showid"]
     except:
         showID = None
         pass
     try:
-        mediaType = urllib.unquote_plus(params["mediaType"])
+        mediaType = params["mediaType"]
     except:
         mediaType = None
         pass
     try:
-        episode = urllib.unquote_plus(params["episode"])
+        episode = params["episode"]
     except:
         episode = None
         pass
     try:
-        fanart = urllib.unquote_plus(params["fanart"])
+        fanart = params["fanart"]
     except:
         pass
     try:
@@ -187,7 +189,7 @@ if __name__ == "__main__":
     except:
         pass
     try:
-        playlist = eval(urllib.unquote_plus(params["playlist"]).replace('||', ','))
+        playlist = eval(params["playlist"].replace('||', ','))
     except:
         pass
     try:
@@ -202,12 +204,6 @@ if __name__ == "__main__":
         filetype = params.get("filetype", "directory")
     except:
         pass
-
-    utils.addon_log("Mode: " + str(mode))
-
-    if not url is None:
-        utils.addon_log("URL: " + str(url))
-        utils.addon_log("Name: " + str(name))
 
     if mode == None:
         utils.addon_log("getSources")
@@ -245,7 +241,7 @@ if __name__ == "__main__":
         updateAll.strm_update()
     elif mode == 4:
         selectedItems = create.getMediaListDialog()
-        if selectedItems is not None:
+        if selectedItems:
             updateAll.strm_update(selectedItems)
     elif mode == 5:
         create.removeItemsFromMediaList('list')

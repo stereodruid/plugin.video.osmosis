@@ -59,12 +59,12 @@ def cleanLabels(text, formater=''):
                    (u"\n", u""), (u"\r", u""),
                    (u"\t", u""), (u"\ ", u''),
                    (u"/ ", u''), (u"\\", u'/'),
-                   (u"//", u'/'), (u'plugin.video.', u''), (u':', u''),
+                   (u"//", u'/'), (u'plugin.video.', u''),
                    (u'plugin.audio.', u''))
 
     text = utils.multiple_reSub(text, dictresub)
     text = utils.multiple_replace(text, *replacements)
-    text = re.sub('[\/:*?<>|!@#$/:,]', '', text)
+    text = re.sub('[\/*?<>|!]', '', text)
     text = re.sub('\(.\d*\)', "", text)
     if formater == 'title':
         text = text.title().replace("'S", "'s")
@@ -94,7 +94,7 @@ def cleanStrms(text, formater=''):
 
 
 def cleanStrmFilesys(string):
-    return re.sub('[\/:*?<>|!@#$"]', '', string)
+    return re.sub('[\/:*?<>|!"]', '', string)
 
 
 def multiRstrip(text):
@@ -173,16 +173,16 @@ def cleanByDictReplacements(string):
                         '  ' : ' ', '\(de\)':'', '\(en\)':'',
                         "\(TVshow\)":"", 'Movies' : '', 'Filme' : '',
                         'Movie' : '', "'.'" : ' ', '\(\)' : '',
-                        ":": ' ', '"?"': '', '"':''}
+                        '"?"': '', '"':''}
 
     return utils.multiple_reSub(string, dictReplacements)
 
 
-def getMovieStrmPath(strmTypePath, mediaListEntry_name, movie_name=''):
+def getMovieStrmPath(strmTypePath, mediaListEntry_name, movie_name=None):
     if folder_medialistentry_movie and folder_medialistentry_movie == 'true':
-        mediaListEntry_name = cleanByDictReplacements(getStrmname(mediaListEntry_name)) if mediaListEntry_name.find('++RenamedTitle++') == -1 else getStrmname(mediaListEntry_name)
+        mediaListEntry_name = cleanByDictReplacements(mediaListEntry_name) if mediaListEntry_name.find('++RenamedTitle++') == -1 else cleanStrmFilesys(getStrmname(mediaListEntry_name))
         strmTypePath = os.path.join(strmTypePath, mediaListEntry_name)
-    if movie_name != '' and folder_movie and folder_movie == 'true':
+    if movie_name and folder_movie and folder_movie == 'true':
         movie_name = cleanByDictReplacements(getStrmname(movie_name))
         strmTypePath = os.path.join(strmTypePath, movie_name)
     return strmTypePath

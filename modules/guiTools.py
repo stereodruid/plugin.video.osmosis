@@ -62,7 +62,7 @@ def addFunction(labels):
 
 def addDir(name, url, mode, art, plot, genre, date, credits, showcontext=False):
     utils.addon_log('addDir')
-    u = sys.argv[0] + "?url=" + urllib.quote_plus(stringUtils.uni(url)) + "&mode=" + str(mode) + "&name=" + urllib.quote_plus(stringUtils.uni(name)) + "&fanart=" + urllib.quote_plus(art.get('fanart', ''))
+    u = "%s?url=%s&name=%s&fanart=%s" % (sys.argv[0], urllib.quote_plus(stringUtils.uni(url)), urllib.quote_plus(stringUtils.cleanLabels(stringUtils.uni(name))), urllib.quote_plus(art.get('fanart', '')))
     contextMenu = []
     thumbArt = art.get('thumb', None)
     if thumbArt == None:
@@ -70,15 +70,15 @@ def addDir(name, url, mode, art, plot, genre, date, credits, showcontext=False):
     liz = xbmcgui.ListItem(name, iconImage=thumbArt, thumbnailImage=thumbArt)
     liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": plot, "Genre": genre, "dateadded": date, "credits": credits })
     liz.setArt(art)
-    contextMenu.append(('Create Strms', 'XBMC.RunPlugin(%s&mode=200&name=%s)' % (u, name)))
+    contextMenu.append(('Create Strms', 'XBMC.RunPlugin(%s&mode=%d)' % (u, 200)))
     liz.addContextMenuItems(contextMenu)
 
-    xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=True)
+    xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url='%s&mode=%d' % (u, mode), listitem=liz, isFolder=True)
 
 
 def addLink(name, url, mode, art, plot, genre, date, showcontext, playlist, regexs, total, setCookie=""):
     utils.addon_log('addLink')
-    u = sys.argv[0] + "?url=" + urllib.quote_plus(stringUtils.uni(url)) + "&mode=" + str(mode) + "&name=" + urllib.quote_plus(stringUtils.uni(name)) + "&fanart=" + urllib.quote_plus(art.get('fanart', ''))
+    u = "%s?url=%s&name=%s&fanart=%s" % (sys.argv[0], urllib.quote_plus(stringUtils.uni(url)), urllib.quote_plus(stringUtils.cleanLabels(stringUtils.uni(name))), urllib.quote_plus(art.get('fanart', '')))
     contextMenu = []
     thumbArt = art.get('thumb', None)
     if thumbArt == None:
@@ -87,11 +87,11 @@ def addLink(name, url, mode, art, plot, genre, date, showcontext, playlist, rege
     liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": plot, "Genre": genre, "dateadded": date })
     liz.setArt(art)
     liz.setProperty('IsPlayable', 'true')
-    contextMenu.append(('Create Strm', 'XBMC.RunPlugin(%s&mode=200&name=%s&filetype=file)' % (u, name)))
+    contextMenu.append(('Create Strm', 'XBMC.RunPlugin(%s&mode=%d&filetype=file)' % (u, 200)))
     liz.addContextMenuItems(contextMenu)
     xbmcplugin.setContent(int(sys.argv[1]), 'movies')
 
-    xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, totalItems=total)
+    xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url='%s&mode=%d' % (u, mode), listitem=liz, totalItems=total)
 
 
 def getSources():
@@ -105,7 +105,7 @@ def getSources():
     addFunction('Update all')
     addItem("Remove Media", 5, iconRemove)
     if xbmc.getCondVisibility('System.HasAddon(service.watchdog)') != 1:
-	    addItem("Install Watchdog", 6, icon)
+        addItem("Install Watchdog", 6, icon)
     # ToDo Add label
 
 
