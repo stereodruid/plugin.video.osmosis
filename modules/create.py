@@ -25,6 +25,7 @@ from modules import jsonUtils
 from modules import stringUtils
 from modules import urlUtils
 from modules import kodiDB
+from modules import tvdb
 
 reload(sys)
 sys.setdefaultencoding("utf-8")
@@ -419,16 +420,29 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
             for detailInfo in showList:
                 filetype = detailInfo.get('filetype', None)
                 file = detailInfo.get('file', None)
-                episode = detailInfo.get('episode', -1)
-                season = detailInfo.get('season', -1)
 
-                if filetype is not None:
+                if filetype:
                     if filetype == 'directory':
                         dirList.append(jsonUtils.requestList(file, 'video').get('files', []))
                         continue
-                    elif season > -1 and episode > -1 and filetype == 'file':
-                        if NOE0_STRMS_EXPORT == "false" or episode > 0:
-                            episodesList.append(detailInfo)
+                    elif filetype == 'file':
+                        if detailInfo.get('season', -1) == -1 or detailInfo.get('episode', -1) == -1:
+                            showtitle = detailInfo.get('showtitle')
+                            episodetitle = detailInfo.get('title')
+
+                            if showtitle and showtitle != '' and episodetitle and episodetitle != '':
+                                lang = None
+                                if strm_type.lower().find('other') == -1:
+                                    lang = strm_type[strm_type.find('(') + 1:strm_type.find(')')]
+
+                                data = tvdb.getEpisodeByName(showtitle, episodetitle, lang)
+                                if data:
+                                    detailInfo['season'] = data.get('season')
+                                    detailInfo['episode'] = data.get('episode')
+
+                        if detailInfo.get('season', -1) > -1 and detailInfo.get('episode', -1) > -1:
+                            if NOE0_STRMS_EXPORT == "false" or episode > 0:
+                                episodesList.append(detailInfo)
 
             step = float(100.0 / len(episodesList) if len(episodesList) > 0 else 1)
             if pagesDone == 0:
@@ -439,10 +453,6 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
                 pagesDone = getEpisode(episode, strm_name, strm_type, pagesDone=pagesDone)
                 thisDialog.dialogeBG.update(int(step * (index + 1)))
 
-        except IOError as (errno, strerror):
-            print ("I/O error({0}): {1}").format(errno, strerror)
-        except ValueError:
-            print ("No valid integer in line.")
         except:
             guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1]) + (". See your Kodi.log!"))
             utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
