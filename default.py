@@ -52,7 +52,8 @@ def getAndMarkResumePoint(props, isTVShow):
 
     watched = 0
     while xbmc.Player().isPlaying():
-        watched = xbmc.Player().getTime() * 100 / xbmc.Player().getTotalTime()
+        if xbmc.Player().getTotalTime() > 0:
+            watched = xbmc.Player().getTime() * 100 / xbmc.Player().getTotalTime()
         time.sleep(1)
 
     time.sleep(1)

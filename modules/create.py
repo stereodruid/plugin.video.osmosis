@@ -441,7 +441,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
                                     detailInfo['episode'] = data.get('episode')
 
                         if detailInfo.get('season', -1) > -1 and detailInfo.get('episode', -1) > -1:
-                            if NOE0_STRMS_EXPORT == "false" or detailInfo.get('episode', -1) > 0:
+                            if NOE0_STRMS_EXPORT == "false" or detailInfo.get('episode') > 0:
                                 episodesList.append(detailInfo)
 
             step = float(100.0 / len(episodesList) if len(episodesList) > 0 else 1)

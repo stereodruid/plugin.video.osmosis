@@ -166,10 +166,10 @@ def markMovie(movID, pos, total, done):
                 pass
 
 
-def markSeries(shoID, pos, total, done):
+def markSeries(epID, pos, total, done):
     if done:
         try:
-            xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % shoID)
+            xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % epID)
             xbmc.executebuiltin("XBMC.Container.Refresh")
         except:
             print("markMovie: Episode not in DB!?")
@@ -177,7 +177,7 @@ def markSeries(shoID, pos, total, done):
     else:
         if xbmc.getCondVisibility('Library.HasContent(TVShows)') and pos > 0 and total > 0:
             try:
-                xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "resume" : {"position":%s,"total":%s} }, "id": 1 }' % (shoID, pos, total))
+                xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "resume" : {"position":%s,"total":%s} }, "id": 1 }' % (epID, pos, total))
                 xbmc.executebuiltin("XBMC.Container.Refresh")
             except:
                 print("markSeries: Show not in DB!?")
