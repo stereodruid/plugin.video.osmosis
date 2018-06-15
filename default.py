@@ -37,66 +37,50 @@ sys.setdefaultencoding("utf-8")
 addon = xbmcaddon.Addon()
 home = xbmc.translatePath(addon.getAddonInfo('path').decode('utf-8'))
 FANART = os.path.join(home, 'fanart.jpg')
+kodi_version = int(xbmc.getInfoLabel("System.BuildVersion")[:2])
 
 
 def getAndMarkResumePoint(props, isTVShow):
-    # search bookmarks for the ID and get the played time if exists
-    checkURL = str(sys.argv[0].replace(r'|', sys.argv[2] + r'|'))
-    urlsResumePoint = kodiDB.getPlayedURLResumePoint(checkURL)
+    resumePoint = None
 
-    if urlsResumePoint:
-        conTime = utils.zeitspanne(int(urlsResumePoint[0]))
-        resume = ["Jump to position : %s " % (str(conTime[5])), "Start from beginning!"]
-        if guiTools.selectDialog(resume, header='OSMOSIS: Would you like to continue?') == 0:
-            xbmc.Player().seekTime(int(urlsResumePoint[0]) - 5)
+    if kodi_version < 18:
+        url = str(sys.argv[0].replace(r'|', sys.argv[2] + r'|'))
+        resumePoint = kodiDB.getPlayedURLResumePoint({'url' : url})
+        guiTools.resumePointDialog(resumePoint)
 
-    watched = 0
-    while xbmc.Player().isPlaying():
-        if xbmc.Player().getTotalTime() > 0:
-            watched = xbmc.Player().getTime() * 100 / xbmc.Player().getTotalTime()
+        watched = 0
+        while xbmc.Player().isPlaying():
+            if xbmc.Player().getTotalTime() > 0:
+                watched = xbmc.Player().getTime() * 100 / xbmc.Player().getTotalTime()
+            time.sleep(1)
+
         time.sleep(1)
 
-    time.sleep(1)
+        if props:
+            ID = props[0]
+            fileID = props[1]
+            pos = 0
+            total = 0
+            urlsWatchedPoint = kodiDB.getPlayedURLResumePoint({'url' : url})
+            if urlsWatchedPoint:
+                pos = urlsWatchedPoint[0]
+                total = urlsWatchedPoint[1]
+                done = False
+            elif urlsResumePoint and not urlsWatchedPoint:
+                kodiDB.delBookMark(urlsResumePoint[2], fileID)
+                done = True
+            elif not urlsResumePoint and not urlsWatchedPoint:
+                done = True if watched > 50 else False
+            else:
+                done = False
 
-    if props:
-        ID = props[0]
-        fileID = props[1]
-        pos = 0
-        total = 0
-        urlsWatchedPoint = kodiDB.getPlayedURLResumePoint(checkURL)
-        if urlsWatchedPoint:
-            pos = urlsWatchedPoint[0]
-            total = urlsWatchedPoint[1]
-            done = False
-        elif urlsResumePoint and not urlsWatchedPoint:
-            kodiDB.delBookMark(urlsResumePoint[2], fileID)
-            done = True
-        elif not urlsResumePoint and not urlsWatchedPoint:
-            done = True if watched > 50 else False
-        else:
-            done = False
-
-        guiTools.markMovie(ID, pos, total, done) if isTVShow == False else guiTools.markSeries(ID, pos, total, done)
-
-
-def autoselectVideostream(playerid):
-    query = ('{"jsonrpc":"2.0","method":"Player.GetProperties", "params":{"playerid":%d,"properties":["videostreams"]}, "id": 1}') % (playerid)
-    streams = json.loads(xbmc.executeJSONRPC(query)).get('result', {}).get('videostreams', [])
-
-    if len(streams) > 1:
-        resolutions = [360, 480, 540, 720, 1080, 0]
-        maxresolution = resolutions[int(addon.getSetting('maxresolution'))]
-
-        selectedstream = 0
-        selectedresolution = None
-
-        for stream in streams:
-            if selectedresolution is None or stream.get('height') <= maxresolution or (maxresolution == 0 and selectedresolution <= stream.get('height')):
-                selectedstream = stream.get('index')
-                selectedresolution = stream.get('height')
-
-        xbmc.Player().setVideoStream(selectedstream)
-        xbmc.Player().seekTime(0)
+            guiTools.markMovie(ID, pos, total, done) if isTVShow == False else guiTools.markSeries(ID, pos, total, done)
+    else:
+        filenameandpath = xbmc.getInfoLabel('Player.FilenameAndPath')
+        path = filenameandpath[0:filenameandpath.rfind("\\" if filenameandpath.find("\\") >= 0 else "/") + 1]
+        filename = filenameandpath[filenameandpath.rfind("\\" if filenameandpath.find("\\") >= 0 else "/") + 1:]
+        resumePoint = kodiDB.getPlayedURLResumePoint({'filename': filename, 'path': path})
+        guiTools.resumePointDialog(resumePoint)
 
 
 if __name__ == "__main__":
@@ -249,26 +233,23 @@ if __name__ == "__main__":
     elif mode == 6:
         xbmc.executebuiltin('InstallAddon(service.watchdog)')
     elif mode == 10:
-        # Split url to get tags
-        # purl = url.split('|')[1]
-        if mediaType:
-            try:
-                # Play Movies/TV-Shows:
-                if movID or showID:
-                    providers = kodiDB.getVideo(movID) if movID else kodiDB.getVideo(showID, episode)
-                    if len(providers) == 1:
-                        url = providers[0][0]
-                    else:
-                        selectProvider = []
-                        for i in providers:
-                            selectProvider.append(i[1])
-                        # Get/Set Provider
-                        url = providers[guiTools.selectDialog(selectProvider, header='OSMOSIS: Select provider!')][0].decode('utf-8')
-            except:
-                pass
 
-        try:
-            # Get infos from selectet media
+        selectedEntry = None
+        if mediaType:
+            if movID or showID:
+                providers = kodiDB.getVideo(movID) if movID else kodiDB.getVideo(showID, episode)
+                if len(providers) == 1:
+                    selectedEntry = providers[0]
+                else:
+                    selectProvider = []
+                    for i in providers:
+                        selectProvider.append(i[1])
+
+                    selectedEntry = providers[guiTools.selectDialog(selectProvider, header='OSMOSIS: Select provider!')]
+
+        if selectedEntry:
+            url = selectedEntry[0]
+
             item = xbmcgui.ListItem(path=url)
             props = None
             infoLabels = {}
@@ -299,7 +280,6 @@ if __name__ == "__main__":
                 if len(infoLabels) > 0:
                     item.setInfo('video', infoLabels)
 
-                # Exec play process
                 xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
 
                 # Wait until the media is started in player
@@ -312,15 +292,11 @@ if __name__ == "__main__":
                     if counter >= 300:
                         raise
 
-                if addon.getSetting('autoselect_videostream') == 'true':
-                    autoselectVideostream(activePlayers[0].get('playerid'))
-
-                getAndMarkResumePoint(props, mediaType == 'show')
+                if xbmc.Player().isPlayingVideo():
+                    getAndMarkResumePoint(props, mediaType == 'show')
             else:
                 # Exec play process
                 xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
-        except Exception:
-            pass
     elif mode == 100:
         create.fillPlugins(url)
         try:

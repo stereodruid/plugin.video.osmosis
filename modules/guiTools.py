@@ -242,3 +242,11 @@ def yesnoDialog(str1, str2='', header=ADDON_NAME, yes='', no=''):
 def browse(type, heading, shares, mask='', useThumbs=False, treatAsFolder=False, path='', enableMultiple=False):
     retval = xbmcgui.Dialog().browse(type, heading, shares, mask, useThumbs, treatAsFolder, path, enableMultiple)
     return retval
+
+
+def resumePointDialog(resumePoint):
+    if resumePoint:
+        conTime = utils.zeitspanne(int(resumePoint[0]))
+        dialogText = ["Jump to position : %s " % (str(conTime[5])), "Start from beginning!"]
+        if selectDialog(dialogText, header='OSMOSIS: Would you like to continue?') == 0:
+            xbmc.Player().seekTime(int(resumePoint[0]) - 5)

@@ -15,8 +15,6 @@
 		 -->
 		<setting label="32016" type="bool" id="noE0_Strms_Export" default="false"/>
 		<setting label="32013" type="bool" id="Hide_tilte_in_OV" default="false"/>
-		<setting label="32017" type="bool" id="autoselect_videostream" default="false"/>
-		<setting label="32018" type="enum" id="maxresolution" values="360p|480p|540p|720p|1080p|Max" default="5" subsetting="true" enable="eq(-1,true)"/>
 	 </category>
 	<category label="31000">   
 		<!-- <setting label="31004" type="bool" id="Write_NFOS" default="false" /> -->

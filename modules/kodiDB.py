@@ -71,10 +71,7 @@ MDBNAME = addon.getSetting('Music-DB name')
 MDBIP = addon.getSetting('Music-DB IP')
 MDBPORT = addon.getSetting('Music-DB port')
 
-try:
-    kodi_version = int(xbmc.getInfoLabel("System.BuildVersion")[:2])
-except:
-    kodi_version = 17
+kodi_version = int(xbmc.getInfoLabel("System.BuildVersion")[:2])
 
 
 class Config(object):
@@ -604,21 +601,23 @@ def getVideo(ID, seasonEpisode=None):
     return provList
 
 
-def getPlayedURLResumePoint(url):
+def getPlayedURLResumePoint(args):
     urlResumePoint = None
 
     try:
         con, cursor = openDB(KMODBPATH, 'KMovies')
 
-        url = stringUtils.invCommas(url)
+        query = "SELECT timeInSeconds, totalTimeInSeconds, idBookmark FROM bookmark INNER JOIN files on files.idFile = bookmark.idFile"
+        if(args.get('url', None)):
+            url = stringUtils.invCommas(args.get('url'))
+            query += "  WHERE files.strFilename LIKE '{}';".format(url)
+        else:
+            filename = stringUtils.invCommas(args.get('filename'))
+            path = stringUtils.invCommas(args.get('path'))
+            query += " INNER JOIN path on path.idPath = files.idPath WHERE files.strFilename LIKE '{}' AND path.strPath LIKE '{}';".format(filename, path)
 
-        cursor.execute("SELECT idFile FROM files WHERE strFilename LIKE '{}';".format(url))
-        dbfile = cursor.fetchone()
-
-        if dbfile:
-            dbfileID = dbfile[0]
-            cursor.execute("SELECT timeInSeconds, totalTimeInSeconds, idBookmark FROM bookmark WHERE idFile = {};".format(dbfileID))
-            urlResumePoint = cursor.fetchone()
+        cursor.execute(query)
+        urlResumePoint = cursor.fetchone()
     finally:
         cursor.close()
         con.close()
