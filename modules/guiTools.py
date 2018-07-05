@@ -21,6 +21,7 @@ import time
 import urllib
 
 import utils
+import jsonUtils
 import xbmc
 import xbmcplugin, xbmcgui, xbmcaddon
 
@@ -105,7 +106,12 @@ def getSources():
     addFunction('Update all')
     addItem("Remove Media", 5, iconRemove)
     if xbmc.getCondVisibility('System.HasAddon(service.watchdog)') != 1:
-        addItem("Install Watchdog", 6, icon)
+        json_query = ('{"jsonrpc":"2.0","method":"Addons.GetAddonDetails", "params":{ "addonid": "service.watchdog", "properties":["enabled", "installed"]}, "id": 1 }')
+        addon_details = jsonUtils.sendJSON(json_query).get('addon')
+        if addon_details.get("installed"):
+            addItem("Activate Watchdog", 7, icon)
+        else:
+            addItem("Install Watchdog", 6, icon)
     # ToDo Add label
 
 

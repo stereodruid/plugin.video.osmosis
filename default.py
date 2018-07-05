@@ -27,6 +27,7 @@ from modules import urlUtils
 from modules import updateAll
 from modules import moduleUtil
 from modules import stringUtils
+from modules import jsonUtils
 
 import utils
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin
@@ -232,6 +233,10 @@ if __name__ == "__main__":
         create.removeItemsFromMediaList('list')
     elif mode == 6:
         xbmc.executebuiltin('InstallAddon(service.watchdog)')
+    elif mode == 7:
+        json_query = ('{"jsonrpc": "2.0", "method":"Addons.SetAddonEnabled", "params":{ "addonid": "service.watchdog", "enabled": true}, "id": 1 }')
+        jsonUtils.sendJSON(json_query)
+        xbmc.executebuiltin("XBMC.Container.Refresh")
     elif mode == 10:
 
         selectedEntry = None

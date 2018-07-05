@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.osmosis" name="OSMOSIS" version="1.3.2" provider-name="Stereodruid, Maven85, gismo112">
+<addon id="plugin.video.osmosis" name="OSMOSIS" version="1.3.3" provider-name="Stereodruid, Maven85, gismo112">
 	<requires>
 		<import addon="xbmc.python" version="2.1.0" />
 		<import addon="script.module.simple.downloader" version="0.9.4" />
@@ -46,6 +46,7 @@
 			<fanart>fanart.jpg</fanart>
 			<screenshot>fanart.jpg</screenshot>
 		</assets>
+		<reuselanguageinvoker>true</reuselanguageinvoker>
 	</extension>
 	<extension point="kodi.context.item">
 		<menu id="kodi.core.main">

@@ -1,3 +1,5 @@
+1.3.3
+  Maven85  Aktivieren des Python-Cachings
 1.3.0-1.3.2
   Maven85  Fix resume function in kodi18
   Maven85  Search episode data on TVDB if season and episode numbers are not specified + caching
