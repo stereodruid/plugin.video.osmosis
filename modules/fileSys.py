@@ -102,7 +102,7 @@ def makeSTRM(filepath, filename, url):
                 if fullpath.find('Audio') > 0:
                     mtime = os.path.getmtime(fullpath)
             except OSError:
-	        pass
+                pass
 
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)
