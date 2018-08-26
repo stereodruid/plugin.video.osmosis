@@ -244,7 +244,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                         continue
 
                     if addon.getSetting('Link_Type') == '0':
-                        link = '%s?url=%s&mode=%d&name=%s&fanart=%s' % (sys.argv[0], urllib.quote_plus(file), 10, urllib.quote_plus(label), urllib.quote_plus(fanart))
+                        link = '%s?url=%s&mode=%d&name=%s&fanart=%s' % (sys.argv[0], urllib.quote_plus(file), 10, urllib.quote_plus(stringUtils.uni(label)), urllib.quote_plus(fanart))
                     else:
                         link = file
 
