@@ -1,4 +1,8 @@
-1.3.0-1.3.1
+1.3.3
+  Maven85  Aktivieren des Python-Cachings
+1.3.0-1.3.2
+  Maven85  Fix resume function in kodi18
+  Maven85  Search episode data on TVDB if season and episode numbers are not specified + caching
   gu3nter  Added MYSQL support for Music
   Gismo112 Add SkinUpdate Resume / Watchedstates
   gu3nter  Sqlite3 and MYSQL are now supported in one Branch

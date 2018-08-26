@@ -21,6 +21,7 @@ import time
 import urllib
 
 import utils
+import jsonUtils
 import xbmc
 import xbmcplugin, xbmcgui, xbmcaddon
 
@@ -105,7 +106,12 @@ def getSources():
     addFunction('Update all')
     addItem("Remove Media", 5, iconRemove)
     if xbmc.getCondVisibility('System.HasAddon(service.watchdog)') != 1:
-        addItem("Install Watchdog", 6, icon)
+        json_query = ('{"jsonrpc":"2.0","method":"Addons.GetAddonDetails", "params":{ "addonid": "service.watchdog", "properties":["enabled", "installed"]}, "id": 1 }')
+        addon_details = jsonUtils.sendJSON(json_query).get('addon')
+        if addon_details.get("installed"):
+            addItem("Activate Watchdog", 7, icon)
+        else:
+            addItem("Install Watchdog", 6, icon)
     # ToDo Add label
 
 
@@ -166,10 +172,10 @@ def markMovie(movID, pos, total, done):
                 pass
 
 
-def markSeries(shoID, pos, total, done):
+def markSeries(epID, pos, total, done):
     if done:
         try:
-            xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % shoID)
+            xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % epID)
             xbmc.executebuiltin("XBMC.Container.Refresh")
         except:
             print("markMovie: Episode not in DB!?")
@@ -177,7 +183,7 @@ def markSeries(shoID, pos, total, done):
     else:
         if xbmc.getCondVisibility('Library.HasContent(TVShows)') and pos > 0 and total > 0:
             try:
-                xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "resume" : {"position":%s,"total":%s} }, "id": 1 }' % (shoID, pos, total))
+                xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "resume" : {"position":%s,"total":%s} }, "id": 1 }' % (epID, pos, total))
                 xbmc.executebuiltin("XBMC.Container.Refresh")
             except:
                 print("markSeries: Show not in DB!?")
@@ -242,3 +248,11 @@ def yesnoDialog(str1, str2='', header=ADDON_NAME, yes='', no=''):
 def browse(type, heading, shares, mask='', useThumbs=False, treatAsFolder=False, path='', enableMultiple=False):
     retval = xbmcgui.Dialog().browse(type, heading, shares, mask, useThumbs, treatAsFolder, path, enableMultiple)
     return retval
+
+
+def resumePointDialog(resumePoint):
+    if resumePoint:
+        conTime = utils.zeitspanne(int(resumePoint[0]))
+        dialogText = ["Jump to position : %s " % (str(conTime[5])), "Start from beginning!"]
+        if selectDialog(dialogText, header='OSMOSIS: Would you like to continue?') == 0:
+            xbmc.Player().seekTime(int(resumePoint[0]) - 5)
