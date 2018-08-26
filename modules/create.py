@@ -122,6 +122,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
     if strm_type.find('Album') != -1 :
         try:
             initialize_DialogBG("Album", "Adding")
+            strm_name = stringUtils.cleanStrmFilesys(strm_name)
             addAlbum(details, strm_name, strm_type)
             thisDialog.dialogeBG.close()
             thisDialog.dialogeBG = None
@@ -243,7 +244,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                         continue
 
                     if addon.getSetting('Link_Type') == '0':
-                        link = +"%s?url=%s&mode=%d&name=%s&fanart=%s" % (sys.argv[0], urllib.quote_plus(file), 10, urllib.quote_plus(label), urllib.quote_plus(fanart))
+                        link = '%s?url=%s&mode=%d&name=%s&fanart=%s' % (sys.argv[0], urllib.quote_plus(file), 10, urllib.quote_plus(label), urllib.quote_plus(fanart))
                     else:
                         link = file
 
