@@ -70,7 +70,7 @@ def makeSTRM(filepath, filename, url):
         if not STRM_LOC.startswith("smb:") and not STRM_LOC.startswith('nfs:'):
             fullpath = '%s.strm' % (os.path.normpath(xbmc.translatePath(os.path.join(filepath, filename))))
         else:
-            fullpath = '%s/%s.strm' % (filepath, filename)
+            fullpath = '%s%s.strm' % (filepath, filename)
 #         if xbmcvfs.exists(fullpath):
 #             if addon.getSetting('Clear_Strms') == 'true':
 #                 x = 0 #xbmcvfs.delete(fullpath)
@@ -97,9 +97,12 @@ def makeSTRM(filepath, filename, url):
             fle.write(bytearray(url, encoding="utf-8"))
             fle.close()
             del fle
-
-            if fullpath.find('Audio') > 0:
-                mtime = os.path.getmtime(fullpath)
+            
+            try:
+                if fullpath.find('Audio') > 0:
+                    mtime = os.path.getmtime(fullpath)
+            except OSError:
+                pass
 
     except IOError as (errno, strerror):
         print ("I/O error({0}): {1}").format(errno, strerror)

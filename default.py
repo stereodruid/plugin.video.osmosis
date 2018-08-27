@@ -302,6 +302,14 @@ if __name__ == "__main__":
             else:
                 # Exec play process
                 xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
+        else:
+            try:
+                # Get infos from selectet media
+                item = xbmcgui.ListItem(path=url)
+	        # Exec play process
+                xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
+            except Exception:
+                pass
     elif mode == 100:
         create.fillPlugins(url)
         try:
