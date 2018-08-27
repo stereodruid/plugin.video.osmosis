@@ -306,9 +306,7 @@ if __name__ == "__main__":
             try:
                 # Get infos from selectet media
                 item = xbmcgui.ListItem(path=url)
-                props = None
-                infoLabels = {}
-			    # Exec play process
+	        # Exec play process
                 xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
             except Exception:
                 pass
