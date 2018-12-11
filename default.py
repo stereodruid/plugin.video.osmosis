@@ -32,9 +32,6 @@ from modules import jsonUtils
 import utils
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin
 
-reload(sys)
-sys.setdefaultencoding("utf-8")
-
 addon = xbmcaddon.Addon()
 home = xbmc.translatePath(addon.getAddonInfo('path').decode('utf-8'))
 FANART = os.path.join(home, 'fanart.jpg')
@@ -126,7 +123,7 @@ if __name__ == "__main__":
 #     except:
 #         pass
     try:
-        url = params["url"].decode('utf-8')
+        url = params["url"]
     except:
         try:
             url = urlUtils.getURL(sys.argv[2])
@@ -332,54 +329,45 @@ if __name__ == "__main__":
 
     elif mode == 200:
         utils.addon_log("write multi strms")
-        try:
-            # A dialog to rename the Change Title for Folder and MediaList entry:
-            selectAction = ['No, continue with original Title!', 'Rename Title!']
-            if not fileSys.writeTutList("select:Rename"):
+
+        # A dialog to rename the Change Title for Folder and MediaList entry:
+        selectAction = ['No, continue with original Title!', 'Rename Title!']
+        if not fileSys.writeTutList("select:Rename"):
+            tutWin = ["Adding content to your library",
+                      "You can rename your Movie, TV-Show or Music title.",
+                      "To make your scraper recognize the content, some times it is necessary to rename the title.",
+                      "Be careful, wrong title can also cause that your scraper can't recognize your content."]
+            xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
+        choice = guiTools.selectDialog(selectAction, header='Title for Folder and MediaList entry')
+        if choice != -1:
+            if choice == 1 or name == None or name == "":
+                name = guiTools.editDialog(name).strip() + "++RenamedTitle++"
+
+            if not fileSys.writeTutList("select:ContentTypeLang"):
                 tutWin = ["Adding content to your library",
-                          "You can rename your Movie, TV-Show or Music title.",
-                          "To make your scraper recognize the content, some times it is necessary to rename the title.",
-                          "Be careful, wrong title can also cause that your scraper can't recognize your content."]
+                          "Now select your content type.",
+                          "Select language or YouTube type.",
+                          "Wait for done message."]
                 xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
-            choice = guiTools.selectDialog(selectAction, header='Title for Folder and MediaList entry')
-            if choice != -1:
-                if choice == 1 or name == None or name == "":
-                    name = guiTools.editDialog(name).strip() + "++RenamedTitle++"
 
-                if not fileSys.writeTutList("select:ContentTypeLang"):
-                    tutWin = ["Adding content to your library",
-                              "Now select your content type.",
-                              "Select language or YouTube type.",
-                              "Wait for done message."]
-                    xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
+            cType = guiTools.getType(url)
+            if filetype == 'file':
+                url += '&playMode=play'
+            if cType != -1:
+                fileSys.writeMediaList(url, name, cType)
+                xbmcgui.Dialog().notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False)
 
-                cType = guiTools.getType(url)
-                if filetype == 'file':
-                    url += '&playMode=play'
-                if cType != -1:
-                    fileSys.writeMediaList(url, name, cType)
-                    xbmcgui.Dialog().notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False)
+                try:
+                    plugin_id = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
+                    if plugin_id:
+                        module = moduleUtil.getModule(plugin_id.group(1))
+                        if module and hasattr(module, 'create'):
+                            url = module.create(name, url, 'video')
+                except:
+                    pass
 
-                    try:
-                        plugin_id = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
-                        if plugin_id:
-                            module = moduleUtil.getModule(plugin_id.group(1))
-                            if module and hasattr(module, 'create'):
-                                url = module.create(name, url, 'video')
-                    except:
-                        pass
-
-                    create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
-                    xbmcgui.Dialog().notification('Writing items...', "Done", xbmcgui.NOTIFICATION_INFO, 5000, False)
-        except IOError as (errno, strerror):
-            print ("I/O error({0}): {1}").format(errno, strerror)
-        except ValueError:
-            print ("No valid integer in line.")
-        except:
-            guiTools.infoDialog(url + " " + name + " " + cType)
-            utils.addon_log(url + " " + name + " " + cType)
-            print (url + " " + name + " " + cType)
-            raise
+                create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
+                xbmcgui.Dialog().notification('Writing items...', "Done", xbmcgui.NOTIFICATION_INFO, 5000, False)
     elif mode == 201:
         utils.addon_log("write single strm")
         # create.fillPluginItems(url)

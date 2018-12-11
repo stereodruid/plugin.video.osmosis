@@ -24,43 +24,41 @@ folder_movie = addon.getSetting('folder_movie')
 
 
 def cleanString(string):
-    newstr = uni(string)
     newstr = newstr.replace('&', '&amp;')
     newstr = newstr.replace('>', '&gt;')
     newstr = newstr.replace('<', '&lt;')
-    return uni(newstr)
+    return newstr
 
 
 def uncleanString(string):
-    newstr = uni(string)
+    newstr = string
     newstr = newstr.replace('&amp;', '&')
     newstr = newstr.replace('&gt;', '>')
     newstr = newstr.replace('&lt;', '<')
-    return uni(newstr)
+    return newstr
 
 
 def cleanLabels(text, formater=''):
-    text = uni(text)
     dictresub = {'\[COLOR (.+?)\]' : '', '\[/COLOR\]' : '', '\[COLOR=(.+?)\]' : '', '\[color (.+?)\]': '',
                  '\[/color\]': '', '\[Color=(.+?)\]': '', '\[/Color\]': ''}
 
-    replacements = ((u"[]", u''), (u"[UPPERCASE]", u''),
-                   (u"[/UPPERCASE]", u''), (u"[LOWERCASE]", u''),
-                   (u"[/LOWERCASE]", u''), (u"[B]", u''), (u"[/B]", u''),
-                   (u"[I]", u''), (u"[/I]", u''),
-                   (u'[D]', u''), (u'[F]', u''),
-                   (u"[CR]", u''), (u"[HD]", u''),
-                   (u"()", u''), (u"[CC]", u''),
-                   (u"[Cc]", u''), (u"[Favorite]", u""),
-                   (u"[DRM]", u""), (u'(cc).', u''),
-                   (u'(n)', u''), (u"(SUB)", u''),
-                   (u"(DUB)", u''), (u'(repeat)', u''),
-                   (u"(English Subtitled)", u""), (u"*", u""),
-                   (u"\n", u""), (u"\r", u""),
-                   (u"\t", u""), (u"\ ", u''),
-                   (u"/ ", u''), (u"\\", u'/'),
-                   (u"//", u'/'), (u'plugin.video.', u''),
-                   (u'plugin.audio.', u''))
+    replacements = (("[]", ''), ("[UPPERCASE]", ''),
+                   ("[/UPPERCASE]", ''), ("[LOWERCASE]", ''),
+                   ("[/LOWERCASE]", ''), ("[B]", ''), ("[/B]", ''),
+                   ("[I]", ''), ("[/I]", ''),
+                   ('[D]', ''), ('[F]', ''),
+                   ("[CR]", ''), ("[HD]", ''),
+                   ("()", ''), ("[CC]", ''),
+                   ("[Cc]", ''), ("[Favorite]", ""),
+                   ("[DRM]", ""), ('(cc).', ''),
+                   ('(n)', ''), ("(SUB)", ''),
+                   ("(DUB)", ''), ('(repeat)', ''),
+                   ("(English Subtitled)", ""), ("*", ""),
+                   ("\n", ""), ("\r", ""),
+                   ("\t", ""), ("\ ", ''),
+                   ("/ ", ''), ("\\", '/'),
+                   ("//", '/'), ('plugin.video.', ''),
+                   ('plugin.audio.', ''))
 
     text = utils.multiple_reSub(text, dictresub)
     text = utils.multiple_replace(text, *replacements)
@@ -75,12 +73,10 @@ def cleanLabels(text, formater=''):
     else:
         text = text
 
-    text = uni(text.strip())
-    return text
+    return text.strip()
 
 
 def cleanStrms(text, formater=''):
-    text = uni(text)
     text = text.replace('Full Episodes', '')
     if formater == 'title':
         text = text.title().replace("'S", "'s")
@@ -102,21 +98,6 @@ def multiRstrip(text):
     for i in replaceRstrip:
         text.rstrip(i)
     return text
-
-
-def asciis(string):
-    if isinstance(string, basestring):
-        if isinstance(string, unicode):
-            string = string.encode('ascii', 'ignore')
-    return string
-
-
-def uni(string):
-    if isinstance(string, basestring):
-        if isinstance(string, unicode):
-            string = string.encode('utf-8', 'ignore')
-
-    return string
 
 
 def removeHTMLTAGS(text):

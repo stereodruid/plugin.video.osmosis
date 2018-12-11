@@ -27,9 +27,6 @@ from modules import urlUtils
 from modules import kodiDB
 from modules import tvdb
 
-reload(sys)
-sys.setdefaultencoding("utf-8")
-
 addon = xbmcaddon.Addon()
 addon_id = addon.getAddonInfo('id')
 ADDON_NAME = addon.getAddonInfo('name')
@@ -57,9 +54,9 @@ def initialize_DialogBG(mess1, mess2, barType="BG"):
 
 
 def fillPlugins(cType='video'):
-    json_query = ('{"jsonrpc":"2.0","method":"Addons.GetAddons","params":{"type":"xbmc.addon.%s","properties":["name","path","thumbnail","description","fanart","summary", "extrainfo"]}, "id": 1 }' % cType)
+    json_query = ('{"jsonrpc":"2.0","method":"Addons.GetAddons","params":{"type":"xbmc.addon.%s","properties":["name","path","thumbnail","description","fanart","summary", "extrainfo", "enabled"]}, "id": 1 }' % cType)
     json_details = jsonUtils.sendJSON(json_query)
-    for addon in sorted(json_details["addons"], key=lambda json: json['name'].lower()):
+    for addon in sorted([addon for addon in json_details["addons"] if addon['enabled'] == True], key=lambda json: json['name'].lower()):
         utils.addon_log('fillPlugins entry: %s' % (addon))
         addontypes = []
         for info in addon['extrainfo']:
@@ -122,7 +119,6 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
     if strm_type.find('Album') != -1 :
         try:
             initialize_DialogBG("Album", "Adding")
-            strm_name = stringUtils.cleanStrmFilesys(strm_name)
             addAlbum(details, strm_name, strm_type)
             thisDialog.dialogeBG.close()
             thisDialog.dialogeBG = None
@@ -144,7 +140,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         art = detail.get('art', {})
 
         if addon.getSetting('Link_Type') == '0':
-            link = '%s?url=%s&mode=%d&name=%s&fanart=%s' % (sys.argv[0], urllib.quote_plus(stringUtils.uni(file)), 10, urllib.quote_plus(stringUtils.uni(label)), urllib.quote_plus(art.get('fanart', '')))
+            link = "{0}?{1}".format(sys.argv[0], urllib.urlencode({'url': file.encode('utf-8'), 'mode': 10, 'name': label.encode('utf-8'), 'fanart': art.get('fanart', '').encode('utf-8')}))
         else:
             link = file
 
@@ -197,20 +193,21 @@ def removeItemsFromMediaList(action='list'):
 
 
 def getMediaListDialog():
-    thelist = sorted(fileSys.readMediaList(purge=False), key=lambda k: k.split('|')[1])
+    thelist = sorted(fileSys.readMediaList(purge=False), key=lambda k: k.split('|')[1].lower())
     items = []
     for entry in thelist:
         splits = entry.strip().split('|')
         matches = re.findall("plugin:\/\/([^\/\?]*)", splits[2])
         if matches:
             pluginnames = [fileSys.getAddonname(plugin) for plugin in matches]
-            items.append(stringUtils.getStrmname(splits[1]) + " (%s)" % (', '.join(pluginnames)))
+            items.append("{0} ({1})".format(stringUtils.getStrmname(splits[1]), ', '.join(pluginnames)))
 
     selectedItemsIndex = xbmcgui.Dialog().multiselect("Select items", items)
     return [thelist[index] for index in selectedItemsIndex] if selectedItemsIndex else None
 
 
 def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
+    strm_name = stringUtils.getStrmname(strm_name)
     albumList = []
     dirList = []
     pagesDone = 0
@@ -228,59 +225,44 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
 
             for index, detailInfo in enumerate(contentList):
                 art = detailInfo.get('art', {})
-                file = detailInfo['file'].replace("\\\\", "\\").encode('utf-8')
+                file = detailInfo['file'].replace("\\\\", "\\")
                 filetype = detailInfo['filetype']
-                label = detailInfo['label'].strip()
+                label = detailInfo['label'].strip().encode("utf8")
                 thumb = art.get('thumb', '')
                 fanart = art.get('fanart', '')
                 track = detailInfo.get('track', 0) if detailInfo.get('track', 0) > 0 else index + 1
+                album = detailInfo['album'].strip().encode("utf8")
                 duration = detailInfo.get('duration', 0)
+
+                if filetype == 'directory':
+                    dirList.append(jsonUtils.requestList(file, 'music').get('files', []))
+                    continue
+
                 if duration == 0:
                     duration = 200
 
-                try:
-                    if filetype == 'directory':
-                        dirList.append(jsonUtils.requestList(file, 'music').get('files', []))
-                        continue
+                if addon.getSetting('Link_Type') == '0':
+                    link = "{0}?{1}".format(sys.argv[0], urllib.urlencode({'url': file, 'mode': 10, 'name': label, 'fanart': fanart}))
+                else:
+                    link = file
 
-                    if addon.getSetting('Link_Type') == '0':
-                        link = '%s?url=%s&mode=%d&name=%s&fanart=%s' % (sys.argv[0], urllib.quote_plus(file), 10, urllib.quote_plus(stringUtils.uni(label)), urllib.quote_plus(fanart))
-                    else:
-                        link = file
+                # Check for Various Artists
+                artistList = []
+                for i, sArtist in enumerate(contentList):
+                    for artist in sArtist.get('artist'):
+                        if artist.encode("utf8") not in artistList:
+                            artistList.append(artist.encode("utf8"))
 
-                    try:
-                        album = detailInfo['album'].strip()
-                        artist = stringUtils.cleanByDictReplacements(", ".join(artist.strip() for artist in detailInfo['artist']) if isinstance(detailInfo['artist'], (list, tuple)) else detailInfo['artist'].strip())
-                        artistList = []
-                        # Check for Various Artists
-                        for i, sArtist in enumerate(contentList):
-                            artistList.append(sArtist.get('artist'))
-                        if len(artistList) > 1:
-                            try:
-                                if artistList[0] != artistList[1] and artistList[1] != artistList[2]:
-                                    artist = 'Various Artists'
-                            except IndexError:
-                                if artistList[0] != artistList[1]:
-                                    artist = 'Various Artists'
+                if len(artistList) == 1:
+                    artist = artistList[0]
+                else:
+                    artist = 'Various Artists'.encode("utf8")
 
-                    except:
-                        pass
-
-                    thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing File: ", " Title: " + label)
-                    path = os.path.join(strm_type, artist, strm_name.replace('++RenamedTitle++', ''))
-                    if album and artist and label and path and link and track:
-                        albumList.append([path, label, link, album, artist, track, duration, thumb])
-                    j = j + 100 / (len(contentList) * int(PAGINGalbums))
-                except IOError as (errno, strerror):
-                    print ("I/O error({0}): {1}").format(errno, strerror)
-                except ValueError:
-                    print ("No valid integer in line.")
-                except:
-                    thisDialog.dialogeBG.close()
-                    guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1]) + (". See your Kodi.log!"))
-                    utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
-                    print ("Unexpected error:"), sys.exc_info()[0]
-                    raise
+                thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing File: ", " Title: " + label)
+                path = os.path.join(strm_type, stringUtils.cleanStrmFilesys(artist), stringUtils.cleanStrmFilesys(strm_name.decode('utf8'))).encode('utf8')
+                if album and artist and label and path and link and track:
+                    albumList.append({'path': path, 'label': label, 'link': link, 'album': album, 'artist': artist, 'track': track, 'duration': duration, 'thumb': thumb})
+                j = j + 100 / (len(contentList) * int(PAGINGalbums))
 
             pagesDone += 1
             contentList = []
@@ -294,36 +276,24 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                 except:
                     pass
         else:
-            albumList.append([os.path.join(strm_type, stringUtils.getStrmname(strm_name) , label), stringUtils.cleanByDictReplacements(label), link])
+            albumList.append({'path': os.path.join(strm_type, strm_name.decode('utf8'), label).encode('utf8'), 'label': stringUtils.cleanByDictReplacements(label), 'link': link})
             pagesDone = int(PAGINGalbums)
 
-    try:
-        # Write strms for all values in albumList
-        thelist = fileSys.readMediaList(purge=False)
-        for entry in thelist:
-            splits = entry.strip().split('|')
-            splitsstrm = splits[0]
-            splitsname = splits[1]
-            if splitsstrm.find('Album') != -1 and splitsname.find(strm_name) != -1:
-                url = splits[2]
-                cType = splits[0]
-                albumartist = artist
-                fileSys.writeMediaList(url, strm_name, albumartist, cType)
-        for i in albumList:
-            strm_link = i[2] + "|" + i[1] if addon.getSetting('Link_Type') == '0' else i[2]
-            fullpath, fileModTime = fileSys.writeSTRM(path, stringUtils.cleanStrms(i[1].rstrip(".")) , strm_link)
-            kodiDB.musicDatabase(i[3], i[4], i[1], i[0], i[2], i[5], i[6], aThumb, fileModTime)
-        thisDialog.dialogeBG.close()
-    except IOError as (errno, strerror):
-        print ("I/O error({0}): {1}").format(errno, strerror)
-    except ValueError:
-        print ("No valid integer in line.")
-    except:
-        thisDialog.dialogeBG.close()
-        guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1]) + (". See your Kodi.log!"))
-        utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
-        print ("Unexpected error:"), sys.exc_info()[0]
-        raise
+    # Write strms for all values in albumList
+    thelist = fileSys.readMediaList(purge=False)
+    for entry in thelist:
+        splits = entry.strip().split('|')
+        splitsstrm = splits[0]
+        splitsname = splits[1]
+        if splitsstrm.find('Album') != -1 and splitsname.find(strm_name) != -1:
+            url = splits[2]
+            cType = splits[0]
+            fileSys.writeMediaList(url, strm_name, cType, albumartist=artist)
+    for album in albumList:
+        strm_link = "%s|%s" % (album.get('link'), album.get('label')) if addon.getSetting('Link_Type') == '0' else album.get('link')
+        fullpath, fileModTime = fileSys.writeSTRM(album.get('path'), stringUtils.cleanStrms(album.get('label').rstrip(".")) , strm_link)
+        kodiDB.musicDatabase(album.get('album'), album.get('artist'), album.get('label'), album.get('path'), album.get('link'), album.get('track'), album.get('duration'), aThumb, fileModTime)
+    thisDialog.dialogeBG.close()
 
     return albumList
 
@@ -343,7 +313,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
             for detailInfo in contentList:
                 file = detailInfo.get('file').replace("\\\\", "\\") if detailInfo.get('file', None) is not None else None
                 filetype = detailInfo.get('filetype', None)
-                label = detailInfo.get('label').strip() if detailInfo.get('label', None) is not None else None
+                label = detailInfo.get('label').strip().encode("utf-8") if detailInfo.get('label', None) is not None else None
                 imdbnumber = detailInfo.get('imdbnumber').strip() if detailInfo.get('imdbnumber', None) is not None else None
 
                 try:
@@ -476,7 +446,7 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
     episode = episode_item.get('episode', -1)
     season = episode_item.get('season', -1)
     strSeasonEpisode = 's%de%d' % (season, episode)
-    showtitle = episode_item.get('showtitle', None)
+    showtitle = episode_item.get('showtitle', None).encode("utf-8")
     provider = getProvider(file)
 
     if showtitle is not None and showtitle != "" and strm_type != "":

@@ -43,7 +43,7 @@ updateIcon = os.path.join(home, 'resources/updateIcon.png')
 
 def addItem(label, mode, icon):
     utils.addon_log('addItem')
-    u = "plugin://%s/?mode=%s&fanart=%s" % (addon_id, str(mode), urllib.quote_plus(icon))
+    u = "plugin://{0}/?{1}".format(addon_id, urllib.urlencode({'mode': mode, 'fanart': icon}))
     liz = xbmcgui.ListItem(label, iconImage=icon, thumbnailImage=icon)
     liz.setInfo(type="Video", infoLabels={ "Title": label, "Genre": "actionRemove"})
     liz.setProperty("Fanart_Image", FANART)
@@ -53,7 +53,7 @@ def addItem(label, mode, icon):
 
 def addFunction(labels):
     utils.addon_log('addItem')
-    u = "plugin://%s/?mode=%s&fanart=%s" % (addon_id, str(666), urllib.quote_plus(updateIcon))
+    u = "plugin://{0}/?{1}".format(addon_id, urllib.urlencode({'mode': 666, 'fanart': updateIcon}))
     liz = xbmcgui.ListItem(labels, iconImage=updateIcon, thumbnailImage=updateIcon)
     liz.setInfo(type="Video", infoLabels={ "Title": labels, "Genre": "actionRemove"})
     liz.setProperty("Fanart_Image", FANART)
@@ -63,7 +63,7 @@ def addFunction(labels):
 
 def addDir(name, url, mode, art, plot, genre, date, credits, showcontext=False):
     utils.addon_log('addDir')
-    u = "%s?url=%s&name=%s&fanart=%s" % (sys.argv[0], urllib.quote_plus(stringUtils.uni(url)), urllib.quote_plus(stringUtils.cleanLabels(stringUtils.uni(name))), urllib.quote_plus(art.get('fanart', '')))
+    u = "{0}?{1}".format(sys.argv[0], urllib.urlencode({'url': url.encode('utf-8'), 'name': stringUtils.cleanLabels(name).encode('utf-8'), 'fanart': art.get('fanart', '').encode('utf-8')}))
     contextMenu = []
     thumbArt = art.get('thumb', None)
     if thumbArt == None:
@@ -79,7 +79,7 @@ def addDir(name, url, mode, art, plot, genre, date, credits, showcontext=False):
 
 def addLink(name, url, mode, art, plot, genre, date, showcontext, playlist, regexs, total, setCookie=""):
     utils.addon_log('addLink')
-    u = "%s?url=%s&name=%s&fanart=%s" % (sys.argv[0], urllib.quote_plus(stringUtils.uni(url)), urllib.quote_plus(stringUtils.cleanLabels(stringUtils.uni(name))), urllib.quote_plus(art.get('fanart', '')))
+    u = "{0}?{1}".format(sys.argv[0], urllib.urlencode({'url': url.encode('utf-8'), 'name': stringUtils.cleanLabels(name).encode('utf-8'), 'fanart': art.get('fanart', '').encode('utf-8')}))
     contextMenu = []
     thumbArt = art.get('thumb', None)
     if thumbArt == None:

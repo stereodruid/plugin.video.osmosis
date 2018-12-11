@@ -42,8 +42,7 @@ STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
 # History:
 # 		0 - init
 def replacer(*key_values):
-    replace_dict = stringUtils.uni(dict(key_values))
-    replacement_function = lambda match: replace_dict[match.group(0)]
+    replacement_function = lambda match: key_values[match.group(0)]
     pattern = re.compile("|".join([re.escape(k) for k, v in key_values]), re.M)
     return lambda string: pattern.sub(replacement_function, string)
 
@@ -58,7 +57,7 @@ def replacer(*key_values):
 # History:
 # 		0 - init
 def multiple_replace(string, *key_values):
-    return replacer(*key_values)(string.decode('utf-8').rstrip())
+    return replacer(*key_values)(string.rstrip())
 
 
 #***************************************************************************************
@@ -74,7 +73,7 @@ def multiple_replace(string, *key_values):
 def multiple_reSub(text, dic):
     for i, j in dic.iteritems():
         text = re.sub(i, j, text)
-    return text.rstrip().decode('utf-8')
+    return text.rstrip()
 
 
 def createSongNFO(filepath, filename , strm_ty='type', artists='none', albums='no album', titls='title', typese='types'):

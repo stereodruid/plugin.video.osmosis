@@ -53,8 +53,8 @@ def makeSTRM(filepath, filename, url):
 
     mtime = None
     try:
-        filename = stringUtils.cleanStrmFilesys(filename.decode("utf-8"))
-        filepath = stringUtils.multiRstrip(filepath.decode("utf-8"))
+        filename = stringUtils.cleanStrmFilesys(filename)
+        filepath = stringUtils.multiRstrip(filepath)
         filepath = completePath(os.path.join(STRM_LOC, filepath))
 
         if not xbmcvfs.exists(filepath):
@@ -94,7 +94,7 @@ def makeSTRM(filepath, filename, url):
                 fle = xbmcvfs.File(fullpath, 'w')
                 pass
 
-            fle.write(bytearray(url, encoding="utf-8"))
+            fle.write(url)
             fle.close()
             del fle
             
@@ -176,30 +176,33 @@ def writeMediaList(url, name, cType='Other', cleanName=True, albumartist=None):
 
     thelist = [x for x in thelist if x != '']
     if len(thelist) > 0 :
-        for i in thelist:
-            splits = i.strip().split('|')
+        for entry in thelist:
+            splits = entry.strip().split('|')
             if stringUtils.getStrmname(splits[1]).lower() == stringUtils.getStrmname(name).lower():
                 existInList = True
                 if splits[2].find(url) == -1:
-                    splits[2] = '%s<next>%s' % (splits[2], url)
-                    if albumartist:
-                        splits[4] = albumartist.decode('utf-8')
+                    splits[2] = ('%s<next>%s' % (splits[2], url))
+                if albumartist:
+                    if len(splits) == 5:
+                        splits[4] = albumartist
+                    else:
+                        splits.append(albumartist)
 
-                    newentry = '|'.join(splits)
-                    xbmcgui.Dialog().notification(str(i), "Adding to MediaList", os.path.join(ADDON_PATH, 'resources/representerIcon.png'), 5000)
-                    thelist = stringUtils.replaceStringElem(thelist, i, newentry)
+                newentry = '|'.join(splits)
+                xbmcgui.Dialog().notification(str(entry), "Adding to MediaList", os.path.join(ADDON_PATH, 'resources/representerIcon.png'), 5000)
+                thelist = stringUtils.replaceStringElem(thelist, entry, newentry)
 
     if existInList != True:
-        newentry = [cType, name.decode("utf-8"), url]
+        newentry = [cType, name, url]
         if albumartist:
-            newentry.append(albumartist.decode('utf-8'))
-
-        newentry = '|'.join(newentry)
+            newentry.append(albumartist)
+        newentry = ('|'.join(newentry))
         thelist.append(newentry)
 
-    output_file = xbmcvfs.File(thefile.decode("utf-8"), 'w')
+    output_file = xbmcvfs.File(thefile, 'w')
     for index, linje in enumerate(thelist):
-        output_file.write(('%s\n' if index < len(thelist) - 1 else '%s') % linje.strip().encode('utf-8'))
+        entry = ('%s\n' if index < len(thelist) - 1 else '%s') % linje.strip()
+        output_file.write(entry)
 
 
 def writeTutList(step):
