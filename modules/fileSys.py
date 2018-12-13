@@ -94,10 +94,10 @@ def makeSTRM(filepath, filename, url):
                 fle = xbmcvfs.File(fullpath, 'w')
                 pass
 
-            fle.write(url)
+            fle.write(bytearray(url, 'utf-8'))
             fle.close()
             del fle
-            
+
             try:
                 if fullpath.find('Audio') > 0:
                     mtime = os.path.getmtime(fullpath)
