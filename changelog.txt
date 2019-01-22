@@ -1,7 +1,8 @@
 1.3.4
+  Maven85  Option to search for episode information from TheTVDB
   Maven85  Refactoring and optimize encoding
 1.3.3
-  Maven85  Aktivieren des Python-Cachings
+  Maven85  Python cache enabled
 1.3.0-1.3.2
   Maven85  Fix resume function in kodi18
   Maven85  Search episode data on TVDB if season and episode numbers are not specified + caching

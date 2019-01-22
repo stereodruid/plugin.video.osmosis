@@ -23,6 +23,10 @@
 	<string id="31002">Anzahl der zu durchsuchenden Ebenen (Filme)</string>
 	<string id="31003">Pro MediaList-Eintrag die Streams in einem Oberordner speichern (Filme)</string>
 	<string id="31005">Jede Stream-Datei in eigenem Ordner speichern (Filme)</string>
+	<string id="31006">Durchsuche TheTVDB nach Episodeninfos (Serien)</string>
+	<string id="31101">Nie</string>
+	<string id="31102">Bei nicht ausreichenden Informationen</string>
+	<string id="31103">Immer</string>
 	
 	<string id="33000">Update Konfiguration</string>
 	<string id="33001">Aktualisierung bei Start</string>

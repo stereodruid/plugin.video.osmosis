@@ -2,6 +2,7 @@ import requests
 import utils
 import json
 import os
+import time
 import xbmc, xbmcaddon, xbmcvfs
 
 try:
@@ -58,7 +59,7 @@ def getTVShowFromCache(showName):
 
 
 def setTVShowCache(showName, data):
-    utils.addon_log('tvdb setTVShowCache: showName = %s; data = %s' % (showName, data))
+    utils.addon_log('tvdb setTVShowCache: showName = %s; data = %s' % (showName.encode('utf-8'), data))
     showCache.set(showName, repr(data))
 
 
@@ -78,17 +79,20 @@ def findEpisodeByName(token, show_data, episodeName, lang):
             res_ep = requests.get(api_baseurl % path, headers=headers, params=params)
             utils.addon_log('tvdb findEpisodeByName: response = %s' % res_ep.json())
 
-            if res_ep.status_code == 200 and len(res_ep.json().get('data')) > 0:
-                json_ep = res_ep.json()
+            json_ep = res_ep.json()
+            if res_ep.status_code == 200 and len(json_ep.get('data', {})) > 0:
                 page = json_ep.get('links').get('next')
                 maxpages = json_ep.get('links').get('last')
                 for episode in json_ep.get('data'):
                     utils.addon_log('tvdb findEpisodeByName: episode = %s' % episode)
-                    if episode.get('episodeName') == episodeName:
+
+                    if episode.get('episodeName', None) and (episode.get('episodeName').lower().find(episodeName.lower()) >= 0 or episodeName.lower().find(episode.get('episodeName').lower()) >= 0):
                         episode_data = {'season': episode.get('airedSeason'), 'episode': episode.get('airedEpisodeNumber')}
                         setEpisodeCache(episodeName, showid, episode_data)
                         return episode_data
-
+                utils.addon_log('tvdb findEpisodeByName: could not match episodeName = %s' % episodeName.encode('utf-8'))
+            else:
+                break
     return episode_data
 
 
@@ -100,7 +104,7 @@ def getEpisodeFromCache(episodeName, showid):
 
 
 def setEpisodeCache(episodeName, showid, data):
-    utils.addon_log('tvdb setEpisodeCache: episodeName = %s; showid = %s; data = %s' % (episodeName, showid, data))
+    utils.addon_log('tvdb setEpisodeCache: episodeName = %s; showid = %s; data = %s' % (episodeName.encode('utf-8'), showid, data))
     entry = "%s_%s" % (episodeName, showid)
     episodeCache.set(entry, repr(data))
 
@@ -109,9 +113,11 @@ def getToken():
     token = None
 
     if xbmcvfs.exists(tvdb_token_loc):
-        file = xbmcvfs.File(tvdb_token_loc, 'r')
-        token = file.read()
-        file.close()
+        file_time = xbmcvfs.Stat(tvdb_token_loc).st_mtime()
+        if (time.time() - file_time) / 3600 < 24:
+            file = xbmcvfs.File(tvdb_token_loc, 'r')
+            token = file.read()
+            file.close()
 
     if token is None or token == '':
         headers = getHeaders({'Content-Type': 'application/json'})
@@ -131,8 +137,8 @@ def refreshToken(token):
 def writeToken(res):
     if res.status_code == 200 and res.json().get('token', None):
         token = res.json().get('token')
-        file = open(tvdb_token_loc, 'w')
-        file.write(token)
+        file = xbmcvfs.File(tvdb_token_loc, 'w')
+        file.write(bytearray(token, 'utf-8'))
         file.close()
         return token
 
@@ -141,8 +147,6 @@ def writeToken(res):
 
 def getHeaders(newHeaders):
     headers = {'Accept': 'application/json'}
-    for key, value in newHeaders.items():
-        if key and value:
-            headers[key] = value
+    headers.update(newHeaders)
 
     return headers

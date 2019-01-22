@@ -42,7 +42,8 @@ STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
 # History:
 # 		0 - init
 def replacer(*key_values):
-    replacement_function = lambda match: key_values[match.group(0)]
+    replace_dict = dict(key_values)
+    replacement_function = lambda match: replace_dict[match.group(0)]
     pattern = re.compile("|".join([re.escape(k) for k, v in key_values]), re.M)
     return lambda string: pattern.sub(replacement_function, string)
 

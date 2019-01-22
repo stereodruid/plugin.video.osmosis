@@ -19,10 +19,14 @@
 	
 	<string id="31000">Content</string>
 	<string id="31004">Write NFOs (ComingSoon)</string>
-	<string id="31001">Number of levels to search (TV-Shows)</string>
-	<string id="31002">Number of levels to search (Movies)</string>
+	<string id="31001">Number of levels to search (TV shows)</string>
+	<string id="31002">Number of levels to search (movies)</string>
 	<string id="31003">Save the streams pro MediaList entry in a superfolder (movies)</string>
 	<string id="31005">Save each stream file in its own folder (movies)</string>
+	<string id="31006">Search TheTVDB for episode info (TV shows)</string>
+	<string id="31101">Never</string>
+	<string id="31102">For insufficient information</string>
+	<string id="31103">Always</string>
 	
 	<string id="33000">Update Configuration</string>
 	<string id="33001">Update at startup</string>

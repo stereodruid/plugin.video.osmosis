@@ -38,64 +38,48 @@ actor_update_fixtime = 2
 
 
 def readMediaList(purge=False):
-    try:
-        if xbmcvfs.exists(MediaList_LOC):
-            fle = xbmcvfs.File(MediaList_LOC, "r")
-            thelist = fle.read().splitlines()
-            fle.close()
-            return thelist
-    except:
-        pass
+    if xbmcvfs.exists(MediaList_LOC):
+        fle = xbmcvfs.File(MediaList_LOC, "r")
+        thelist = fle.read().splitlines()
+        fle.close()
+        return thelist
 
 
 def strm_update(selectedItems=None, actor=0):
-    try:
-        if xbmcvfs.exists(MediaList_LOC):
-            thelist = selectedItems if selectedItems else readMediaList()
-            if len(thelist) > 0:
-                dialogeBG = xbmcgui.DialogProgressBG()
-                dialogeBG.create("OSMOSIS: " , 'Total Update-Progress:')
+    if xbmcvfs.exists(MediaList_LOC):
+        thelist = selectedItems if selectedItems else readMediaList()
+        if len(thelist) > 0:
+            dialogeBG = xbmcgui.DialogProgressBG()
+            dialogeBG.create("OSMOSIS: " , 'Total Update-Progress:')
 
-                iUrls = 0
-                splittedEntries = []
-                for entry in thelist:
-                    splits = entry.strip().split('|')
-                    iUrls += len(splits[2].split('<next>'))
-                    splittedEntries.append(splits)
+            iUrls = 0
+            splittedEntries = []
+            for entry in thelist:
+                splits = entry.strip().split('|')
+                iUrls += len(splits[2].split('<next>'))
+                splittedEntries.append(splits)
 
-                step = j = 100 / iUrls
-                for splittedEntry in splittedEntries:
-                    cType, name, url = splittedEntry[0], splittedEntry[1], splittedEntry[2]
+            step = j = 100 / iUrls
+            for splittedEntry in splittedEntries:
+                cType, name, url = splittedEntry[0], splittedEntry[1], splittedEntry[2]
 
-                    urls = url.split('<next>')
-                    for url in urls:
-                        try:
-                            plugin_id = re.search('plugin:\/\/([^\/\?]*)', url)
-                            if plugin_id:
-                                module = moduleUtil.getModule(plugin_id.group(1))
-                                if module and hasattr(module, 'update'):
-                                    url = module.update(name, url, 'video', readMediaList() if selectedItems else thelist)
+                urls = url.split('<next>')
+                for url in urls:
+                    plugin_id = re.search('plugin:\/\/([^\/\?]*)', url)
+                    if plugin_id:
+                        module = moduleUtil.getModule(plugin_id.group(1))
+                        if module and hasattr(module, 'update'):
+                            url = module.update(name, url, 'video', readMediaList() if selectedItems else thelist)
 
-                            dialogeBG.update(j, "OSMOSIS total update process: " , "Current Item: %s Items left: %d" % (stringUtils.getStrmname(name), iUrls))
-                            j += step
+                    dialogeBG.update(j, "OSMOSIS total update process: " , "Current Item: %s Items left: %d" % (stringUtils.getStrmname(name), iUrls))
+                    j += step
 
-                            create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
-                            iUrls -= 1
-                        except:
-                            pass
+                    create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
+                    iUrls -= 1
 
-                dialogeBG.close()
-                if actor == actor_update_periodictime:
-                    xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (addon.getAddonInfo('name'), "Next update in: " + addon.getSetting('Automatic_Update_Time') + "h" , 5000, represent))
-                elif actor == actor_update_fixtime:
-                    next_run = addon.getSetting('update_time')[:5]
-                    xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (addon.getAddonInfo('name'), "Next update: " + next_run + "h" , 5000, represent))
-    except IOError as (errno, strerror):
-        print ("I/O error({0}): {1}").format(errno, strerror)
-    except ValueError:
-        print ("No valid integer in line.")
-    except:
-        guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1]) + (". See your Kodi.log!"))
-        utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
-        print ("Unexpected error:"), sys.exc_info()[1]
-        pass
+            dialogeBG.close()
+            if actor == actor_update_periodictime:
+                xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (addon.getAddonInfo('name'), "Next update in: " + addon.getSetting('Automatic_Update_Time') + "h" , 5000, represent))
+            elif actor == actor_update_fixtime:
+                next_run = addon.getSetting('update_time')[:5]
+                xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (addon.getAddonInfo('name'), "Next update: " + next_run + "h" , 5000, represent))

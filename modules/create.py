@@ -35,6 +35,7 @@ PAGINGTVshows = addon.getSetting('paging_tvshows')
 PAGINGMovies = addon.getSetting('paging_movies')
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
 NOE0_STRMS_EXPORT = addon.getSetting('noE0_Strms_Export')
+SEARCH_THETVDB = int(addon.getSetting('search_thetvdb'))
 
 thisDialog = sys.modules[__name__]
 thisDialog.dialogeBG = None
@@ -87,49 +88,25 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
     thisDialog.dialogeBG.close()
     thisDialog.dialogeBG = None
     if strm_type.find('Cinema') != -1 or strm_type.find('YouTube') != -1 or strm_type.find('Movies') != -1:
-        try:
-            initialize_DialogBG("Movie", "Adding")
-            addMovies(details, strm_name, strm_type)
-            thisDialog.dialogeBG.close()
-            thisDialog.dialogeBG = None
-            return
-        except:
-            thisDialog.dialogeBG.close()
-            thisDialog.dialogeBG = None
-            guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1]) + (". See your Kodi.log!"))
-            utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
-            print ("Unexpected error:"), sys.exc_info()[0]
-            raise
+        initialize_DialogBG("Movie", "Adding")
+        addMovies(details, strm_name, strm_type)
+        thisDialog.dialogeBG.close()
+        thisDialog.dialogeBG = None
+        return
 
     if strm_type.find('TV-Show') != -1 or strm_type.find('Shows-Collection') != -1:
-        try:
-            initialize_DialogBG("Adding TV-Shows", "working..")
-            getTVShowFromList(details, strm_name, strm_type)
-            thisDialog.dialogeBG.close()
-            thisDialog.dialogeBG = None
-            return
-        except:
-            thisDialog.dialogeBG.close()
-            thisDialog.dialogeBG = None
-            guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1]) + (". See your Kodi.log!"))
-            utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
-            print ("Unexpected error:"), sys.exc_info()[0]
-            raise
+        initialize_DialogBG("Adding TV-Shows", "working..")
+        getTVShowFromList(details, strm_name, strm_type)
+        thisDialog.dialogeBG.close()
+        thisDialog.dialogeBG = None
+        return
 
     if strm_type.find('Album') != -1 :
-        try:
-            initialize_DialogBG("Album", "Adding")
-            addAlbum(details, strm_name, strm_type)
-            thisDialog.dialogeBG.close()
-            thisDialog.dialogeBG = None
-            return
-        except:
-            thisDialog.dialogeBG.close()
-            thisDialog.dialogeBG = None
-            guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1]) + (". See your Kodi.log!"))
-            utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
-            print ("Unexpected error:"), sys.exc_info()[0]
-            raise
+        initialize_DialogBG("Album", "Adding")
+        addAlbum(details, strm_name, strm_type)
+        thisDialog.dialogeBG.close()
+        thisDialog.dialogeBG = None
+        return
 
     for detail in details:
         filetype = detail['filetype']
@@ -152,16 +129,6 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
                 filename = (strm_name + ' - ' + label).strip()
             except:
                 filename = (strm_name + ' - ' + label).strip()
-
-        if strm_type.find('Audio-Album') != -1:
-            path = os.path.join(strm_type, strm_name)
-            track = detail.get('track', 0)
-            try:
-                album = detail['album'].strip()
-                artist = stringUtils.cleanByDictReplacements(", ".join(artist.strip() for artist in detailInfo['artist']) if isinstance(detailInfo['artist'], (list, tuple)) else detailInfo['artist'].strip())
-                filename = stringUtils.cleanByDictReplacements(label.strip())
-            except:
-                filename = stringUtils.cleanByDictReplacements(label.strip())
 
         if strm_type in ['Other']:
             path = os.path.join('Other', strm_name)
@@ -316,31 +283,21 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
                 label = detailInfo.get('label').strip().encode("utf-8") if detailInfo.get('label', None) is not None else None
                 imdbnumber = detailInfo.get('imdbnumber').strip() if detailInfo.get('imdbnumber', None) is not None else None
 
-                try:
-                    if label and strm_name:
-                        label = stringUtils.cleanLabels(label)
-                        if HIDE_tile_in_OV == "true" and label.find("[OV]") > -1:
-                            get_title_with_OV = False
-                        else:
-                            get_title_with_OV = True
+                if label and strm_name:
+                    label = stringUtils.cleanLabels(label)
+                    if HIDE_tile_in_OV == "true" and label.find("[OV]") > -1:
+                        get_title_with_OV = False
+                    else:
+                        get_title_with_OV = True
 
-                        provider = getProvider(file)
+                    provider = getProvider(file)
 
-                        thisDialog.dialogeBG.update(j, ADDON_NAME + ": Getting Movies: ", " Video: " + label)
-                        if filetype is not None and filetype == 'file' and get_title_with_OV == True:
-                            m_path = stringUtils.getMovieStrmPath(strm_type, strm_name, label)
-                            m_title = stringUtils.getStrmname(label)
-                            movieList.append({'path': m_path, 'title':  m_title, 'url': file, 'provider': provider, 'imdbnumber': imdbnumber})
-                        j = j + len(contentList) * int(PAGINGMovies) / 100
-                except IOError as (errno, strerror):
-                    print ("I/O error({0}): {1}").format(errno, strerror)
-                except ValueError:
-                    print ("No valid integer in line.")
-                except:
-                    guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1]) + (". See your Kodi.log!"))
-                    utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
-                    print ("Unexpected error:"), sys.exc_info()[0]
-                    raise
+                    thisDialog.dialogeBG.update(j, ADDON_NAME + ": Getting Movies: ", " Video: " + label)
+                    if filetype is not None and filetype == 'file' and get_title_with_OV == True:
+                        m_path = stringUtils.getMovieStrmPath(strm_type, strm_name, label)
+                        m_title = stringUtils.getStrmname(label)
+                        movieList.append({'path': m_path, 'title':  m_title, 'url': file, 'provider': provider, 'imdbnumber': imdbnumber})
+                    j = j + len(contentList) * int(PAGINGMovies) / 100
 
             pagesDone += 1
             if filetype != '' and filetype != 'file' and pagesDone < int(PAGINGMovies):
@@ -387,48 +344,42 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
 
     while pagesDone < int(PAGINGTVshows):
         strm_type = strm_type.replace('Shows-Collection', 'TV-Shows')
-        try:
-            for detailInfo in showList:
-                filetype = detailInfo.get('filetype', None)
-                file = detailInfo.get('file', None)
 
-                if filetype:
-                    if filetype == 'directory':
-                        dirList.append(jsonUtils.requestList(file, 'video').get('files', []))
-                        continue
-                    elif filetype == 'file':
-                        if detailInfo.get('season', -1) == -1 or detailInfo.get('episode', -1) == -1:
-                            showtitle = detailInfo.get('showtitle')
-                            episodetitle = detailInfo.get('title')
+        for detailInfo in showList:
+            filetype = detailInfo.get('filetype', None)
+            file = detailInfo.get('file', None)
 
-                            if showtitle and showtitle != '' and episodetitle and episodetitle != '':
-                                lang = None
-                                if strm_type.lower().find('other') == -1:
-                                    lang = strm_type[strm_type.find('(') + 1:strm_type.find(')')]
+            if filetype:
+                if filetype == 'directory':
+                    dirList.append(jsonUtils.requestList(file, 'video').get('files', []))
+                    continue
+                elif filetype == 'file':
+                    if SEARCH_THETVDB == 2 or (SEARCH_THETVDB == 1 and detailInfo.get('season', -1) == -1 or detailInfo.get('episode', -1) == -1):
+                        showtitle = detailInfo.get('showtitle')
+                        episodetitle = detailInfo.get('title')
 
-                                data = tvdb.getEpisodeByName(showtitle, episodetitle, lang)
-                                if data:
-                                    detailInfo['season'] = data.get('season')
-                                    detailInfo['episode'] = data.get('episode')
+                        if showtitle and showtitle != '' and episodetitle and episodetitle != '':
+                            lang = None
+                            if strm_type.lower().find('other') == -1:
+                                lang = strm_type[strm_type.find('(') + 1:strm_type.find(')')]
 
-                        if detailInfo.get('season', -1) > -1 and detailInfo.get('episode', -1) > -1:
-                            if NOE0_STRMS_EXPORT == "false" or detailInfo.get('episode') > 0:
-                                episodesList.append(detailInfo)
+                            data = tvdb.getEpisodeByName(showtitle, episodetitle, lang)
+                            if data:
+                                detailInfo['season'] = data.get('season')
+                                detailInfo['episode'] = data.get('episode')
 
-            step = float(100.0 / len(episodesList) if len(episodesList) > 0 else 1)
-            if pagesDone == 0:
-                thisDialog.dialogeBG.update(int(step), "Initialisation of TV-Shows: " + stringUtils.getStrmname(strm_name))
-            else:
-                thisDialog.dialogeBG.update(int(step), "Page: %d %s" % (pagesDone, stringUtils.getStrmname(strm_name)))
-            for index, episode in enumerate(episodesList):
-                pagesDone = getEpisode(episode, strm_name, strm_type, pagesDone=pagesDone)
-                thisDialog.dialogeBG.update(int(step * (index + 1)))
+                    if detailInfo.get('season', -1) > -1 and detailInfo.get('episode', -1) > -1:
+                        if NOE0_STRMS_EXPORT == "false" or detailInfo.get('episode') > 0:
+                            episodesList.append(detailInfo)
 
-        except:
-            guiTools.infoDialog("Unexpected error: " + str(sys.exc_info()[1]) + (". See your Kodi.log!"))
-            utils.addon_log(("Unexpected error: ") + str(sys.exc_info()[1]))
-            print ("Unexpected error:"), sys.exc_info()[0]
-            raise
+        step = float(100.0 / len(episodesList) if len(episodesList) > 0 else 1)
+        if pagesDone == 0:
+            thisDialog.dialogeBG.update(int(step), "Initialisation of TV-Shows: " + stringUtils.getStrmname(strm_name))
+        else:
+            thisDialog.dialogeBG.update(int(step), "Page: %d %s" % (pagesDone, stringUtils.getStrmname(strm_name)))
+        for index, episode in enumerate(episodesList):
+            pagesDone = getEpisode(episode, strm_name, strm_type, pagesDone=pagesDone)
+            thisDialog.dialogeBG.update(int(step * (index + 1)))
 
         pagesDone += 1
         episodesList = []
