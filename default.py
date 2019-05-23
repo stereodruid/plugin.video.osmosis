@@ -37,50 +37,6 @@ home = xbmc.translatePath(addon.getAddonInfo('path').decode('utf-8'))
 FANART = os.path.join(home, 'fanart.jpg')
 kodi_version = int(xbmc.getInfoLabel("System.BuildVersion")[:2])
 
-
-def getAndMarkResumePoint(props, isTVShow):
-    resumePoint = None
-
-    if kodi_version < 18:
-        url = str(sys.argv[0].replace(r'|', sys.argv[2] + r'|'))
-        resumePoint = kodiDB.getPlayedURLResumePoint({'url' : url})
-        guiTools.resumePointDialog(resumePoint)
-
-        watched = 0
-        while xbmc.Player().isPlaying():
-            if xbmc.Player().getTotalTime() > 0:
-                watched = xbmc.Player().getTime() * 100 / xbmc.Player().getTotalTime()
-            time.sleep(1)
-
-        time.sleep(1)
-
-        if props:
-            ID = props[0]
-            fileID = props[1]
-            pos = 0
-            total = 0
-            urlsWatchedPoint = kodiDB.getPlayedURLResumePoint({'url' : url})
-            if urlsWatchedPoint:
-                pos = urlsWatchedPoint[0]
-                total = urlsWatchedPoint[1]
-                done = False
-            elif urlsResumePoint and not urlsWatchedPoint:
-                kodiDB.delBookMark(urlsResumePoint[2], fileID)
-                done = True
-            elif not urlsResumePoint and not urlsWatchedPoint:
-                done = True if watched > 50 else False
-            else:
-                done = False
-
-            guiTools.markMovie(ID, pos, total, done) if isTVShow == False else guiTools.markSeries(ID, pos, total, done)
-    else:
-        filenameandpath = xbmc.getInfoLabel('Player.FilenameAndPath')
-        path = filenameandpath[0:filenameandpath.rfind("\\" if filenameandpath.find("\\") >= 0 else "/") + 1]
-        filename = filenameandpath[filenameandpath.rfind("\\" if filenameandpath.find("\\") >= 0 else "/") + 1:]
-        resumePoint = kodiDB.getPlayedURLResumePoint({'filename': filename, 'path': path})
-        guiTools.resumePointDialog(resumePoint)
-
-
 if __name__ == "__main__":
     try:
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_UNSORTED)
@@ -251,11 +207,12 @@ if __name__ == "__main__":
 
         if selectedEntry:
             url = selectedEntry[0]
-
             item = xbmcgui.ListItem(path=url)
-            props = None
-            infoLabels = {}
+
             if mediaType:
+                props = None
+                infoLabels = {}
+
                 if mediaType == 'show':
                     sTVShowTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
                     sTVShowTitle = stringUtils.unicodetoascii(sTVShowTitle)
@@ -287,15 +244,16 @@ if __name__ == "__main__":
                 # Wait until the media is started in player
                 counter = 0
                 activePlayers = []
-                while len(activePlayers) == 0:
+                title = episode if mediaType == 'show' else stringUtils.cleanStrmFilesys(infoLabels.get('title'))
+                while len(activePlayers) == 0 or (xbmc.Player().isPlayingVideo() and xbmc.getInfoLabel('Player.Filename') != "{0}.strm".format(title)):
                     activePlayers = json.loads(xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')).get('result', [])
                     xbmc.sleep(100)
                     counter += 1
-                    if counter >= 300:
+                    if counter >= 600:
                         raise
 
-                if xbmc.Player().isPlayingVideo():
-                    getAndMarkResumePoint(props, mediaType == 'show')
+                resumePoint = kodiDB.getPlayedURLResumePoint({'filename': xbmc.getInfoLabel('Player.Filename'), 'path': xbmc.getInfoLabel('Player.Folderpath')})
+                guiTools.resumePointDialog(resumePoint)
             else:
                 # Exec play process
                 xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
@@ -303,7 +261,7 @@ if __name__ == "__main__":
             try:
                 # Get infos from selectet media
                 item = xbmcgui.ListItem(path=url)
-	        # Exec play process
+            # Exec play process
                 xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
             except Exception:
                 pass

@@ -71,8 +71,6 @@ def fillPlugins(cType='video'):
 
 
 def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None'):
-    initialize_DialogBG("Updating", "Getting content..")
-    thisDialog.dialogeBG.update(0, ADDON_NAME + ": Getting: ", stringUtils.getStrmname(strm_name))
     utils.addon_log('fillPluginItems')
     details = []
 
@@ -85,8 +83,6 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         details.append("palyableSingleMedia")
         details.append(url)
 
-    thisDialog.dialogeBG.close()
-    thisDialog.dialogeBG = None
     if strm_type.find('Cinema') != -1 or strm_type.find('YouTube') != -1 or strm_type.find('Movies') != -1:
         initialize_DialogBG("Movie", "Adding")
         addMovies(details, strm_name, strm_type)

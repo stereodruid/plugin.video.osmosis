@@ -62,7 +62,7 @@ def addFunction(labels):
 
 
 def addDir(name, url, mode, art, plot, genre, date, credits, showcontext=False):
-    utils.addon_log('addDir')
+    utils.addon_log('addDir: %s' % name.encode('utf-8'))
     u = "{0}?{1}".format(sys.argv[0], urllib.urlencode({'url': url.encode('utf-8'), 'name': stringUtils.cleanLabels(name.encode('utf-8')), 'fanart': art.get('fanart', '').encode('utf-8')}))
     contextMenu = []
     thumbArt = art.get('thumb', None)
@@ -78,7 +78,7 @@ def addDir(name, url, mode, art, plot, genre, date, credits, showcontext=False):
 
 
 def addLink(name, url, mode, art, plot, genre, date, showcontext, playlist, regexs, total, setCookie=""):
-    utils.addon_log('addLink')
+    utils.addon_log('addLink: %s' % name.encode('utf-8'))
     u = "{0}?{1}".format(sys.argv[0], urllib.urlencode({'url': url.encode('utf-8'), 'name': stringUtils.cleanLabels(name.encode('utf-8')), 'fanart': art.get('fanart', '').encode('utf-8')}))
     contextMenu = []
     thumbArt = art.get('thumb', None)
