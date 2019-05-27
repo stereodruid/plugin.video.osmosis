@@ -1,0 +1,269 @@
+# Kodi Media Center language file
+# Addon Name: OSMOSIS
+# Addon id: plugin.video.osmosis
+# Addon Provider: Stereodruid, Maven85, gismo112
+
+msgid ""
+msgstr ""
+
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de_DE\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "#32000"
+msgid "General"
+msgstr "Allgemein"
+
+msgctxt "#32003"
+msgid "Stream Folder"
+msgstr "Medien Speicherort"
+
+msgctxt "#32004"
+msgid "MedienList.xml Folder"
+msgstr "MedienList.xml Speicherort"
+
+msgctxt "#32006"
+msgid "Internal Strm link references"
+msgstr "Interne Stream Referenz nutzen"
+
+msgctxt "#32008"
+msgid "Delete old strms before generating new ones"
+msgstr "Lösche veraltete Streams"
+
+msgctxt "#32005"
+msgid "Update old strms before generating new ones"
+msgstr "Veraltete Streams erneuern (empfohlen)"
+
+msgctxt "#32009"
+msgid "Run Library Scan when finished"
+msgstr "Datenbank scannen, wenn fertig"
+
+msgctxt "#32010"
+msgid "Clean Database when finished"
+msgstr "Datenbank bereinigen, wenn fertig"
+
+msgctxt "#32011"
+msgid "Clear Strm folder before each run"
+msgstr "Medien Speicherort immer bereinigen (löscht alle Dateien im Ordner)"
+
+msgctxt "#32013"
+msgid "Do not add streams which are in "[OV]" (e. g. AMAZON VOD)"
+msgstr "Keine Streams hinzufügen, die in "[OV]" vorhanden sind (z. B. AMAZON VOD)"
+
+msgctxt "#32014"
+msgid "Kodi is using MYSQL-Database"
+msgstr "Kodi verwendet eine MYSQL-Datenbank"
+
+msgctxt "#32015"
+msgid "Detect Kodi's SQLite DBs automatically"
+msgstr "Kodi's SQLite-DBs automatisch ermitteln"
+
+msgctxt "#32016"
+msgid "Do not export E0 (Trailer) Episodes"
+msgstr "Keine E0 (Trailer) Episoden exportieren"
+
+msgctxt "#31000"
+msgid "Content"
+msgstr "Medien"
+
+msgctxt "#31004"
+msgid "Write NFOs (ComingSoon)"
+msgstr "NFO's anlegen (In Kürze)"
+
+msgctxt "#31001"
+msgid "Number of levels to search (TV shows)"
+msgstr "Anzahl der zu durchsuchenden Ebenen (Serien)"
+
+msgctxt "#31002"
+msgid "Number of levels to search (movies)"
+msgstr "Anzahl der zu durchsuchenden Ebenen (Filme)"
+
+msgctxt "#31003"
+msgid "Save the streams pro MediaList entry in a superfolder (movies)"
+msgstr "Pro MediaList-Eintrag die Streams in einem Oberordner speichern (Filme)"
+
+msgctxt "#31005"
+msgid "Save each stream file in its own folder (movies)"
+msgstr "Jede Stream-Datei in eigenem Ordner speichern (Filme)"
+
+msgctxt "#31006"
+msgid "Search TheTVDB for episode info (TV shows)"
+msgstr "Durchsuche TheTVDB nach Episodeninfos (Serien)"
+
+msgctxt "#31101"
+msgid "Never"
+msgstr "Nie"
+
+msgctxt "#31102"
+msgid "For insufficient information"
+msgstr "Bei unzureichenden Informationen"
+
+msgctxt "#31103"
+msgid "Always"
+msgstr "Immer"
+
+msgctxt "#33000"
+msgid "Update Configuration"
+msgstr "Update Konfiguration"
+
+msgctxt "#33001"
+msgid "Update at startup"
+msgstr "Aktualisierung bei Start"
+
+msgctxt "#33002"
+msgid "Automatic Update"
+msgstr "Automatische Aktualisierung"
+
+msgctxt "#33003"
+msgid "Update Every (Hours)"
+msgstr "Update alle (Stunde/n)"
+
+msgctxt "#33004"
+msgid "Force Update at (00:00 to disable)"
+msgstr "Update zur definierten Uhrzeit (00:00 zum Deaktivieren)"
+
+msgctxt "#38000"
+msgid "Kodi Movie database"
+msgstr "Kodi Filmdatenbank"
+
+msgctxt "#38001"
+msgid "Movie-DB username (MYSQL)"
+msgstr "Film-DB Benutzername (MYSQL)"
+
+msgctxt "#38002"
+msgid "Movie-DB password (MYSQL)"
+msgstr "Film-DB Passwort (MYSQL)"
+
+msgctxt "#38003"
+msgid "Movie-DB filename (MYSQL)"
+msgstr "Film-DB Datenbank (MYSQL)"
+
+msgctxt "#38004"
+msgid "Movie-DB directory (SQLITE3)"
+msgstr "Film-DB Speicherort (MYSQL)"
+
+msgctxt "#38005"
+msgid "Movie-DB IP (MYSQL)"
+msgstr "Film-DB IP-Adresse (MYSQL)"
+
+msgctxt "#38006"
+msgid "Movie-DB Port (MYSQL)"
+msgstr "Film-DB Port (MYSQL)"
+
+msgctxt "#35000"
+msgid "Kodi Music database"
+msgstr "Kodi Musikdatenbank"
+
+msgctxt "#35001"
+msgid "Music-DB username (MYSQL)"
+msgstr "Musik-DB Benutzername (MYSQL)"
+
+msgctxt "#35002"
+msgid "Music-DB password (MYSQL)"
+msgstr "Musik-DB Passwort (MYSQL)"
+
+msgctxt "#35003"
+msgid "Music-DB filename (MYSQL)"
+msgstr "Musik-DB Datenbank (MYSQL)"
+
+msgctxt "#35004"
+msgid "Music-DB directory (SQLITE3)"
+msgstr "Musik-DB Speicherort (MYSQL)"
+
+msgctxt "#35005"
+msgid "Music-DB IP (MYSQL)"
+msgstr "Musik-DB IP-Adresse (MYSQL)"
+
+msgctxt "#35006"
+msgid "Music-DB Port (MYSQL)"
+msgstr "Musik-DB Port (MYSQL)"
+
+msgctxt "#37000"
+msgid "Osmosis TV-Show database"
+msgstr "Osmosis Seriendatenbank"
+
+msgctxt "#37001"
+msgid "TV-Show-DB username (MYSQL)"
+msgstr "Serien-DB Benutzername (MYSQL)"
+
+msgctxt "#37002"
+msgid "TV-Show-DB password (MYSQL)"
+msgstr "Serien-DB Passwort (MYSQL)"
+
+msgctxt "#37003"
+msgid "TV-Show-DB filename (MYSQL)"
+msgstr "Serien-DB Datenbank (MYSQL)"
+
+msgctxt "#37004"
+msgid "TV-Show-DB directory (SQLITE3)"
+msgstr "Serien-DB Speicherort (MYSQL)"
+
+msgctxt "#37005"
+msgid "TV-Show-DB IP (MYSQL)"
+msgstr "Serien-DB IP-Adresse (MYSQL)"
+
+msgctxt "#37006"
+msgid "TV-Show-DB Port (MYSQL)"
+msgstr "Serien-DB Port (MYSQL)"
+
+msgctxt "#36000"
+msgid "Osmosis Movie database"
+msgstr "Osmosis Filmdatenbank"
+
+msgctxt "#36001"
+msgid "Movie-DB username (MYSQL)"
+msgstr "Film-DB Benutzername (MYSQL)"
+
+msgctxt "#36002"
+msgid "Movie-DB password (MYSQL)"
+msgstr "Film-DB Passwort (MYSQL)"
+
+msgctxt "#36003"
+msgid "Movie-DB filename (MYSQL)"
+msgstr "Film-DB Datenbank (MYSQL)"
+
+msgctxt "#36004"
+msgid "Movie-DB directory (SQLITE3)"
+msgstr "Film-DB Speicherort (MYSQL)"
+
+msgctxt "#36005"
+msgid "Movie-DB IP (MYSQL)"
+msgstr "Film-DB IP-Adresse (MYSQL)"
+
+msgctxt "#36006"
+msgid "Movie-DB Port (MYSQL)"
+msgstr "Film-DB Port (MYSQL)"
+
+msgctxt "#34000"
+msgid "Osmosis Music database"
+msgstr "Osmosis Musikdatenbank"
+
+msgctxt "#34001"
+msgid "Music-DB username (MYSQL)"
+msgstr "Musik-DB Benutzername (MYSQL)"
+
+msgctxt "#34002"
+msgid "Music-DB password (MYSQL)"
+msgstr "Musik-DB Passwort (MYSQL)"
+
+msgctxt "#34003"
+msgid "Music-DB filename (MYSQL)"
+msgstr "Musik-DB Datenbank (MYSQL)"
+
+msgctxt "#34004"
+msgid "Music-DB directory (SQLITE3)"
+msgstr "Musik-DB Speicherort (MYSQL)"
+
+msgctxt "#34005"
+msgid "Music-DB IP (MYSQL)"
+msgstr "Musik-DB IP-Adresse (MYSQL)"
+
+msgctxt "#34006"
+msgid "Music-DB Port (MYSQL)"
+msgstr "Musik-DB Port (MYSQL)"
+
+msgctxt "#39000"
+msgid "Continue at {0}"
+msgstr "Bei {0} fortsetzen"
