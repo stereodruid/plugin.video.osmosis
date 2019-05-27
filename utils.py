@@ -106,7 +106,6 @@ def addon_log(string):
 
 
 def zeitspanne(sekunden):
-
     delta = datetime.timedelta(seconds=sekunden)
     delta_str = str(delta)[-8:]  # z.B: " 1:01:01"
     hours, minutes, seconds = [ int(val) for val in delta_str.split(":", 3) ]
@@ -114,4 +113,3 @@ def zeitspanne(sekunden):
     days = delta.days % 7
     timePlayed = datetime.time(hours, minutes, seconds)
     return weeks, days, hours, minutes, seconds, timePlayed
-

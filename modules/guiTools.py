@@ -22,6 +22,7 @@ import urllib
 
 import utils
 import jsonUtils
+import xmldialogs
 import xbmc
 import xbmcplugin, xbmcgui, xbmcaddon
 
@@ -253,7 +254,10 @@ def browse(type, heading, shares, mask='', useThumbs=False, treatAsFolder=False,
 
 def resumePointDialog(resumePoint):
     if resumePoint:
-        conTime = utils.zeitspanne(int(resumePoint[0]))
-        dialogText = ["Jump to position : %s " % (str(conTime[5])), "Start from beginning!"]
-        if selectDialog(dialogText, header='OSMOSIS: Would you like to continue?') == 0:
-            xbmc.Player().seekTime(int(resumePoint[0]) - 5)
+        xmldialogs.show_modal_dialog(xmldialogs.Skip,
+             "plugin-video-osmosis-continue.xml",
+             addon.getAddonInfo('path'),
+             minutes=0,
+             seconds=15,
+             skip_to=int(resumePoint[0]) - 5,
+             label='Continue at {0}'.format(utils.zeitspanne(int(resumePoint[0]))[5]))
