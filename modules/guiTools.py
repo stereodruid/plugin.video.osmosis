@@ -260,4 +260,4 @@ def resumePointDialog(resumePoint):
              minutes=0,
              seconds=15,
              skip_to=int(resumePoint[0]) - 5,
-             label=addon.getSettingString(39000).format(utils.zeitspanne(int(resumePoint[0]))[5]))
+             label=addon.getLocalizedString(39000).format(utils.zeitspanne(int(resumePoint[0]))[5]))
