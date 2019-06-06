@@ -35,11 +35,11 @@ addon = xbmcaddon.Addon()
 addon_id = addon.getAddonInfo('id')
 ADDON_NAME = addon.getAddonInfo('name')
 home = xbmc.translatePath(addon.getAddonInfo('path').decode('utf-8'))
-icon = os.path.join(home, 'icon.png')
-iconRemove = os.path.join(home, 'resources/iconRemove.png')
-FANART = os.path.join(home, 'fanart.jpg')
-folderIcon = os.path.join(home, 'resources/folderIcon.png')
-updateIcon = os.path.join(home, 'resources/updateIcon.png')
+icon = os.path.join(home, 'resources/media/icon.png')
+iconRemove = os.path.join(home, 'resources/media/iconRemove.png')
+FANART = os.path.join(home, 'resources/media/fanart.jpg')
+folderIcon = os.path.join(home, 'resources/media/folderIcon.png')
+updateIcon = os.path.join(home, 'resources/media/updateIcon.png')
 
 
 def addItem(label, mode, icon):
@@ -100,9 +100,8 @@ def getSources():
     utils.addon_log('getSources')
     xbmcplugin.setContent(int(sys.argv[1]), 'movies')
     art = {'fanart': FANART, 'thumb': folderIcon}
-    addDir('Video Plugins', 'video', 1, art, 'description', 'genre', 'date', 'credits')
-    addDir('Music Plugins', 'audio', 1, art, 'description', 'genre', 'date', 'credits')
-    addDir('UPNP Servers', 'upnp://', 2, art, 'description', 'genre', 'date', 'credits')
+    addDir('Video Plugins', 'video', 1, art, '', 'genre', 'date', 'credits')
+    addDir('Music Plugins', 'audio', 1, art, '', 'genre', 'date', 'credits')
     addItem('Update', 4, updateIcon)
     addFunction('Update all')
     addItem("Remove Media", 5, iconRemove)

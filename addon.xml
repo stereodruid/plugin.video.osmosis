@@ -28,9 +28,9 @@
 		<source>https://github.com/stereodruid/OSMOSIS</source>
 		<news></news>
 		<assets>
-			<icon>icon.png</icon>
-			<fanart>fanart.jpg</fanart>
-			<screenshot>fanart.jpg</screenshot>
+			<icon>resources/media/icon.png</icon>
+			<fanart>resources/media/fanart.jpg</fanart>
+			<screenshot>resources/media/fanart.jpg</screenshot>
 		</assets>
 		<language>en de</language>
 		<reuselanguageinvoker>true</reuselanguageinvoker>

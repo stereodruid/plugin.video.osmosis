@@ -30,7 +30,7 @@ addon = xbmcaddon.Addon()
 ADDON_PATH = addon.getAddonInfo('path')
 MEDIALIST_PATH = addon.getSetting('MediaList_LOC')
 MediaList_LOC = xbmc.translatePath(os.path.join(MEDIALIST_PATH, 'MediaList.xml'))
-represent = os.path.join(ADDON_PATH, 'icon.png')
+represent = os.path.join(ADDON_PATH, 'resources/media/icon.png')
 
 actor_update_manual = 0
 actor_update_periodictime = 1

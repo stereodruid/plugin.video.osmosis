@@ -189,7 +189,7 @@ def writeMediaList(url, name, cType='Other', cleanName=True, albumartist=None):
                         splits.append(albumartist)
 
                 newentry = '|'.join(splits)
-                xbmcgui.Dialog().notification(str(entry), "Adding to MediaList", os.path.join(ADDON_PATH, 'resources/representerIcon.png'), 5000)
+                xbmcgui.Dialog().notification(str(entry), "Adding to MediaList", os.path.join(ADDON_PATH, 'resources/media/representerIcon.png'), 5000)
                 thelist = stringUtils.replaceStringElem(thelist, entry, newentry)
 
     if existInList != True:

@@ -30,7 +30,7 @@ from modules import tvdb
 addon = xbmcaddon.Addon()
 addon_id = addon.getAddonInfo('id')
 ADDON_NAME = addon.getAddonInfo('name')
-HIDE_tile_in_OV = addon.getSetting('Hide_tilte_in_OV')
+HIDE_title_in_OV = addon.getSetting('Hide_tilte_in_OV')
 PAGINGTVshows = addon.getSetting('paging_tvshows')
 PAGINGMovies = addon.getSetting('paging_movies')
 STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
@@ -274,17 +274,17 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
     while pagesDone < int(PAGINGMovies):
         if not contentList[0] == "palyableSingleMedia":
             for detailInfo in contentList:
-                file = detailInfo.get('file').replace("\\\\", "\\") if detailInfo.get('file', None) is not None else None
+                file = detailInfo.get('file').replace("\\\\", "\\") if detailInfo.get('file', None) else None
                 filetype = detailInfo.get('filetype', None)
-                label = detailInfo.get('label').strip().encode("utf-8") if detailInfo.get('label', None) is not None else None
-                imdbnumber = detailInfo.get('imdbnumber').strip() if detailInfo.get('imdbnumber', None) is not None else None
+                label = detailInfo.get('label').strip().encode("utf-8") if detailInfo.get('label', None) else None
+                imdbnumber = detailInfo.get('imdbnumber').strip() if detailInfo.get('imdbnumber', None) else None
 
                 if label and strm_name:
                     label = stringUtils.cleanLabels(label)
-                    if HIDE_tile_in_OV == "true" and label.find("[OV]") > -1:
-                        get_title_with_OV = False
-                    else:
-                        get_title_with_OV = True
+                    get_title_with_OV = True
+                    if HIDE_title_in_OV == "true":
+                        if re.search('(\WOV\W)', label):
+                            get_title_with_OV = False
 
                     provider = getProvider(file)
 
@@ -364,8 +364,15 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
                                 detailInfo['season'] = data.get('season')
                                 detailInfo['episode'] = data.get('episode')
 
+                    get_title_with_OV = True
+                    if HIDE_title_in_OV == "true":
+                        label = detailInfo.get('label').strip().encode("utf-8") if detailInfo.get('label', None) else None
+                        label = stringUtils.cleanLabels(label)
+                        if re.search('(\WOV\W)', label):
+                            get_title_with_OV = False
+
                     if detailInfo.get('season', -1) > -1 and detailInfo.get('episode', -1) > -1:
-                        if NOE0_STRMS_EXPORT == "false" or detailInfo.get('episode') > 0:
+                        if NOE0_STRMS_EXPORT == "false" or detailInfo.get('episode') > 0 and get_title_with_OV == True:
                             episodesList.append(detailInfo)
 
         step = float(100.0 / len(episodesList) if len(episodesList) > 0 else 1)
