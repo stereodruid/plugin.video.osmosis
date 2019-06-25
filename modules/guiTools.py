@@ -15,11 +15,12 @@
 
 # -*- coding: utf-8 -*-
 
-from modules import stringUtils
+from . import stringUtils
+from . import fileSys
 import os, sys
 import time
 import urllib
-
+import re
 import utils
 import jsonUtils
 import xmldialogs
@@ -41,7 +42,6 @@ FANART = os.path.join(home, 'resources/media/fanart.jpg')
 folderIcon = os.path.join(home, 'resources/media/folderIcon.png')
 updateIcon = os.path.join(home, 'resources/media/updateIcon.png')
 
-
 def addItem(label, mode, icon):
     utils.addon_log('addItem')
     u = "plugin://{0}/?{1}".format(addon_id, urllib.urlencode({'mode': mode, 'fanart': icon}))
@@ -51,7 +51,6 @@ def addItem(label, mode, icon):
 
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
 
-
 def addFunction(labels):
     utils.addon_log('addItem')
     u = "plugin://{0}/?{1}".format(addon_id, urllib.urlencode({'mode': 666, 'fanart': updateIcon}))
@@ -60,7 +59,6 @@ def addFunction(labels):
     liz.setProperty("Fanart_Image", FANART)
 
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
-
 
 def addDir(name, url, mode, art, plot, genre, date, credits, showcontext=False):
     utils.addon_log('addDir: %s' % name.encode('utf-8'))
@@ -76,7 +74,6 @@ def addDir(name, url, mode, art, plot, genre, date, credits, showcontext=False):
     liz.addContextMenuItems(contextMenu)
 
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url='%s&mode=%d' % (u, mode), listitem=liz, isFolder=True)
-
 
 def addLink(name, url, mode, art, plot, genre, date, showcontext, playlist, regexs, total, setCookie=""):
     utils.addon_log('addLink: %s' % name.encode('utf-8'))
@@ -94,7 +91,6 @@ def addLink(name, url, mode, art, plot, genre, date, showcontext, playlist, rege
     xbmcplugin.setContent(int(sys.argv[1]), 'movies')
 
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url='%s&mode=%d' % (u, mode), listitem=liz, totalItems=total)
-
 
 def getSources():
     utils.addon_log('getSources')
@@ -115,25 +111,24 @@ def getSources():
             addItem("Install Watchdog", 6, icon)
     # ToDo Add label
 
-
 def getType(url):
     if url.find('plugin.audio') != -1:
         Types = ['YouTube', 'Audio-Album', 'Audio-Single', 'Other']
     else:
         Types = ['Movies', 'TV-Shows', 'YouTube', 'Other']
 
-    selectType = selectDialog(Types, header='Select category')
+    selectType = selectDialog('Select category', Types)
 
     if selectType == -1:
         return -1
 
     if selectType == 3:
         subType = ['(Music)', '(Movies)', '(TV-Shows)']
-        selectOption = selectDialog(subType, header='Select Video type:')
+        selectOption = selectDialog('Select Video type:', subType)
 
     else:
         subType = ['(en)', '(de)', '(sp)', '(tr)', 'Other']
-        selectOption = selectDialog(subType, header='Select language tag')
+        selectOption = selectDialog('Select language tag', subType)
 
     if selectOption == -1:
         return -1
@@ -141,18 +136,16 @@ def getType(url):
     if selectType >= 0 and selectOption >= 0:
         return Types[selectType] + subType[selectOption]
 
-
-def selectDialog(list, header=ADDON_NAME, autoclose=0):
-    if len(list) > 0:
-        select = xbmcgui.Dialog().select(header, list, autoclose)
-        return select
-
+def selectDialog(header, list, autoclose=0, multiselect=False):
+    if multiselect:
+        return xbmcgui.Dialog().multiselect(header, list, autoclose=autoclose)
+    else:
+        return xbmcgui.Dialog().select(header, list, autoclose)
 
 def editDialog(nameToChange):
     dialog = xbmcgui.Dialog()
     select = dialog.input(nameToChange, type=xbmcgui.INPUT_ALPHANUM, defaultt=nameToChange)
     return select
-
 
 # Before executing the code below we need to know the movie original title (string variable originaltitle) and the year (string variable year). They can be obtained from the infolabels of the listitem. The code filters the database for items with the same original title and the same year, year-1 and year+1 to avoid errors identifying the media.
 def markMovie(movID, pos, total, done):
@@ -172,7 +165,6 @@ def markMovie(movID, pos, total, done):
                 print("markMovie: Movie not in DB!?")
                 pass
 
-
 def markSeries(epID, pos, total, done):
     if done:
         try:
@@ -189,7 +181,6 @@ def markSeries(epID, pos, total, done):
             except:
                 print("markSeries: Show not in DB!?")
                 pass
-
 
 # Functions not in usee yet:
 def handle_wait(time_to_wait, header, title):
@@ -215,41 +206,33 @@ def handle_wait(time_to_wait, header, title):
         dlg.close()
         return True
 
-
 def show_busy_dialog():
     xbmc.executebuiltin('ActivateWindow(busydialog)')
-
 
 def hide_busy_dialog():
     xbmc.executebuiltin('Dialog.Close(busydialog)')
     while xbmc.getCondVisibility('Window.IsActive(busydialog)'):
         time.sleep(.1)
 
-
 def Error(header, line1='', line2='', line3=''):
     dlg = xbmcgui.Dialog()
     dlg.ok(header, line1, line2, line3)
     del dlg
 
-
 def infoDialog(str, header=ADDON_NAME, time=10000):
     try: xbmcgui.Dialog().notification(header, str, icon, time, sound=False)
     except: xbmc.executebuiltin("Notification(%s,%s, %s, %s)" % (header, str, time, THUMB))
 
-
 def okDialog(str1, str2='', header=ADDON_NAME):
     xbmcgui.Dialog().ok(header, str1, str2)
-
 
 def yesnoDialog(str1, str2='', header=ADDON_NAME, yes='', no=''):
     answer = xbmcgui.Dialog().yesno(header, str1, str2, '', yes, no)
     return answer
 
-
 def browse(type, heading, shares, mask='', useThumbs=False, treatAsFolder=False, path='', enableMultiple=False):
     retval = xbmcgui.Dialog().browse(type, heading, shares, mask, useThumbs, treatAsFolder, path, enableMultiple)
     return retval
-
 
 def resumePointDialog(resumePoint):
     if resumePoint:
@@ -260,3 +243,22 @@ def resumePointDialog(resumePoint):
              seconds=15,
              skip_to=int(resumePoint[0]) - 5,
              label=addon.getLocalizedString(39000).format(utils.zeitspanne(int(resumePoint[0]))[5]))
+
+def mediaListDialog(multiselect=True):
+    thelist = sorted(fileSys.readMediaList(purge=False), key=lambda k: k.split('|')[1].lower())
+    items = []
+    for entry in thelist:
+        splits = entry.strip().split('|')
+        matches = re.findall("plugin:\/\/([^\/\?]*)", splits[2])
+        if matches:
+            pluginnames = [fileSys.getAddonname(plugin) for plugin in matches]
+            items.append("{0} ({1}: {2})".format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', ''), ', '.join(pluginnames)))
+        else:
+            items.append("{0} ({1})".format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', '')))
+
+    if multiselect:
+        selectedItemsIndex = selectDialog("Select items", items, multiselect=True)
+        return [thelist[index] for index in selectedItemsIndex] if selectedItemsIndex else None
+    else:
+        selectedItemIndex = selectDialog("Select items", items)
+        return thelist[selectedItemIndex] if selectedItemIndex > -1 else None

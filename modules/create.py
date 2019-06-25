@@ -14,6 +14,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 # -*- coding: utf-8 -*-
+
 import os, sys, re
 import urllib
 import utils
@@ -41,7 +42,6 @@ thisDialog = sys.modules[__name__]
 thisDialog.dialogeBG = None
 thisDialog.dialoge = None
 
-
 def initialize_DialogBG(mess1, mess2, barType="BG"):
     if barType == "BG":
         if not thisDialog.dialogeBG:
@@ -52,7 +52,6 @@ def initialize_DialogBG(mess1, mess2, barType="BG"):
         if not thisDialog.dialoge:
             thisDialog.dialoge = xbmcgui.DialogProgress()
             thisDialog.dialoge.create("OSMOSIS: " + mess1 + ": " , " " + mess2)
-
 
 def fillPlugins(cType='video'):
     json_query = ('{"jsonrpc":"2.0","method":"Addons.GetAddons","params":{"type":"xbmc.addon.%s","properties":["name","path","thumbnail","description","fanart","summary", "extrainfo", "enabled"]}, "id": 1 }' % cType)
@@ -68,7 +67,6 @@ def fillPlugins(cType='video'):
         if cType in addontypes and not addon['addonid'] == addon_id:
             art = {'thumb': addon['thumbnail'], 'fanart': addon['fanart']}
             guiTools.addDir(addon['name'], 'plugin://' + addon['addonid'], 101, art, addon['description'], cType, 'date', 'credits')
-
 
 def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None'):
     utils.addon_log('fillPluginItems')
@@ -143,31 +141,15 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             else:
                 guiTools.addDir(label, file, 101, art, plot, '', '', '')
 
-
 def removeItemsFromMediaList(action='list'):
     utils.addon_log('removingitemsdialog')
 
-    selectedItems = getMediaListDialog()
+    selectedItems = guiTools.mediaListDialog(multiselect=True)
 
-    if selectedItems is not None:
+    if selectedItems:
         fileSys.removeMediaList(selectedItems)
         selectedLabels = [stringUtils.getStrmname(item.split('|')[1]) for item in selectedItems]
         xbmcgui.Dialog().notification("Finished deleting:", "{0}".format(", ".join(label for label in selectedLabels)))
-
-
-def getMediaListDialog():
-    thelist = sorted(fileSys.readMediaList(purge=False), key=lambda k: k.split('|')[1].lower())
-    items = []
-    for entry in thelist:
-        splits = entry.strip().split('|')
-        matches = re.findall("plugin:\/\/([^\/\?]*)", splits[2])
-        if matches:
-            pluginnames = [fileSys.getAddonname(plugin) for plugin in matches]
-            items.append("{0} ({1})".format(stringUtils.getStrmname(splits[1]), ', '.join(pluginnames)))
-
-    selectedItemsIndex = xbmcgui.Dialog().multiselect("Select items", items)
-    return [thelist[index] for index in selectedItemsIndex] if selectedItemsIndex else None
-
 
 def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
     strm_name = stringUtils.getStrmname(strm_name)
@@ -260,7 +242,6 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
 
     return albumList
 
-
 def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
     movieList = []
     pagesDone = 0
@@ -320,7 +301,6 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
 
         j = j + 100 / len(movieList)
 
-
 def getProvider(entry):
     provider = None
     provGeneral = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), entry)
@@ -332,7 +312,6 @@ def getProvider(entry):
             provider += ": " + provXST.group(1)
 
     return provider
-
 
 def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
     dirList = []
@@ -390,7 +369,6 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
         if pagesDone < int(PAGINGTVshows) and len(dirList) > 0:
             showList = [item for sublist in dirList for item in sublist]
             dirList = []
-
 
 def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
     episode = None

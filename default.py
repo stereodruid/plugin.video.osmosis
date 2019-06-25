@@ -14,6 +14,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 # -*- coding: utf-8 -*-
+
 import os, sys
 import urllib, urlparse
 import time
@@ -148,7 +149,7 @@ if __name__ == "__main__":
         utils.addon_log("getSources")
         guiTools.getSources()
 
-        xbmcplugin.setContent(int(sys.argv[1]), 'movies')
+        # xbmcplugin.setContent(int(sys.argv[1]), 'movies')
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
         if not fileSys.writeTutList("select:PluginType"):
@@ -159,27 +160,21 @@ if __name__ == "__main__":
             xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
     elif mode == 1:
         create.fillPlugins(url)
+        xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
         if not fileSys.writeTutList("select:Addon"):
             tutWin = ["Adding content to your library",
                       "Here, you can select the Add-on:",
                       "The selected Add-on should provide Video/Music content in the right structure.",
                       "Take a look at ++ Naming video files/TV shows ++ http://kodi.wiki/view/naming_video_files/TV_shows."]
             xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
-        try:
-            xbmcplugin.setContent(int(sys.argv[1]), 'movies')
-            xbmcplugin.endOfDirectory(int(sys.argv[1]))
-        except:
-            pass
     elif mode == 2:
         create.fillPluginItems(url)
-        try:
-            xbmcplugin.endOfDirectory(int(sys.argv[1]))
-        except:
-            pass
+        xbmcplugin.endOfDirectory(int(sys.argv[1]))
     elif mode == 666:
         updateAll.strm_update()
     elif mode == 4:
-        selectedItems = create.getMediaListDialog()
+        selectedItems = guiTools.mediaListDialog()
         if selectedItems:
             updateAll.strm_update(selectedItems)
     elif mode == 5:
@@ -191,7 +186,6 @@ if __name__ == "__main__":
         jsonUtils.sendJSON(json_query)
         xbmc.executebuiltin("XBMC.Container.Refresh")
     elif mode == 10:
-
         selectedEntry = None
         if mediaType:
             if movID or showID:
@@ -203,7 +197,7 @@ if __name__ == "__main__":
                     for i in providers:
                         selectProvider.append(i[1])
 
-                    selectedEntry = providers[guiTools.selectDialog(selectProvider, header='OSMOSIS: Select provider!')]
+                    selectedEntry = providers[guiTools.selectDialog('OSMOSIS: Select provider!', selectProvider)]
 
         if selectedEntry:
             url = selectedEntry[0]
@@ -267,65 +261,68 @@ if __name__ == "__main__":
                 pass
     elif mode == 100:
         create.fillPlugins(url)
-        try:
-            xbmcplugin.endOfDirectory(int(sys.argv[1]))
-        except:
-            pass
+        xbmcplugin.endOfDirectory(int(sys.argv[1]))
     elif mode == 101:
         create.fillPluginItems(url)
+        xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
         if not fileSys.writeTutList("select:AddonNavi"):
             tutWin = ["Adding content to your library",
                       "Search for your Movie, TV-Show or Music.",
                       "Mark/select content, do not play a Movie or enter a TV-Show.",
                       "Open context menu on the selected and select *create strms*."]
             xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
-
-        try:
-            xbmcplugin.endOfDirectory(int(sys.argv[1]))
-        except:
-            pass
-
     elif mode == 200:
         utils.addon_log("write multi strms")
 
         # A dialog to rename the Change Title for Folder and MediaList entry:
-        selectAction = ['No, continue with original Title!', 'Rename Title!']
+        selectAction = ['No, continue with original Title', 'Rename Title', 'Get Title from Medialist']
         if not fileSys.writeTutList("select:Rename"):
             tutWin = ["Adding content to your library",
                       "You can rename your Movie, TV-Show or Music title.",
                       "To make your scraper recognize the content, some times it is necessary to rename the title.",
                       "Be careful, wrong title can also cause that your scraper can't recognize your content."]
             xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
-        choice = guiTools.selectDialog(selectAction, header='Title for Folder and MediaList entry')
+        choice = guiTools.selectDialog('Title for Folder and MediaList entry', selectAction)
         if choice != -1:
+            cType = None
             if choice == 1 or name == None or name == "":
-                name = guiTools.editDialog(name).strip() + "++RenamedTitle++"
+                name = guiTools.editDialog(name).strip()
+                name = "{0}++RenamedTitle++".format(name) if name else name
 
-            if not fileSys.writeTutList("select:ContentTypeLang"):
-                tutWin = ["Adding content to your library",
-                          "Now select your content type.",
-                          "Select language or YouTube type.",
-                          "Wait for done message."]
-                xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
+            if choice == 2:
+                entry = guiTools.mediaListDialog(False)
+                splits = entry.split('|') if entry else None
+                name = splits[1] if splits else None
+                cType = splits[0] if splits else None
 
-            cType = guiTools.getType(url)
-            if filetype == 'file':
-                url += '&playMode=play'
-            if cType != -1:
-                fileSys.writeMediaList(url, name, cType)
-                xbmcgui.Dialog().notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False)
+            if name:
+                if not fileSys.writeTutList("select:ContentTypeLang"):
+                    tutWin = ["Adding content to your library",
+                              "Now select your content type.",
+                              "Select language or YouTube type.",
+                              "Wait for done message."]
+                    xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
 
-                try:
-                    plugin_id = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
-                    if plugin_id:
-                        module = moduleUtil.getModule(plugin_id.group(1))
-                        if module and hasattr(module, 'create'):
-                            url = module.create(name, url, 'video')
-                except:
-                    pass
+                if not cType:
+                    cType = guiTools.getType(url)
+                if cType != -1:
+                    if filetype == 'file':
+                        url += '&playMode=play'
+                    fileSys.writeMediaList(url, name, cType)
+                    xbmcgui.Dialog().notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False)
 
-                create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
-                xbmcgui.Dialog().notification('Writing items...', "Done", xbmcgui.NOTIFICATION_INFO, 5000, False)
+                    try:
+                        plugin_id = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
+                        if plugin_id:
+                            module = moduleUtil.getModule(plugin_id.group(1))
+                            if module and hasattr(module, 'create'):
+                                url = module.create(name, url, 'video')
+                    except:
+                        pass
+
+                    create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
+                    xbmcgui.Dialog().notification('Writing items...', "Done", xbmcgui.NOTIFICATION_INFO, 5000, False)
     elif mode == 201:
         utils.addon_log("write single strm")
         # create.fillPluginItems(url)
