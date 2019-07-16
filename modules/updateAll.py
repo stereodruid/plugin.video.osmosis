@@ -17,10 +17,11 @@
 
 import os
 import sys
-from modules import create
-from modules import guiTools
-from modules import moduleUtil
-from modules import stringUtils
+from . import create
+from . import guiTools
+from . import moduleUtil
+from . import stringUtils
+from . import fileSys
 
 import utils
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
@@ -36,28 +37,24 @@ actor_update_manual = 0
 actor_update_periodictime = 1
 actor_update_fixtime = 2
 
-
-def readMediaList(purge=False):
-    if xbmcvfs.exists(MediaList_LOC):
-        fle = xbmcvfs.File(MediaList_LOC, "r")
-        thelist = fle.read().splitlines()
-        fle.close()
-        return thelist
-
-
 def strm_update(selectedItems=None, actor=0):
     if xbmcvfs.exists(MediaList_LOC):
-        thelist = selectedItems if selectedItems else readMediaList()
-        if len(thelist) > 0:
+        thelist = fileSys.readMediaList()
+        items = selectedItems if selectedItems else [{'entry': item} for item in thelist]
+        if len(items) > 0:
             dialogeBG = xbmcgui.DialogProgressBG()
             dialogeBG.create("OSMOSIS: " , 'Total Update-Progress:')
 
             iUrls = 0
             splittedEntries = []
-            for entry in thelist:
-                splits = entry.strip().split('|')
-                iUrls += len(splits[2].split('<next>'))
-                splittedEntries.append(splits)
+            if not selectedItems:
+                for item in items:
+                    splits = item.get('entry').split('|')
+                    iUrls += len(splits[2].split('<next>'))
+                    splittedEntries.append(splits)
+            else:
+                iUrls = len(selectedItems)
+                splittedEntries = [[item.get('entry').split('|')[0], item.get('entry').split('|')[1], item.get('url')] for item in selectedItems]
 
             step = j = 100 / iUrls
             for splittedEntry in splittedEntries:
@@ -69,7 +66,7 @@ def strm_update(selectedItems=None, actor=0):
                     if plugin_id:
                         module = moduleUtil.getModule(plugin_id.group(1))
                         if module and hasattr(module, 'update'):
-                            url = module.update(name, url, 'video', readMediaList() if selectedItems else thelist)
+                            url = module.update(name, url, 'video', thelist)
 
                     dialogeBG.update(j, "OSMOSIS total update process: " , "Current Item: %s Items left: %d" % (stringUtils.getStrmname(name), iUrls))
                     j += step

@@ -23,7 +23,8 @@ import shutil
 
 import utils
 import codecs
-from modules import stringUtils
+from . import stringUtils
+from . import kodiDB
 import errno
 import xbmc
 import xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
@@ -52,7 +53,7 @@ def makeSTRM(filepath, filename, url):
 
     filename = stringUtils.cleanStrmFilesys(filename)
     filepath = stringUtils.multiRstrip(filepath)
-    filepath = completePath(os.path.join(STRM_LOC, filepath))
+    filepath = stringUtils.completePath(os.path.join(STRM_LOC, filepath))
 
     if not xbmcvfs.exists(filepath):
         dirs = filepath.replace(STRM_LOC, '').split("\\") if filepath.find("\\") != -1 else filepath.replace(STRM_LOC, '').split("/")
@@ -60,7 +61,7 @@ def makeSTRM(filepath, filename, url):
 
         filepath = STRM_LOC
         for dir in dirs:
-            filepath = completePath(os.path.join(filepath, dir))
+            filepath = stringUtils.completePath(os.path.join(filepath, dir))
             if not xbmcvfs.exists(filepath):
                 xbmcvfs.mkdir(filepath)
 
@@ -151,10 +152,7 @@ def writeMediaList(url, name, cType='Other', cleanName=True, albumartist=None):
     if not xbmcvfs.exists(thefile):
         xbmcvfs.File(thefile, 'w').close()
 
-    fle = xbmcvfs.File(thefile, 'r')
-    thelist = fle.read().splitlines()
-    fle.close()
-    del fle
+    thelist = readMediaList()
 
     thelist = [x for x in thelist if x != '']
     if len(thelist) > 0 :
@@ -245,25 +243,40 @@ def make_sure_path_exists(path):
 
 def removeMediaList(delList):
     utils.addon_log('Removing items')
-    thefile = completePath(os.path.join(MEDIALIST_PATH))
-    thefile = xbmc.translatePath(os.path.join(thefile, 'MediaList.xml'))
+    thefile = xbmc.translatePath(os.path.join(MEDIALIST_PATH, 'MediaList.xml'))
 
     if xbmcvfs.exists(thefile):
         delNotInMediaList(delList)
 
-        fle = xbmcvfs.File(thefile, 'r')
-        thelist = fle.read().splitlines()
-        fle.close()
-        del fle
+        thelist = readMediaList()
 
-        thelist = [entry for entry in thelist if entry not in delList]
+        newlist = []
+        for entry in thelist:
+            additem = True
+            for item in delList:
+                if entry.find(item.get('url')) > -1:
+                    if entry.find('<next>') > -1:
+                        entry = entry.replace(item.get('url'), '')
+                        splits = entry.split('|')
+                        if splits[2].startswith('<next>') or splits[2].endswith('<next>'):
+                            if splits[2].startswith('<next>'):
+                                splits[2] = splits[2][6:]
+                            elif splits[2].endswith('<next>'):
+                                splits[2] = splits[2][0:len(splits[2])-6]
+                            entry = ('|'.join(splits))
+                    else:
+                        additem = False
+                        break;
+
+            if additem:
+                newlist.append(entry)
 
         fle = xbmcvfs.File(thefile, "w")
-        fle.write('\n'.join(thelist).strip())
+        fle.write('\n'.join(newlist).strip())
         fle.close()
         del fle
 
-def readMediaList(purge=False):
+def readMediaList():
     if xbmcvfs.exists(MediaList_LOC):
         fle = xbmcvfs.File(MediaList_LOC, 'r')
         thelist = fle.read().splitlines()
@@ -271,32 +284,45 @@ def readMediaList(purge=False):
         return thelist
 
 def delNotInMediaList(delList):
-    for entry in delList:
+    for item in delList:
         try:
-            splits = entry.split('|')
+            splits = item.get('entry').split('|')
             type = splits[0]
             isAudio = True if type.lower().find('audio') > -1 else False
-            path = completePath(STRM_LOC) + type
 
-            if isAudio and len(splits) > 3:
-                path = completePath(path) + stringUtils.cleanByDictReplacements(splits[3])
+            if type.lower().find('movies') > -1:
+                path = xbmc.translatePath(os.path.join(STRM_LOC, stringUtils.getMovieStrmPath(type, splits[1])))
+            else:
+                path = os.path.join(STRM_LOC, type)
 
-            itemPath = stringUtils.getStrmname(splits[1])
-            path = completePath(completePath(path) + stringUtils.cleanStrmFilesys(itemPath))
+                if isAudio and len(splits) > 3:
+                    path = os.path.join(path, stringUtils.cleanByDictReplacements(splits[3]))
+
+                itemPath = stringUtils.getStrmname(splits[1])
+                path = xbmc.translatePath(os.path.join(path, stringUtils.cleanStrmFilesys(itemPath)))
+
+            path = stringUtils.completePath(path)
+
             utils.addon_log("remove: %s" % path)
-            xbmcvfs.rmdir(path, force=True)
+
+            deleteFromFileSystem = True
+            streams = None
+            if type.lower().find('tv-shows') > -1 or type.lower().find('movies') > -1:
+                streams = [stream[0] for stream in kodiDB.delStream(path[len(STRM_LOC) + 1:len(path)], stringUtils.getProviderId(item.get('url')).get('providerId'), type.lower().find('tv-shows') > -1)]
+                if len(streams) > 0 or path.endswith(stringUtils.completePath(type)):
+                    deleteFromFileSystem = False
+                    dirs, files = xbmcvfs.listdir(path)
+                    for file in files:
+                        if file.lower().replace('.strm', '') not in streams:
+                            xbmcvfs.delete(xbmc.translatePath(os.path.join(path, file)))
+
+            if deleteFromFileSystem:
+                xbmcvfs.rmdir(path, force=True)
+
             if isAudio:
                 xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": 1}')
         except OSError:
                 print ("Unable to remove: %s" % path)
-
-def completePath(filepath):
-    if filepath.find("\\") != -1 and not filepath.endswith("\\"):
-        filepath += "\\"
-    elif filepath.find("/") != -1 and not filepath.endswith("/"):
-        filepath += "/"
-
-    return xbmc.translatePath(filepath)
 
 def getAddonname(addonid):
     if addonid not in addonList:

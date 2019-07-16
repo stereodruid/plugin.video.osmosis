@@ -244,21 +244,29 @@ def resumePointDialog(resumePoint):
              skip_to=int(resumePoint[0]) - 5,
              label=addon.getLocalizedString(39000).format(utils.zeitspanne(int(resumePoint[0]))[5]))
 
-def mediaListDialog(multiselect=True):
-    thelist = sorted(fileSys.readMediaList(purge=False), key=lambda k: k.split('|')[1].lower())
+def mediaListDialog(multiselect=True, expand=True):
+    thelist = fileSys.readMediaList()
     items = []
-    for entry in thelist:
+    for index, entry in enumerate(thelist):
         splits = entry.strip().split('|')
-        matches = re.findall("plugin:\/\/([^\/\?]*)", splits[2])
+        name = stringUtils.getStrmname(splits[1])
+        matches = re.findall('(plugin:\/\/[^<]*)', splits[2])
         if matches:
-            pluginnames = [fileSys.getAddonname(plugin) for plugin in matches]
-            items.append("{0} ({1}: {2})".format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', ''), ', '.join(pluginnames)))
+            if expand:
+                for url in matches:
+                    items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} ({1}: {2})'.format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', ''), stringUtils.getProvidername(url)), 'url': url})
+            else:
+                pluginnames = sorted([stringUtils.getProvidername(url) for url in matches], key=lambda k: k.lower())
+                items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} ({1}: {2})'.format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', ''),  ', '.join(pluginnames)), 'url': splits[2]})
         else:
-            items.append("{0} ({1})".format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', '')))
+            items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} ({1})'.format(name, splits[0].replace('(', '/').replace(')', '')), 'url': splits[2]})
+
+    sItems = sorted([item.get('text') for item in items], key=lambda k: k.lower())
 
     if multiselect:
-        selectedItemsIndex = selectDialog("Select items", items, multiselect=True)
-        return [thelist[index] for index in selectedItemsIndex] if selectedItemsIndex else None
+        selectedItemsIndex = selectDialog("Select items", sItems, multiselect=True)
+        return [item for item in items for index in selectedItemsIndex if item.get('text') == sItems[index]] if selectedItemsIndex and len(selectedItemsIndex) > 0 else None
     else:
-        selectedItemIndex = selectDialog("Select items", items)
-        return thelist[selectedItemIndex] if selectedItemIndex > -1 else None
+        selectedItemIndex = selectDialog("Select items", sItems)
+        selectedList = [item for index, item in enumerate(items) if selectedItemIndex > -1 and item.get('text') == sItems[selectedItemIndex]]
+        return selectedList[0] if len(selectedList) == 1 else None

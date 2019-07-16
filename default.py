@@ -175,7 +175,7 @@ if __name__ == "__main__":
         updateAll.strm_update()
     elif mode == 4:
         selectedItems = guiTools.mediaListDialog()
-        if selectedItems:
+        if selectedItems and len(selectedItems) > 0:
             updateAll.strm_update(selectedItems)
     elif mode == 5:
         create.removeItemsFromMediaList('list')
@@ -192,12 +192,11 @@ if __name__ == "__main__":
                 providers = kodiDB.getVideo(movID) if movID else kodiDB.getVideo(showID, episode)
                 if len(providers) == 1:
                     selectedEntry = providers[0]
-                else:
-                    selectProvider = []
-                    for i in providers:
-                        selectProvider.append(i[1])
+                else:                    
+                    selectProvider = sorted([stringUtils.getProvidername(provider[0]) for provider in providers], key=lambda k: k.lower())
 
-                    selectedEntry = providers[guiTools.selectDialog('OSMOSIS: Select provider!', selectProvider)]
+                    choice = guiTools.selectDialog('OSMOSIS: Select provider!', selectProvider)
+                    if choice > -1: selectedEntry = providers[choice]
 
         if selectedEntry:
             url = selectedEntry[0]
@@ -221,6 +220,10 @@ if __name__ == "__main__":
                     if props:
                         infoLabels['title'] = props[2]
                         infoLabels['aired'] = props[3]
+
+                    # match = re.search('<thumb>(.*)<\/thumb>', props[4])
+                    # if match:
+                    #    item.setArt({'thumb': match.group(1)})
                 else:
                     sTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
                     props = kodiDB.getKodiMovieID(sTitle)
@@ -252,13 +255,8 @@ if __name__ == "__main__":
                 # Exec play process
                 xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
         else:
-            try:
-                # Get infos from selectet media
-                item = xbmcgui.ListItem(path=url)
-            # Exec play process
-                xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
-            except Exception:
-                pass
+            item = xbmcgui.ListItem(path="")
+            xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
     elif mode == 100:
         create.fillPlugins(url)
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -291,8 +289,8 @@ if __name__ == "__main__":
                 name = "{0}++RenamedTitle++".format(name) if name else name
 
             if choice == 2:
-                entry = guiTools.mediaListDialog(False)
-                splits = entry.split('|') if entry else None
+                item = guiTools.mediaListDialog(False, False)
+                splits = item.get('entry').split('|') if item else None
                 name = splits[1] if splits else None
                 cType = splits[0] if splits else None
 

@@ -7,7 +7,6 @@ import xbmc, xbmcaddon, xbmcvfs
 
 addon = xbmcaddon.Addon()
 
-
 def update(strm_name, url, media_type, thelist):
     plex_details = jsonUtils.requestList("plugin://plugin.video.plexbmc", media_type).get('files', [])
     for plex_detail in plex_details:

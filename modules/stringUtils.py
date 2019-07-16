@@ -16,12 +16,18 @@
 # -*- coding: utf-8 -*-
 import os, re
 import utils
-import xbmcaddon
+import xbmcaddon, xbmc
+from . import moduleUtil
+
+try:
+    import json
+except:
+    import simplejson as json
 
 addon = xbmcaddon.Addon()
 folder_medialistentry_movie = addon.getSetting('folder_medialistentry_movie')
 folder_movie = addon.getSetting('folder_movie')
-
+addonList = {}
 
 def cleanString(string):
     newstr = newstr.replace('&', '&amp;')
@@ -29,14 +35,12 @@ def cleanString(string):
     newstr = newstr.replace('<', '&lt;')
     return newstr
 
-
 def uncleanString(string):
     newstr = string
     newstr = newstr.replace('&amp;', '&')
     newstr = newstr.replace('&gt;', '>')
     newstr = newstr.replace('&lt;', '<')
     return newstr
-
 
 def cleanLabels(text, formater=''):
     dictresub = {'\[COLOR (.+?)\]' : '', '\[/COLOR\]' : '', '\[COLOR=(.+?)\]' : '', '\[color (.+?)\]': '',
@@ -75,7 +79,6 @@ def cleanLabels(text, formater=''):
 
     return text.strip()
 
-
 def cleanStrms(text, formater=''):
     text = text.replace('Full Episodes', '')
     if formater == 'title':
@@ -88,10 +91,8 @@ def cleanStrms(text, formater=''):
         text = text
     return text
 
-
 def cleanStrmFilesys(string):
     return re.sub('[\/:*?<>|!"]', '', string)
-
 
 def multiRstrip(text):
     replaceRstrip = ['.', ',', '-', '_', ' ', '#', '+', '`', '&', '%', '!', '?']
@@ -99,13 +100,10 @@ def multiRstrip(text):
         text.rstrip(i)
     return text
 
-
 def removeHTMLTAGS(text):
     return re.sub('<[^<]+?>', '', text)
 
-
 def removeNonAscii(s): return "".join(filter(lambda x: ord(x) < 128, s))
-
 
 def unicodetoascii(text):
 
@@ -140,14 +138,11 @@ def unicodetoascii(text):
             )
     return TEXT
 
-
 def removeStringElem(lst, string=''):
     return ([x for x in lst if x != string])
 
-
 def replaceStringElem(lst, old='', new=''):
     return ([x.replace(old, new) for x in lst])
-
 
 def cleanByDictReplacements(string):
     dictReplacements = {"'\(\\d+\)'" : '', '()' : '', 'Kinofilme' : '',
@@ -157,7 +152,6 @@ def cleanByDictReplacements(string):
                         '"?"': '', '"':''}
 
     return utils.multiple_reSub(string, dictReplacements)
-
 
 def getMovieStrmPath(strmTypePath, mediaListEntry_name, movie_name=None):
     if folder_medialistentry_movie and folder_medialistentry_movie == 'true':
@@ -170,16 +164,58 @@ def getMovieStrmPath(strmTypePath, mediaListEntry_name, movie_name=None):
         strmTypePath = os.path.join(strmTypePath, movie_name)
     return strmTypePath
 
-
 def getStrmname(strm_name):
     return strm_name.replace('++RenamedTitle++', '').strip()
-
 
 def invCommas(string):
    string = string.replace("'", "''")
    return string
 
-
 def cleanTitle(string):
    string = string.replace(".strm", "")
    return string
+
+def completePath(filepath):
+    if not filepath.endswith("\\") and not filepath.endswith("/"):
+        filepath += os.sep
+
+    return filepath
+
+def getAddonname(addonid):
+    if addonid not in addonList:
+        r = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "id": 1, "method": "Addons.GetAddonDetails", "params": {"addonid": "' + addonid + '", "properties": ["name"]}}')
+        data = json.loads(r)
+        if not "error" in data.keys():
+            addonList[addonid] = data["result"]["addon"]["name"]
+            return addonList[addonid]
+        else:
+            return addonid
+    else:
+        return addonList[addonid]
+
+def getProviderId(url):
+    provider = None
+    plugin_id = re.search('plugin:\/\/([^\/\?]*)', url)
+
+    if plugin_id:
+        module = moduleUtil.getModule(plugin_id.group(1))
+        if module and hasattr(module, 'getProviderId'):
+            providerId = module.getProviderId(plugin_id.group(1), url)
+        else:
+            providerId = plugin_id.group(1)
+
+        provider = {'plugin_id': plugin_id.group(1), 'providerId': providerId}
+
+    return provider
+
+def getProvidername(url):
+    provider = getProviderId(url)
+
+    if provider:
+        module = moduleUtil.getModule(provider.get('plugin_id'))
+        if module and hasattr(module, 'getProvidername'):
+            provider = module.getProvidername(provider.get('plugin_id'), url)
+        else:
+            provider = getAddonname(provider.get('plugin_id'))
+
+    return provider

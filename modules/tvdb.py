@@ -86,7 +86,7 @@ def findEpisodeByName(token, show_data, episodeName, lang):
                 for episode in json_ep.get('data'):
                     utils.addon_log('tvdb findEpisodeByName: episode = %s' % episode)
 
-                    if episode.get('episodeName', None) and (episode.get('episodeName').lower().find(episodeName.lower()) >= 0 or episodeName.lower().find(episode.get('episodeName').lower()) >= 0):
+                    if episode.get('episodeName', None) and (episode.get('episodeName').lower().replace(' ', '').find(episodeName.lower().replace(' ', '')) >= 0 or episodeName.lower().replace(' ', '').find(episode.get('episodeName').lower().replace(' ', '')) >= 0):
                         episode_data = {'season': episode.get('airedSeason'), 'episode': episode.get('airedEpisodeNumber')}
                         setEpisodeCache(episodeName, showid, episode_data)
                         return episode_data

@@ -148,7 +148,7 @@ def removeItemsFromMediaList(action='list'):
 
     if selectedItems:
         fileSys.removeMediaList(selectedItems)
-        selectedLabels = [stringUtils.getStrmname(item.split('|')[1]) for item in selectedItems]
+        selectedLabels = sorted(list(dict.fromkeys([item.get('name') for item in selectedItems])), key=lambda k: k.lower())
         xbmcgui.Dialog().notification("Finished deleting:", "{0}".format(", ".join(label for label in selectedLabels)))
 
 def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
@@ -257,7 +257,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
             for detailInfo in contentList:
                 file = detailInfo.get('file').replace("\\\\", "\\") if detailInfo.get('file', None) else None
                 filetype = detailInfo.get('filetype', None)
-                label = detailInfo.get('label').strip().encode("utf-8") if detailInfo.get('label', None) else None
+                label = detailInfo.get('label').encode("utf-8") if detailInfo.get('label', None) else None
                 imdbnumber = detailInfo.get('imdbnumber').strip() if detailInfo.get('imdbnumber', None) else None
 
                 if label and strm_name:
@@ -267,13 +267,13 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
                         if re.search('(\WOV\W)', label):
                             get_title_with_OV = False
 
-                    provider = getProvider(file)
+                    provider = stringUtils.getProviderId(file)
 
                     thisDialog.dialogeBG.update(j, ADDON_NAME + ": Getting Movies: ", " Video: " + label)
                     if filetype is not None and filetype == 'file' and get_title_with_OV == True:
                         m_path = stringUtils.getMovieStrmPath(strm_type, strm_name, label)
                         m_title = stringUtils.getStrmname(label)
-                        movieList.append({'path': m_path, 'title':  m_title, 'url': file, 'provider': provider, 'imdbnumber': imdbnumber})
+                        movieList.append({'path': m_path, 'title':  m_title, 'url': file, 'provider': provider.get('providerId'), 'imdbnumber': imdbnumber})
                     j = j + len(contentList) * int(PAGINGMovies) / 100
 
             pagesDone += 1
@@ -282,10 +282,10 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
             else:
                 pagesDone = int(PAGINGMovies)
         else:
-            provider = getProvider(contentList[1])
+            provider = stringUtils.getProviderId(contentList[1])
             m_path = stringUtils.getMovieStrmPath(strm_type, strm_name)
             m_title = stringUtils.getStrmname(strm_name)
-            movieList.append({'path': m_path, 'title':  m_title, 'url': contentList[1], 'provider': provider})
+            movieList.append({'path': m_path, 'title':  m_title, 'url': contentList[1], 'provider': provider.get('providerId')})
             pagesDone = int(PAGINGMovies)
 
     if addon.getSetting('Link_Type') == '0':
@@ -300,18 +300,6 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
         fileSys.writeSTRM(stringUtils.cleanStrms(movie.get('path')), stringUtils.cleanStrms(movie.get('title')), strm_link)
 
         j = j + 100 / len(movieList)
-
-def getProvider(entry):
-    provider = None
-    provGeneral = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), entry)
-    provXST = re.search('%s(.*)'"\&function"'' % (r"site="), entry)
-
-    if provGeneral:
-        provider = provGeneral.group(1)
-        if provXST:
-            provider += ": " + provXST.group(1)
-
-    return provider
 
 def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
     dirList = []
@@ -379,11 +367,11 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
     season = episode_item.get('season', -1)
     strSeasonEpisode = 's%de%d' % (season, episode)
     showtitle = episode_item.get('showtitle', None).encode("utf-8")
-    provider = getProvider(file)
+    provider = stringUtils.getProviderId(file)
 
     if showtitle is not None and showtitle != "" and strm_type != "":
         path = os.path.join(strm_type, stringUtils.cleanStrmFilesys(showtitle)) if strm_name.find('++RenamedTitle++') == -1 else os.path.join(strm_type, stringUtils.cleanStrmFilesys(stringUtils.getStrmname(strm_name)))
-        episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': showtitle, 'provider': provider} if strm_name.find('++RenamedTitle++') == -1 else {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': stringUtils.getStrmname(strm_name), 'provider': provider}
+        episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': showtitle, 'provider': provider.get('providerId')} if strm_name.find('++RenamedTitle++') == -1 else {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': stringUtils.getStrmname(strm_name), 'provider': provider.get('providerId')}
 
         if addon.getSetting('Link_Type') == '0':
             episode = kodiDB.writeShow(episode)
