@@ -45,30 +45,27 @@ updateIcon = os.path.join(home, 'resources/media/updateIcon.png')
 def addItem(label, mode, icon):
     utils.addon_log('addItem')
     u = "plugin://{0}/?{1}".format(addon_id, urllib.urlencode({'mode': mode, 'fanart': icon}))
-    liz = xbmcgui.ListItem(label, iconImage=icon, thumbnailImage=icon)
-    liz.setInfo(type="Video", infoLabels={ "Title": label, "Genre": "actionRemove"})
-    liz.setProperty("Fanart_Image", FANART)
+    liz = xbmcgui.ListItem(label)
+    liz.setInfo(type="Video", infoLabels={"Title": label})
+    liz.setArt({'icon': icon, 'thumb': icon, 'fanart': FANART})
 
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
 
 def addFunction(labels):
     utils.addon_log('addItem')
     u = "plugin://{0}/?{1}".format(addon_id, urllib.urlencode({'mode': 666, 'fanart': updateIcon}))
-    liz = xbmcgui.ListItem(labels, iconImage=updateIcon, thumbnailImage=updateIcon)
-    liz.setInfo(type="Video", infoLabels={ "Title": labels, "Genre": "actionRemove"})
-    liz.setProperty("Fanart_Image", FANART)
+    liz = xbmcgui.ListItem(labels)
+    liz.setInfo(type="Video", infoLabels={"Title": labels})
+    liz.setArt({'icon': updateIcon, 'thumb': updateIcon, 'fanart':  FANART})
 
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
 
-def addDir(name, url, mode, art, plot, genre, date, credits, showcontext=False):
+def addDir(name, url, mode, art, plot=None, genre=None, date=None, credits=None, showcontext=False):
     utils.addon_log('addDir: %s' % name.encode('utf-8'))
     u = "{0}?{1}".format(sys.argv[0], urllib.urlencode({'url': url.encode('utf-8'), 'name': stringUtils.cleanLabels(name.encode('utf-8')), 'fanart': art.get('fanart', '').encode('utf-8')}))
     contextMenu = []
-    thumbArt = art.get('thumb', None)
-    if thumbArt == None:
-        thumbArt = art.get('fanart', None)
-    liz = xbmcgui.ListItem(name, iconImage=thumbArt, thumbnailImage=thumbArt)
-    liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": plot, "Genre": genre, "dateadded": date, "credits": credits })
+    liz = xbmcgui.ListItem(name)
+    liz.setInfo(type="Video", infoLabels={"Title": name, "Plot": plot, "Genre": genre, "dateadded": date, "credits": credits})
     liz.setArt(art)
     contextMenu.append(('Create Strms', 'XBMC.RunPlugin(%s&mode=%d)' % (u, 200)))
     liz.addContextMenuItems(contextMenu)
@@ -79,11 +76,8 @@ def addLink(name, url, mode, art, plot, genre, date, showcontext, playlist, rege
     utils.addon_log('addLink: %s' % name.encode('utf-8'))
     u = "{0}?{1}".format(sys.argv[0], urllib.urlencode({'url': url.encode('utf-8'), 'name': stringUtils.cleanLabels(name.encode('utf-8')), 'fanart': art.get('fanart', '').encode('utf-8')}))
     contextMenu = []
-    thumbArt = art.get('thumb', None)
-    if thumbArt == None:
-        thumbArt = art.get('fanart', None)
-    liz = xbmcgui.ListItem(name, iconImage=thumbArt, thumbnailImage=thumbArt)
-    liz.setInfo(type="Video", infoLabels={ "Title": name, "Plot": plot, "Genre": genre, "dateadded": date })
+    liz = xbmcgui.ListItem(name)
+    liz.setInfo(type="Video", infoLabels={"Title": name, "Plot": plot, "Genre": genre, "dateadded": date})
     liz.setArt(art)
     liz.setProperty('IsPlayable', 'true')
     contextMenu.append(('Create Strm', 'XBMC.RunPlugin(%s&mode=%d&filetype=file)' % (u, 200)))
@@ -94,19 +88,18 @@ def addLink(name, url, mode, art, plot, genre, date, showcontext, playlist, rege
 
 def getSources():
     utils.addon_log('getSources')
-    xbmcplugin.setContent(int(sys.argv[1]), 'movies')
+    xbmcplugin.setContent(int(sys.argv[1]), 'files')
     art = {'fanart': FANART, 'thumb': folderIcon}
-    addDir('Video Plugins', 'video', 1, art, '', 'genre', 'date', 'credits')
-    addDir('Music Plugins', 'audio', 1, art, '', 'genre', 'date', 'credits')
+    addDir('Video Plugins', 'video', 1, art)
+    addDir('Music Plugins', 'audio', 1, art)
     addItem('Update', 4, updateIcon)
     addFunction('Update all')
     addItem("Remove Media", 5, iconRemove)
     if xbmc.getCondVisibility('System.HasAddon(service.watchdog)') != 1:
         json_query = ('{"jsonrpc":"2.0","method":"Addons.GetAddonDetails", "params":{ "addonid": "service.watchdog", "properties":["enabled", "installed"]}, "id": 1 }')
         addon_details = jsonUtils.sendJSON(json_query).get('addon')
-        if addon_details is not None:
-            if addon_details.get("installed"):
-                addItem("Activate Watchdog", 7, icon)
+        if addon_details and addon_details.get("installed"):
+            addItem("Activate Watchdog", 7, icon)
         else:
             addItem("Install Watchdog", 6, icon)
     # ToDo Add label
