@@ -36,120 +36,16 @@ import xbmc, xbmcaddon, xbmcgui, xbmcplugin
 addon = xbmcaddon.Addon()
 home = xbmc.translatePath(addon.getAddonInfo('path').decode('utf-8'))
 FANART = os.path.join(home, 'fanart.jpg')
-kodi_version = int(xbmc.getInfoLabel("System.BuildVersion")[:2])
 
-if __name__ == "__main__":
-    try:
-        xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_UNSORTED)
-    except:
-        pass
-    try:
-        xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_LABEL)
-    except:
-        pass
-    try:
-        xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_DATE)
-    except:
-        pass
-    try:
-        xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_GENRE)
-    except:
-        pass
-
+if __name__ == '__main__':
     params = dict(urlparse.parse_qsl(sys.argv[2][1:]))
-    utils.addon_log("params = %s" % (params))
+    utils.addon_log('params = {0}'.format(params))
 
-    name = None
-    guiElem = None
-    del_item = None
-    url = None
-    mode = None
-    playlist = None
-    iconimage = None
-    fanart = FANART
-    playlist = None
-    fav_mode = None
-    regexs = None
-    album = None
-    artist = None
-    titl = None
-    cType = None
-
-#     try:
-#         markName = params["url"].decode('utf-8').split('|')[1]
-#     except:
-#         pass
-    try:
-        url = params["url"]
-    except:
-        try:
-            url = urlUtils.getURL(sys.argv[2])
-        except:
-            pass
-        pass
-    try:
-        name = params["name"]
-    except:
-        name = None
-    try:
-        iconimage = params["iconimage"]
-    except:
-        pass
-    try:
-        movID = params["id"]
-    except:
-        movID = None
-        pass
-    try:
-        shoID = params["showid"]
-    except:
-        shoID = None
-        pass
-    try:
-        showID = params["showid"]
-    except:
-        showID = None
-        pass
-    try:
-        mediaType = params["mediaType"]
-    except:
-        mediaType = None
-        pass
-    try:
-        episode = params["episode"]
-    except:
-        episode = None
-        pass
-    try:
-        fanart = params["fanart"]
-    except:
-        pass
-    try:
-        mode = int(params["mode"])
-    except:
-        pass
-    try:
-        playlist = eval(params["playlist"].replace('||', ','))
-    except:
-        pass
-    try:
-        fav_mode = int(params["fav_mode"])
-    except:
-        pass
-    try:
-        regexs = params["regexs"]
-    except:
-        pass
-    try:
-        filetype = params.get("filetype", "directory")
-    except:
-        pass
+    mode = int(params.get('mode')) if params.get('mode') else None
 
     if mode == None:
-        utils.addon_log("getSources")
+        utils.addon_log('getSources')
         guiTools.getSources()
-
-        # xbmcplugin.setContent(int(sys.argv[1]), 'movies')
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
         if not fileSys.writeTutList("select:PluginType"):
@@ -159,7 +55,7 @@ if __name__ == "__main__":
                       "Music Plugins: Select to add Music"]
             xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
     elif mode == 1:
-        create.fillPlugins(url)
+        create.fillPlugins(params.get('url'))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
         if not fileSys.writeTutList("select:Addon"):
@@ -169,7 +65,7 @@ if __name__ == "__main__":
                       "Take a look at ++ Naming video files/TV shows ++ http://kodi.wiki/view/naming_video_files/TV_shows."]
             xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
     elif mode == 2:
-        create.fillPluginItems(url)
+        create.fillPluginItems(params.get('url'))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
     elif mode == 666:
         updateAll.strm_update()
@@ -181,36 +77,36 @@ if __name__ == "__main__":
         create.removeItemsFromMediaList('list')
     elif mode == 6:
         xbmc.executebuiltin('InstallAddon(service.watchdog)')
+        xbmc.executebuiltin("XBMC.Container.Refresh")
     elif mode == 7:
         json_query = ('{"jsonrpc": "2.0", "method":"Addons.SetAddonEnabled", "params":{ "addonid": "service.watchdog", "enabled": true}, "id": 1 }')
         jsonUtils.sendJSON(json_query)
         xbmc.executebuiltin("XBMC.Container.Refresh")
     elif mode == 10:
         selectedEntry = None
-        if mediaType:
-            if movID or showID:
-                providers = kodiDB.getVideo(movID) if movID else kodiDB.getVideo(showID, episode)
+        mediaType = params.get('mediaType')
+        if mediaType: 
+            if params.get('id') or params.get('showid'):
+                providers = kodiDB.getVideo(params.get('id')) if params.get('id') else kodiDB.getVideo(params.get('showid'), params.get('episode'))
                 if len(providers) == 1:
                     selectedEntry = providers[0]
                 else:                    
-                    selectProvider = sorted([stringUtils.getProvidername(provider[0]) for provider in providers], key=lambda k: k.lower())
+                    selectProvider = [stringUtils.getProvidername(provider[0]) for provider in providers]
 
                     choice = guiTools.selectDialog('OSMOSIS: Select provider!', selectProvider)
                     if choice > -1: selectedEntry = providers[choice]
 
-        if selectedEntry:
-            url = selectedEntry[0]
-            item = xbmcgui.ListItem(path=url)
+            if selectedEntry:
+                item = xbmcgui.ListItem(path=selectedEntry[0])
 
-            if mediaType:
                 props = None
                 infoLabels = {}
 
                 if mediaType == 'show':
                     sTVShowTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
                     sTVShowTitle = stringUtils.unicodetoascii(sTVShowTitle)
-                    iSeason = int(episode[1:episode.index('e')])
-                    iEpisode = int(episode[episode.index('e') + 1:])
+                    iSeason = int(params.get('episode')[1:params.get('episode').index('e')])
+                    iEpisode = int(params.get('episode')[params.get('episode').index('e') + 1:])
                     props = kodiDB.getKodiEpisodeID(sTVShowTitle, iSeason, iEpisode)
 
                     infoLabels['tvShowTitle'] = sTVShowTitle
@@ -221,9 +117,9 @@ if __name__ == "__main__":
                         infoLabels['title'] = props[2]
                         infoLabels['aired'] = props[3]
 
-                    # match = re.search('<thumb>(.*)<\/thumb>', props[4])
-                    # if match:
-                    #    item.setArt({'thumb': match.group(1)})
+                    #match = re.search('<thumb>(.*)<\/thumb>', props[4])
+                    #if match:
+                    #   item.setArt({'thumb': match.group(1)})
                 else:
                     sTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
                     props = kodiDB.getKodiMovieID(sTitle)
@@ -241,7 +137,7 @@ if __name__ == "__main__":
                 # Wait until the media is started in player
                 counter = 0
                 activePlayers = []
-                title = episode if mediaType == 'show' else stringUtils.cleanStrmFilesys(infoLabels.get('title'))
+                title = params.get('episode') if mediaType == 'show' else stringUtils.cleanStrmFilesys(infoLabels.get('title'))
                 while len(activePlayers) == 0 or (xbmc.Player().isPlayingVideo() and xbmc.getInfoLabel('Player.Filename') != "{0}.strm".format(title)):
                     activePlayers = json.loads(xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')).get('result', [])
                     xbmc.sleep(100)
@@ -252,16 +148,14 @@ if __name__ == "__main__":
                 resumePoint = kodiDB.getPlayedURLResumePoint({'filename': xbmc.getInfoLabel('Player.Filename'), 'path': xbmc.getInfoLabel('Player.Folderpath')})
                 guiTools.resumePointDialog(resumePoint)
             else:
-                # Exec play process
-                xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
+                xbmcplugin.setResolvedUrl(int(sys.argv[1]), False, xbmcgui.ListItem())
         else:
-            item = xbmcgui.ListItem(path="")
-            xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
+            xbmcplugin.setResolvedUrl(int(sys.argv[1]), False, xbmcgui.ListItem(path=params.get('url')))
     elif mode == 100:
-        create.fillPlugins(url)
+        create.fillPlugins(params.get('url'))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
     elif mode == 101:
-        create.fillPluginItems(url)
+        create.fillPluginItems(params.get('url'))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
         if not fileSys.writeTutList("select:AddonNavi"):
@@ -284,7 +178,8 @@ if __name__ == "__main__":
         choice = guiTools.selectDialog('Title for Folder and MediaList entry', selectAction)
         if choice != -1:
             cType = None
-            if choice == 1 or name == None or name == "":
+            name = params.get('name')
+            if choice == 1 or name == None or name == '':
                 name = guiTools.editDialog(name).strip()
                 name = "{0}++RenamedTitle++".format(name) if name else name
 
@@ -295,6 +190,7 @@ if __name__ == "__main__":
                 cType = splits[0] if splits else None
 
             if name:
+                url = params.get('url')
                 if not fileSys.writeTutList("select:ContentTypeLang"):
                     tutWin = ["Adding content to your library",
                               "Now select your content type.",
@@ -305,7 +201,7 @@ if __name__ == "__main__":
                 if not cType:
                     cType = guiTools.getType(url)
                 if cType != -1:
-                    if filetype == 'file':
+                    if params.get('filetype', 'directory') == 'file':
                         url += '&playMode=play'
                     fileSys.writeMediaList(url, name, cType)
                     xbmcgui.Dialog().notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False)
