@@ -225,7 +225,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
             pagesDone = int(PAGINGalbums)
 
     # Write strms for all values in albumList
-    thelist = fileSys.readMediaList(purge=False)
+    thelist = fileSys.readMediaList()
     for entry in thelist:
         splits = entry.strip().split('|')
         splitsstrm = splits[0]

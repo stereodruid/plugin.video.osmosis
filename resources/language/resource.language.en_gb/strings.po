@@ -66,7 +66,7 @@ msgstr ""
 
 msgctxt "#31000"
 msgid "Content"
-msgstr "תוכן"
+msgstr ""
 
 msgctxt "#31004"
 msgid "Write NFOs (ComingSoon)"
