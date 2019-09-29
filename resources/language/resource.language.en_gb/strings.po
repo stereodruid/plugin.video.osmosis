@@ -92,6 +92,10 @@ msgctxt "#31006"
 msgid "Search TheTVDB for episode info (TV shows)"
 msgstr ""
 
+msgctxt "#31007"
+msgid "Confirm user entries from cache (TV shows)"
+msgstr ""
+
 msgctxt "#31101"
 msgid "Never"
 msgstr ""

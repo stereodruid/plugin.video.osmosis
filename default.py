@@ -106,7 +106,7 @@ if __name__ == '__main__':
                     sTVShowTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
                     sTVShowTitle = stringUtils.unicodetoascii(sTVShowTitle)
                     iSeason = int(params.get('episode')[1:params.get('episode').index('e')])
-                    iEpisode = int(params.get('episode')[params.get('episode').index('e') + 1:])
+                    iEpisode = params.get('episode')[params.get('episode').index('e') + 1:]
                     props = kodiDB.getKodiEpisodeID(sTVShowTitle, iSeason, iEpisode)
 
                     infoLabels['tvShowTitle'] = sTVShowTitle

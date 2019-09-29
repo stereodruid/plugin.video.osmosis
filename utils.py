@@ -101,8 +101,16 @@ def createSongNFO(filepath, filename , strm_ty='type', artists='none', albums='n
 
 
 def addon_log(string):
-    # if debug == 'true':
-    xbmc.log("[%s-%s]: %s" % (addon_id, addon_version, string))
+    if isinstance (string,str):
+        string = string.decode("utf-8")
+    message = "[%s-%s]: %s" % (addon_id, addon_version, string)
+    xbmc.log(message.encode("utf-8"))
+
+def addon_log_notice(string):
+    if isinstance (string,str):
+        string = string.decode("utf-8")
+    message = "[%s-%s]: %s" % (addon_id, addon_version, string)
+    xbmc.log(message.encode("utf-8"),xbmc.LOGNOTICE)
 
 
 def zeitspanne(sekunden):
