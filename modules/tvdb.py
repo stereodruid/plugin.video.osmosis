@@ -6,6 +6,8 @@ import time
 import re
 import xbmc, xbmcaddon, xbmcvfs, xbmcgui
 
+from . import fileSys
+
 try:
     from fuzzywuzzy import fuzz
     use_fuzzy_matching = True
@@ -20,6 +22,7 @@ except:
 
 addon = xbmcaddon.Addon()
 medialist_path = addon.getSetting('MediaList_LOC')
+MediaList_LOC = xbmc.translatePath(os.path.join(medialist_path, 'MediaList.xml'))
 tvdb_token_loc = xbmc.translatePath(os.path.join(medialist_path, 'tvdb_token.txt'))
 CONFIRM_USER_ENTRIES = addon.getSetting('confirm_user_entries')
 
@@ -32,17 +35,12 @@ api_baseurl = 'https://api.thetvdb.com/%s'
 
 dialog_autoclose_time=60
 
-
-def getEpisodeByName(showName, episodeSeason, episodeNr, episodeName, lang):
-    utils.addon_log('tvdb getEpisodeByName: enter; name = %s; season = %s' % (episodeName, episodeSeason))
-    episode = None
-
-    token = getToken()
-    if token:
-        show_data = getTVShowFromCache(showName)
-        if show_data:
-            episode = findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, lang)
-        else:
+def getShowByName(showName, lang):
+    utils.addon_log('tvdb getShowByName: enter; name = %s; lang = %s' % (showName, lang))
+    show_data = getTVShowFromCache(showName)
+    if not show_data:
+        token = getToken()
+        if token:
             lang_tvdb_list=[lang]
             if lang != 'en':
                 lang_tvdb_list.append('en')
@@ -92,7 +90,6 @@ def getEpisodeByName(showName, episodeSeason, episodeNr, episodeName, lang):
                                                 preselect=int(delta_selected-1 if preselected is None else preselected+delta_selected))
                         time2 = time.time()
                         if int(time2-time1) >= dialog_autoclose_time:
-                            utils.addon_log_notice('TVDB select dialog timed out')
                             if lang == 'en':
                                 ignore_show = True
                         if selected >= delta_selected:
@@ -122,9 +119,19 @@ def getEpisodeByName(showName, episodeSeason, episodeNr, episodeName, lang):
                         show_data=res.json().get('data')
                         setTVShowCache(showName, show_data)
 
-            if show_data:
-                utils.addon_log('tvbd show from id: data = %s' % show_data)
-                episode = findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, lang)
+    utils.addon_log('tvdb getShowByName: name = %s; lang = %s; data = %s' % (showName, lang, show_data))
+    return show_data
+
+
+def getEpisodeByName(showName, episodeSeason, episodeNr, episodeName, lang):
+    utils.addon_log('tvdb getEpisodeByName: enter; name = %s; season = %s' % (episodeName, episodeSeason))
+    episode = None
+    show_data = getShowByName(showName, lang)
+    if show_data:
+        token = getToken()
+        if token:
+            utils.addon_log('tvbd show from id: data = %s' % show_data)
+            episode = findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, lang)
 
     utils.addon_log('tvdb getEpisodeByName: name = %s; data = %s' % (episodeName, episode))
     return episode
@@ -153,6 +160,46 @@ def getTVShowFromCache(showName):
 def setTVShowCache(showName, data):
     utils.addon_log('tvdb setTVShowCache: showName = %s; data = %s' % (showName.encode('utf-8'), data))
     showCache.set(showName, repr(data))
+
+
+def removeShowsFromTVDBCache(selectedItems=None):
+    if not selectedItems and not xbmcgui.Dialog().yesno('Remove all Shows from TVDB cache', 'Are you sure to delete all shows from cache?'):
+        return
+
+    delete_type = xbmcgui.Dialog().select('Which data should be deleted from cache?', 
+                                                ['all cached data for show (includes automatched and user entries for episodes)',
+                                                'automatched entries for episodes',
+                                                'user entries for episode',
+                                                'automatched and user entries for episodes',
+                                                ])
+
+    if xbmcvfs.exists(MediaList_LOC):
+        thelist = fileSys.readMediaList()
+        items = selectedItems if selectedItems else [{'entry': item} for item in thelist]
+        if len(items) > 0:
+            splittedEntries = []
+            if not selectedItems:
+                for item in items:
+                    splits = item.get('entry').split('|')
+                    splittedEntries.append(splits)
+            else:
+                splittedEntries = [[item.get('entry').split('|')[0], item.get('entry').split('|')[1], item.get('url')] for item in selectedItems]
+
+            for splittedEntry in splittedEntries:
+                cType, name = splittedEntry[0], re.sub('( - |, )[sS](taffel|eason) \d+', '', splittedEntry[1])
+                if re.findall('TV-Shows', cType):
+                    show_data = getTVShowFromCache(name)
+                    if show_data:
+                        tvdb_id = show_data.get('id')
+                        if delete_type in [0, 1, 3]:
+                            utils.addon_log_notice('tvdb: Delete automatched episode entries from cache for "%s"' % name)
+                            episodeCache.delete('%_%_' + str(tvdb_id))
+                        if delete_type in [0, 2, 3]:
+                            utils.addon_log_notice('tvdb: Delete user episode entries from cache for "%s"' % name)
+                            episodeCache_manual.delete('%_%_' + str(tvdb_id))
+                        if delete_type == 0:
+                            utils.addon_log_notice('tvdb: Delete TVDB data from cache for "%s"' % name)
+                            showCache.delete(name)
 
 
 def findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, lang, silent=False, fallback_en=False):
@@ -402,8 +449,7 @@ def findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, l
                                      preselect=int(0 if preselected is None else preselected+delta_selected))
             time2 = time.time()
             if int(time2-time1) >= dialog_autoclose_time:
-                utils.addon_log_notice('Episode select dialog timed out')
-                selected = 0
+                selected = -1
 
             if selected >= delta_selected and selected < episodecount+delta_selected:
                 episode_data=episodeListData[selected-delta_selected]
@@ -425,6 +471,11 @@ def findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, l
                     episode_data = episode_data_en
                     match_found = True
                     match_found_fallback_en = True
+            elif selected == 0:
+                episode_data = {'season': episodeSeason, 'episode': episodeNr, 'episodeName': episodeName, 'ignore': True}
+                setEpisodeCache(episodeSeason, episodeName, showid, episode_data, user_entry=True)
+                utils.addon_log_notice('tvdb findEpisodeByName: ignore episodeName = "%s"; lang = %s' % (episodeName,lang) )
+
 
         if match_found == True:
             if match_found_fallback_en != True:
@@ -435,6 +486,8 @@ def findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, l
             episode_data=None
             utils.addon_log_notice('tvdb findEpisodeByName: could not match episodeName = "%s"; lang = %s' % (episodeName,lang) )
 
+    if episode_data and episode_data.get('ignore', False):
+        return None
     return episode_data
 
 

@@ -95,6 +95,8 @@ def getSources():
     addItem('Update', 4, updateIcon)
     addFunction('Update all')
     addItem("Remove Media", 5, iconRemove)
+    addItem('Remove Shows from TVDB cache', 51, iconRemove )
+    addItem('Remove all Shows from TVDB cache', 52, iconRemove )
     if xbmc.getCondVisibility('System.HasAddon(service.watchdog)') != 1:
         json_query = ('{"jsonrpc":"2.0","method":"Addons.GetAddonDetails", "params":{ "addonid": "service.watchdog", "properties":["enabled", "installed"]}, "id": 1 }')
         addon_details = jsonUtils.sendJSON(json_query).get('addon')
@@ -237,13 +239,15 @@ def resumePointDialog(resumePoint):
              skip_to=int(resumePoint[0]) - 5,
              label=addon.getLocalizedString(39000).format(utils.zeitspanne(int(resumePoint[0]))[5]))
 
-def mediaListDialog(multiselect=True, expand=True):
+def mediaListDialog(multiselect=True, expand=True, cTypeFilter='.*', header_prefix=ADDON_NAME):
     thelist = fileSys.readMediaList()
     items = []
     for index, entry in enumerate(thelist):
         splits = entry.strip().split('|')
         name = stringUtils.getStrmname(splits[1])
         matches = re.findall('(plugin:\/\/[^<]*)', splits[2])
+        if not re.findall(cTypeFilter, splits[0]):
+            continue
         if matches:
             if expand:
                 for url in matches:
@@ -257,9 +261,9 @@ def mediaListDialog(multiselect=True, expand=True):
     sItems = sorted([item.get('text') for item in items], key=lambda k: k.lower())
 
     if multiselect:
-        selectedItemsIndex = selectDialog("Select items", sItems, multiselect=True)
+        selectedItemsIndex = selectDialog("%s: Select items" % header_prefix, sItems, multiselect=True)
         return [item for item in items for index in selectedItemsIndex if item.get('text') == sItems[index]] if selectedItemsIndex and len(selectedItemsIndex) > 0 else None
     else:
-        selectedItemIndex = selectDialog("Select items", sItems)
+        selectedItemIndex = selectDialog("%: Select items" % header_prefix, sItems)
         selectedList = [item for index, item in enumerate(items) if selectedItemIndex > -1 and item.get('text') == sItems[selectedItemIndex]]
         return selectedList[0] if len(selectedList) == 1 else None

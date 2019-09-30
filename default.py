@@ -29,6 +29,7 @@ from modules import updateAll
 from modules import moduleUtil
 from modules import stringUtils
 from modules import jsonUtils
+from modules import tvdb
 
 import utils
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin
@@ -70,11 +71,17 @@ if __name__ == '__main__':
     elif mode == 666:
         updateAll.strm_update()
     elif mode == 4:
-        selectedItems = guiTools.mediaListDialog()
+        selectedItems = guiTools.mediaListDialog(header_prefix='Update')
         if selectedItems and len(selectedItems) > 0:
             updateAll.strm_update(selectedItems)
     elif mode == 5:
         create.removeItemsFromMediaList('list')
+    elif mode == 51:
+        selectedItems = guiTools.mediaListDialog(True, False, header_prefix='Remove Shows from TVDB cache', cTypeFilter='TV-Shows')
+        if selectedItems and len(selectedItems) > 0:
+            tvdb.removeShowsFromTVDBCache(selectedItems)
+    elif mode == 52:
+        tvdb.removeShowsFromTVDBCache()
     elif mode == 6:
         xbmc.executebuiltin('InstallAddon(service.watchdog)')
         xbmc.executebuiltin("XBMC.Container.Refresh")
@@ -184,7 +191,7 @@ if __name__ == '__main__':
                 name = "{0}++RenamedTitle++".format(name) if name else name
 
             if choice == 2:
-                item = guiTools.mediaListDialog(False, False)
+                item = guiTools.mediaListDialog(False, False, header_prefix='Get Title from Medialist', )
                 splits = item.get('entry').split('|') if item else None
                 name = splits[1] if splits else None
                 cType = splits[0] if splits else None

@@ -155,7 +155,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
 def removeItemsFromMediaList(action='list'):
     utils.addon_log('removingitemsdialog')
 
-    selectedItems = guiTools.mediaListDialog(multiselect=True)
+    selectedItems = guiTools.mediaListDialog(header_prefix='Remove item(s) from Medialist', multiselect=True)
 
     if selectedItems:
         fileSys.removeMediaList(selectedItems)
@@ -321,6 +321,18 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
     dirList = []
     episodesList = []
 
+    lang = None
+    if strm_type.lower().find('other') == -1:
+        lang = strm_type[strm_type.find('(') + 1:strm_type.find(')')]
+    showtitle_tvdb = None
+    if strm_name != '':
+        showtitle = stringUtils.getStrmname(strm_name)
+    if (SEARCH_THETVDB == 2):
+        show_data = tvdb.getShowByName(showtitle, lang)
+        if show_data:
+            showtitle = show_data.get('seriesName', showtitle)
+            showtitle_tvdb = showtitle
+
     while pagesDone < int(PAGINGTVshows):
         strm_type = strm_type.replace('Shows-Collection', 'TV-Shows')
 
@@ -340,15 +352,11 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
                     continue
                 elif filetype == 'file':
                     if (SEARCH_THETVDB == 2 or (SEARCH_THETVDB == 1 and detailInfo.get('season', -1) == -1 or detailInfo.get('episode', -1) == -1)) and  NOE0_STRMS_EXPORT == "false" or detailInfo.get('episode') > 0:
-                        showtitle = stringUtils.getStrmname(strm_name)
                         episodetitle = detailInfo.get('title')
                         episodeseason = detailInfo.get('season', -1)
                         episode = detailInfo.get('episode', -1)
 
                         if showtitle and showtitle != '' and episodetitle and episodetitle != '':
-                            lang = None
-                            if strm_type.lower().find('other') == -1:
-                                lang = strm_type[strm_type.find('(') + 1:strm_type.find(')')]
 
                             eptitle = episodetitle
                             eptitle = eptitle.replace(u"\u201e", "'")
@@ -437,6 +445,8 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
                                             episodesList[index-split_episode].get('episode',None),
                                             episodesList[index-split_episode].get('episodeName',None)))
                     split_episode=0
+            if showtitle_tvdb:
+                episodesList[index]['showtitle'] = showtitle_tvdb
             season_prev=episode.get('season')
             episode_prev=episode.get('episode')
 
