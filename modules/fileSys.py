@@ -168,11 +168,11 @@ def writeMediaList(url, name, cType='Other', cleanName=True, albumartist=None):
                 for s, split2 in enumerate(splits2):
                     split2_plugin = re.sub('.*(plugin:\/\/[^<]*)', '\g<1>', split2)
                     split2_name_orig = re.sub('(?:name_orig=([^;]*);)(plugin:\/\/[^<]*)', '\g<1>', split2)
-                    if split2_plugin == plugin or split2_name_orig == name_orig:
+                    if re.sub('%26OfferGroups%3DB0043YVHMY', '', split2_plugin) == re.sub('%26OfferGroups%3DB0043YVHMY', '', plugin) or split2_name_orig == name_orig:
                         splits2[s] = url
                         replaced = True
                 if replaced == True:
-                    splits[2] = '<next>'.join(splits2)
+                    splits[2] = '<next>'.join(set(splits2))
                     utils.addon_log_notice('writeMediaList: replace %s in %s' % (name_orig, name))
                 else:
                     splits[2] = '{0}<next>{1}'.format(splits[2], url) if splits[2].strip() != '' else '{0}'.format(url)
