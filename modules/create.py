@@ -21,6 +21,9 @@ import utils
 import copy
 import xbmc, xbmcgui, xbmcaddon
 
+## nur debugging
+import json
+
 from modules import fileSys
 from modules import guiTools
 from modules import jsonUtils
@@ -111,7 +114,6 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         thisDialog.dialogeBG.close()
         thisDialog.dialogeBG = None
         return
-
     for detail in details:
         filetype = detail['filetype']
         label = detail['label']
@@ -144,12 +146,134 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
                     kodiDB.musicDatabase(album, artist, label, path, link, track)
                 fileSys.writeSTRM(stringUtils.cleanStrms((path.rstrip("."))), stringUtils.cleanStrms(filename.rstrip(".")) , link)
             else:
-                guiTools.addLink(label, file, 10, art, plot, '', '', '', None, '', total=len(details))
+                guiTools.addLink(label, file, 10, art, plot, '', '', '', None, '', total=len(details), type=detail.get('type', None))
         else:
             if strm:
                 fillPluginItems(file, media_type, file_type, strm, label, strm_type)
             else:
                 guiTools.addDir(label, file, 101, art, plot, '', '', '', name_parent=name_parent, type=detail.get('type', None))
+
+def addToMedialist(params):
+    # A dialog to rename the Change Title for Folder and MediaList entry:
+    name_orig = params.get('name')
+    name = re.sub('( - |, )*[sS](taffel|eason) \d+.*', '', name_orig)
+
+    if name != name_orig:
+        tvshow_detected = True
+    else:
+        tvshow_detected = False
+    if name == '':
+        name = params.get('name_parent')
+        name_orig = '%s - %s' % (name, name_orig)
+    if params.get('noninteractive', False) == False:
+        selectAction = ['Continue with original Title: %s' % name, 'Rename Title', 'Get Title from Medialist']
+        if not fileSys.writeTutList("select:Rename"):
+            tutWin = ["Adding content to your library",
+                      "You can rename your Movie, TV-Show or Music title.",
+                      "To make your scraper recognize the content, some times it is necessary to rename the title.",
+                      "Be careful, wrong title can also cause that your scraper can't recognize your content."]
+            xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
+        choice = guiTools.selectDialog('Title for MediaList entry: %s' % name_orig, selectAction)
+    else:
+        choice = 0
+
+    if choice != -1:
+        cType = params.get('cType', None)
+        if choice == 1 or name == None or name == '':
+            name = guiTools.editDialog(name).strip()
+            name = "{0}++RenamedTitle++".format(name) if name else name
+
+        if choice == 2:
+            item = guiTools.mediaListDialog(False, False, header_prefix='Get Title from Medialist for %s' % name_orig, preselect_name=name)
+            splits = item.get('entry').split('|') if item else None
+            name = splits[1] if splits else None
+            cType = splits[0] if splits else None
+
+        if name:
+            url = params.get('url')
+            if not cType:
+                if not fileSys.writeTutList("select:ContentTypeLang"):
+                    tutWin = ["Adding content to your library",
+                              "Now select your content type.",
+                              "Select language or YouTube type.",
+                              "Wait for done message."]
+                    xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
+
+                if tvshow_detected or params.get('type') == 'tvshow':
+                    cType = guiTools.getTypeLangOnly('TV-Shows')
+                elif params.get('type') == 'movie':
+                    cType = guiTools.getTypeLangOnly('Movie')
+                else:
+                    cType = guiTools.getType(url)
+            if cType != -1:
+                if params.get('filetype', 'directory') == 'file':
+                    url += '&playMode=play'
+                fileSys.writeMediaList('name_orig=%s;%s' % (name_orig, url), name, cType)
+                xbmcgui.Dialog().notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False)
+
+                try:
+                    plugin_id = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
+                    if plugin_id:
+                        module = moduleUtil.getModule(plugin_id.group(1))
+                        if module and hasattr(module, 'create'):
+                            url = module.create(name, url, 'video')
+                except:
+                    pass
+
+                fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
+                xbmcgui.Dialog().notification('Writing items...', "Done", xbmcgui.NOTIFICATION_INFO, 5000, False)
+
+def addMultipleSeasonToMediaList(params):
+    name = params.get('name')
+    url = params.get('url')
+    selectAction = ['Continue with original Title: %s' % name, 'Rename Title', 'Get Title from Medialist']
+    if not fileSys.writeTutList("select:Rename"):
+        tutWin = ["Adding content to your library",
+                  "You can rename your Movie, TV-Show or Music title.",
+                  "To make your scraper recognize the content, some times it is necessary to rename the title.",
+                  "Be careful, wrong title can also cause that your scraper can't recognize your content."]
+        xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
+    choice = guiTools.selectDialog('Title for MediaList entry: %s' % name, selectAction)
+    if choice != -1:
+        cType = None
+        if choice == 1 or name == None or name == '':
+            name = guiTools.editDialog(name).strip()
+            name = "{0}++RenamedTitle++".format(name) if name else name
+
+        if choice == 2:
+            item = guiTools.mediaListDialog(False, False, header_prefix='Get Title from Medialist for %s' % name, preselect_name=name)
+            splits = item.get('entry').split('|') if item else None
+            name = splits[1] if splits else None
+            cType = splits[0] if splits else None
+
+    if not cType:
+        cType = guiTools.getTypeLangOnly('TV-Shows')
+
+    details = jsonUtils.requestList(url, 'video').get('files', [])
+    retry_count=1
+    while len(details) == 0 and retry_count <= 3:
+        utils.addon_log('requestList: try=%d data = %s)' % (retry_count, details))
+        details = jsonUtils.requestList(url, 'video').get('files', [])
+        retry_count=retry_count+1
+    seasonList=[]
+    for detail in details:
+        file = detail['file'].replace("\\\\", "\\")
+        filetype = detail['filetype']
+        label = detail['label']
+        if label.find('COLOR') != -1:
+            label=stringUtils.cleanLabels(label) + ' (*)'
+        showtitle = detail['showtitle']
+        if filetype == 'directory':
+            seasonList.append({'name': label.encode('utf-8'), 'name_parent': showtitle.encode('utf-8'), 'url': file.encode('utf-8'), 'cType': cType, 'noninteractive': True})
+
+    sItems = sorted([item.get('name') for item in seasonList], key=lambda k: k.lower())
+    preselect = [i for i, item in enumerate(sItems) if item.find(' (*)') == -1]
+    selectedItemsIndex = guiTools.selectDialog("Select Seasons to add for %s" % showtitle, sItems, multiselect=True, preselect=preselect)
+    seasonList = [item for item in seasonList for index in selectedItemsIndex if item.get('name') == sItems[index]] if selectedItemsIndex and len(selectedItemsIndex) > 0 else None
+    if seasonList and len(seasonList) > 0:
+        for season in seasonList:
+            addToMedialist(season)
+
 
 def removeItemsFromMediaList(action='list'):
     utils.addon_log('removingitemsdialog')

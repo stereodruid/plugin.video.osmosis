@@ -173,73 +173,11 @@ if __name__ == '__main__':
             xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
     elif mode == 200:
         utils.addon_log("write multi strms")
-
-        # A dialog to rename the Change Title for Folder and MediaList entry:
-        name_orig = params.get('name')
-        name = re.sub('( - |, )*[sS](taffel|eason) \d+.*', '', name_orig)
-        if name != name_orig:
-            tvshow_detected = True
-        else:
-            tvshow_detected = False
-        if name == '':
-            name = params.get('name_parent')
-            name_orig = '%s - %s' % (name, name_orig)
-        selectAction = ['Continue with original Title: %s' % name, 'Rename Title', 'Get Title from Medialist']
-        if not fileSys.writeTutList("select:Rename"):
-            tutWin = ["Adding content to your library",
-                      "You can rename your Movie, TV-Show or Music title.",
-                      "To make your scraper recognize the content, some times it is necessary to rename the title.",
-                      "Be careful, wrong title can also cause that your scraper can't recognize your content."]
-            xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
-        choice = guiTools.selectDialog('Title for Folder and MediaList entry', selectAction)
-        if choice != -1:
-            cType = None
-            if choice == 1 or name == None or name == '':
-                name = guiTools.editDialog(name).strip()
-                name = "{0}++RenamedTitle++".format(name) if name else name
-
-            if choice == 2:
-                item = guiTools.mediaListDialog(False, False, header_prefix='Get Title from Medialist for %s' % name_orig, preselect_name=name)
-                splits = item.get('entry').split('|') if item else None
-                name = splits[1] if splits else None
-                cType = splits[0] if splits else None
-
-            if name:
-                url = params.get('url')
-                if not fileSys.writeTutList("select:ContentTypeLang"):
-                    tutWin = ["Adding content to your library",
-                              "Now select your content type.",
-                              "Select language or YouTube type.",
-                              "Wait for done message."]
-                    xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
-
-                if not cType:
-                    if tvshow_detected or params.get('type') == 'tvshow':
-                        lang=guiTools.getLang()
-                        cType = 'TV-Shows' + lang
-                    elif params.get('type') == 'movie':
-                        lang=guiTools.getLang()
-                        cType = 'Movie' + lang
-                    else:
-                        cType = guiTools.getType(url)
-                if cType != -1:
-                    if params.get('filetype', 'directory') == 'file':
-                        url += '&playMode=play'
-                    fileSys.writeMediaList('name_orig=%s;%s' % (name_orig, url), name, cType)
-                    xbmcgui.Dialog().notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False)
-
-                    try:
-                        plugin_id = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
-                        if plugin_id:
-                            module = moduleUtil.getModule(plugin_id.group(1))
-                            if module and hasattr(module, 'create'):
-                                url = module.create(name, url, 'video')
-                    except:
-                        pass
-
-                    create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
-                    xbmcgui.Dialog().notification('Writing items...', "Done", xbmcgui.NOTIFICATION_INFO, 5000, False)
+        create.addToMedialist(params)
     elif mode == 201:
         utils.addon_log("write single strm")
         # create.fillPluginItems(url)
         # makeSTRM(name, name, url)
+    elif mode == 202:
+        utils.addon_log("Add all season individually to MediaList")
+        create.addMultipleSeasonToMediaList(params)

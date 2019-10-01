@@ -67,12 +67,20 @@ def addDir(name, url, mode, art, plot=None, genre=None, date=None, credits=None,
     liz = xbmcgui.ListItem(name)
     liz.setInfo(type="Video", infoLabels={"Title": name, "Plot": plot, "Genre": genre, "dateadded": date, "credits": credits})
     liz.setArt(art)
-    contextMenu.append(('Create Strms', 'XBMC.RunPlugin(%s&mode=%d)' % (u, 200)))
+    if type == 'tvshow':
+        contextMenu.append(('Add TV-Show to MediaList', 'XBMC.RunPlugin(%s&mode=%d)' % (u, 200)))
+        contextMenu.append(('Add seasons individually to MediaList', 'XBMC.RunPlugin(%s&mode=%d)' % (u, 202)))
+    elif re.findall('( - |, )*[sS](taffel|eason) \d+.*', name):
+        contextMenu.append(('Add Season to MediaList', 'XBMC.RunPlugin(%s&mode=%d)' % (u, 200)))
+    elif type == 'movie': # ???
+        contextMenu.append(('Add Movie to MediaList', 'XBMC.RunPlugin(%s&mode=%d)' % (u, 200)))
+    else:
+        contextMenu.append(('Create Strms', 'XBMC.RunPlugin(%s&mode=%d)' % (u, 200)))
     liz.addContextMenuItems(contextMenu)
 
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url='%s&mode=%d' % (u, mode), listitem=liz, isFolder=True)
 
-def addLink(name, url, mode, art, plot, genre, date, showcontext, playlist, regexs, total, setCookie=""):
+def addLink(name, url, mode, art, plot, genre, date, showcontext, playlist, regexs, total, setCookie="", type=None):
     utils.addon_log('addLink: %s' % name.encode('utf-8'))
     u = "{0}?{1}".format(sys.argv[0], urllib.urlencode({'url': url.encode('utf-8'), 'name': stringUtils.cleanLabels(name.encode('utf-8')), 'fanart': art.get('fanart', '').encode('utf-8')}))
     contextMenu = []
@@ -80,7 +88,10 @@ def addLink(name, url, mode, art, plot, genre, date, showcontext, playlist, rege
     liz.setInfo(type="Video", infoLabels={"Title": name, "Plot": plot, "Genre": genre, "dateadded": date})
     liz.setArt(art)
     liz.setProperty('IsPlayable', 'true')
-    contextMenu.append(('Create Strm', 'XBMC.RunPlugin(%s&mode=%d&filetype=file)' % (u, 200)))
+    if type == 'movie':
+        contextMenu.append(('Add Movie to MediaList', 'XBMC.RunPlugin(%s&mode=%d&filetype=file)' % (u, 200)))
+    else:
+        contextMenu.append(('Create Strm', 'XBMC.RunPlugin(%s&mode=%d&filetype=file)' % (u, 200)))
     liz.addContextMenuItems(contextMenu)
     xbmcplugin.setContent(int(sys.argv[1]), 'movies')
 
@@ -131,7 +142,7 @@ def getType(url):
     if selectType >= 0 and selectOption >= 0:
         return Types[selectType] + subType[selectOption]
 
-def getLang():
+def getTypeLangOnly(Type):
     lang = ['(en)', '(de)', '(sp)', '(tr)', 'Other']
     selectOption = selectDialog('Select language tag', lang)
 
@@ -139,11 +150,14 @@ def getLang():
         return -1
 
     if lang >= 0 and selectOption >= 0:
-        return lang[selectOption]
+        return Type + lang[selectOption]
 
 def selectDialog(header, list, autoclose=0, multiselect=False, useDetails=False, preselect=None):
     if multiselect:
-        return xbmcgui.Dialog().multiselect(header, list, autoclose=autoclose, useDetails=useDetails)
+        if preselect:
+            return xbmcgui.Dialog().multiselect(header, list, autoclose=autoclose, useDetails=useDetails, preselect=preselect)
+        else:
+            return xbmcgui.Dialog().multiselect(header, list, autoclose=autoclose, useDetails=useDetails)
     else:
         if preselect:
             return xbmcgui.Dialog().select(header, list, autoclose, useDetails=useDetails, preselect=preselect)
