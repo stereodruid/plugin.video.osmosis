@@ -69,8 +69,7 @@ def fillPlugins(cType='video'):
             art = {'thumb': addon['thumbnail'], 'fanart': addon['fanart']}
             guiTools.addDir(addon['name'], 'plugin://' + addon['addonid'], 101, art, addon['description'], cType, 'date', 'credits')
 
-def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None'):
-    utils.addon_log('fillPluginItems')
+def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None', name_parent=''):
     details = []
 
     if url.find("playMode=play") == -1:
@@ -150,7 +149,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             if strm:
                 fillPluginItems(file, media_type, file_type, strm, label, strm_type)
             else:
-                guiTools.addDir(label, file, 101, art, plot, '', '', '')
+                guiTools.addDir(label, file, 101, art, plot, '', '', '', name_parent=name_parent, type=detail.get('type', None))
 
 def removeItemsFromMediaList(action='list'):
     utils.addon_log('removingitemsdialog')

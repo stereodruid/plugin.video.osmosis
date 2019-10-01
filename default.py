@@ -162,7 +162,7 @@ if __name__ == '__main__':
         create.fillPlugins(params.get('url'))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
     elif mode == 101:
-        create.fillPluginItems(params.get('url'))
+        create.fillPluginItems(params.get('url'), name_parent=params.get('name', ''))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
         if not fileSys.writeTutList("select:AddonNavi"):
@@ -175,7 +175,16 @@ if __name__ == '__main__':
         utils.addon_log("write multi strms")
 
         # A dialog to rename the Change Title for Folder and MediaList entry:
-        selectAction = ['No, continue with original Title', 'Rename Title', 'Get Title from Medialist']
+        name_orig = params.get('name')
+        name = re.sub('( - |, )*[sS](taffel|eason) \d+.*', '', name_orig)
+        if name != name_orig:
+            tvshow_detected = True
+        else:
+            tvshow_detected = False
+        if name == '':
+            name = params.get('name_parent')
+            name_orig = '%s - %s' % (name, name_orig)
+        selectAction = ['Continue with original Title: %s' % name, 'Rename Title', 'Get Title from Medialist']
         if not fileSys.writeTutList("select:Rename"):
             tutWin = ["Adding content to your library",
                       "You can rename your Movie, TV-Show or Music title.",
@@ -185,13 +194,12 @@ if __name__ == '__main__':
         choice = guiTools.selectDialog('Title for Folder and MediaList entry', selectAction)
         if choice != -1:
             cType = None
-            name = params.get('name')
             if choice == 1 or name == None or name == '':
                 name = guiTools.editDialog(name).strip()
                 name = "{0}++RenamedTitle++".format(name) if name else name
 
             if choice == 2:
-                item = guiTools.mediaListDialog(False, False, header_prefix='Get Title from Medialist', )
+                item = guiTools.mediaListDialog(False, False, header_prefix='Get Title from Medialist for %s' % name_orig, preselect_name=name)
                 splits = item.get('entry').split('|') if item else None
                 name = splits[1] if splits else None
                 cType = splits[0] if splits else None
@@ -206,11 +214,18 @@ if __name__ == '__main__':
                     xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
 
                 if not cType:
-                    cType = guiTools.getType(url)
+                    if tvshow_detected or params.get('type') == 'tvshow':
+                        lang=guiTools.getLang()
+                        cType = 'TV-Shows' + lang
+                    elif params.get('type') == 'movie':
+                        lang=guiTools.getLang()
+                        cType = 'Movie' + lang
+                    else:
+                        cType = guiTools.getType(url)
                 if cType != -1:
                     if params.get('filetype', 'directory') == 'file':
                         url += '&playMode=play'
-                    fileSys.writeMediaList(url, name, cType)
+                    fileSys.writeMediaList('name_orig=%s;%s' % (name_orig, url), name, cType)
                     xbmcgui.Dialog().notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False)
 
                     try:

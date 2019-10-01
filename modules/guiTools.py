@@ -60,9 +60,9 @@ def addFunction(labels):
 
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
 
-def addDir(name, url, mode, art, plot=None, genre=None, date=None, credits=None, showcontext=False):
-    utils.addon_log('addDir: %s' % name.encode('utf-8'))
-    u = "{0}?{1}".format(sys.argv[0], urllib.urlencode({'url': url.encode('utf-8'), 'name': stringUtils.cleanLabels(name.encode('utf-8')), 'fanart': art.get('fanart', '').encode('utf-8')}))
+def addDir(name, url, mode, art, plot=None, genre=None, date=None, credits=None, showcontext=False, name_parent='', type=None):
+    utils.addon_log('addDir: %s (%s)' % (name.encode('utf-8'), name_parent.encode('utf-8')))
+    u = "{0}?{1}".format(sys.argv[0], urllib.urlencode({'url': url.encode('utf-8'), 'name': stringUtils.cleanLabels(name.encode('utf-8')), 'type': type, 'name_parent': stringUtils.cleanLabels(name_parent.encode('utf-8')), 'fanart': art.get('fanart', '').encode('utf-8')}))
     contextMenu = []
     liz = xbmcgui.ListItem(name)
     liz.setInfo(type="Video", infoLabels={"Title": name, "Plot": plot, "Genre": genre, "dateadded": date, "credits": credits})
@@ -131,11 +131,24 @@ def getType(url):
     if selectType >= 0 and selectOption >= 0:
         return Types[selectType] + subType[selectOption]
 
-def selectDialog(header, list, autoclose=0, multiselect=False):
+def getLang():
+    lang = ['(en)', '(de)', '(sp)', '(tr)', 'Other']
+    selectOption = selectDialog('Select language tag', lang)
+
+    if selectOption == -1:
+        return -1
+
+    if lang >= 0 and selectOption >= 0:
+        return lang[selectOption]
+
+def selectDialog(header, list, autoclose=0, multiselect=False, useDetails=False, preselect=None):
     if multiselect:
-        return xbmcgui.Dialog().multiselect(header, list, autoclose=autoclose)
+        return xbmcgui.Dialog().multiselect(header, list, autoclose=autoclose, useDetails=useDetails)
     else:
-        return xbmcgui.Dialog().select(header, list, autoclose)
+        if preselect:
+            return xbmcgui.Dialog().select(header, list, autoclose, useDetails=useDetails, preselect=preselect)
+        else:
+            return xbmcgui.Dialog().select(header, list, autoclose, useDetails=useDetails)
 
 def editDialog(nameToChange):
     dialog = xbmcgui.Dialog()
@@ -239,31 +252,49 @@ def resumePointDialog(resumePoint):
              skip_to=int(resumePoint[0]) - 5,
              label=addon.getLocalizedString(39000).format(utils.zeitspanne(int(resumePoint[0]))[5]))
 
-def mediaListDialog(multiselect=True, expand=True, cTypeFilter='.*', header_prefix=ADDON_NAME):
+def mediaListDialog(multiselect=True, expand=True, cTypeFilter='.*', header_prefix=ADDON_NAME, preselect_name=None):
     thelist = fileSys.readMediaList()
     items = []
     for index, entry in enumerate(thelist):
         splits = entry.strip().split('|')
-        name = stringUtils.getStrmname(splits[1])
-        matches = re.findall('(plugin:\/\/[^<]*)', splits[2])
         if not re.findall(cTypeFilter, splits[0]):
             continue
+        name = stringUtils.getStrmname(splits[1])
+        matches=re.findall('(?:name_orig=([^;]*);)*(plugin:\/\/[^<]*)', splits[2])
         if matches:
             if expand:
-                for url in matches:
-                    items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} ({1}: {2})'.format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', ''), stringUtils.getProvidername(url)), 'url': url})
+                for match in matches:
+                    # items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} ({1}: {2})'.format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', ''), stringUtils.getProvidername(url)), 'url': url})
+                    name_orig=match[0]
+                    url=match[1]
+                    items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} [{1}]'.format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', '')), 'text2': '[{0}] {1}'.format(stringUtils.getProvidername(url), name_orig) , 'url': url, 'name_orig': name_orig})
             else:
-                pluginnames = sorted([stringUtils.getProvidername(url) for url in matches], key=lambda k: k.lower())
+                # pluginnames = sorted([stringUtils.getProvidername(match[1]) for match in matches], key=lambda k: k.lower())
+                pluginnames = sorted(set([stringUtils.getProvidername(match[1]) for match in matches]), key=lambda k: k.lower())
                 items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} ({1}: {2})'.format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', ''),  ', '.join(pluginnames)), 'url': splits[2]})
         else:
             items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} ({1})'.format(name, splits[0].replace('(', '/').replace(')', '')), 'url': splits[2]})
 
-    sItems = sorted([item.get('text') for item in items], key=lambda k: k.lower())
+    if expand == False:
+        sItems = sorted([item.get('text') for item in items], key=lambda k: k.lower())
+        if preselect_name:
+            preselect_idx = [i for i, item in enumerate(sItems) if item.find(preselect_name) != -1 ]
+            if len(preselect_idx) > 0:
+                preselect_idx=preselect_idx[0]
+            else:
+                preselect_idx=None
+        else:
+            preselect_idx=None
+    else:
+        sItems = sorted([xbmcgui.ListItem(label=item.get('text'), label2=item.get('text2','')) for item in items], key=lambda k: k.getLabel().lower())
 
     if multiselect:
-        selectedItemsIndex = selectDialog("%s: Select items" % header_prefix, sItems, multiselect=True)
-        return [item for item in items for index in selectedItemsIndex if item.get('text') == sItems[index]] if selectedItemsIndex and len(selectedItemsIndex) > 0 else None
+        selectedItemsIndex = selectDialog("%s: Select items" % header_prefix, sItems, multiselect=True, useDetails=expand)
+        if expand == False:
+            return [item for item in items for index in selectedItemsIndex if item.get('text') == sItems[index]] if selectedItemsIndex and len(selectedItemsIndex) > 0 else None
+        else:
+            return [item for item in items for index in selectedItemsIndex if item.get('text') == sItems[index].getLabel() and item.get('text2') == sItems[index].getLabel2()] if selectedItemsIndex and len(selectedItemsIndex) > 0 else None
     else:
-        selectedItemIndex = selectDialog("%: Select items" % header_prefix, sItems)
+        selectedItemIndex = selectDialog("%s: Select items" % header_prefix, sItems, useDetails=expand, preselect=preselect_idx)
         selectedList = [item for index, item in enumerate(items) if selectedItemIndex > -1 and item.get('text') == sItems[selectedItemIndex]]
         return selectedList[0] if len(selectedList) == 1 else None

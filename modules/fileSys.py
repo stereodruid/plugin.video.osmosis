@@ -160,8 +160,23 @@ def writeMediaList(url, name, cType='Other', cleanName=True, albumartist=None):
             splits = entry.strip().split('|')
             if stringUtils.getStrmname(splits[1]).lower() == stringUtils.getStrmname(name).lower():
                 existInList = True
-                if splits[2].find(url) == -1:
+                plugin = re.sub('.*(plugin:\/\/[^<]*)', '\g<1>', url)
+                name_orig = re.sub('(?:name_orig=([^;]*);)(plugin:\/\/[^<]*)', '\g<1>', url)
+
+                replaced = False
+                splits2 = splits[2].split('<next>')
+                for s, split2 in enumerate(splits2):
+                    split2_plugin = re.sub('.*(plugin:\/\/[^<]*)', '\g<1>', split2)
+                    split2_name_orig = re.sub('(?:name_orig=([^;]*);)(plugin:\/\/[^<]*)', '\g<1>', split2)
+                    if split2_plugin == plugin or split2_name_orig == name_orig:
+                        splits2[s] = url
+                        replaced = True
+                if replaced == True:
+                    splits[2] = '<next>'.join(splits2)
+                    utils.addon_log_notice('writeMediaList: replace %s in %s' % (name_orig, name))
+                else:
                     splits[2] = '{0}<next>{1}'.format(splits[2], url) if splits[2].strip() != '' else '{0}'.format(url)
+                    utils.addon_log_notice('writeMediaList: append %s to %s' % (name_orig, name))
                 if albumartist:
                     if len(splits) == 5:
                         splits[4] = albumartist
@@ -256,9 +271,10 @@ def removeMediaList(delList):
             for item in delList:
                 if entry.find(item.get('url')) > -1:
                     if entry.find('<next>') > -1:
+                        entry = entry.replace('name_orig=%s;%s' % (item.get('name_orig',''), item.get('url')), '')
                         entry = entry.replace(item.get('url'), '')
                         splits = entry.split('|')
-                        if splits[2].startswith('<next>') or splits[2].endswith('<next>'):
+                        while splits[2].startswith('<next>') or splits[2].endswith('<next>'):
                             if splits[2].startswith('<next>'):
                                 splits[2] = splits[2][6:]
                             elif splits[2].endswith('<next>'):
