@@ -300,7 +300,7 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter='.*', header_pref
         else:
             preselect_idx=None
     else:
-        sItems = sorted([xbmcgui.ListItem(label=item.get('text'), label2=item.get('text2','')) for item in items], key=lambda k: k.getLabel().lower())
+        sItems = sorted([xbmcgui.ListItem(label=item.get('text'), label2=item.get('text2','')) for item in items], key=lambda k: (k.getLabel().lower(), k.getLabel2().lower()))
 
     if multiselect:
         selectedItemsIndex = selectDialog("%s: Select items" % header_prefix, sItems, multiselect=True, useDetails=expand)
