@@ -457,7 +457,7 @@ def movieExists(title, path):
             dbMovieID = cursor.lastrowid
         else:
             dbMovieID = dbMovie[0]
-            if dbMovie[2] != path:
+            if dbMovie[2].encode('utf-8') != path:
                 cursor.execute("UPDATE movies SET filePath = '{0}' WHERE id LIKE '{1}';".format(path, dbMovieID))
                 con.commit()
     finally:
