@@ -456,10 +456,10 @@ def movieExists(title, path):
             con.commit()
             dbMovieID = cursor.lastrowid
         else:
-            if dbMovie[2] != path:
-                cursor.execute("UPDATE movies SET filePath = '{0}';".format(path))
-                con.commit()
             dbMovieID = dbMovie[0]
+            if dbMovie[2] != path:
+                cursor.execute("UPDATE movies SET filePath = '{0}' WHERE id LIKE '{1}';".format(path, dbMovieID))
+                con.commit()
     finally:
         cursor.close()
         con.close()
