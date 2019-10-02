@@ -39,7 +39,7 @@ actor_update_fixtime = 2
 
 def strm_update(selectedItems=None, actor=0):
     if xbmcvfs.exists(MediaList_LOC):
-        thelist = fileSys.readMediaList()
+        thelist = sorted(fileSys.readMediaList())
         items = selectedItems if selectedItems else [{'entry': item} for item in thelist]
         if len(items) > 0:
             dialogeBG = xbmcgui.DialogProgressBG()
