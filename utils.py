@@ -121,3 +121,7 @@ def zeitspanne(sekunden):
     days = delta.days % 7
     timePlayed = datetime.time(hours, minutes, seconds)
     return weeks, days, hours, minutes, seconds, timePlayed
+
+
+def key_natural_sort(s):
+    return tuple(int(split) if split.isdigit() else split for split in re.split(r'(\d+)', s))

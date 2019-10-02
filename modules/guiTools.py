@@ -290,7 +290,7 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
             items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} ({1})'.format(name, splits[0].replace('(', '/').replace(')', '')), 'url': splits[2]})
 
     if expand == False:
-        sItems = sorted([item.get('text') for item in items], key=lambda k: k.lower())
+        sItems = sorted([item.get('text') for item in items], key=lambda k: utils.key_natural_sort(k.lower()))
         if preselect_name:
             preselect_idx = [i for i, item in enumerate(sItems) if item.find(preselect_name) != -1 ]
             if len(preselect_idx) > 0:
@@ -300,7 +300,10 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
         else:
             preselect_idx=None
     else:
-        sItems = sorted([xbmcgui.ListItem(label=item.get('text'), label2=item.get('text2','')) for item in items], key=lambda k: (k.getLabel().lower(), k.getLabel2().lower()))
+        sItems = sorted([xbmcgui.ListItem(label=item.get('text'), label2=item.get('text2','')) for item in items],
+            key=lambda k: (re.sub('.* \[([^/]*)/.*\]', '\g<1>', k.getLabel()),
+                            utils.key_natural_sort(k.getLabel().lower()),
+                            utils.key_natural_sort(k.getLabel2().lower())))
 
     if multiselect:
         selectedItemsIndex = selectDialog("%s: Select items" % header_prefix, sItems, multiselect=True, useDetails=expand)

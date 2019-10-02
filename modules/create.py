@@ -272,7 +272,7 @@ def addMultipleSeasonToMediaList(params):
         if filetype == 'directory':
             seasonList.append({'name': label.encode('utf-8'), 'name_parent': showtitle.encode('utf-8'), 'url': file.encode('utf-8'), 'cType': cType, 'noninteractive': True})
 
-    sItems = sorted([item.get('name') for item in seasonList], key=lambda k: k.lower())
+    sItems = sorted([item.get('name') for item in seasonList], key=lambda k: utils.key_natural_sort(k.lower()))
     preselect = [i for i, item in enumerate(sItems) if item.find(' (*)') == -1]
     selectedItemsIndex = guiTools.selectDialog("Select Seasons to add for %s" % showtitle, sItems, multiselect=True, preselect=preselect)
     seasonList = [item for item in seasonList for index in selectedItemsIndex if item.get('name') == sItems[index]] if selectedItemsIndex and len(selectedItemsIndex) > 0 else None
