@@ -153,14 +153,22 @@ def getTVShowFromTVDBID(token, tvdb_id, lang):
 
 
 def getTVShowFromCache(showName):
+    showName = showName.decode('utf-8') if isinstance(showName, str) else showName
     data = showCache.get(showName)
     utils.addon_log('tvdb getTVShowCache: showName = %s; data = %s' % (showName, data))
     return eval(data) if data and len(data.strip()) > 0 else None
 
 
 def setTVShowCache(showName, data):
+    showName = showName.decode('utf-8') if isinstance(showName, str) else showName
     utils.addon_log('tvdb setTVShowCache: showName = %s; data = %s' % (showName, data))
     showCache.set(showName, repr(data))
+
+
+def deleteTVShowFromCache(showName):
+    showName = showName.decode('utf-8') if isinstance(showName, str) else showName
+    showCache.delete(showName)
+    utils.addon_log('tvdb deleteTVShowCache: showName = %s' % showName)
 
 
 def removeShowsFromTVDBCache(selectedItems=None):
@@ -172,7 +180,8 @@ def removeShowsFromTVDBCache(selectedItems=None):
                                                 'automatched entries for episodes',
                                                 'user entries for episode',
                                                 'automatched and user entries for episodes',
-                                                ])
+                                                ],
+                                                preselect=1)
 
     if xbmcvfs.exists(MediaList_LOC):
         thelist = fileSys.readMediaList()
@@ -194,13 +203,13 @@ def removeShowsFromTVDBCache(selectedItems=None):
                         tvdb_id = show_data.get('id')
                         if delete_type in [0, 1, 3]:
                             utils.addon_log_notice('tvdb: Delete automatched episode entries from cache for "%s"' % name)
-                            episodeCache.delete('%_%_' + str(tvdb_id))
+                            deleteEpisodeFromCache('%', '%', tvdb_id,user_entry=False)
                         if delete_type in [0, 2, 3]:
                             utils.addon_log_notice('tvdb: Delete user episode entries from cache for "%s"' % name)
-                            episodeCache_manual.delete('%_%_' + str(tvdb_id))
+                            deleteEpisodeFromCache('%', '%', tvdb_id,user_entry=True)
                         if delete_type == 0:
                             utils.addon_log_notice('tvdb: Delete TVDB data from cache for "%s"' % name)
-                            showCache.delete(name)
+                            deleteTVShowFromCache(name)
 
 
 def findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, lang, silent=False, fallback_en=False):
@@ -408,7 +417,7 @@ def findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, l
                 else:
                     if episode.get('episodeName', None) and (episode.get('episodeName').lower().replace(' ', '').find(epName.lower().replace(' ', '')) >= 0 or epName.lower().replace(' ', '').find(episode.get('episodeName').lower().replace(' ', '')) >= 0):
                         episode_data = {'season': episode.get('airedSeason'), 'episode': episode.get('airedEpisodeNumber'), 'episodeName': episode.get('episodeName')}
-                        setEpisodeCache(episodeSeason, episodeName, showid, episode_data)
+                        setEpisodeCache(episodeSeason, episodeName, showid, episode_data,user_entry=False)
                         if episodeSeason == episode.get('airedSeason'):
                             ratio_max = 100
             if ratio_max > 99.0:
@@ -493,6 +502,7 @@ def findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, l
 
 
 def getEpisodeFromCache(episodeSeason, episodeName, showid):
+    episodeName = episodeName.decode('utf-8') if isinstance(episodeName, str) else episodeName
     entry = "%s_%s_%s" % (episodeSeason, episodeName, showid)
     data_tmp = episodeCache.get(entry)
     if not data_tmp:
@@ -512,7 +522,8 @@ def getEpisodeFromCache(episodeSeason, episodeName, showid):
     return data
 
 
-def setEpisodeCache(episodeSeason, episodeName, showid, data, user_entry=True):
+def setEpisodeCache(episodeSeason, episodeName, showid, data, user_entry=False):
+    episodeName = episodeName.decode('utf-8') if isinstance(episodeName, str) else episodeName
     entry = "%s_%s_%s" % (episodeSeason, episodeName, showid)
     if user_entry == True:
         utils.addon_log('tvdb setEpisodeCache (user entry): season = %s; episodeName = "%s"; showid = %s; data = %s' % (episodeSeason, episodeName, showid, data))
@@ -521,6 +532,17 @@ def setEpisodeCache(episodeSeason, episodeName, showid, data, user_entry=True):
     else:
         episodeCache.set(entry, repr(data))
         utils.addon_log('tvdb setEpisodeCache: season = %s; episodeName = "%s"; showid = %s; data = %s' % (episodeSeason, episodeName, showid, data))
+
+
+def deleteEpisodeFromCache(episodeSeason, episodeName, showid, user_entry=False):
+    episodeName = episodeName.decode('utf-8') if isinstance(episodeName, str) else episodeName
+    entry = "%s_%s_%s" % (episodeSeason, episodeName, showid)
+    if user_entry == True:
+        utils.addon_log('tvdb deleteEpisodeFromCache (user entry): season = %s; episodeName = "%s"; showid = %s' % (episodeSeason, episodeName, showid))
+        episodeCache_manual.delete(entry)
+    else:
+        episodeCache.delete(entry)
+        utils.addon_log('tvdb deleteEpisodeFromCache: season = %s; episodeName = "%s"; showid = %s' % (episodeSeason, episodeName, showid))
 
 
 def getTVDBDataFromCache(showid, lang):
