@@ -282,6 +282,8 @@ def removeMediaList(delList):
                             elif splits[2].endswith('<next>'):
                                 splits[2] = splits[2][0:len(splits[2])-6]
                             entry = ('|'.join(splits))
+                        if len(splits[2]) == 0:
+                            additem = False
                     else:
                         additem = False
                         break;

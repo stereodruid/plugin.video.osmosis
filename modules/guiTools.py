@@ -278,12 +278,12 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
         if matches:
             if expand:
                 for match in matches:
-                    # items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} ({1}: {2})'.format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', ''), stringUtils.getProvidername(url)), 'url': url})
                     name_orig=match[0]
                     url=match[1]
                     items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} [{1}]'.format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', '')), 'text2': '[{0}] {1}'.format(stringUtils.getProvidername(url), name_orig) , 'url': url, 'name_orig': name_orig})
+                if len(matches) > 1:
+                    items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} [{1}]'.format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', '')), 'text2': '[All]', 'url': splits[2]})
             else:
-                # pluginnames = sorted([stringUtils.getProvidername(match[1]) for match in matches], key=lambda k: k.lower())
                 pluginnames = sorted(set([stringUtils.getProvidername(match[1]) for match in matches]), key=lambda k: k.lower())
                 items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} ({1}: {2})'.format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', ''),  ', '.join(pluginnames)), 'url': splits[2]})
         else:
@@ -303,7 +303,10 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
         sItems = sorted([xbmcgui.ListItem(label=item.get('text'), label2=item.get('text2','')) for item in items],
             key=lambda k: (re.sub('.* \[([^/]*)/.*\]', '\g<1>', k.getLabel()),
                             utils.key_natural_sort(k.getLabel().lower()),
-                            utils.key_natural_sort(k.getLabel2().lower())))
+                            utils.key_natural_sort(re.sub('.*(?: - |, )*([sS](?:taffel|eason) \d+).*', '\g<1>', k.getLabel2().lower())),
+                            utils.key_natural_sort(k.getLabel2().lower())
+                            )
+                        )
 
     if multiselect:
         selectedItemsIndex = selectDialog("%s: Select items" % header_prefix, sItems, multiselect=True, useDetails=expand)
