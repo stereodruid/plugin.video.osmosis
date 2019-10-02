@@ -7,6 +7,7 @@ import re
 import xbmc, xbmcaddon, xbmcvfs, xbmcgui
 
 from . import fileSys
+from . import stringUtils
 
 try:
     from fuzzywuzzy import fuzz
@@ -186,7 +187,7 @@ def removeShowsFromTVDBCache(selectedItems=None):
                 splittedEntries = [[item.get('entry').split('|')[0], item.get('entry').split('|')[1], item.get('url')] for item in selectedItems]
 
             for splittedEntry in splittedEntries:
-                cType, name = splittedEntry[0], splittedEntry[1]
+                cType, name = splittedEntry[0], stringUtils.getStrmname(splittedEntry[1])
                 if re.findall('TV-Shows', cType):
                     show_data = getTVShowFromCache(name)
                     if show_data:
