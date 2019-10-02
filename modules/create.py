@@ -151,6 +151,8 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             if strm:
                 fillPluginItems(file, media_type, file_type, strm, label, strm_type)
             else:
+                if isinstance (name_parent,str):
+                    name_parent=name_parent.decode('utf-8')
                 guiTools.addDir(label, file, 101, art, plot, '', '', '', name_parent=name_parent, type=detail.get('type', None))
 
 def addToMedialist(params):
@@ -448,8 +450,9 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
     if strm_type.lower().find('other') == -1:
         lang = strm_type[strm_type.find('(') + 1:strm_type.find(')')]
     showtitle_tvdb = None
-    if strm_name != '':
-        showtitle = stringUtils.getStrmname(strm_name)
+    showtitle = stringUtils.getStrmname(strm_name)
+    if isinstance (showtitle,str):
+        showtitle = showtitle.decode("utf-8")
     if (SEARCH_THETVDB == 2):
         show_data = tvdb.getShowByName(showtitle, lang)
         if show_data:

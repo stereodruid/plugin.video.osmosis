@@ -153,12 +153,12 @@ def getTVShowFromTVDBID(token, tvdb_id, lang):
 
 def getTVShowFromCache(showName):
     data = showCache.get(showName)
-    utils.addon_log('tvdb getTVShowCache: showName = %s; data = %s' % (showName.encode('utf-8'), data))
+    utils.addon_log('tvdb getTVShowCache: showName = %s; data = %s' % (showName, data))
     return eval(data) if data and len(data.strip()) > 0 else None
 
 
 def setTVShowCache(showName, data):
-    utils.addon_log('tvdb setTVShowCache: showName = %s; data = %s' % (showName.encode('utf-8'), data))
+    utils.addon_log('tvdb setTVShowCache: showName = %s; data = %s' % (showName, data))
     showCache.set(showName, repr(data))
 
 
