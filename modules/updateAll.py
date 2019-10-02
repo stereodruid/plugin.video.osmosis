@@ -58,7 +58,7 @@ def strm_update(selectedItems=None, actor=0):
 
             step = j = 100 / iUrls
             for splittedEntry in splittedEntries:
-                cType, name, url = splittedEntry[0], splittedEntry[1], splittedEntry[2]
+                cType, name, url = splittedEntry[0], splittedEntry[1], re.sub('name_orig=[^;]*;', '', splittedEntry[2])
 
                 urls = url.split('<next>')
                 for url in urls:
