@@ -185,7 +185,12 @@ def addToMedialist(params):
             name = "{0}++RenamedTitle++".format(name) if name else name
 
         if choice == 2:
-            item = guiTools.mediaListDialog(False, False, header_prefix='Get Title from Medialist for %s' % name_orig, preselect_name=name)
+            cTypeFilter=None
+            if tvshow_detected or params.get('type', None) == 'tvshow':
+                cTypeFilter='TV-Shows'
+            elif params.get('type', None) == 'movie':
+                cTypeFilter='Movies'
+            item = guiTools.mediaListDialog(False, False, header_prefix='Get Title from Medialist for %s' % name_orig, cTypeFilter=cTypeFilter,preselect_name=name)
             splits = item.get('entry').split('|') if item else None
             name = splits[1] if splits else None
             cType = splits[0] if splits else None

@@ -266,12 +266,12 @@ def resumePointDialog(resumePoint):
              skip_to=int(resumePoint[0]) - 5,
              label=addon.getLocalizedString(39000).format(utils.zeitspanne(int(resumePoint[0]))[5]))
 
-def mediaListDialog(multiselect=True, expand=True, cTypeFilter='.*', header_prefix=ADDON_NAME, preselect_name=None):
+def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_prefix=ADDON_NAME, preselect_name=None):
     thelist = fileSys.readMediaList()
     items = []
     for index, entry in enumerate(thelist):
         splits = entry.strip().split('|')
-        if not re.findall(cTypeFilter, splits[0]):
+        if cTypeFilter and not re.findall(cTypeFilter, splits[0]):
             continue
         name = stringUtils.getStrmname(splits[1])
         matches=re.findall('(?:name_orig=([^;]*);)*(plugin:\/\/[^<]*)', splits[2])
