@@ -80,9 +80,9 @@ def addDir(name, url, mode, art, plot=None, genre=None, date=None, credits=None,
 
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url='%s&mode=%d' % (u, mode), listitem=liz, isFolder=True)
 
-def addLink(name, url, mode, art, plot, genre, date, showcontext, playlist, regexs, total, setCookie="", type=None):
+def addLink(name, url, mode, art, plot, genre, date, showcontext, playlist, regexs, total, setCookie="", type=None, year=None):
     utils.addon_log('addLink: %s' % name.encode('utf-8'))
-    u = "{0}?{1}".format(sys.argv[0], urllib.urlencode({'url': url.encode('utf-8'), 'name': stringUtils.cleanLabels(name.encode('utf-8')), 'fanart': art.get('fanart', '').encode('utf-8')}))
+    u = "{0}?{1}".format(sys.argv[0], urllib.urlencode({'url': url.encode('utf-8'), 'name': stringUtils.cleanLabels(name.encode('utf-8')), 'fanart': art.get('fanart', '').encode('utf-8'), 'type': type, 'year': year}))
     contextMenu = []
     liz = xbmcgui.ListItem(name)
     liz.setInfo(type="Video", infoLabels={"Title": name, "Plot": plot, "Genre": genre, "dateadded": date})

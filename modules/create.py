@@ -21,9 +21,6 @@ import utils
 import copy
 import xbmc, xbmcgui, xbmcaddon
 
-## nur debugging
-import json
-
 from modules import fileSys
 from modules import guiTools
 from modules import jsonUtils
@@ -146,7 +143,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
                     kodiDB.musicDatabase(album, artist, label, path, link, track)
                 fileSys.writeSTRM(stringUtils.cleanStrms((path.rstrip("."))), stringUtils.cleanStrms(filename.rstrip(".")) , link)
             else:
-                guiTools.addLink(label, file, 10, art, plot, '', '', '', None, '', total=len(details), type=detail.get('type', None))
+                guiTools.addLink(label, file, 10, art, plot, '', '', '', None, '', total=len(details), type=detail.get('type', None), year=detail.get('year', None))
         else:
             if strm:
                 fillPluginItems(file, media_type, file_type, strm, label, strm_type)
@@ -167,6 +164,8 @@ def addToMedialist(params):
     if name == '':
         name = params.get('name_parent')
         name_orig = '%s - %s' % (name, name_orig)
+    if params.get('type', None) == 'movie' and params.get('year',  None):
+        name = name + ' (%s)' % params.get('year', None)
     if params.get('noninteractive', False) == False:
         selectAction = ['Continue with original Title: %s' % name, 'Rename Title', 'Get Title from Medialist']
         if not fileSys.writeTutList("select:Rename"):
@@ -201,10 +200,10 @@ def addToMedialist(params):
                               "Wait for done message."]
                     xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
 
-                if tvshow_detected or params.get('type') == 'tvshow':
+                if tvshow_detected or params.get('type', None) == 'tvshow':
                     cType = guiTools.getTypeLangOnly('TV-Shows')
-                elif params.get('type') == 'movie':
-                    cType = guiTools.getTypeLangOnly('Movie')
+                elif params.get('type', None) == 'movie':
+                    cType = guiTools.getTypeLangOnly('Movies')
                 else:
                     cType = guiTools.getType(url)
             if cType != -1:
