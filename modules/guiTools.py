@@ -275,14 +275,23 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
             continue
         name = stringUtils.getStrmname(splits[1])
         matches=re.findall('(?:name_orig=([^;]*);)*(plugin:\/\/[^<]*)', splits[2])
+        iconImage=''
+        if splits[0].find('TV-Shows') != -1:
+            iconImage='DefaultTVShows.png'
+        if splits[0].find('Movies') != -1:
+            iconImage='DefaultVideo.png'
+        if splits[0].find('Audio-Album') != -1:
+            iconImage='DefaultMusicAlbums.png'
+        if splits[0].find('Audio-Single') != -1:
+            iconImage='DefaultMusicSongs.png'
         if matches:
             if expand:
                 for match in matches:
                     name_orig=match[0]
                     url=match[1]
-                    items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} [{1}]'.format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', '')), 'text2': '[{0}] {1}'.format(stringUtils.getProvidername(url), name_orig) , 'url': url, 'name_orig': name_orig})
+                    items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} [{1}]'.format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', '')), 'text2': '[{0}] {1}'.format(stringUtils.getProvidername(url), name_orig), 'iconImage': iconImage, 'url': url, 'name_orig': name_orig})
                 if len(matches) > 1:
-                    items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} [{1}]'.format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', '')), 'text2': '[All]', 'url': splits[2]})
+                    items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} [{1}]'.format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', '')), 'text2': '[All]', 'url': splits[2], 'iconImage': 'DefaultVideoPlaylists.png'})
             else:
                 pluginnames = sorted(set([stringUtils.getProvidername(match[1]) for match in matches]), key=lambda k: k.lower())
                 items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} ({1}: {2})'.format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', ''),  ', '.join(pluginnames)), 'url': splits[2]})
@@ -300,7 +309,7 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
         else:
             preselect_idx=None
     else:
-        sItems = sorted([xbmcgui.ListItem(label=item.get('text'), label2=item.get('text2','')) for item in items],
+        sItems = sorted([xbmcgui.ListItem(label=item.get('text'), label2=item.get('text2',''), iconImage=item.get('iconImage')) for item in items],
             key=lambda k: (re.sub('.* \[([^/]*)/.*\]', '\g<1>', k.getLabel()),
                             utils.key_natural_sort(k.getLabel().lower()),
                             utils.key_natural_sort(re.sub('.*(?: - |, )*([sS](?:taffel|eason) \d+).*', '\g<1>', k.getLabel2().lower())),
