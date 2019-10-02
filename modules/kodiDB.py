@@ -480,7 +480,7 @@ def movieStreamExists(movieID, provider, url):
             cursor.execute("INSERT INTO stream_ref (mov_id, provider, url) VALUES ({}, '{}', '{}');".format(movieID, provider, url))
             con.commit()
         else:
-            if str(dbMovie[1]) != url:
+            if dbMovie[1].encode('utf-8') != url:
                 cursor.execute("UPDATE stream_ref SET url='{}' WHERE mov_id = {};".format(url, movieID))
                 con.commit()
     finally:
