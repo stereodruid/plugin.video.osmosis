@@ -160,6 +160,7 @@ def writeMediaList(url, name, cType='Other', cleanName=True, albumartist=None):
             splits = entry.strip().split('|')
             if stringUtils.getStrmname(splits[1]).lower() == stringUtils.getStrmname(name).lower():
                 existInList = True
+                splits[0] = cType
                 splits[1] = name
                 plugin = re.sub('.*(plugin:\/\/[^<]*)', '\g<1>', url)
                 name_orig = re.sub('(?:name_orig=([^;]*);)(plugin:\/\/[^<]*)', '\g<1>', url)
