@@ -432,7 +432,7 @@ def findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, l
             or (ratio_max >= 68 and ratio_max/ratio_max2 >= 1.48)):
             match_found = True
         else:
-            utils.addon_log('tvdb "%s" "%s"; ratio=%0.1f (ratio2=%0.1f) [%0.1f]' % (showname, epName, ratio_max, ratio_max2, ratio_max/ratio_max2))
+            utils.addon_log('tvdb "%s" "%s"; ratio=%0.1f (ratio2=%0.1f) [%0.1f]' % (showname, episodeName, ratio_max, ratio_max2, ratio_max/ratio_max2))
 
         match_found_fallback_en = False
         if match_found == False and lang != 'en':
