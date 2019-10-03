@@ -274,30 +274,33 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
         if cTypeFilter and not re.findall(cTypeFilter, splits[0]):
             continue
         name = stringUtils.getStrmname(splits[1])
+        cType = splits[0].replace('(', '/').replace(')', '')
         matches=re.findall('(?:name_orig=([^;]*);)*(plugin:\/\/[^<]*)', splits[2])
         iconImage=''
         if splits[0].find('TV-Shows') != -1:
             iconImage='DefaultTVShows.png'
         if splits[0].find('Movies') != -1:
-            iconImage='DefaultVideo.png'
+            iconImage='DefaultMovies.png'
         if splits[0].find('Audio-Album') != -1:
             iconImage='DefaultMusicAlbums.png'
         if splits[0].find('Audio-Single') != -1:
             iconImage='DefaultMusicSongs.png'
         if matches:
             if expand:
+                indent_text = ''
+                if len(matches) > 1:
+                    items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} [{1}]'.format(name, cType), 'text2': '', 'url': splits[2], 'iconImage': 'DefaultVideoPlaylists.png'})
+                    indent_text = '    '
                 for match in matches:
                     name_orig=match[0]
                     url=match[1]
                     item_entry = '|'.join([splits[0], splits[1], 'name_orig=%s;%s' % (name_orig, url) if name_orig != '' else url])
-                    items.append({'index': index, 'entry': item_entry, 'name': name, 'text': '{0} [{1}]'.format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', '')), 'text2': '[{0}] {1}'.format(stringUtils.getProvidername(url), name_orig), 'iconImage': iconImage, 'url': url, 'name_orig': name_orig})
-                if len(matches) > 1:
-                    items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} [{1}]'.format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', '')), 'text2': '[All]', 'url': splits[2], 'iconImage': 'DefaultVideoPlaylists.png'})
+                    items.append({'index': index, 'entry': item_entry, 'name': name, 'text': '{2}{0} [{1}]'.format(name, cType, indent_text), 'text2': '  {2}{1} \n  {2}[{0}]'.format(stringUtils.getProvidername(url), name_orig, indent_text), 'iconImage': iconImage, 'url': url, 'name_orig': name_orig})
             else:
                 pluginnames = sorted(set([stringUtils.getProvidername(match[1]) for match in matches]), key=lambda k: k.lower())
-                items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} ({1}: {2})'.format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', ''),  ', '.join(pluginnames)), 'url': splits[2]})
+                items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} ({1}: {2})'.format(name, cType,  ', '.join(pluginnames)), 'url': splits[2]})
         else:
-            items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} ({1})'.format(name, splits[0].replace('(', '/').replace(')', '')), 'url': splits[2]})
+            items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} ({1})'.format(name, cType), 'url': splits[2]})
 
     if expand == False:
         sItems = sorted([item.get('text') for item in items], key=lambda k: utils.key_natural_sort(k.lower()))
@@ -312,9 +315,9 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
     else:
         sItems = sorted([xbmcgui.ListItem(label=item.get('text'), label2=item.get('text2',''), iconImage=item.get('iconImage')) for item in items],
             key=lambda k: (re.sub('.* \[([^/]*)/.*\]', '\g<1>', k.getLabel()),
-                            utils.key_natural_sort(k.getLabel().lower()),
+                            utils.key_natural_sort(re.sub('^ *', '', k.getLabel().lower())),
                             utils.key_natural_sort(re.sub('.*(?: - |, )*([sS](?:taffel|eason) \d+).*', '\g<1>', k.getLabel2().lower())),
-                            utils.key_natural_sort(k.getLabel2().lower())
+                            utils.key_natural_sort(re.sub('^ *', '', k.getLabel2().lower()))
                             )
                         )
 
