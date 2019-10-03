@@ -167,6 +167,12 @@ def getMovieStrmPath(strmTypePath, mediaListEntry_name, movie_name=None):
 def getStrmname(strm_name):
     return strm_name.replace('++RenamedTitle++', '').strip()
 
+def parseMediaListURL(url):
+    match=re.findall('(?:name_orig=([^;]*);)*(plugin:\/\/[^<]*)', url)
+    name_orig = match[0][0]
+    plugin_id = match[0][1]
+    return [name_orig, plugin_id]
+
 def invCommas(string):
    string = string.replace("'", "''")
    return string

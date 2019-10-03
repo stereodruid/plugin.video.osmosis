@@ -47,31 +47,27 @@ def strm_update(selectedItems=None, actor=0):
 
             iUrls = 0
             splittedEntries = []
-            if not selectedItems:
-                for item in items:
-                    splits = item.get('entry').split('|')
-                    iUrls += len(splits[2].split('<next>'))
-                    splittedEntries.append(splits)
-            else:
-                iUrls = len(selectedItems)
-                splittedEntries = [[item.get('entry').split('|')[0], item.get('entry').split('|')[1], item.get('url')] for item in selectedItems]
+            for item in items:
+                splits = item.get('entry').split('|')
+                iUrls += len(splits[2].split('<next>'))
+                splittedEntries.append(splits)
 
             step = j = 100 / iUrls
             for splittedEntry in splittedEntries:
-                cType, name, url = splittedEntry[0], splittedEntry[1], re.sub('name_orig=[^;]*;', '', splittedEntry[2])
+                cType, name, url = splittedEntry[0], splittedEntry[1], splittedEntry[2]
 
                 urls = url.split('<next>')
                 for url in urls:
-                    plugin_id = re.search('plugin:\/\/([^\/\?]*)', url)
+                    name_orig, plugin_id = stringUtils.parseMediaListURL(url)
                     if plugin_id:
-                        module = moduleUtil.getModule(plugin_id.group(1))
+                        module = moduleUtil.getModule(plugin_id)
                         if module and hasattr(module, 'update'):
-                            url = module.update(name, url, 'video', thelist)
+                            plugin_id = module.update(name, plugin_id, 'video', thelist)
 
                     dialogeBG.update(j, "OSMOSIS total update process: " , "Current Item: %s Items left: %d" % (stringUtils.getStrmname(name), iUrls))
                     j += step
 
-                    create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
+                    create.fillPluginItems(plugin_id, strm=True, strm_name=name, strm_type=cType, name_orig=name_orig)
                     iUrls -= 1
 
             dialogeBG.close()

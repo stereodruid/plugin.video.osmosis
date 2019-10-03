@@ -289,7 +289,8 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
                 for match in matches:
                     name_orig=match[0]
                     url=match[1]
-                    items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} [{1}]'.format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', '')), 'text2': '[{0}] {1}'.format(stringUtils.getProvidername(url), name_orig), 'iconImage': iconImage, 'url': url, 'name_orig': name_orig})
+                    item_entry = '|'.join([splits[0], splits[1], 'name_orig=%s;%s' % (name_orig, url) if name_orig != '' else url])
+                    items.append({'index': index, 'entry': item_entry, 'name': name, 'text': '{0} [{1}]'.format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', '')), 'text2': '[{0}] {1}'.format(stringUtils.getProvidername(url), name_orig), 'iconImage': iconImage, 'url': url, 'name_orig': name_orig})
                 if len(matches) > 1:
                     items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} [{1}]'.format(stringUtils.getStrmname(splits[1]), splits[0].replace('(', '/').replace(')', '')), 'text2': '[All]', 'url': splits[2], 'iconImage': 'DefaultVideoPlaylists.png'})
             else:

@@ -69,38 +69,40 @@ def fillPlugins(cType='video'):
             art = {'thumb': addon['thumbnail'], 'fanart': addon['fanart']}
             guiTools.addDir(addon['name'], 'plugin://' + addon['addonid'], 101, art, addon['description'], cType, 'date', 'credits')
 
-def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None', name_parent=''):
+def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None', name_parent='', name_orig=''):
     details = []
+    name_orig_from_url, plugin_id = stringUtils.parseMediaListURL(url)
+    name_orig = name_orig_from_url if name_orig_from_url != '' else name_orig
 
-    if url.find("playMode=play") == -1:
+    if plugin_id.find("playMode=play") == -1:
         if not file_type:
-            details = jsonUtils.requestList(url, media_type).get('files', [])
+            details = jsonUtils.requestList(plugin_id, media_type).get('files', [])
             retry_count=1
             while len(details) == 0 and retry_count <= 3:
                 utils.addon_log('requestList: try=%d data = %s)' % (retry_count, details))
-                details = jsonUtils.requestList(url, media_type).get('files', [])
+                details = jsonUtils.requestList(plugin_id, media_type).get('files', [])
                 retry_count=retry_count+1
         else:
-            details = jsonUtils.requestItem(url, media_type).get('files', [])
+            details = jsonUtils.requestItem(plugin_id, media_type).get('files', [])
             retry_count=1
             while len(details) == 0 and retry_count <= 3:
                 utils.addon_log('requestItem: try=%d data = %s)' % (retry_count, details))
-                details = jsonUtils.requestItem(url, media_type).get('files', [])
+                details = jsonUtils.requestItem(plugin_id, media_type).get('files', [])
                 retry_count=retry_count+1
     else:
         details.append("palyableSingleMedia")
-        details.append(url)
+        details.append(plugin_id)
 
     if strm_type.find('Cinema') != -1 or strm_type.find('YouTube') != -1 or strm_type.find('Movies') != -1:
         initialize_DialogBG("Movie", "Adding")
-        addMovies(details, strm_name, strm_type)
+        addMovies(details, strm_name, strm_type, name_orig=name_orig)
         thisDialog.dialogeBG.close()
         thisDialog.dialogeBG = None
         return
 
     if strm_type.find('TV-Show') != -1 or strm_type.find('Shows-Collection') != -1:
         initialize_DialogBG("Adding TV-Shows", "working..")
-        getTVShowFromList(details, strm_name, strm_type)
+        getTVShowFromList(details, strm_name, strm_type, name_orig=name_orig)
         thisDialog.dialogeBG.close()
         thisDialog.dialogeBG = None
         return
@@ -146,7 +148,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
                 guiTools.addLink(label, file, 10, art, plot, '', '', '', None, '', total=len(details), type=detail.get('type', None), year=detail.get('year', None))
         else:
             if strm:
-                fillPluginItems(file, media_type, file_type, strm, label, strm_type)
+                fillPluginItems(file, media_type, file_type, strm, label, strm_type, name_orig=name_orig)
             else:
                 if isinstance (name_parent,str):
                     name_parent=name_parent.decode('utf-8')
@@ -225,8 +227,7 @@ def addToMedialist(params):
                             url = module.create(name, url, 'video')
                 except:
                     pass
-
-                fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
+                fillPluginItems(url, strm=True, strm_name=name, strm_type=cType, name_orig=name_orig)
                 xbmcgui.Dialog().notification('Writing items...', "Done", xbmcgui.NOTIFICATION_INFO, 5000, False)
 
 def addMultipleSeasonToMediaList(params):
@@ -382,7 +383,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
 
     return albumList
 
-def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
+def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a", name_orig=''):
     movieList = []
     pagesDone = 0
     file = ''
@@ -396,6 +397,8 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
         if not contentList[0] == "palyableSingleMedia":
             for detailInfo in contentList:
                 file = detailInfo.get('file').replace("\\\\", "\\") if detailInfo.get('file', None) else None
+                if name_orig != '' and file.find('name_orig=') == -1:
+                    file = 'name_orig=%s;%s' % (name_orig , file if isinstance(file, str) else file.encode('utf-8'))
                 filetype = detailInfo.get('filetype', None)
                 label = detailInfo.get('label').encode("utf-8") if detailInfo.get('label', None) else None
                 imdbnumber = detailInfo.get('imdbnumber').strip() if detailInfo.get('imdbnumber', None) else None
@@ -428,9 +431,12 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
                 pagesDone = int(PAGINGMovies)
         else:
             provider = stringUtils.getProviderId(contentList[1])
+            url = contentList[1]
+            if name_orig != '' and file.find('name_orig=') == -1:
+                url = 'name_orig=%s;%s' % (name_orig , url if isinstance(url, str) else url.encode('utf-8'))
             m_path = stringUtils.getMovieStrmPath(strm_type, strm_name)
             m_title = stringUtils.getStrmname(strm_name)
-            movieList.append({'path': m_path, 'title':  m_title, 'url': contentList[1], 'provider': provider.get('providerId')})
+            movieList.append({'path': m_path, 'title':  m_title, 'url': url, 'provider': provider.get('providerId')})
             pagesDone = int(PAGINGMovies)
 
     if addon.getSetting('Link_Type') == '0':
@@ -446,7 +452,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a"):
 
         j = j + 100 / len(movieList)
 
-def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
+def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, name_orig=''):
     dirList = []
     episodesList = []
 
@@ -581,7 +587,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
             episode_prev=episode.get('episode')
 
         for index, episode in enumerate(episodesList):
-            pagesDone = getEpisode(episode, strm_name, strm_type, pagesDone=pagesDone)
+            pagesDone = getEpisode(episode, strm_name, strm_type, pagesDone=pagesDone, name_orig=name_orig)
             thisDialog.dialogeBG.update(int(step * (index + 1)))
 
         pagesDone += 1
@@ -591,11 +597,14 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0):
             showList = [item for sublist in dirList for item in sublist]
             dirList = []
 
-def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0):
+def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0, name_orig=''):
     episode = None
 
     utils.addon_log("detailInfo: %s" % (episode_item))
     file = episode_item.get('file', None)
+
+    if name_orig != '' and file.find('name_orig=') == -1:
+        file = 'name_orig=%s;%s' % (name_orig , file if isinstance(file, str) else file.encode('utf-8'))
     episode = episode_item.get('episode', -1)
     split_episode = episode_item.get('split_episode', -1)
     multi_episode = episode_item.get('multi_episode', False)

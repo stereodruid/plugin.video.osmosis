@@ -477,11 +477,11 @@ def movieStreamExists(movieID, provider, url):
         dbMovie = cursor.fetchone()
 
         if dbMovie is None:
-            cursor.execute("INSERT INTO stream_ref (mov_id, provider, url) VALUES ({}, '{}', '{}');".format(movieID, provider, url))
+            cursor.execute("INSERT INTO stream_ref (mov_id, provider, url) VALUES ({}, '{}', '{}');".format(movieID, provider, stringUtils.invCommas(url)))
             con.commit()
         else:
             if dbMovie[1].encode('utf-8') != url:
-                cursor.execute("UPDATE stream_ref SET url='{}' WHERE mov_id = {};".format(url, movieID))
+                cursor.execute("UPDATE stream_ref SET url='{}' WHERE mov_id = {};".format(stringUtils.invCommas(url), movieID))
                 con.commit()
     finally:
         cursor.close()
@@ -522,11 +522,11 @@ def episodeStreamExists(showID, seEp, provider, url):
         dbShow = cursor.fetchone()
 
         if dbShow is None:
-            cursor.execute("INSERT INTO stream_ref (show_id, seasonEpisode, provider, url) VALUES ({}, '{}', '{}', '{}');".format(showID, seEp, provider, url))
+            cursor.execute("INSERT INTO stream_ref (show_id, seasonEpisode, provider, url) VALUES ({}, '{}', '{}', '{}');".format(showID, seEp, provider, stringUtils.invCommas(url)))
             con.commit()
         else:
-            if str(dbShow[1]) != url:
-                cursor.execute("UPDATE stream_ref SET url = '{}' WHERE show_id = {} AND seasonEpisode LIKE '{}' AND provider LIKE '{}';".format(url, showID, seEp, provider))
+            if dbShow[1].encode('utf-8') != url:
+                cursor.execute("UPDATE stream_ref SET url = '{}' WHERE show_id = {} AND seasonEpisode LIKE '{}' AND provider LIKE '{}';".format(stringUtils.invCommas(url), showID, seEp, provider))
                 con.commit()
     finally:
         cursor.close()
@@ -554,31 +554,43 @@ def getVideo(ID, seasonEpisode=None):
 
     return provList
 
-def delStream(path, provider, isShow):
+def delStream(path, provider, isShow, name_orig):
     streams = []
 
+    utils.addon_log('delStream: path = %s, provider = %s, isShow = %s, name_orig = %s' % (path, provider, isShow, name_orig))
     try:
         args = {'sqliteDB': MODBPATH, 'mysqlDB': 'Movies'} if not isShow or isShow == False else {'sqliteDB': SHDBPATH, 'mysqlDB': 'TVShows'}
         con, cursor = openDB(**args)
 
         path = stringUtils.invCommas(path)
-        query = "{0} FROM stream_ref WHERE stream_ref.{1} IN (SELECT {2}.id FROM {2} WHERE {2}.filePath like '{3}') and stream_ref.provider like '{4}';"
         if isShow == False:
-            args = ('DELETE', 'mov_id', 'movies', path, provider)
+            query = "SELECT movies.title FROM movies WHERE movies.id IN (SELECT stream_ref.mov_id FROM stream_ref WHERE stream_ref.mov_id IN (SELECT movies.id FROM movies WHERE movies.filePath like '{0}') and stream_ref.provider like '{1}' and stream_ref.url like '{2}');"
         else:
-            args = ('DELETE', 'show_id', 'shows', path, provider)
+            query = "SELECT stream_ref.seasonEpisode FROM stream_ref WHERE stream_ref.show_id IN (SELECT shows.id FROM shows WHERE shows.filePath like '{0}') and stream_ref.provider like '{1}' and stream_ref.url like '{2}';"
+        args = [path, provider, 'name_orig=%s;%%' % name_orig if name_orig != '' else '']
+        utils.addon_log('delStream: query{args} = %s' % query.format(*args))
+        cursor.execute(query.format(*args))
+        streams_delete = cursor.fetchall()
 
+        if isShow == False:
+            query = "DELETE FROM stream_ref WHERE stream_ref.mov_id IN (SELECT movies.id FROM movies WHERE movies.filePath like '{0}') and stream_ref.provider like '{1}' and stream_ref.url like '{2}';"
+        else:
+            query = "DELETE FROM stream_ref WHERE stream_ref.show_id IN (SELECT shows.id FROM shows WHERE shows.filePath like '{0}') and stream_ref.provider like '{1}' and stream_ref.url like '{2}';"
+        utils.addon_log('delStream: query{args} = %s' % query.format(*args))
         cursor.execute(query.format(*args))
         con.commit()
 
         if isShow == False:
-            query = 'SELECT movies.title FROM movies WHERE movies.id IN (SELECT stream_ref.mov_id from stream_ref)'
-            args = ()
+            query = "SELECT movies.title FROM movies WHERE movies.id IN (SELECT stream_ref.mov_id FROM stream_ref WHERE stream_ref.mov_id IN (SELECT movies.id FROM movies WHERE movies.filePath like '{0}'));"
         else:
-            args = ('SELECT stream_ref.seasonEpisode', 'show_id', 'shows', path, '%')
-
+            query = "SELECT stream_ref.seasonEpisode FROM stream_ref WHERE stream_ref.show_id IN (SELECT shows.id FROM shows WHERE shows.filePath like '{0}');"
+        utils.addon_log('delStream: query{args} = %s' % query.format(*args))
         cursor.execute(query.format(*args))
-        streams = cursor.fetchall()
+        streams_keep = cursor.fetchall()
+
+        streams = [s for s in streams_delete if s not in streams_keep]
+    except:
+        streams = []
     finally:
         cursor.close()
         con.close()
