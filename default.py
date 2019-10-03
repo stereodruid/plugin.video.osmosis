@@ -98,13 +98,13 @@ if __name__ == '__main__':
                 if len(providers) == 1:
                     selectedEntry = providers[0]
                 else:                    
-                    selectProvider = [stringUtils.getProvidername(provider[0]) for provider in providers]
+                    selectProvider = ['[%s] %s' % (stringUtils.getProvidername(provider[0]), stringUtils.parseMediaListURL(provider[0])[0]) for provider in providers]
 
                     choice = guiTools.selectDialog('OSMOSIS: Select provider!', selectProvider)
                     if choice > -1: selectedEntry = providers[choice]
 
             if selectedEntry:
-                item = xbmcgui.ListItem(path=selectedEntry[0])
+                item = xbmcgui.ListItem(path=stringUtils.parseMediaListURL(selectedEntry[0])[1])
 
                 props = None
                 infoLabels = {}
