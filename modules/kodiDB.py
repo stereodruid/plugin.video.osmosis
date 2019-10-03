@@ -20,6 +20,7 @@ import os
 import sys
 import datetime
 from . import stringUtils
+import utils
 import xbmc
 import xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
 import sqlite3
