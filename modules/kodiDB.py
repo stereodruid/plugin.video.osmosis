@@ -380,7 +380,7 @@ def writeShow(episode):
     if episode is not None:
         showID = showExists(episode.get('tvShowTitle'), episode.get('path'))
         if showID is not None:
-            episodeStreamExists(showID, episode.get('strSeasonEpisode'), episode.get('provider'), episode.get('url'))
+            episodeStreamExists(showID, episode.get('strSeasonEpisode'), episode.get('provider'), episode.get('url'), episode.get('name_orig'))
             dbEpisode = {'path': episode.get('path'), 'tvShowTitle': episode.get('tvShowTitle'), 'showID': showID, 'strSeasonEpisode': episode.get('strSeasonEpisode')}
 
     return dbEpisode
@@ -512,14 +512,15 @@ def showExists(title, path):
 
     return dbShowID
 
-def episodeStreamExists(showID, seEp, provider, url):
+def episodeStreamExists(showID, seEp, provider, url, name_orig):
     try:
         con, cursor = openDB(SHDBPATH, 'TVShows')
 
         if url.find("?url=plugin") > -1:
             url = url.strip().replace("?url=plugin", "plugin", 1)
 
-        cursor.execute("SELECT show_id, url FROM stream_ref WHERE show_id = {} AND seasonEpisode LIKE '{}' AND provider LIKE '{}';".format(showID, seEp, provider))
+        utils.addon_log_notice('episodeStreamExists: query = %s' % "SELECT show_id, url FROM stream_ref WHERE show_id = {} AND seasonEpisode LIKE '{}' AND provider LIKE '{}' and url like '{}';".format(showID, seEp, provider,'name_orig=%s;%%' % name_orig if name_orig != '' else ''))
+        cursor.execute("SELECT show_id, url FROM stream_ref WHERE show_id = {} AND seasonEpisode LIKE '{}' AND provider LIKE '{}' and url like '{}';".format(showID, seEp, provider,'name_orig=%s;%%' % name_orig if name_orig != '' else ''))
         dbShow = cursor.fetchone()
 
         if dbShow is None:

@@ -629,7 +629,7 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0, name_orig='
 
     if showtitle is not None and showtitle != "" and strm_type != "":
         path = os.path.join(strm_type, stringUtils.cleanStrmFilesys(showtitle)) if strm_name.find('++RenamedTitle++') == -1 else os.path.join(strm_type, stringUtils.cleanStrmFilesys(stringUtils.getStrmname(strm_name)))
-        episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': showtitle, 'provider': provider.get('providerId')} if strm_name.find('++RenamedTitle++') == -1 else {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': stringUtils.getStrmname(strm_name), 'provider': provider.get('providerId')}
+        episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': showtitle, 'name_orig': name_orig, 'provider': provider.get('providerId')} if strm_name.find('++RenamedTitle++') == -1 else {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': stringUtils.getStrmname(strm_name), 'name_orig': name_orig, 'provider': provider.get('providerId')}
 
         if addon.getSetting('Link_Type') == '0':
             episode = kodiDB.writeShow(episode)
