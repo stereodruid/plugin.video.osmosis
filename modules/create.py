@@ -156,19 +156,19 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
 
 def addToMedialist(params):
     # A dialog to rename the Change Title for Folder and MediaList entry:
-    name_orig = params.get('name')
-    name = re.sub('( - |, )*[sS](taffel|eason) \d+.*', '', name_orig)
-
-    if name != name_orig:
-        tvshow_detected = True
-    else:
-        tvshow_detected = False
-    if name == '':
-        name = params.get('name_parent')
-        name_orig = '%s - %s' % (name, name_orig)
-    if params.get('type', None) == 'movie' and params.get('year',  None):
-        name = name + ' (%s)' % params.get('year', None)
     if params.get('noninteractive', False) == False:
+        name_orig = params.get('name')
+        name = re.sub('( - |, )*[sS](taffel|eason) \d+', '', name_orig)
+
+        if name != name_orig:
+            tvshow_detected = True
+        else:
+            tvshow_detected = False
+        if name == '':
+            name = params.get('name_parent')
+            name_orig = '%s - %s' % (name, name_orig)
+        if params.get('type', None) == 'movie' and params.get('year',  None):
+            name = name + ' (%s)' % params.get('year', None)
         selectAction = ['Continue with original Title: %s' % name, 'Rename Title', 'Get Title from Medialist']
         if not fileSys.writeTutList("select:Rename"):
             tutWin = ["Adding content to your library",
@@ -179,6 +179,9 @@ def addToMedialist(params):
         choice = guiTools.selectDialog('Title for MediaList entry: %s' % name_orig, selectAction)
     else:
         choice = 0
+        name = params.get('name')
+        name_orig = params.get('name_orig')
+
 
     if choice != -1:
         cType = params.get('cType', None)
@@ -248,38 +251,43 @@ def addMultipleSeasonToMediaList(params):
             name = "{0}++RenamedTitle++".format(name) if name else name
 
         if choice == 2:
-            item = guiTools.mediaListDialog(False, False, header_prefix='Get Title from Medialist for %s' % name, preselect_name=name)
+            item = guiTools.mediaListDialog(False, False, header_prefix='Get Title from Medialist for %s' % name, preselect_name=name, cTypeFilter='TV-Shows')
             splits = item.get('entry').split('|') if item else None
             name = splits[1] if splits else None
             cType = splits[0] if splits else None
+        utils.addon_log_notice('addMultipleSeasonToMediaList: name = %s, cType = %s' % (name,cType))
+        if name:
 
-    if not cType:
-        cType = guiTools.getTypeLangOnly('TV-Shows')
+            if not cType:
+                cType = guiTools.getTypeLangOnly('TV-Shows')
 
-    details = jsonUtils.requestList(url, 'video').get('files', [])
-    retry_count=1
-    while len(details) == 0 and retry_count <= 3:
-        utils.addon_log('requestList: try=%d data = %s)' % (retry_count, details))
-        details = jsonUtils.requestList(url, 'video').get('files', [])
-        retry_count=retry_count+1
-    seasonList=[]
-    for detail in details:
-        file = detail['file'].replace("\\\\", "\\")
-        filetype = detail['filetype']
-        label = detail['label']
-        if label.find('COLOR') != -1:
-            label=stringUtils.cleanLabels(label) + ' (*)'
-        showtitle = detail['showtitle']
-        if filetype == 'directory':
-            seasonList.append({'name': label.encode('utf-8'), 'name_parent': showtitle.encode('utf-8'), 'url': file.encode('utf-8'), 'cType': cType, 'noninteractive': True})
+            if cType != -1:
+                details = jsonUtils.requestList(url, 'video').get('files', [])
+                retry_count=1
+                while len(details) == 0 and retry_count <= 3:
+                    utils.addon_log('requestList: try=%d data = %s)' % (retry_count, details))
+                    details = jsonUtils.requestList(url, 'video').get('files', [])
+                    retry_count=retry_count+1
+                seasonList=[]
+                for detail in details:
+                    file = detail['file'].replace("\\\\", "\\")
+                    filetype = detail['filetype']
+                    label = detail['label']
+                    if label.find('COLOR') != -1:
+                        label=stringUtils.cleanLabels(label) + ' (*)'
+                    showtitle = detail['showtitle']
+                    name_orig = '%s - %s' % (showtitle, label)
+                    if filetype == 'directory':
+                        seasonList.append({'label': label.encode('utf-8'), 'name': name.encode('utf-8'), 'name_orig': name_orig.encode('utf-8'), 'url': file.encode('utf-8'), 'cType': cType, 'noninteractive': True})
 
-    sItems = sorted([item.get('name') for item in seasonList], key=lambda k: utils.key_natural_sort(k.lower()))
-    preselect = [i for i, item in enumerate(sItems) if item.find(' (*)') == -1]
-    selectedItemsIndex = guiTools.selectDialog("Select Seasons to add for %s" % showtitle, sItems, multiselect=True, preselect=preselect)
-    seasonList = [item for item in seasonList for index in selectedItemsIndex if item.get('name') == sItems[index]] if selectedItemsIndex and len(selectedItemsIndex) > 0 else None
-    if seasonList and len(seasonList) > 0:
-        for season in seasonList:
-            addToMedialist(season)
+                sItems = sorted([item.get('label') for item in seasonList], key=lambda k: utils.key_natural_sort(k.lower()))
+                preselect = [i for i, item in enumerate(sItems) if item.find(' (*)') == -1]
+                selectedItemsIndex = guiTools.selectDialog("Select Seasons to add for %s" % showtitle, sItems, multiselect=True, preselect=preselect)
+                seasonList = [item for item in seasonList for index in selectedItemsIndex if item.get('label') == sItems[index]] if selectedItemsIndex and len(selectedItemsIndex) > 0 else None
+                utils.addon_log_notice('addMultipleSeasonToMediaList: seasonList = %s' % seasonList)
+                if seasonList and len(seasonList) > 0:
+                    for season in seasonList:
+                        addToMedialist(season)
 
 
 def removeItemsFromMediaList(action='list'):
