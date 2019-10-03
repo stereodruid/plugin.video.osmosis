@@ -519,8 +519,7 @@ def episodeStreamExists(showID, seEp, provider, url, name_orig):
         if url.find("?url=plugin") > -1:
             url = url.strip().replace("?url=plugin", "plugin", 1)
 
-        utils.addon_log_notice('episodeStreamExists: query = %s' % "SELECT show_id, url FROM stream_ref WHERE show_id = {} AND seasonEpisode LIKE '{}' AND provider LIKE '{}' and url like '{}';".format(showID, seEp, provider,'name_orig=%s;%%' % name_orig if name_orig != '' else ''))
-        cursor.execute("SELECT show_id, url FROM stream_ref WHERE show_id = {} AND seasonEpisode LIKE '{}' AND provider LIKE '{}' and url like '{}';".format(showID, seEp, provider,'name_orig=%s;%%' % name_orig if name_orig != '' else ''))
+        cursor.execute("SELECT show_id, url FROM stream_ref WHERE show_id = {} AND seasonEpisode LIKE '{}' AND provider LIKE '{}' and url like '{}';".format(showID, seEp, provider,stringUtils.invCommas('name_orig=%s;%%' % name_orig if name_orig != '' else '')))
         dbShow = cursor.fetchone()
 
         if dbShow is None:
