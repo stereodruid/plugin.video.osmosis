@@ -324,7 +324,7 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
         sItems = sorted([xbmcgui.ListItem(label=item.get('text'), label2=item.get('text2',''), iconImage=item.get('iconImage')) for item in items],
             key=lambda k: (re.sub('.* \[([^/]*)/.*\]', '\g<1>', k.getLabel()),
                             utils.key_natural_sort(re.sub('^ *', '', k.getLabel().lower())),
-                            utils.key_natural_sort(re.sub('.*(?: - |, )*([sS](?:taffel|eason|erie[s]{0,1})|[pP]art).*', '\g<1>', k.getLabel2().lower())),
+                            utils.key_natural_sort(re.sub('( - |, )*([sS](taffel|eason|erie[s]{0,1})|[pP]art|[tT]eil) (?P<number>\d+).*', '\g<number>', k.getLabel2().lower())),
                             utils.key_natural_sort(re.sub('^ *', '', k.getLabel2().lower()))
                             )
                         )
