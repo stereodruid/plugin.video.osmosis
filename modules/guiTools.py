@@ -70,7 +70,7 @@ def addDir(name, url, mode, art, plot=None, genre=None, date=None, credits=None,
     if type == 'tvshow':
         contextMenu.append(('Add TV-Show to MediaList', 'XBMC.RunPlugin(%s&mode=%d)' % (u, 200)))
         contextMenu.append(('Add seasons individually to MediaList', 'XBMC.RunPlugin(%s&mode=%d)' % (u, 202)))
-    elif re.findall('( - |, )*[sS](taffel|eason) \d+.*', name):
+    elif re.findall('( - |, )*([sS](taffel|eason|erie[s]{0,1})|[pP]art|[tT]eil) \d+.*', name):
         contextMenu.append(('Add Season to MediaList', 'XBMC.RunPlugin(%s&mode=%d)' % (u, 200)))
     elif type == 'movie': # ???
         contextMenu.append(('Add Movie to MediaList', 'XBMC.RunPlugin(%s&mode=%d)' % (u, 200)))
@@ -324,7 +324,7 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
         sItems = sorted([xbmcgui.ListItem(label=item.get('text'), label2=item.get('text2',''), iconImage=item.get('iconImage')) for item in items],
             key=lambda k: (re.sub('.* \[([^/]*)/.*\]', '\g<1>', k.getLabel()),
                             utils.key_natural_sort(re.sub('^ *', '', k.getLabel().lower())),
-                            utils.key_natural_sort(re.sub('.*(?: - |, )*([sS](?:taffel|eason) \d+).*', '\g<1>', k.getLabel2().lower())),
+                            utils.key_natural_sort(re.sub('.*(?: - |, )*([sS](?:taffel|eason|erie[s]{0,1})|[pP]art).*', '\g<1>', k.getLabel2().lower())),
                             utils.key_natural_sort(re.sub('^ *', '', k.getLabel2().lower()))
                             )
                         )

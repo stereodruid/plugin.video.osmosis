@@ -158,7 +158,7 @@ def addToMedialist(params):
     # A dialog to rename the Change Title for Folder and MediaList entry:
     if params.get('noninteractive', False) == False:
         name_orig = params.get('name')
-        name = re.sub('( - |, )*[sS](taffel|eason) \d+', '', name_orig)
+        name = re.sub('( - |, )*([sS](taffel|eason|erie[s]{0,1})|[pP]art|[tT]eil) \d+', '', name_orig)
 
         if name != name_orig:
             tvshow_detected = True
