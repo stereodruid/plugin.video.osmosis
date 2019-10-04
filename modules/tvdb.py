@@ -416,16 +416,18 @@ def findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, l
 
                 else:
                     if episode.get('episodeName', None) and (episode.get('episodeName').lower().replace(' ', '').find(epName.lower().replace(' ', '')) >= 0 or epName.lower().replace(' ', '').find(episode.get('episodeName').lower().replace(' ', '')) >= 0):
-                        episode_data = {'season': episode.get('airedSeason'), 'episode': episode.get('airedEpisodeNumber'), 'episodeName': episode.get('episodeName')}
-                        setEpisodeCache(episodeSeason, episodeName, showid, episode_data,user_entry=False)
                         if episodeSeason == episode.get('airedSeason'):
-                            ratio_max = 100
+                            ratio_max = 99.5
+                        else:
+                            ratio_max = 80
+                        episode_data = {'season': episode.get('airedSeason'), 'episode': episode.get('airedEpisodeNumber'), 'episodeName': episode.get('episodeName'), 'match_ratio': ratio_max}
+                        setEpisodeCache(episodeSeason, episodeName, showid, episode_data,user_entry=False)
             if ratio_max > 99.0:
                 break
 
         match_found = False
         match_userentry = False
-        if ratio_max >= 95:
+        if ratio_max >= 95 or (use_fuzzy_matching == False and ratio_max >= 80):
             match_found = True
         elif ((ratio_max >= 85 and ratio_max/ratio_max2 >= 1.05)
             or (ratio_max >= 75 and ratio_max/ratio_max2 >= 1.15)
