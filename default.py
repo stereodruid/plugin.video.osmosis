@@ -154,6 +154,8 @@ if __name__ == '__main__':
 
                 resumePoint = kodiDB.getPlayedURLResumePoint({'filename': xbmc.getInfoLabel('Player.Filename'), 'path': xbmc.getInfoLabel('Player.Folderpath')})
                 guiTools.resumePointDialog(resumePoint)
+            elif mediaType == 'audio' and params.get('url', '').startswith('plugin://'):
+                xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path=params.get('url')))
             else:
                 xbmcplugin.setResolvedUrl(int(sys.argv[1]), False, xbmcgui.ListItem())
         else:

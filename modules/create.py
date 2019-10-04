@@ -336,7 +336,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                     duration = 200
 
                 if addon.getSetting('Link_Type') == '0':
-                    link = "{0}?{1}".format(sys.argv[0], urllib.urlencode({'url': file, 'mode': 10, 'name': label, 'fanart': fanart}))
+                    link = "{0}?{1}".format(sys.argv[0], urllib.urlencode({'url': file, 'mode': 10, 'mediaType': 'audio', 'name': label, 'fanart': fanart}))
                 else:
                     link = file
 
