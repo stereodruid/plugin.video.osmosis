@@ -475,13 +475,17 @@ def movieStreamExists(movieID, provider, url, name_orig):
             url = url.strip().replace("?url=plugin", "plugin", 1)
 
         cursor.execute("SELECT mov_id, url FROM stream_ref WHERE mov_id = {} AND provider LIKE '{}' and (url like '{}' or url like 'plugin%');".format(movieID, provider,stringUtils.invCommas('name_orig=%s;%%' % name_orig if name_orig != '' else '')))
-        dbMovie = cursor.fetchone()
+        dbMovie = cursor.fetchall()
 
-        if dbMovie is None:
+        if len(dbMovie) > 1:
+            cursor.execute("DELETE FROM stream_ref WHERE mov_id = {} AND provider LIKE '{}' and (url like '{}' or url like 'plugin%');".format(movieID, provider,stringUtils.invCommas('name_orig=%s;%%' % name_orig if name_orig != '' else '')))
+            dbMovie = []
+
+        if len(dbMovie) == 0:
             cursor.execute("INSERT INTO stream_ref (mov_id, provider, url) VALUES ({}, '{}', '{}');".format(movieID, provider, stringUtils.invCommas(url)))
             con.commit()
         else:
-            if dbMovie[1].encode('utf-8') != url:
+            if dbMovie[0][1].encode('utf-8') != url:
                 cursor.execute("UPDATE stream_ref SET url='{}' WHERE mov_id = {};".format(stringUtils.invCommas(url), movieID))
                 con.commit()
     finally:
@@ -520,13 +524,17 @@ def episodeStreamExists(showID, seEp, provider, url, name_orig):
             url = url.strip().replace("?url=plugin", "plugin", 1)
 
         cursor.execute("SELECT show_id, url FROM stream_ref WHERE show_id = {} AND seasonEpisode LIKE '{}' AND provider LIKE '{}' and (url like '{}' or url like 'plugin%');".format(showID, seEp, provider,stringUtils.invCommas('name_orig=%s;%%' % name_orig if name_orig != '' else '')))
-        dbShow = cursor.fetchone()
+        dbShow = cursor.fetchall()
 
-        if dbShow is None:
+        if len(dbShow) > 1:
+            cursor.execute("DELETE FROM stream_ref WHERE show_id = {} AND seasonEpisode LIKE '{}' AND provider LIKE '{}' and (url like '{}' or url like 'plugin%');".format(showID, seEp, provider,stringUtils.invCommas('name_orig=%s;%%' % name_orig if name_orig != '' else '')))
+            dbShow = []
+
+        if len(dbShow) == 0:
             cursor.execute("INSERT INTO stream_ref (show_id, seasonEpisode, provider, url) VALUES ({}, '{}', '{}', '{}');".format(showID, seEp, provider, stringUtils.invCommas(url)))
             con.commit()
         else:
-            if dbShow[1].encode('utf-8') != url:
+            if dbShow[0][1].encode('utf-8') != url:
                 cursor.execute("UPDATE stream_ref SET url = '{}' WHERE show_id = {} AND seasonEpisode LIKE '{}' AND provider LIKE '{}';".format(stringUtils.invCommas(url), showID, seEp, provider))
                 con.commit()
     finally:
