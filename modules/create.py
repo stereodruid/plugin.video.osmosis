@@ -444,7 +444,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a", name
                 url = 'name_orig=%s;%s' % (name_orig , url if isinstance(url, str) else url.encode('utf-8'))
             m_path = stringUtils.getMovieStrmPath(strm_type, strm_name)
             m_title = stringUtils.getStrmname(strm_name)
-            movieList.append({'path': m_path, 'title':  m_title, 'url': url, 'provider': provider.get('providerId')})
+            movieList.append({'path': m_path, 'title':  m_title, 'name_orig': name_orig, 'url': url, 'provider': provider.get('providerId')})
             pagesDone = int(PAGINGMovies)
 
     if addon.getSetting('Link_Type') == '0':

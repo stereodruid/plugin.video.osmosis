@@ -359,7 +359,7 @@ def writeMovie(movieList):
         kmovName = kmovieExists(entry.get('title'), entry.get('imdbnumber'))
         movID = movieExists(kmovName, entry.get('path'))
         if movID is not None:
-            movieStreamExists(movID, entry.get('provider'), entry.get('url'))
+            movieStreamExists(movID, entry.get('provider'), entry.get('url'), entry.get('name_orig'))
             dbMovieList.append({'path': entry.get('path'), 'title': kmovName, 'movieID': movID, 'provider': entry.get('provider')})
 
     return dbMovieList
@@ -467,14 +467,14 @@ def movieExists(title, path):
 
     return dbMovieID
 
-def movieStreamExists(movieID, provider, url):
+def movieStreamExists(movieID, provider, url, name_orig):
     try:
         con, cursor = openDB(MODBPATH, 'Movies')
 
         if url.find("?url=plugin") != -1:
             url = url.strip().replace("?url=plugin", "plugin", 1)
 
-        cursor.execute("SELECT mov_id, url FROM stream_ref WHERE mov_id = {} AND provider LIKE '{}';".format(movieID, provider))
+        cursor.execute("SELECT mov_id, url FROM stream_ref WHERE mov_id = {} AND provider LIKE '{}' and (url like '{}' or url like 'plugin%');".format(movieID, provider,stringUtils.invCommas('name_orig=%s;%%' % name_orig if name_orig != '' else '')))
         dbMovie = cursor.fetchone()
 
         if dbMovie is None:
