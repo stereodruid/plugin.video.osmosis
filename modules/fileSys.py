@@ -75,13 +75,13 @@ def makeSTRM(filepath, filename, url):
 #            else:
 #                return fullpath
 
-    if fullpath.find('Audio') > 0:
-        try:
-            if xbmcvfs.exists(fullpath.decode("utf-8")):
-                return fullpath, None
-        except:
-            if xbmcvfs.exists(fullpath.encode("utf-8")):
-                return fullpath, None
+#    if fullpath.find('Audio') > 0:
+#        try:
+#            if xbmcvfs.exists(fullpath.decode("utf-8")):
+#                return fullpath, None
+#        except:
+#            if xbmcvfs.exists(fullpath.encode("utf-8")):
+#                return fullpath, None
 
     try:
         fullpath = fullpath.decode("utf-8")
