@@ -269,6 +269,17 @@ def resumePointDialog(resumePoint):
 def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_prefix=ADDON_NAME, preselect_name=None):
     thelist = fileSys.readMediaList()
     items = []
+    if not cTypeFilter:
+        selectAction = ['Movies', 'TV-Shows', 'Audio', 'All']
+        choice = selectDialog('%s: Select which Media Types to show' % header_prefix, selectAction)
+        if choice != -1:
+            if choice == 3:
+                cTypeFilter = None
+            else:
+                cTypeFilter = selectAction[choice]
+        else:
+            return
+
     for index, entry in enumerate(thelist):
         splits = entry.strip().split('|')
         if cTypeFilter and not re.findall(cTypeFilter, splits[0]):
@@ -302,16 +313,13 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
         else:
             items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} ({1})'.format(name, cType), 'url': splits[2]})
 
+    preselect_idx=None
     if expand == False:
         sItems = sorted([item.get('text') for item in items], key=lambda k: utils.key_natural_sort(k.lower()))
         if preselect_name:
             preselect_idx = [i for i, item in enumerate(sItems) if item.find(preselect_name) != -1 ]
-            if len(preselect_idx) > 0:
+            if preselect_idx and len(preselect_idx) > 0:
                 preselect_idx=preselect_idx[0]
-            else:
-                preselect_idx=None
-        else:
-            preselect_idx=None
     else:
         sItems = sorted([xbmcgui.ListItem(label=item.get('text'), label2=item.get('text2',''), iconImage=item.get('iconImage')) for item in items],
             key=lambda k: (re.sub('.* \[([^/]*)/.*\]', '\g<1>', k.getLabel()),
@@ -320,9 +328,11 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
                             utils.key_natural_sort(re.sub('^ *', '', k.getLabel2().lower()))
                             )
                         )
+        if preselect_name != None:
+            preselect_idx = [i for i, item in enumerate(sItems) if item.getLabel().find(preselect_name) != -1 ]
 
     if multiselect:
-        selectedItemsIndex = selectDialog("%s: Select items" % header_prefix, sItems, multiselect=True, useDetails=expand)
+        selectedItemsIndex = selectDialog("%s: Select items" % header_prefix, sItems, multiselect=True, useDetails=expand, preselect=preselect_idx)
         if expand == False:
             return [item for item in items for index in selectedItemsIndex if item.get('text') == sItems[index]] if selectedItemsIndex and len(selectedItemsIndex) > 0 else None
         else:
