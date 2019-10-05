@@ -40,6 +40,19 @@ actor_update_fixtime = 2
 def strm_update(selectedItems=None, actor=0):
     if xbmcvfs.exists(MediaList_LOC):
         thelist = sorted(fileSys.readMediaList())
+        if not selectedItems and actor == actor_update_manual:
+            selectAction = ['Movies', 'TV-Shows', 'Audio', 'All']
+            choice = guiTools.selectDialog('Update all: Select which Media Types to update', selectAction)
+            if choice != -1:
+                if choice == 3:
+                    cTypeFilter = None
+                else:
+                    cTypeFilter = selectAction[choice]
+            else:
+                return
+        else:
+            cTypeFilter = None
+
         items = selectedItems if selectedItems else [{'entry': item} for item in thelist]
         if len(items) > 0:
             dialogeBG = xbmcgui.DialogProgressBG()
@@ -49,8 +62,14 @@ def strm_update(selectedItems=None, actor=0):
             splittedEntries = []
             for item in items:
                 splits = item.get('entry').split('|')
+                if cTypeFilter and not re.findall(cTypeFilter, splits[0]):
+                    continue
                 iUrls += len(splits[2].split('<next>'))
                 splittedEntries.append(splits)
+
+            if iUrls == 0:
+                dialogeBG.close()
+                return
 
             step = j = 100 / iUrls
             for splittedEntry in splittedEntries:
