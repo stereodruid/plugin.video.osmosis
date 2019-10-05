@@ -401,7 +401,7 @@ def findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, l
 
                         if ratio > ratio_max:
                             if ratio_max > 0 and not (ratio_max_season == episode.get('airedSeason') and ratio_max_episode == episode.get('airedEpisodeNumber')):
-                                ratio_max2 = max(ratio,0.1)
+                                ratio_max2 = ratio_max
                             ratio_max = ratio
                             ratio_max_season = episode.get('airedSeason')
                             ratio_max_episode = episode.get('airedEpisodeNumber')
