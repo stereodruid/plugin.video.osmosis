@@ -26,6 +26,7 @@ medialist_path = addon.getSetting('MediaList_LOC')
 MediaList_LOC = xbmc.translatePath(os.path.join(medialist_path, 'MediaList.xml'))
 tvdb_token_loc = xbmc.translatePath(os.path.join(medialist_path, 'tvdb_token.txt'))
 CONFIRM_USER_ENTRIES = addon.getSetting('confirm_user_entries')
+dialog_autoclose_time=int(addon.getSetting('tvdb_dialog_autoclose_time'))
 
 showCache = StorageServer.StorageServer(addon.getAddonInfo('name') + 'TVShowsTVDB1', 24 * 30)
 episodeCache = StorageServer.StorageServer(addon.getAddonInfo('name') + 'EpisodesTVDB1', 24 * 30)
@@ -34,7 +35,6 @@ tvdbDataCache = StorageServer.StorageServer(addon.getAddonInfo('name') + 'TVDBDa
 
 api_baseurl = 'https://api.thetvdb.com/%s'
 
-dialog_autoclose_time=60
 
 def getShowByName(showName, lang):
     utils.addon_log('tvdb getShowByName: enter; name = %s; lang = %s' % (showName, lang))
@@ -90,9 +90,9 @@ def getShowByName(showName, lang):
                                                 showName, showInfoDialogList, useDetails=True, autoclose = dialog_autoclose_time*1000, 
                                                 preselect=int(delta_selected-1 if preselected is None else preselected+delta_selected))
                         time2 = time.time()
-                        if int(time2-time1) >= dialog_autoclose_time:
-                            if lang == 'en':
-                                ignore_show = True
+                        if  dialog_autoclose_time > 0 and int(time2-time1)>= dialog_autoclose_time:
+                            selected = -1
+                            ignore_show = True
                         if selected >= delta_selected:
                             show_data=showInfoList[selected-delta_selected]
                             setTVShowCache(showName, show_data)
@@ -460,7 +460,7 @@ def findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, l
                                      episodeListDialog, useDetails = True, autoclose = dialog_autoclose_time*1000,
                                      preselect=int(0 if preselected is None else preselected+delta_selected))
             time2 = time.time()
-            if int(time2-time1) >= dialog_autoclose_time:
+            if dialog_autoclose_time > 0 and int(time2-time1) >= dialog_autoclose_time:
                 selected = -1
 
             if selected >= delta_selected and selected < episodecount+delta_selected:
