@@ -40,85 +40,69 @@ def getShowByName(showName, lang):
     utils.addon_log('tvdb getShowByName: enter; name = %s; lang = %s' % (showName, lang))
     show_data = getTVShowFromCache(showName)
     if not show_data:
-        token = getToken()
-        if token:
-            lang_tvdb_list=[lang]
-            if lang != 'en':
-                lang_tvdb_list.append('en')
-            ignore_show = False
-            for lang_tvdb in lang_tvdb_list:
-                res = getTVShowFromTVDB(token, re.sub(' \(\d+\)', '', showName), lang_tvdb)
-                if res.status_code == 401:
-                    token = refreshToken(token)
-                    res = getTVShowFromTVDB(token, re.sub(' \(\d+\)', '', showName), lang_tvdb)
-
-                if res.status_code == 200 and len(res.json().get('data')) > 0:
-                    if len(res.json().get('data')) > 1:
-                        showInfoDialogList = []
-                        showInfoList = []
-                        preselected=None
-                        show_count=0
-                        delta_selected = 1
-
+        lang_tvdb_list=[lang]
+        if lang != 'en':
+            lang_tvdb_list.append('en')
+        selected = 0
+        for lang_tvdb in lang_tvdb_list:
+            show_data_tvdb = getTVShowFromTVDB(re.sub(' \(\d+\)', '', showName), lang_tvdb)
+            if show_data_tvdb:
+                if len(show_data_tvdb) > 1:
+                    showInfoDialogList = []
+                    showInfoList = []
+                    preselected=None
+                    delta_selected = 1
+                    ListItem=xbmcgui.ListItem()
+                    ListItem.setLabel('Show not in list')
+                    ListItem.setLabel2('Enter TVDB id manually')
+                    showInfoDialogList.append(ListItem)
+                    if lang != 'en' and lang_tvdb != 'en':
                         ListItem=xbmcgui.ListItem()
-                        ListItem.setLabel('Show not in list')
-                        ListItem.setLabel2('Enter TVDB id manually')
+                        ListItem.setLabel('Try english')
+                        ListItem.setLabel2('Search TVDB again with language set to english')
                         showInfoDialogList.append(ListItem)
-                        if lang != 'en' and lang_tvdb != 'en':
-                            ListItem=xbmcgui.ListItem()
-                            ListItem.setLabel('Try english')
-                            ListItem.setLabel2('Search TVDB again with language set to english')
+                        delta_selected = 2
+                    for show in show_data_tvdb:
+                        utils.addon_log('tvbd show from id: data = %s' % show)
+                        ListItem=xbmcgui.ListItem()
+                        ListItem.setLabel('TVDB ID=%s %s' % (str(show.get('id')), show.get('seriesName')))
+                        ListItem.setLabel2(show.get('overview'))
+                        if show.get('seriesName') == showName:
+                            preselected=0
+                            showInfoDialogList.insert(delta_selected, ListItem)
+                            showInfoList.insert(0, show)
+                        else:
                             showInfoDialogList.append(ListItem)
-                            delta_selected = 2
-                        for show in res.json().get('data'):
-                            utils.addon_log('tvbd show from id: data = %s' % show)
-                            ListItem=xbmcgui.ListItem()
-                            ListItem.setLabel('TVDB ID=%s %s' % (str(show.get('id')), show.get('seriesName')))
-                            ListItem.setLabel2(show.get('overview'))
-                            if show.get('seriesName') == showName:
-                                preselected=0
-                                showInfoDialogList.insert(delta_selected, ListItem)
-                                showInfoList.insert(0, show)
-                            else:
-                                showInfoDialogList.append(ListItem)
-                                showInfoList.append(show)
-                            show_count=show_count+1
+                            showInfoList.append(show)
 
-                        dialog = xbmcgui.Dialog()
-                        time1=time.time()
-                        selected = dialog.select('%s: multiple entries found on TVDB' % 
-                                                showName, showInfoDialogList, useDetails=True, autoclose = dialog_autoclose_time*1000, 
-                                                preselect=int(delta_selected-1 if preselected is None else preselected+delta_selected))
-                        time2 = time.time()
-                        if  dialog_autoclose_time > 0 and int(time2-time1)>= dialog_autoclose_time:
-                            selected = -1
-                            ignore_show = True
-                        if selected >= delta_selected:
-                            show_data=showInfoList[selected-delta_selected]
-                            setTVShowCache(showName, show_data)
-                            break
-                        if selected == 0:
-                            break
-                    else:
-                         show_data=res.json().get('data')[0]
-                         setTVShowCache(showName, show_data)
-                         break
-            if not show_data and ignore_show == False:
-                dialog=xbmcgui.Dialog()
-                tvdb_id = 0
-                try:
-                    tvdb_id = int(dialog.numeric(0, '%s not found: Enter TVDB ID' % (showName)))
-                except:
-                    pass
-                if tvdb_id > 0:
-                    res = getTVShowFromTVDBID(token, tvdb_id, lang)
-                    if res.status_code == 401:
-                        token = refreshToken(token)
-                        res = getTVShowFromTVDBID(token, tvdb_id, lang)
+                    dialog = xbmcgui.Dialog()
+                    time1=time.time()
+                    selected = dialog.select('%s: multiple entries found on TVDB' % 
+                                            showName, showInfoDialogList, useDetails=True, autoclose = dialog_autoclose_time*1000, 
+                                            preselect=int(delta_selected-1 if preselected is None else preselected+delta_selected))
+                    time2 = time.time()
+                    if  dialog_autoclose_time > 0 and int(time2-time1)>= dialog_autoclose_time:
+                        selected = -1
+                    if selected >= delta_selected:
+                        show_data=showInfoList[selected-delta_selected]
+                        break
+                    if selected == 0:
+                        break
+                else:
+                     show_data=show_data_tvdb[0]
+                     break
+        if not show_data and selected == 0:
+            dialog=xbmcgui.Dialog()
+            tvdb_id = 0
+            try:
+                tvdb_id = int(dialog.numeric(0, '%s not found: Enter TVDB ID' % (showName)))
+            except:
+                pass
+            if tvdb_id > 0:
+                show_data = getTVShowFromTVDBID(tvdb_id, lang)
 
-                    if res.status_code == 200 and len(res.json().get('data')) > 0:
-                        show_data=res.json().get('data')
-                        setTVShowCache(showName, show_data)
+    if show_data:
+         setTVShowCache(showName, show_data)
 
     utils.addon_log('tvdb getShowByName: name = %s; lang = %s; data = %s' % (showName, lang, show_data))
     return show_data
@@ -129,27 +113,29 @@ def getEpisodeByName(showName, episodeSeason, episodeNr, episodeName, lang):
     episode = None
     show_data = getShowByName(showName, lang)
     if show_data:
-        token = getToken()
-        if token:
-            utils.addon_log('tvbd show from id: data = %s' % show_data)
-            episode = findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, lang)
+        utils.addon_log('tvbd show from id: data = %s' % show_data)
+        episode = findEpisodeByName(show_data, episodeSeason, episodeNr, episodeName, lang)
 
     utils.addon_log('tvdb getEpisodeByName: name = %s; data = %s' % (episodeName, episode))
     return episode
 
-
-def getTVShowFromTVDB(token, showName, lang):
-    headers = getHeaders({'Authorization': 'Bearer %s' % token, 'Accept-Language': lang})
+def getTVShowFromTVDB(showName, lang):
+    show_data = None
     params = {'name': showName}
-    res = requests.get(api_baseurl % 'search/series', headers=headers, params=params)
-    utils.addon_log('tvdb searchTVShow: response = %s' % res.json())
-    return res
+    res = getJsonFromTVDB(api_baseurl % 'search/series', lang, params)
+    if res.status_code == 200 and len(res.json().get('data')) > 0:
+        show_data = res.json().get('data')
+    utils.addon_log('tvdb getTVShowFromTVDB: show_data = %s' % show_data)
+    return show_data
 
-def getTVShowFromTVDBID(token, tvdb_id, lang):
-    headers = getHeaders({'Authorization': 'Bearer %s' % token, 'Accept-Language': lang})
-    res = requests.get(api_baseurl % 'series/%s' % tvdb_id, headers=headers)
-    utils.addon_log('tvdb searchTVShow: response = %s' % res.json())
-    return res
+def getTVShowFromTVDBID(tvdb_id, lang):
+    show_data = None
+    res = getJsonFromTVDB(api_baseurl % 'series/%s' % tvdb_id, lang)
+    if res.status_code == 200 and len(res.json().get('data')) > 0:
+        show_data=res.json().get('data')
+        setTVShowCache(showName, show_data)
+    utils.addon_log('tvdb getTVShowFromTVDBID: show_data = %s' % show_data)
+    return show_data
 
 
 def getTVShowFromCache(showName):
@@ -211,8 +197,27 @@ def removeShowsFromTVDBCache(selectedItems=None):
                             utils.addon_log_notice('tvdb: Delete TVDB data from cache for "%s"' % name)
                             deleteTVShowFromCache(name)
 
+def getEpisodeDataFromTVDB(showid, lang):
+    utils.addon_log_notice('getEpisodeDataFromTVDB: showid = %s, lang = %s' % (showid, lang))
+    page = 1
+    maxpages = 1
+    json_data=[]
+    while page <= maxpages:
+        params = {'page': page}
+        path = 'series/%s/episodes/query' % showid
+        res_ep = getJsonFromTVDB(api_baseurl % path, lang, params)
 
-def findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, lang, silent=False, fallback_en=False):
+        json_ep = res_ep.json()
+        if res_ep.status_code == 200 and len(json_ep.get('data', {})) > 0:
+            page = json_ep.get('links').get('next')
+            maxpages = json_ep.get('links').get('last')
+            json_data = json_data + json_ep.get('data')
+        else:
+            break
+
+    return json_data
+
+def findEpisodeByName(show_data, episodeSeason, episodeNr, episodeName, lang, silent=False, fallback_en=False):
     utils.addon_log('tvdb findEpisodeByName: show_data = %s' % show_data)
 
     showid = show_data.get('id')
@@ -233,8 +238,6 @@ def findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, l
             episode_data = None;
 
     if episode_data is None:
-        page = 1
-        maxpages = 1
         ratio_max = 0
         ratio_max2 = 100
         ratio_max_season = -1
@@ -245,33 +248,7 @@ def findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, l
         episodecountcurrentseason=0
         preselected=None
 
-        json_data=getTVDBDataFromCache(showid, lang)
-        if not json_data:
-            json_data=[]
-            while page <= maxpages:
-                headers = getHeaders({'Authorization': 'Bearer %s' % token, 'Accept-Language': lang})
-                params = {'page': page}
-                path = 'series/%s/episodes/query' % showid
-                retry_count=0
-                res_ep = None
-                while res_ep is None and retry_count <= 3:
-                    try:
-                        res_ep = requests.get(api_baseurl % path, headers=headers, params=params)
-                    except:
-                        pass
-                    retry_count=retry_count+1
-                utils.addon_log('tvdb findEpisodeByName: response = %s' % res_ep.json())
-
-                json_ep = res_ep.json()
-                if res_ep.status_code == 200 and len(json_ep.get('data', {})) > 0:
-                    page = json_ep.get('links').get('next')
-                    maxpages = json_ep.get('links').get('last')
-                    json_data = json_data + json_ep.get('data')
-                else:
-                    break
-
-            setTVDBDataCache(showid, lang, json_data)
-
+        json_data=tvdbDataCache.cacheFunction(getEpisodeDataFromTVDB, showid, lang)
         json_data=sorted(json_data, key=lambda x: (x['airedSeason'] == 0, 
                                                     x['airedSeason'] != episodeSeason or x['airedEpisodeNumber'] != episodeNr,
                                                     x['airedSeason'] != episodeSeason,
@@ -438,7 +415,7 @@ def findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, l
 
         match_found_fallback_en = False
         if match_found == False and lang != 'en':
-            episode_data_en = findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, 'en', silent = True, fallback_en = True)
+            episode_data_en = findEpisodeByName(show_data, episodeSeason, episodeNr, episodeName, 'en', silent = True, fallback_en = True)
             if episode_data_en:
                 episode_data = episode_data_en
                 match_found = True
@@ -478,7 +455,7 @@ def findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, l
                 except:
                     pass
             elif lang != 'en' and selected == 2:
-                episode_data_en = findEpisodeByName(token, show_data, episodeSeason, episodeNr, episodeName, 'en', fallback_en = True)
+                episode_data_en = findEpisodeByName(show_data, episodeSeason, episodeNr, episodeName, 'en', fallback_en = True)
                 if episode_data_en:
                     episode_data = episode_data_en
                     match_found = True
@@ -546,17 +523,25 @@ def deleteEpisodeFromCache(episodeSeason, episodeName, showid, user_entry=False)
         episodeCache.delete(entry)
         utils.addon_log('tvdb deleteEpisodeFromCache: season = %s; episodeName = "%s"; showid = %s' % (episodeSeason, episodeName, showid))
 
+def getJsonFromTVDB(url, lang, params=''):
+    token = getToken()
+    if token:
+        headers = getHeaders({'Authorization': 'Bearer %s' % token, 'Accept-Language': lang})
 
-def getTVDBDataFromCache(showid, lang):
-    entry = "%s_%s" % (showid, lang)
-    data = tvdbDataCache.get(entry)
-    return eval(data) if data and len(data.strip()) > 0 else None
+        res = None
+        retry_count = 0
+        while res is None and retry_count <= 3:
+            try:
+                res = requests.get(url, headers=headers, params=params)
+                if res.status_code == 401:
+                    token = refreshToken(token)
+                    headers = getHeaders({'Authorization': 'Bearer %s' % token, 'Accept-Language': lang})
+                    res = requests.get(url, headers=headers, params=params)
+            except:
+                pass
+            retry_count=retry_count+1
 
-
-def setTVDBDataCache(showid, lang, data):
-    entry = "%s_%s" % (showid, lang)
-    tvdbDataCache.set(entry, repr(data))
-
+    return res
 
 def getToken():
     token = None
