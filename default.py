@@ -29,6 +29,7 @@ from modules import updateAll
 from modules import moduleUtil
 from modules import stringUtils
 from modules import jsonUtils
+from modules import tvdb
 
 import utils
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin
@@ -70,11 +71,17 @@ if __name__ == '__main__':
     elif mode == 666:
         updateAll.strm_update()
     elif mode == 4:
-        selectedItems = guiTools.mediaListDialog()
+        selectedItems = guiTools.mediaListDialog(header_prefix='Update')
         if selectedItems and len(selectedItems) > 0:
             updateAll.strm_update(selectedItems)
     elif mode == 5:
         create.removeItemsFromMediaList('list')
+    elif mode == 51:
+        selectedItems = guiTools.mediaListDialog(True, False, header_prefix='Remove Shows from TVDB cache', cTypeFilter='TV-Shows')
+        if selectedItems and len(selectedItems) > 0:
+            tvdb.removeShowsFromTVDBCache(selectedItems)
+    elif mode == 52:
+        tvdb.removeShowsFromTVDBCache()
     elif mode == 6:
         xbmc.executebuiltin('InstallAddon(service.watchdog)')
         xbmc.executebuiltin("XBMC.Container.Refresh")
@@ -91,13 +98,13 @@ if __name__ == '__main__':
                 if len(providers) == 1:
                     selectedEntry = providers[0]
                 else:                    
-                    selectProvider = [stringUtils.getProvidername(provider[0]) for provider in providers]
+                    selectProvider = ['[%s] %s' % (stringUtils.getProvidername(provider[0]), stringUtils.parseMediaListURL(provider[0])[0]) for provider in providers]
 
                     choice = guiTools.selectDialog('OSMOSIS: Select provider!', selectProvider)
                     if choice > -1: selectedEntry = providers[choice]
 
             if selectedEntry:
-                item = xbmcgui.ListItem(path=selectedEntry[0])
+                item = xbmcgui.ListItem(path=stringUtils.parseMediaListURL(selectedEntry[0])[1])
 
                 props = None
                 infoLabels = {}
@@ -106,7 +113,7 @@ if __name__ == '__main__':
                     sTVShowTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
                     sTVShowTitle = stringUtils.unicodetoascii(sTVShowTitle)
                     iSeason = int(params.get('episode')[1:params.get('episode').index('e')])
-                    iEpisode = int(params.get('episode')[params.get('episode').index('e') + 1:])
+                    iEpisode = params.get('episode')[params.get('episode').index('e') + 1:]
                     props = kodiDB.getKodiEpisodeID(sTVShowTitle, iSeason, iEpisode)
 
                     infoLabels['tvShowTitle'] = sTVShowTitle
@@ -147,6 +154,8 @@ if __name__ == '__main__':
 
                 resumePoint = kodiDB.getPlayedURLResumePoint({'filename': xbmc.getInfoLabel('Player.Filename'), 'path': xbmc.getInfoLabel('Player.Folderpath')})
                 guiTools.resumePointDialog(resumePoint)
+            elif mediaType == 'audio' and params.get('url', '').startswith('plugin://'):
+                xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path=params.get('url')))
             else:
                 xbmcplugin.setResolvedUrl(int(sys.argv[1]), False, xbmcgui.ListItem())
         else:
@@ -155,7 +164,7 @@ if __name__ == '__main__':
         create.fillPlugins(params.get('url'))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
     elif mode == 101:
-        create.fillPluginItems(params.get('url'))
+        create.fillPluginItems(params.get('url'), name_parent=params.get('name', ''))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
         if not fileSys.writeTutList("select:AddonNavi"):
@@ -166,58 +175,11 @@ if __name__ == '__main__':
             xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
     elif mode == 200:
         utils.addon_log("write multi strms")
-
-        # A dialog to rename the Change Title for Folder and MediaList entry:
-        selectAction = ['No, continue with original Title', 'Rename Title', 'Get Title from Medialist']
-        if not fileSys.writeTutList("select:Rename"):
-            tutWin = ["Adding content to your library",
-                      "You can rename your Movie, TV-Show or Music title.",
-                      "To make your scraper recognize the content, some times it is necessary to rename the title.",
-                      "Be careful, wrong title can also cause that your scraper can't recognize your content."]
-            xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
-        choice = guiTools.selectDialog('Title for Folder and MediaList entry', selectAction)
-        if choice != -1:
-            cType = None
-            name = params.get('name')
-            if choice == 1 or name == None or name == '':
-                name = guiTools.editDialog(name).strip()
-                name = "{0}++RenamedTitle++".format(name) if name else name
-
-            if choice == 2:
-                item = guiTools.mediaListDialog(False, False)
-                splits = item.get('entry').split('|') if item else None
-                name = splits[1] if splits else None
-                cType = splits[0] if splits else None
-
-            if name:
-                url = params.get('url')
-                if not fileSys.writeTutList("select:ContentTypeLang"):
-                    tutWin = ["Adding content to your library",
-                              "Now select your content type.",
-                              "Select language or YouTube type.",
-                              "Wait for done message."]
-                    xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
-
-                if not cType:
-                    cType = guiTools.getType(url)
-                if cType != -1:
-                    if params.get('filetype', 'directory') == 'file':
-                        url += '&playMode=play'
-                    fileSys.writeMediaList(url, name, cType)
-                    xbmcgui.Dialog().notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False)
-
-                    try:
-                        plugin_id = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
-                        if plugin_id:
-                            module = moduleUtil.getModule(plugin_id.group(1))
-                            if module and hasattr(module, 'create'):
-                                url = module.create(name, url, 'video')
-                    except:
-                        pass
-
-                    create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
-                    xbmcgui.Dialog().notification('Writing items...', "Done", xbmcgui.NOTIFICATION_INFO, 5000, False)
+        create.addToMedialist(params)
     elif mode == 201:
         utils.addon_log("write single strm")
         # create.fillPluginItems(url)
         # makeSTRM(name, name, url)
+    elif mode == 202:
+        utils.addon_log("Add all season individually to MediaList")
+        create.addMultipleSeasonToMediaList(params)

@@ -39,7 +39,20 @@ actor_update_fixtime = 2
 
 def strm_update(selectedItems=None, actor=0):
     if xbmcvfs.exists(MediaList_LOC):
-        thelist = fileSys.readMediaList()
+        thelist = sorted(fileSys.readMediaList())
+        if not selectedItems and actor == actor_update_manual:
+            selectAction = ['Movies', 'TV-Shows', 'Audio', 'All']
+            choice = guiTools.selectDialog('Update all: Select which Media Types to update', selectAction)
+            if choice != -1:
+                if choice == 3:
+                    cTypeFilter = None
+                else:
+                    cTypeFilter = selectAction[choice]
+            else:
+                return
+        else:
+            cTypeFilter = None
+
         items = selectedItems if selectedItems else [{'entry': item} for item in thelist]
         if len(items) > 0:
             dialogeBG = xbmcgui.DialogProgressBG()
@@ -47,14 +60,16 @@ def strm_update(selectedItems=None, actor=0):
 
             iUrls = 0
             splittedEntries = []
-            if not selectedItems:
-                for item in items:
-                    splits = item.get('entry').split('|')
-                    iUrls += len(splits[2].split('<next>'))
-                    splittedEntries.append(splits)
-            else:
-                iUrls = len(selectedItems)
-                splittedEntries = [[item.get('entry').split('|')[0], item.get('entry').split('|')[1], item.get('url')] for item in selectedItems]
+            for item in items:
+                splits = item.get('entry').split('|')
+                if cTypeFilter and not re.findall(cTypeFilter, splits[0]):
+                    continue
+                iUrls += len(splits[2].split('<next>'))
+                splittedEntries.append(splits)
+
+            if iUrls == 0:
+                dialogeBG.close()
+                return
 
             step = j = 100 / iUrls
             for splittedEntry in splittedEntries:
@@ -62,16 +77,16 @@ def strm_update(selectedItems=None, actor=0):
 
                 urls = url.split('<next>')
                 for url in urls:
-                    plugin_id = re.search('plugin:\/\/([^\/\?]*)', url)
+                    name_orig, plugin_id = stringUtils.parseMediaListURL(url)
                     if plugin_id:
-                        module = moduleUtil.getModule(plugin_id.group(1))
+                        module = moduleUtil.getModule(plugin_id)
                         if module and hasattr(module, 'update'):
-                            url = module.update(name, url, 'video', thelist)
+                            plugin_id = module.update(name, plugin_id, 'video', thelist)
 
                     dialogeBG.update(j, "OSMOSIS total update process: " , "Current Item: %s Items left: %d" % (stringUtils.getStrmname(name), iUrls))
                     j += step
 
-                    create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType)
+                    create.fillPluginItems(plugin_id, strm=True, strm_name=name, strm_type=cType, name_orig=name_orig)
                     iUrls -= 1
 
             dialogeBG.close()

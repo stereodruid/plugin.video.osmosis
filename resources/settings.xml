@@ -23,6 +23,8 @@
 		<setting label="31003" type="bool" id="folder_medialistentry_movie" default="true"/>
 		<setting label="31005" type="bool" id="folder_movie" default="false"/>
 		<setting label="31006" type="enum" id="search_thetvdb" lvalues='31101|31102|31103' default="0"/>
+		<setting label="31007" type="bool" id="confirm_user_entries" default="false" visible="gt(-1,0)"/>
+		<setting label="31008" type="number" id="tvdb_dialog_autoclose_time" default="60" visible="gt(-2,0)"/>
 	</category>
 	<category label="33000">
 		<setting label="33001" type="bool" id="Update_at_startup" default="true"/>

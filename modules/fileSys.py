@@ -75,13 +75,13 @@ def makeSTRM(filepath, filename, url):
 #            else:
 #                return fullpath
 
-    if fullpath.find('Audio') > 0:
-        try:
-            if xbmcvfs.exists(fullpath.decode("utf-8")):
-                return fullpath, None
-        except:
-            if xbmcvfs.exists(fullpath.encode("utf-8")):
-                return fullpath, None
+#    if fullpath.find('Audio') > 0:
+#        try:
+#            if xbmcvfs.exists(fullpath.decode("utf-8")):
+#                return fullpath, None
+#        except:
+#            if xbmcvfs.exists(fullpath.encode("utf-8")):
+#                return fullpath, None
 
     try:
         fullpath = fullpath.decode("utf-8")
@@ -160,8 +160,25 @@ def writeMediaList(url, name, cType='Other', cleanName=True, albumartist=None):
             splits = entry.strip().split('|')
             if stringUtils.getStrmname(splits[1]).lower() == stringUtils.getStrmname(name).lower():
                 existInList = True
-                if splits[2].find(url) == -1:
+                splits[0] = cType
+                splits[1] = name
+                plugin = re.sub('.*(plugin:\/\/[^<]*)', '\g<1>', url)
+                name_orig = re.sub('(?:name_orig=([^;]*);)(plugin:\/\/[^<]*)', '\g<1>', url)
+
+                replaced = False
+                splits2 = filter(None, splits[2].split('<next>'))
+                for s, split2 in enumerate(splits2):
+                    split2_plugin = re.sub('.*(plugin:\/\/[^<]*)', '\g<1>', split2)
+                    split2_name_orig = re.sub('(?:name_orig=([^;]*);)(plugin:\/\/[^<]*)', '\g<1>', split2)
+                    if re.sub('%26OfferGroups%3DB0043YVHMY', '', split2_plugin) == re.sub('%26OfferGroups%3DB0043YVHMY', '', plugin) or split2_name_orig == name_orig:
+                        splits2[s] = url
+                        replaced = True
+                if replaced == True:
+                    splits[2] = '<next>'.join(set(splits2))
+                    utils.addon_log_notice('writeMediaList: replace %s in %s' % (name_orig, name))
+                else:
                     splits[2] = '{0}<next>{1}'.format(splits[2], url) if splits[2].strip() != '' else '{0}'.format(url)
+                    utils.addon_log_notice('writeMediaList: append %s to %s' % (name_orig, name))
                 if albumartist:
                     if len(splits) == 5:
                         splits[4] = albumartist
@@ -256,14 +273,13 @@ def removeMediaList(delList):
             for item in delList:
                 if entry.find(item.get('url')) > -1:
                     if entry.find('<next>') > -1:
+                        entry = entry.replace('name_orig=%s;%s' % (item.get('name_orig',''), item.get('url')), '')
                         entry = entry.replace(item.get('url'), '')
                         splits = entry.split('|')
-                        if splits[2].startswith('<next>') or splits[2].endswith('<next>'):
-                            if splits[2].startswith('<next>'):
-                                splits[2] = splits[2][6:]
-                            elif splits[2].endswith('<next>'):
-                                splits[2] = splits[2][0:len(splits[2])-6]
-                            entry = ('|'.join(splits))
+                        splits[2]='<next>'.join(list(filter(None, splits[2].split('<next>'))))
+                        entry = ('|'.join(splits))
+                        if len(splits[2]) == 0:
+                            additem = False
                     else:
                         additem = False
                         break;
@@ -306,15 +322,22 @@ def delNotInMediaList(delList):
             utils.addon_log("remove: %s" % path)
 
             deleteFromFileSystem = True
-            streams = None
-            if type.lower().find('tv-shows') > -1 or type.lower().find('movies') > -1:
-                streams = [stream[0] for stream in kodiDB.delStream(path[len(STRM_LOC) + 1:len(path)], stringUtils.getProviderId(item.get('url')).get('providerId'), type.lower().find('tv-shows') > -1)]
-                if len(streams) > 0 or path.endswith(stringUtils.completePath(type)):
+            for split2 in splits[2].split('<next>'):
+                name_orig, plugin_id = stringUtils.parseMediaListURL(split2)
+                streams = None
+                if type.lower().find('tv-shows') > -1 or type.lower().find('movies') > -1:
                     deleteFromFileSystem = False
+                    streams = [stream[0] for stream in kodiDB.delStream(path[len(STRM_LOC) + 1:len(path)], stringUtils.getProviderId(item.get('url')).get('providerId'), type.lower().find('tv-shows') > -1,name_orig)]
+                    if len(streams) > 0:
+                        dirs, files = xbmcvfs.listdir(path)
+                        for file in files:
+                            if file.decode('utf-8').replace('.strm', '') in streams:
+                                utils.addon_log_notice('delNotInMediaList: delete file = "%s"' % os.path.join(path, file))
+                                xbmcvfs.delete(xbmc.translatePath(os.path.join(path, file)))
                     dirs, files = xbmcvfs.listdir(path)
-                    for file in files:
-                        if file.lower().replace('.strm', '') not in streams:
-                            xbmcvfs.delete(xbmc.translatePath(os.path.join(path, file)))
+                    if not files and not dirs:
+                        deleteFromFileSystem = True
+                        utils.addon_log_notice('delNotInMediaList: delete empty directory = %s' % path)
 
             if deleteFromFileSystem:
                 xbmcvfs.rmdir(path, force=True)
