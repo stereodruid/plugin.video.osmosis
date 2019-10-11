@@ -467,7 +467,6 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
     lang = None
     if strm_type.lower().find('other') == -1:
         lang = strm_type[strm_type.find('(') + 1:strm_type.find(')')]
-    showtitle_tvdb = None
     showtitle = stringUtils.getStrmname(strm_name)
     if isinstance (showtitle,str):
         showtitle = showtitle.decode("utf-8")
@@ -475,7 +474,6 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
         show_data = tvdb.getShowByName(showtitle, lang)
         if show_data:
             showtitle = show_data.get('seriesName', showtitle)
-            showtitle_tvdb = showtitle
 
     while pagesDone < int(PAGINGTVshows):
         strm_type = strm_type.replace('Shows-Collection', 'TV-Shows')
@@ -589,8 +587,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
                                             episodesList[index-split_episode].get('episode',None),
                                             episodesList[index-split_episode].get('episodeName',None)))
                     split_episode=0
-            if showtitle_tvdb:
-                episodesList[index]['showtitle'] = showtitle_tvdb
+            episodesList[index]['showtitle'] = showtitle
             season_prev=episode.get('season')
             episode_prev=episode.get('episode')
 
@@ -628,8 +625,8 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0, name_orig='
     provider = stringUtils.getProviderId(file)
 
     if showtitle is not None and showtitle != "" and strm_type != "":
-        path = os.path.join(strm_type, stringUtils.cleanStrmFilesys(showtitle)) if strm_name.find('++RenamedTitle++') == -1 else os.path.join(strm_type, stringUtils.cleanStrmFilesys(stringUtils.getStrmname(strm_name)))
-        episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': showtitle, 'name_orig': name_orig, 'provider': provider.get('providerId')} if strm_name.find('++RenamedTitle++') == -1 else {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': stringUtils.getStrmname(strm_name), 'name_orig': name_orig, 'provider': provider.get('providerId')}
+        path = os.path.join(strm_type, stringUtils.cleanStrmFilesys(showtitle))
+        episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': showtitle, 'name_orig': name_orig, 'provider': provider.get('providerId')}
 
         if addon.getSetting('Link_Type') == '0':
             episode = kodiDB.writeShow(episode)
