@@ -133,7 +133,6 @@ def getTVShowFromTVDBID(tvdb_id, lang):
     res = getJsonFromTVDB(api_baseurl % 'series/%s' % tvdb_id, lang)
     if res.status_code == 200 and len(res.json().get('data')) > 0:
         show_data=res.json().get('data')
-        setTVShowCache(showName, show_data)
     utils.addon_log('tvdb getTVShowFromTVDBID: show_data = %s' % show_data)
     return show_data
 
