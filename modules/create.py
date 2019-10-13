@@ -178,7 +178,7 @@ def addToMedialist(params):
             xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
         choice = guiTools.selectDialog('Title for MediaList entry: %s' % name_orig, selectAction)
     else:
-        choice = 0
+        choice = params.get('choice', 0)
         name = params.get('name')
         name_orig = params.get('name_orig')
 
@@ -295,6 +295,40 @@ def addMultipleSeasonToMediaList(params):
                 if seasonList and len(seasonList) > 0:
                     for season in seasonList:
                         addToMedialist(season)
+
+def renameMediaListEntry(selectedItems):
+    for item in selectedItems:
+        splits = item.get('entry').split('|')
+        cType = splits[0]
+        name_old = stringUtils.getStrmname(splits[1])
+        choice = 1
+        if cType.find('TV-Shows') != -1:
+            selectAction = ['Get Title from TVDB', 'Enter new Title']
+            choice = guiTools.selectDialog('Rename MediaList entry: %s' % name_old, selectAction)
+        if choice != -1:
+            if choice == 1:
+                name = guiTools.editDialog(name_old).strip()
+                name = "{0}++RenamedTitle++".format(name) if name else name
+            elif choice == 0:
+                show_data = tvdb.getShowByName(name_old,  re.sub('TV-Shows\((.*)\)', r'\g<1>', cType))
+                if show_data:
+                    name = show_data.get('seriesName', name_old).encode('utf-8')
+            if name and name_old != name:
+                utils.addon_log_notice('renameMediaListEntry: Use new name "%s" for "%s"' % (name, name_old))
+                item['name_new'] = name
+                removeAndReaddMedialistEntry([item])
+
+def removeAndReaddMedialistEntry(selectedItems):
+    for item in selectedItems:
+        splits = item.get('entry').split('|')
+        cType = splits[0]
+        fileSys.removeMediaList([item])
+        name = item.get('name_new', splits[1])
+        urls = splits[2].split('<next>')
+        for url in urls:
+            name_orig, plugin_id = stringUtils.parseMediaListURL(url)
+            params={'cType': cType, 'name': name, 'name_orig': name_orig, 'url': plugin_id, 'choice': 99, 'noninteractive': True}
+            addToMedialist(params)
 
 
 def removeItemsFromMediaList(action='list'):
