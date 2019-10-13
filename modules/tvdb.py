@@ -85,6 +85,9 @@ def getShowByName(showName, lang):
                         selected = -1
                     if selected >= delta_selected:
                         show_data=showInfoList[selected-delta_selected]
+                        if lang_tvdb == 'en' and lang != 'en':
+                            show_data_orig_lang = getTVShowFromTVDBID(show_data.get('id'), lang)
+                            show_data = show_data_orig_lang if show_data_orig_lang else show_data
                         break
                     if selected == 0:
                         break

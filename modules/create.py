@@ -219,6 +219,13 @@ def addToMedialist(params):
             if cType != -1:
                 if params.get('filetype', 'directory') == 'file':
                     url += '&playMode=play'
+                if (SEARCH_THETVDB == 2 and cType.find('TV-Shows') != -1 and choice == 0):
+                    show_data = tvdb.getShowByName(name,  re.sub('TV-Shows\((.*)\)', r'\g<1>', cType))
+                    if show_data:
+                        showtitle_tvdb = show_data.get('seriesName', name).encode('utf-8')
+                        if showtitle_tvdb != name:
+                            utils.addon_log_notice('addToMedialist: Use TVDB name "%s" for "%s"' % (showtitle_tvdb, name))
+                            name = showtitle_tvdb
                 fileSys.writeMediaList('name_orig=%s;%s' % (name_orig, url), name, cType)
                 xbmcgui.Dialog().notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False)
 
@@ -470,10 +477,6 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
     showtitle = stringUtils.getStrmname(strm_name)
     if isinstance (showtitle,str):
         showtitle = showtitle.decode("utf-8")
-    if (SEARCH_THETVDB == 2):
-        show_data = tvdb.getShowByName(showtitle, lang)
-        if show_data:
-            showtitle = show_data.get('seriesName', showtitle)
 
     while pagesDone < int(PAGINGTVshows):
         strm_type = strm_type.replace('Shows-Collection', 'TV-Shows')
