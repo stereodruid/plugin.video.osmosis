@@ -315,12 +315,20 @@ def renameMediaListEntry(selectedItems):
                     name = show_data.get('seriesName', name_old).encode('utf-8')
             if name and name_old != name:
                 utils.addon_log_notice('renameMediaListEntry: Use new name "%s" for "%s"' % (name, name_old))
-                fileSys.removeMediaList([item])
-                urls = splits[2].split('<next>')
-                for url in urls:
-                    name_orig, plugin_id = stringUtils.parseMediaListURL(url)
-                    params={'cType': cType, 'name': name, 'name_orig': name_orig, 'url': plugin_id, 'choice': 99, 'noninteractive': True}
-                    addToMedialist(params)
+                item['name_new'] = name
+                removeAndReaddMedialistEntry([item])
+
+def removeAndReaddMedialistEntry(selectedItems):
+    for item in selectedItems:
+        splits = item.get('entry').split('|')
+        cType = splits[0]
+        fileSys.removeMediaList([item])
+        name = item.get('name_new', splits[1])
+        urls = splits[2].split('<next>')
+        for url in urls:
+            name_orig, plugin_id = stringUtils.parseMediaListURL(url)
+            params={'cType': cType, 'name': name, 'name_orig': name_orig, 'url': plugin_id, 'choice': 99, 'noninteractive': True}
+            addToMedialist(params)
 
 
 def removeItemsFromMediaList(action='list'):
