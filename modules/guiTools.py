@@ -105,6 +105,7 @@ def getSources():
     addDir('Music Plugins', 'audio', 1, art)
     addItem('Update', 4, updateIcon)
     addFunction('Update all')
+    addItem('Rename', 41, updateIcon)
     addItem("Remove Media", 5, iconRemove)
     addItem('Remove Shows from TVDB cache', 51, iconRemove )
     addItem('Remove all Shows from TVDB cache', 52, iconRemove )
