@@ -104,6 +104,7 @@ def getSources():
     addDir('Video Plugins', 'video', 1, art)
     addDir('Music Plugins', 'audio', 1, art)
     addItem('Update', 4, updateIcon)
+    addItem('Update (with removal of unused .strm files)', 42, updateIcon)
     addFunction('Update all')
     addItem('Rename', 41, updateIcon)
     addItem("Remove Media", 5, iconRemove)

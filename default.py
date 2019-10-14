@@ -78,6 +78,10 @@ if __name__ == '__main__':
         selectedItems = guiTools.mediaListDialog(header_prefix='Rename', expand = False)
         if selectedItems and len(selectedItems) > 0:
             create.renameMediaListEntry(selectedItems)
+    elif mode == 42:
+        selectedItems = guiTools.mediaListDialog(header_prefix='Update')
+        if selectedItems and len(selectedItems) > 0:
+            create.removeAndReaddMedialistEntry(selectedItems)
     elif mode == 5:
         create.removeItemsFromMediaList('list')
     elif mode == 51:
