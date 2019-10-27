@@ -48,6 +48,7 @@ def writeSTRM(path, file, url):
 
 def makeSTRM(filepath, filename, url):
     utils.addon_log('makeSTRM')
+    name_orig, url = stringUtils.parseMediaListURL(url)
 
     mtime = None
 
