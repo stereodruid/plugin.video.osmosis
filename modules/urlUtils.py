@@ -15,18 +15,11 @@
 
 # -*- coding: utf-8 -*-
 
-import SimpleDownloader as downloader
 import urllib
 import xbmcaddon
 
 addon = xbmcaddon.Addon()
 addon_id = addon.getAddonInfo('id')
-downloader = downloader.SimpleDownloader()
-
-
-def downloadThumb(url, imageType, path):
-    params = { "url": url   , "download_path": path, "Title": imageType }
-    downloader.download(imageType + ".tbn", params)
 
 
 def stripUnquoteURL(url):

@@ -1,5 +1,6 @@
 1.3.6
   lars-a   Various improvements (tvdb, medialist handling etc.)
+  Maven85  Removed script.module.simple.downloader
 1.3.5
   Maven85  Remove dialog: remove single provider from medialist & entry from OSMOSIS' database
   Maven85  Possibility to select the entry from medialist in the creation dialog

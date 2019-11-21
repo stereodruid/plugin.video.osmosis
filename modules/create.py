@@ -43,6 +43,7 @@ thisDialog = sys.modules[__name__]
 thisDialog.dialogeBG = None
 thisDialog.dialoge = None
 
+
 def initialize_DialogBG(mess1, mess2, barType="BG"):
     if barType == "BG":
         if not thisDialog.dialogeBG:
@@ -53,6 +54,7 @@ def initialize_DialogBG(mess1, mess2, barType="BG"):
         if not thisDialog.dialoge:
             thisDialog.dialoge = xbmcgui.DialogProgress()
             thisDialog.dialoge.create("OSMOSIS: " + mess1 + ": " , " " + mess2)
+
 
 def fillPlugins(cType='video'):
     json_query = ('{"jsonrpc":"2.0","method":"Addons.GetAddons","params":{"type":"xbmc.addon.%s","properties":["name","path","thumbnail","description","fanart","summary", "extrainfo", "enabled"]}, "id": 1 }' % cType)
@@ -69,6 +71,7 @@ def fillPlugins(cType='video'):
             art = {'thumb': addon['thumbnail'], 'fanart': addon['fanart']}
             guiTools.addDir(addon['name'], 'plugin://' + addon['addonid'], 101, art, addon['description'], cType, 'date', 'credits')
 
+
 def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None', name_parent='', name_orig=''):
     details = []
     name_orig_from_url, plugin_id = stringUtils.parseMediaListURL(url)
@@ -77,18 +80,18 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
     if plugin_id.find("playMode=play") == -1:
         if not file_type:
             details = jsonUtils.requestList(plugin_id, media_type).get('files', [])
-            retry_count=1
+            retry_count = 1
             while len(details) == 0 and retry_count <= 3:
                 utils.addon_log('requestList: try=%d data = %s)' % (retry_count, details))
                 details = jsonUtils.requestList(plugin_id, media_type).get('files', [])
-                retry_count=retry_count+1
+                retry_count = retry_count + 1
         else:
             details = jsonUtils.requestItem(plugin_id, media_type).get('files', [])
-            retry_count=1
+            retry_count = 1
             while len(details) == 0 and retry_count <= 3:
                 utils.addon_log('requestItem: try=%d data = %s)' % (retry_count, details))
                 details = jsonUtils.requestItem(plugin_id, media_type).get('files', [])
-                retry_count=retry_count+1
+                retry_count = retry_count + 1
     else:
         details.append("palyableSingleMedia")
         details.append(plugin_id)
@@ -150,9 +153,10 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             if strm:
                 fillPluginItems(file, media_type, file_type, strm, label, strm_type, name_orig=name_orig)
             else:
-                if isinstance (name_parent,str):
-                    name_parent=name_parent.decode('utf-8')
+                if isinstance (name_parent, str):
+                    name_parent = name_parent.decode('utf-8')
                 guiTools.addDir(label, file, 101, art, plot, '', '', '', name_parent=name_parent, type=detail.get('type', None))
+
 
 def addToMedialist(params):
     # A dialog to rename the Change Title for Folder and MediaList entry:
@@ -167,7 +171,7 @@ def addToMedialist(params):
         if name == '':
             name = params.get('name_parent')
             name_orig = '%s - %s' % (name, name_orig)
-        if params.get('type', None) == 'movie' and params.get('year',  None):
+        if params.get('type', None) == 'movie' and params.get('year', None):
             name = name + ' (%s)' % params.get('year', None)
         selectAction = ['Continue with original Title: %s' % name, 'Rename Title', 'Get Title from Medialist']
         if not fileSys.writeTutList("select:Rename"):
@@ -182,7 +186,6 @@ def addToMedialist(params):
         name = params.get('name')
         name_orig = params.get('name_orig')
 
-
     if choice != -1:
         cType = params.get('cType', None)
         if choice == 1 or name == None or name == '':
@@ -190,12 +193,12 @@ def addToMedialist(params):
             name = "{0}++RenamedTitle++".format(name) if name else name
 
         if choice == 2:
-            cTypeFilter=None
+            cTypeFilter = None
             if tvshow_detected or params.get('type', None) == 'tvshow':
-                cTypeFilter='TV-Shows'
+                cTypeFilter = 'TV-Shows'
             elif params.get('type', None) == 'movie':
-                cTypeFilter='Movies'
-            item = guiTools.mediaListDialog(False, False, header_prefix='Get Title from Medialist for %s' % name_orig, cTypeFilter=cTypeFilter,preselect_name=name)
+                cTypeFilter = 'Movies'
+            item = guiTools.mediaListDialog(False, False, header_prefix='Get Title from Medialist for %s' % name_orig, cTypeFilter=cTypeFilter, preselect_name=name)
             splits = item.get('entry').split('|') if item else None
             name = splits[1] if splits else None
             cType = splits[0] if splits else None
@@ -220,7 +223,7 @@ def addToMedialist(params):
                 if params.get('filetype', 'directory') == 'file':
                     url += '&playMode=play'
                 if (SEARCH_THETVDB == 2 and cType.find('TV-Shows') != -1 and choice == 0):
-                    show_data = tvdb.getShowByName(name,  re.sub('TV-Shows\((.*)\)', r'\g<1>', cType))
+                    show_data = tvdb.getShowByName(name, re.sub('TV-Shows\((.*)\)', r'\g<1>', cType))
                     if show_data:
                         showtitle_tvdb = show_data.get('seriesName', name).encode('utf-8')
                         if showtitle_tvdb != name:
@@ -239,6 +242,7 @@ def addToMedialist(params):
                     pass
                 fillPluginItems(url, strm=True, strm_name=name, strm_type=cType, name_orig=name_orig)
                 xbmcgui.Dialog().notification('Writing items...', "Done", xbmcgui.NOTIFICATION_INFO, 5000, False)
+
 
 def addMultipleSeasonToMediaList(params):
     name = params.get('name')
@@ -262,7 +266,7 @@ def addMultipleSeasonToMediaList(params):
             splits = item.get('entry').split('|') if item else None
             name = splits[1] if splits else None
             cType = splits[0] if splits else None
-        utils.addon_log_notice('addMultipleSeasonToMediaList: name = %s, cType = %s' % (name,cType))
+        utils.addon_log_notice('addMultipleSeasonToMediaList: name = %s, cType = %s' % (name, cType))
         if name:
 
             if not cType:
@@ -270,18 +274,18 @@ def addMultipleSeasonToMediaList(params):
 
             if cType != -1:
                 details = jsonUtils.requestList(url, 'video').get('files', [])
-                retry_count=1
+                retry_count = 1
                 while len(details) == 0 and retry_count <= 3:
                     utils.addon_log('requestList: try=%d data = %s)' % (retry_count, details))
                     details = jsonUtils.requestList(url, 'video').get('files', [])
-                    retry_count=retry_count+1
-                seasonList=[]
+                    retry_count = retry_count + 1
+                seasonList = []
                 for detail in details:
                     file = detail['file'].replace("\\\\", "\\")
                     filetype = detail['filetype']
                     label = detail['label']
                     if label.find('COLOR') != -1:
-                        label=stringUtils.cleanLabels(label) + ' (*)'
+                        label = stringUtils.cleanLabels(label) + ' (*)'
                     showtitle = detail['showtitle']
                     name_orig = '%s - %s' % (showtitle, label)
                     if filetype == 'directory':
@@ -295,6 +299,7 @@ def addMultipleSeasonToMediaList(params):
                 if seasonList and len(seasonList) > 0:
                     for season in seasonList:
                         addToMedialist(season)
+
 
 def renameMediaListEntry(selectedItems):
     for item in selectedItems:
@@ -310,13 +315,14 @@ def renameMediaListEntry(selectedItems):
                 name = guiTools.editDialog(name_old).strip()
                 name = "{0}++RenamedTitle++".format(name) if name else name
             elif choice == 0:
-                show_data = tvdb.getShowByName(name_old,  re.sub('TV-Shows\((.*)\)', r'\g<1>', cType))
+                show_data = tvdb.getShowByName(name_old, re.sub('TV-Shows\((.*)\)', r'\g<1>', cType))
                 if show_data:
                     name = show_data.get('seriesName', name_old).encode('utf-8')
             if name and name_old != name:
                 utils.addon_log_notice('renameMediaListEntry: Use new name "%s" for "%s"' % (name, name_old))
                 item['name_new'] = name
                 removeAndReaddMedialistEntry([item])
+
 
 def removeAndReaddMedialistEntry(selectedItems):
     for item in selectedItems:
@@ -327,7 +333,7 @@ def removeAndReaddMedialistEntry(selectedItems):
         urls = splits[2].split('<next>')
         for url in urls:
             name_orig, plugin_id = stringUtils.parseMediaListURL(url)
-            params={'cType': cType, 'name': name, 'name_orig': name_orig, 'url': plugin_id, 'choice': 99, 'noninteractive': True}
+            params = {'cType': cType, 'name': name, 'name_orig': name_orig, 'url': plugin_id, 'choice': 99, 'noninteractive': True}
             addToMedialist(params)
 
 
@@ -340,6 +346,7 @@ def removeItemsFromMediaList(action='list'):
         fileSys.removeMediaList(selectedItems)
         selectedLabels = sorted(list(dict.fromkeys([item.get('name') for item in selectedItems])), key=lambda k: k.lower())
         xbmcgui.Dialog().notification("Finished deleting:", "{0}".format(", ".join(label for label in selectedLabels)))
+
 
 def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
     strm_name = stringUtils.getStrmname(strm_name)
@@ -404,12 +411,6 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
             if pagesDone < int(PAGINGalbums) and len(dirList) > 0:
                 contentList = [item for sublist in dirList for item in sublist]
                 dirList = []
-
-            if False:
-                try:
-                    urlUtils.downloadThumb(aThumb, album, os.path.join(STRM_LOC, strm_type, artist))
-                except:
-                    pass
         else:
             albumList.append({'path': os.path.join(strm_type, strm_name.decode('utf8'), label).encode('utf8'), 'label': stringUtils.cleanByDictReplacements(label), 'link': link})
             pagesDone = int(PAGINGalbums)
@@ -431,6 +432,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
     thisDialog.dialogeBG.close()
 
     return albumList
+
 
 def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a", name_orig=''):
     movieList = []
@@ -471,11 +473,11 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a", name
             pagesDone += 1
             if filetype != '' and filetype != 'file' and pagesDone < int(PAGINGMovies):
                 contentList = jsonUtils.requestList(file, 'video').get('files', [])
-                retry_count=1
+                retry_count = 1
                 while len(contentList) == 0 and retry_count <= 3:
                     utils.addon_log('requestList: try=%d data = %s)' % (retry_count, details))
                     contentList = jsonUtils.requestList(file, 'video').get('files', [])
-                    retry_count=retry_count+1
+                    retry_count = retry_count + 1
             else:
                 pagesDone = int(PAGINGMovies)
         else:
@@ -501,6 +503,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a", name
 
         j = j + 100 / len(movieList)
 
+
 def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, name_orig=''):
     dirList = []
     episodesList = []
@@ -509,7 +512,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
     if strm_type.lower().find('other') == -1:
         lang = strm_type[strm_type.find('(') + 1:strm_type.find(')')]
     showtitle = stringUtils.getStrmname(strm_name)
-    if isinstance (showtitle,str):
+    if isinstance (showtitle, str):
         showtitle = showtitle.decode("utf-8")
 
     while pagesDone < int(PAGINGTVshows):
@@ -521,12 +524,12 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
 
             if filetype:
                 if filetype == 'directory':
-                    retry_count=1
-                    json_reply=jsonUtils.requestList(file, 'video').get('files', [])
+                    retry_count = 1
+                    json_reply = jsonUtils.requestList(file, 'video').get('files', [])
                     while len(json_reply) == 0 and retry_count <= 3:
                         utils.addon_log('requestList: try=%d data = %s)' % (retry_count, json_reply))
-                        json_reply=jsonUtils.requestList(file, 'video').get('files', [])
-                        retry_count=retry_count+1
+                        json_reply = jsonUtils.requestList(file, 'video').get('files', [])
+                        retry_count = retry_count + 1
                     dirList.append(json_reply)
                     continue
                 elif filetype == 'file':
@@ -547,15 +550,15 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
                             if data:
                                 detailInfo['season'] = data.get('season')
                                 detailInfo['episode'] = data.get('episode')
-                                detailInfo['episodeName'] = data.get('episodeName',None)
+                                detailInfo['episodeName'] = data.get('episodeName', None)
                                 utils.addon_log_notice('found tvdb entry for "%s": "S%02dE%02d - %s" matched to "S%02dE%02d - %s"' %
                                                        (showtitle, episodeseason, episode, episodetitle,
-                                                       detailInfo['season'], detailInfo['episode'], detailInfo['episodeName'] ))
+                                                       detailInfo['season'], detailInfo['episode'], detailInfo['episodeName']))
                             else:
                                 detailInfo['season'] = -1
                                 detailInfo['episode'] = -1
                                 utils.addon_log_notice('no tvdb entry found for "%s": "S%02dE%02d - %s"' %
-                                                       (showtitle, episodeseason, episode, episodetitle ))
+                                                       (showtitle, episodeseason, episode, episodetitle))
 
                     get_title_with_OV = True
                     if HIDE_title_in_OV == "true":
@@ -569,21 +572,21 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
                             if  episodetitle.find('Teil 1 und 2') >= 0 or episodetitle.find('Parts 1 & 2') >= 0 :
                                 utils.addon_log_notice('found tvdb entry for "%s": "S%02dE%02d - %s" (multi) matched to "S%02dE%02d - %s"' %
                                     (showtitle, episodeseason, episode, episodetitle,
-                                    detailInfo['season'], detailInfo['episode'], detailInfo['episodeName'] ))
-                                data = tvdb.getEpisodeByName(showtitle, episodeseason, episode+1, re.sub('(Teil 1 und 2|Parts 1 & 2)', '(2)', eptitle), lang)
+                                    detailInfo['season'], detailInfo['episode'], detailInfo['episodeName']))
+                                data = tvdb.getEpisodeByName(showtitle, episodeseason, episode + 1, re.sub('(Teil 1 und 2|Parts 1 & 2)', '(2)', eptitle), lang)
                                 if data:
                                     utils.addon_log_notice('found tvdb entry for "%s": "S%02dE%02d - %s" (multi) matched to "S%02dE%02d - %s"' %
                                         (showtitle, episodeseason, episode, episodetitle,
-                                        detailInfo['season'], detailInfo['episode']+1, data.get('episodeName',None) ))
+                                        detailInfo['season'], detailInfo['episode'] + 1, data.get('episodeName', None)))
                                 detailInfo['multi_episode'] = True
-                                detailInfo['episode']=[detailInfo['episode'], detailInfo['episode']+1]
+                                detailInfo['episode'] = [detailInfo['episode'], detailInfo['episode'] + 1]
 
                             episodetitles = filter(None, re.split(' / | , ', episodetitle))
                             if episodetitles[0] != episodetitle and not re.search(' *(-|\(|:)* *([tT]eil|[pP]art|[pP]t\.) (\d+|\w+)\)*', episodetitle):
                                 utils.addon_log_notice('check multi episode "%s": "S%02dE%02d - %s"' % (showtitle, episodeseason, episode, episodetitle))
-                                seasonm=[]
-                                episodem=[]
-                                episodeNamem=[]
+                                seasonm = []
+                                episodem = []
+                                episodeNamem = []
                                 for e, eptitle in enumerate(episodetitles):
                                     data = tvdb.getEpisodeByName(showtitle, episodeseason, episode, eptitle, lang)
                                     if data:
@@ -593,7 +596,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
 
                                 if all(x == seasonm[0] for x in seasonm) and len(set(episodem)) == len(episodetitles):
                                     detailInfo['multi_episode'] = True
-                                    detailInfo['episode']=episodem
+                                    detailInfo['episode'] = episodem
                                     for e, ep in enumerate(episodem):
                                         utils.addon_log_notice('found tvdb entry for "%s": "S%02dE%02d - %s" (multi) matched to "S%02dE%02d - %s"' %
                                             (showtitle, episodeseason, episode, episodetitle,
@@ -607,26 +610,26 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
         else:
             thisDialog.dialogeBG.update(int(step), "Page: %d %s" % (pagesDone, stringUtils.getStrmname(strm_name)))
 
-        split_episode=0
+        split_episode = 0
         for index, episode in enumerate(episodesList):
             if index > 0:
                 if season_prev == episode.get('season') and episode_prev == episode.get('episode'):
-                    episodesList[index-1]['split_episode']=split_episode+1
-                    episodesList[index]['split_episode']=split_episode+2
-                    split_episode=split_episode+1
+                    episodesList[index - 1]['split_episode'] = split_episode + 1
+                    episodesList[index]['split_episode'] = split_episode + 2
+                    split_episode = split_episode + 1
                 else:
                     if split_episode > 0:
                         split_episode_names = []
-                        for s in range(0, split_episode+1):
-                            split_episode_names.insert(0, episodesList[index-s-1]['title'])
+                        for s in range(0, split_episode + 1):
+                            split_episode_names.insert(0, episodesList[index - s - 1]['title'])
                         utils.addon_log_notice('Split Episode for %s: "%s" matched to "S%02dE%02d - %s"' % (showtitle, ', '.join(split_episode_names),
-                                            episodesList[index-split_episode].get('season',None),
-                                            episodesList[index-split_episode].get('episode',None),
-                                            episodesList[index-split_episode].get('episodeName',None)))
-                    split_episode=0
+                                            episodesList[index - split_episode].get('season', None),
+                                            episodesList[index - split_episode].get('episode', None),
+                                            episodesList[index - split_episode].get('episodeName', None)))
+                    split_episode = 0
             episodesList[index]['showtitle'] = showtitle
-            season_prev=episode.get('season')
-            episode_prev=episode.get('episode')
+            season_prev = episode.get('season')
+            episode_prev = episode.get('episode')
 
         for index, episode in enumerate(episodesList):
             pagesDone = getEpisode(episode, strm_name, strm_type, pagesDone=pagesDone, name_orig=name_orig)
@@ -638,6 +641,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
         if pagesDone < int(PAGINGTVshows) and len(dirList) > 0:
             showList = [item for sublist in dirList for item in sublist]
             dirList = []
+
 
 def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0, name_orig=''):
     episode = None
@@ -655,7 +659,7 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0, name_orig='
         strSeasonEpisode = 's%de%d.%d' % (season, episode, split_episode)
     else:
         if multi_episode:
-            strSeasonEpisode = ('s%de' % season) + '-'.join(map(str,episode))
+            strSeasonEpisode = ('s%de' % season) + '-'.join(map(str, episode))
         else:
             strSeasonEpisode = 's%de%d' % (season, episode)
     showtitle = episode_item.get('showtitle', None).encode("utf-8")
