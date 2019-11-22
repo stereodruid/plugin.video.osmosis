@@ -14,20 +14,21 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 # -*- coding: utf-8 -*-
-import os, re
-import utils
-import xbmcaddon, xbmc
-from . import moduleUtil
 
-try:
-    import json
-except:
-    import simplejson as json
+from __future__ import unicode_literals
+from kodi_six.utils import py2_encode
+import os, re
+import xbmcaddon, xbmc
+
+import utils
+from . import moduleUtil
+from . import jsonUtils
 
 addon = xbmcaddon.Addon()
 folder_medialistentry_movie = addon.getSetting('folder_medialistentry_movie')
 folder_movie = addon.getSetting('folder_movie')
 addonList = {}
+
 
 def cleanString(string):
     newstr = newstr.replace('&', '&amp;')
@@ -35,12 +36,14 @@ def cleanString(string):
     newstr = newstr.replace('<', '&lt;')
     return newstr
 
+
 def uncleanString(string):
     newstr = string
     newstr = newstr.replace('&amp;', '&')
     newstr = newstr.replace('&gt;', '>')
     newstr = newstr.replace('&lt;', '<')
     return newstr
+
 
 def cleanLabels(text, formater=''):
     dictresub = {'\[COLOR (.+?)\]' : '', '\[/COLOR\]' : '', '\[COLOR=(.+?)\]' : '', '\[color (.+?)\]': '',
@@ -79,6 +82,7 @@ def cleanLabels(text, formater=''):
 
     return text.strip()
 
+
 def cleanStrms(text, formater=''):
     text = text.replace('Full Episodes', '')
     if formater == 'title':
@@ -91,8 +95,10 @@ def cleanStrms(text, formater=''):
         text = text
     return text
 
+
 def cleanStrmFilesys(string):
     return re.sub('[\/:*?<>|!"]', '', string)
+
 
 def multiRstrip(text):
     replaceRstrip = ['.', ',', '-', '_', ' ', '#', '+', '`', '&', '%', '!', '?']
@@ -100,10 +106,13 @@ def multiRstrip(text):
         text.rstrip(i)
     return text
 
+
 def removeHTMLTAGS(text):
     return re.sub('<[^<]+?>', '', text)
 
+
 def removeNonAscii(s): return "".join(filter(lambda x: ord(x) < 128, s))
+
 
 def unicodetoascii(text):
 
@@ -138,11 +147,14 @@ def unicodetoascii(text):
             )
     return TEXT
 
+
 def removeStringElem(lst, string=''):
     return ([x for x in lst if x != string])
 
+
 def replaceStringElem(lst, old='', new=''):
-    return ([x.replace(old, new) for x in lst])
+    return ([x.replace(old, py2_encode(new)) for x in lst])
+
 
 def cleanByDictReplacements(string):
     dictReplacements = {"'\(\\d+\)'" : '', '()' : '', 'Kinofilme' : '',
@@ -152,6 +164,7 @@ def cleanByDictReplacements(string):
                         '"?"': '', '"':''}
 
     return utils.multiple_reSub(string, dictReplacements)
+
 
 def getMovieStrmPath(strmTypePath, mediaListEntry_name, movie_name=None):
     if folder_medialistentry_movie and folder_medialistentry_movie == 'true':
@@ -164,40 +177,46 @@ def getMovieStrmPath(strmTypePath, mediaListEntry_name, movie_name=None):
         strmTypePath = os.path.join(strmTypePath, movie_name)
     return strmTypePath
 
+
 def getStrmname(strm_name):
-    return strm_name.replace('++RenamedTitle++', '').strip()
+    return strm_name.replace(py2_encode('++RenamedTitle++'), py2_encode('')).strip()
+
 
 def parseMediaListURL(url):
-    match=re.findall('(?:name_orig=([^;]*);)*(plugin:\/\/[^<]*)', url)
+    match = re.findall('(?:name_orig=([^;]*);)*(plugin:\/\/[^<]*)', url)
     name_orig = match[0][0]
     plugin_id = match[0][1]
     return [name_orig, plugin_id]
 
+
 def invCommas(string):
-   string = string.replace("'", "''")
+   string = string.replace(py2_encode("'"), py2_encode("''"))
    return string
+
 
 def cleanTitle(string):
-   string = string.replace(".strm", "")
+   string = string.replace(py2_encode(".strm"), py2_encode(""))
    return string
 
+
 def completePath(filepath):
-    if not filepath.endswith("\\") and not filepath.endswith("/"):
+    if not filepath.endswith(py2_encode("\\")) and not filepath.endswith(py2_encode("/")):
         filepath += os.sep
 
     return filepath
 
+
 def getAddonname(addonid):
     if addonid not in addonList:
-        r = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "id": 1, "method": "Addons.GetAddonDetails", "params": {"addonid": "' + addonid + '", "properties": ["name"]}}')
-        data = json.loads(r)
-        if not "error" in data.keys():
-            addonList[addonid] = data["result"]["addon"]["name"]
+        result = jsonUtils.jsonrpc('Addons.GetAddonDetails', {"addonid": addonid, "properties": ["name"]})
+        if len(result) > 0:
+            addonList[addonid] = result["result"]["addon"]["name"]
             return addonList[addonid]
         else:
             return addonid
     else:
         return addonList[addonid]
+
 
 def getProviderId(url):
     provider = None
@@ -213,6 +232,7 @@ def getProviderId(url):
         provider = {'plugin_id': plugin_id.group(1), 'providerId': providerId}
 
     return provider
+
 
 def getProvidername(url):
     provider = getProviderId(url)

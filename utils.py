@@ -13,34 +13,37 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+from __future__ import unicode_literals
+from kodi_six.utils import py2_decode
 import os
 import re
 import sys
 import datetime
-
-from modules import stringUtils
 import xbmc, xbmcaddon, xbmcvfs
 import xml.etree.ElementTree as ET
+from kodi_six.utils import py2_encode
+
+from resources.lib import stringUtils
 
 addon = xbmcaddon.Addon()
 addon_id = addon.getAddonInfo('id')
 addon_version = addon.getAddonInfo('version')
-STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
+STRM_LOC = py2_decode(xbmc.translatePath(addon.getSetting('STRM_LOC')))
 
 
 #***************************************************************************************
 # Python Header
 # Name:
-# 		replacer
+#         replacer
 # Purpose:
-# 		Replace multiple string elements.
+#         Replace multiple string elements.
 # Call it like this:
 # def multiple_replace(string, *key_values):
 #    return replacer(*key_values)(string)
 # Author:
-# 		stereodruid(J.G.)
+#         stereodruid(J.G.)
 # History:
-# 		0 - init
+#         0 - init
 def replacer(*key_values):
     replace_dict = dict(key_values)
     replacement_function = lambda match: replace_dict[match.group(0)]
@@ -50,13 +53,13 @@ def replacer(*key_values):
 
 #***************************************************************************************
 # Python Header
-# 		multiple_replace
+#         multiple_replace
 # Purpose:
-# 		caller for replacer
+#         caller for replacer
 # Author:
-# 		stereodruid(J.G.)
+#         stereodruid(J.G.)
 # History:
-# 		0 - init
+#         0 - init
 def multiple_replace(string, *key_values):
     return replacer(*key_values)(string.rstrip())
 
@@ -72,7 +75,11 @@ def multiple_replace(string, *key_values):
 # History:
 #        0 - init
 def multiple_reSub(text, dic):
-    for i, j in dic.iteritems():
+    try:
+        iteritems = dic.iteritems()
+    except:
+        iteritems = dic.items()
+    for i, j in iteritems:
         text = re.sub(i, j, text)
     return text.rstrip()
 
@@ -84,7 +91,7 @@ def createSongNFO(filepath, filename , strm_ty='type', artists='none', albums='n
     if not xbmcvfs.exists(filepath):
         xbmcvfs.mkdirs(filepath)
         fullpath = os.path.join(filepath, filename + '.nfo')
-        nfo = open(fullpath, 'w+')
+        nfo = open(fullpath, 'w')
         root = ET.Element('musicvideo')
         xtitle = ET.Element('title')
         xtitle.text = titls
@@ -101,16 +108,13 @@ def createSongNFO(filepath, filename , strm_ty='type', artists='none', albums='n
 
 
 def addon_log(string):
-    if isinstance (string,str):
-        string = string.decode("utf-8")
-    message = "[%s-%s]: %s" % (addon_id, addon_version, string)
-    xbmc.log(message.encode("utf-8"))
+    message = '[{0}-{1}]: {2}'.format(addon_id, addon_version, string)
+    xbmc.log(py2_encode(message))
+
 
 def addon_log_notice(string):
-    if isinstance (string,str):
-        string = string.decode("utf-8")
-    message = "[%s-%s]: %s" % (addon_id, addon_version, string)
-    xbmc.log(message.encode("utf-8"),xbmc.LOGNOTICE)
+    message = "[{0}-{1}]: {2}".format(addon_id, addon_version, string)
+    xbmc.log(py2_encode(message), xbmc.LOGNOTICE)
 
 
 def zeitspanne(sekunden):

@@ -16,7 +16,7 @@ CMD_AUTOCLOSE_DIALOG = 'AlarmClock(closedialog,Dialog.Close(all,true),' \
 def show_modal_dialog(dlg_class, xml, path, **kwargs):
     """
     Show a modal Dialog in the UI.
-    Pass kwargs minutes and/or seconds tohave the dialog automatically
+    Pass kwargs minutes and/or seconds to have the dialog automatically
     close after the specified time.
     """
     dlg = dlg_class(xml, path, 'default', '1080i', **kwargs)
@@ -32,6 +32,7 @@ class Skip(xbmcgui.WindowXMLDialog):
     Dialog for skipping video parts (intro, recap, ...)
     """
 
+
     def __init__(self, *args, **kwargs):
         self.skip_to = kwargs['skip_to']
         self.label = kwargs['label']
@@ -40,9 +41,11 @@ class Skip(xbmcgui.WindowXMLDialog):
         else:
             xbmcgui.WindowXMLDialog.__init__(self, *args, **kwargs)
 
+
     def onInit(self):
         self.action_exitkeys_id = [10, 13]
         self.getControl(6012).setLabel(self.label)
+
 
     def onClick(self, controlID):
         if controlID == 6012:

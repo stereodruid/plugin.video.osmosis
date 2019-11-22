@@ -15,27 +15,32 @@
 
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+from kodi_six.utils import py2_decode
 import os, sys
-import urllib, urlparse
 import time
 import re
-import json
-from modules import create
-from modules import kodiDB
-from modules import fileSys
-from modules import guiTools
-from modules import urlUtils
-from modules import updateAll
-from modules import moduleUtil
-from modules import stringUtils
-from modules import jsonUtils
-from modules import tvdb
-
-import utils
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin
 
+import utils
+from resources.lib import create
+from resources.lib import fileSys
+from resources.lib import guiTools
+from resources.lib import jsonUtils
+from resources.lib import kodiDB
+from resources.lib import moduleUtil
+from resources.lib import stringUtils
+from resources.lib import tvdb
+from resources.lib import updateAll
+from resources.lib import urlUtils
+
+try:
+    import urllib.parse as urlparse
+except:
+    import urlparse
+
 addon = xbmcaddon.Addon()
-home = xbmc.translatePath(addon.getAddonInfo('path').decode('utf-8'))
+home = py2_decode(xbmc.translatePath(addon.getAddonInfo('path')))
 FANART = os.path.join(home, 'fanart.jpg')
 
 if __name__ == '__main__':
@@ -75,13 +80,13 @@ if __name__ == '__main__':
         if selectedItems and len(selectedItems) > 0:
             updateAll.strm_update(selectedItems)
     elif mode == 41:
-        selectedItems = guiTools.mediaListDialog(header_prefix='Rename', expand = False)
+        selectedItems = guiTools.mediaListDialog(header_prefix='Rename', expand=False)
         if selectedItems and len(selectedItems) > 0:
             create.renameMediaListEntry(selectedItems)
     elif mode == 42:
         selectedItems = guiTools.mediaListDialog(header_prefix='Update')
         if selectedItems and len(selectedItems) > 0:
-            create.removeAndReaddMedialistEntry(selectedItems)
+            create.removeAndReadMedialistEntry(selectedItems)
     elif mode == 5:
         create.removeItemsFromMediaList('list')
     elif mode == 51:
@@ -94,19 +99,18 @@ if __name__ == '__main__':
         xbmc.executebuiltin('InstallAddon(service.watchdog)')
         xbmc.executebuiltin("XBMC.Container.Refresh")
     elif mode == 7:
-        json_query = ('{"jsonrpc": "2.0", "method":"Addons.SetAddonEnabled", "params":{ "addonid": "service.watchdog", "enabled": true}, "id": 1 }')
-        jsonUtils.sendJSON(json_query)
+        jsonUtils.jsonrpc('Addons.SetAddonEnabled', { "addonid": "service.watchdog", "enabled": True})
         xbmc.executebuiltin("XBMC.Container.Refresh")
     elif mode == 10:
         selectedEntry = None
         mediaType = params.get('mediaType')
-        if mediaType: 
+        if mediaType:
             if params.get('id') or params.get('showid'):
                 providers = kodiDB.getVideo(params.get('id')) if params.get('id') else kodiDB.getVideo(params.get('showid'), params.get('episode'))
                 if len(providers) == 1:
                     selectedEntry = providers[0]
-                else:                    
-                    selectProvider = ['[%s] %s' % (stringUtils.getProvidername(provider[0]), stringUtils.parseMediaListURL(provider[0])[0]) for provider in providers]
+                else:
+                    selectProvider = ['[{0}] {1}'.format(stringUtils.getProvidername(provider[0]), stringUtils.parseMediaListURL(provider[0])[0]) for provider in providers]
 
                     choice = guiTools.selectDialog('OSMOSIS: Select provider!', selectProvider)
                     if choice > -1: selectedEntry = providers[choice]
@@ -132,8 +136,8 @@ if __name__ == '__main__':
                         infoLabels['title'] = props[2]
                         infoLabels['aired'] = props[3]
 
-                    #match = re.search('<thumb>(.*)<\/thumb>', props[4])
-                    #if match:
+                    # match = re.search('<thumb>(.*)<\/thumb>', props[4])
+                    # if match:
                     #   item.setArt({'thumb': match.group(1)})
                 else:
                     sTitle = sys.argv[0][sys.argv[0].index('|') + 1:]
@@ -151,10 +155,10 @@ if __name__ == '__main__':
 
                 # Wait until the media is started in player
                 counter = 0
-                activePlayers = []
+                activePlayers = {}
                 title = params.get('episode') if mediaType == 'show' else stringUtils.cleanStrmFilesys(infoLabels.get('title'))
                 while len(activePlayers) == 0 or (xbmc.Player().isPlayingVideo() and xbmc.getInfoLabel('Player.Filename') != "{0}.strm".format(title)):
-                    activePlayers = json.loads(xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}')).get('result', [])
+                    activePlayers = jsonUtils.jsonrpc('Player.GetActivePlayers')
                     xbmc.sleep(100)
                     counter += 1
                     if counter >= 600:

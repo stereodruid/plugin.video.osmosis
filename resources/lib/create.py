@@ -15,19 +15,24 @@
 
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+from kodi_six.utils import py2_encode, py2_decode
 import os, sys, re
-import urllib
 import utils
-import copy
 import xbmc, xbmcgui, xbmcaddon
 
-from modules import fileSys
-from modules import guiTools
-from modules import jsonUtils
-from modules import stringUtils
-from modules import urlUtils
-from modules import kodiDB
-from modules import tvdb
+from . import fileSys
+from . import guiTools
+from . import jsonUtils
+from . import stringUtils
+from . import urlUtils
+from . import kodiDB
+from . import tvdb
+
+try:
+    import urllib.parse as urllib
+except:
+    import urllib
 
 addon = xbmcaddon.Addon()
 addon_id = addon.getAddonInfo('id')
@@ -35,7 +40,7 @@ ADDON_NAME = addon.getAddonInfo('name')
 HIDE_title_in_OV = addon.getSetting('Hide_tilte_in_OV')
 PAGINGTVshows = addon.getSetting('paging_tvshows')
 PAGINGMovies = addon.getSetting('paging_movies')
-STRM_LOC = xbmc.translatePath(addon.getSetting('STRM_LOC'))
+STRM_LOC = py2_decode(xbmc.translatePath(addon.getSetting('STRM_LOC')))
 NOE0_STRMS_EXPORT = addon.getSetting('noE0_Strms_Export')
 SEARCH_THETVDB = int(addon.getSetting('search_thetvdb'))
 
@@ -57,10 +62,13 @@ def initialize_DialogBG(mess1, mess2, barType="BG"):
 
 
 def fillPlugins(cType='video'):
-    json_query = ('{"jsonrpc":"2.0","method":"Addons.GetAddons","params":{"type":"xbmc.addon.%s","properties":["name","path","thumbnail","description","fanart","summary", "extrainfo", "enabled"]}, "id": 1 }' % cType)
-    json_details = jsonUtils.sendJSON(json_query)
+    json_details = jsonUtils.jsonrpc('Addons.GetAddons',
+                        {
+                            "type": "xbmc.addon.{0}".format(cType),
+                            "properties": ["name", "path", "thumbnail", "description", "fanart", "summary", "extrainfo", "enabled"]
+                        })
     for addon in sorted([addon for addon in json_details["addons"] if addon['enabled'] == True], key=lambda json: json['name'].lower()):
-        utils.addon_log('fillPlugins entry: %s' % (addon))
+        utils.addon_log('fillPlugins entry: {0}'.format(addon))
         addontypes = []
         for info in addon['extrainfo']:
             if info['key'] == 'provides':
@@ -69,7 +77,7 @@ def fillPlugins(cType='video'):
 
         if cType in addontypes and not addon['addonid'] == addon_id:
             art = {'thumb': addon['thumbnail'], 'fanart': addon['fanart']}
-            guiTools.addDir(addon['name'], 'plugin://' + addon['addonid'], 101, art, addon['description'], cType, 'date', 'credits')
+            guiTools.addDir(addon['name'], 'plugin://{0}'.format(addon['addonid']), 101, art, addon['description'], cType, 'date', 'credits')
 
 
 def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None', name_parent='', name_orig=''):
@@ -77,23 +85,15 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
     name_orig_from_url, plugin_id = stringUtils.parseMediaListURL(url)
     name_orig = name_orig_from_url if name_orig_from_url != '' else name_orig
 
-    if plugin_id.find("playMode=play") == -1:
-        if not file_type:
+    if plugin_id.find('playMode=play') == -1:
+        details = jsonUtils.requestList(plugin_id, media_type).get('files', [])
+        retry_count = 1
+        while len(details) == 0 and retry_count <= 3:
+            utils.addon_log('requestList: try={0} data = {1})'.format(retry_count, details))
             details = jsonUtils.requestList(plugin_id, media_type).get('files', [])
-            retry_count = 1
-            while len(details) == 0 and retry_count <= 3:
-                utils.addon_log('requestList: try=%d data = %s)' % (retry_count, details))
-                details = jsonUtils.requestList(plugin_id, media_type).get('files', [])
-                retry_count = retry_count + 1
-        else:
-            details = jsonUtils.requestItem(plugin_id, media_type).get('files', [])
-            retry_count = 1
-            while len(details) == 0 and retry_count <= 3:
-                utils.addon_log('requestItem: try=%d data = %s)' % (retry_count, details))
-                details = jsonUtils.requestItem(plugin_id, media_type).get('files', [])
-                retry_count = retry_count + 1
+            retry_count = retry_count + 1
     else:
-        details.append("palyableSingleMedia")
+        details.append('playableSingleMedia')
         details.append(plugin_id)
 
     if strm_type.find('Cinema') != -1 or strm_type.find('YouTube') != -1 or strm_type.find('Movies') != -1:
@@ -125,7 +125,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         art = detail.get('art', {})
 
         if addon.getSetting('Link_Type') == '0':
-            link = "{0}?{1}".format(sys.argv[0], urllib.urlencode({'url': file.encode('utf-8'), 'mode': 10, 'name': label.encode('utf-8'), 'fanart': art.get('fanart', '').encode('utf-8')}))
+            link = '{0}?{1}'.format(sys.argv[0], urllib.urlencode({'url': file, 'mode': 10, 'name': py2_encode(label), 'fanart': art.get('fanart', '')}))
         else:
             link = file
 
@@ -140,13 +140,13 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
 
         if strm_type in ['Other']:
             path = os.path.join('Other', strm_name)
-            filename = (strm_name + ' - ' + label)
+            filename = '{0} - {1}'.format(strm_name, label)
 
         if filetype == 'file':
             if strm:
                 if strm_type.find('Audio-Albums') != -1:
                     kodiDB.musicDatabase(album, artist, label, path, link, track)
-                fileSys.writeSTRM(stringUtils.cleanStrms((path.rstrip("."))), stringUtils.cleanStrms(filename.rstrip(".")) , link)
+                fileSys.writeSTRM(stringUtils.cleanStrms(path.rstrip('.')), stringUtils.cleanStrms(filename.rstrip('.')) , link)
             else:
                 guiTools.addLink(label, file, 10, art, plot, '', '', '', None, '', total=len(details), type=detail.get('type', None), year=detail.get('year', None))
         else:
@@ -154,33 +154,33 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
                 fillPluginItems(file, media_type, file_type, strm, label, strm_type, name_orig=name_orig)
             else:
                 if isinstance (name_parent, str):
-                    name_parent = name_parent.decode('utf-8')
+                    name_parent = name_parent
                 guiTools.addDir(label, file, 101, art, plot, '', '', '', name_parent=name_parent, type=detail.get('type', None))
 
 
 def addToMedialist(params):
+    name = name_orig = py2_decode(params.get('name'))
     # A dialog to rename the Change Title for Folder and MediaList entry:
     if params.get('noninteractive', False) == False:
-        name_orig = params.get('name')
         name = re.sub('( - |, )*([sS](taffel|eason|erie[s]{0,1})|[pP]art|[tT]eil) \d+', '', name_orig)
-
         if name != name_orig:
             tvshow_detected = True
         else:
             tvshow_detected = False
+
         if name == '':
             name = params.get('name_parent')
-            name_orig = '%s - %s' % (name, name_orig)
-        if params.get('type', None) == 'movie' and params.get('year', None):
-            name = name + ' (%s)' % params.get('year', None)
-        selectAction = ['Continue with original Title: %s' % name, 'Rename Title', 'Get Title from Medialist']
-        if not fileSys.writeTutList("select:Rename"):
-            tutWin = ["Adding content to your library",
-                      "You can rename your Movie, TV-Show or Music title.",
-                      "To make your scraper recognize the content, some times it is necessary to rename the title.",
-                      "Be careful, wrong title can also cause that your scraper can't recognize your content."]
+            name_orig = '{0} - {1}'.format(name, name_orig)
+        if params.get('type') == 'movie' and params.get('year'):
+            name = '{0} ({1})'.format(name, params.get('year'))
+        selectAction = ['Continue with original Title: {0}'.format(py2_decode(name)), 'Rename Title', 'Get Title from Medialist']
+        if not fileSys.writeTutList('select:Rename'):
+            tutWin = ['Adding content to your library',
+                      'You can rename your Movie, TV-Show or Music title.',
+                      'To make your scraper recognize the content, some times it is necessary to rename the title.',
+                      'Be careful, wrong title can also cause that your scraper can\'t recognize your content.']
             xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
-        choice = guiTools.selectDialog('Title for MediaList entry: %s' % name_orig, selectAction)
+        choice = guiTools.selectDialog('Title for MediaList entry: {0}'.format(name_orig), selectAction)
     else:
         choice = params.get('choice', 0)
         name = params.get('name')
@@ -188,6 +188,9 @@ def addToMedialist(params):
 
     if choice != -1:
         cType = params.get('cType', None)
+        if name:
+            name = stringUtils.cleanLabels(name)
+
         if choice == 1 or name == None or name == '':
             name = guiTools.editDialog(name).strip()
             name = "{0}++RenamedTitle++".format(name) if name else name
@@ -198,7 +201,7 @@ def addToMedialist(params):
                 cTypeFilter = 'TV-Shows'
             elif params.get('type', None) == 'movie':
                 cTypeFilter = 'Movies'
-            item = guiTools.mediaListDialog(False, False, header_prefix='Get Title from Medialist for %s' % name_orig, cTypeFilter=cTypeFilter, preselect_name=name)
+            item = guiTools.mediaListDialog(False, False, header_prefix='Get Title from Medialist for {0}'.format(name_orig), cTypeFilter=cTypeFilter, preselect_name=name)
             splits = item.get('entry').split('|') if item else None
             name = splits[1] if splits else None
             cType = splits[0] if splits else None
@@ -206,11 +209,11 @@ def addToMedialist(params):
         if name:
             url = params.get('url')
             if not cType:
-                if not fileSys.writeTutList("select:ContentTypeLang"):
-                    tutWin = ["Adding content to your library",
-                              "Now select your content type.",
-                              "Select language or YouTube type.",
-                              "Wait for done message."]
+                if not fileSys.writeTutList('select:ContentTypeLang'):
+                    tutWin = ['Adding content to your library',
+                              'Now select your content type.',
+                              'Select language or YouTube type.',
+                              'Wait for done message.']
                     xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
 
                 if tvshow_detected or params.get('type', None) == 'tvshow':
@@ -225,15 +228,15 @@ def addToMedialist(params):
                 if (SEARCH_THETVDB == 2 and cType.find('TV-Shows') != -1 and choice == 0):
                     show_data = tvdb.getShowByName(name, re.sub('TV-Shows\((.*)\)', r'\g<1>', cType))
                     if show_data:
-                        showtitle_tvdb = show_data.get('seriesName', name).encode('utf-8')
+                        showtitle_tvdb = show_data.get('seriesName', name)
                         if showtitle_tvdb != name:
-                            utils.addon_log_notice('addToMedialist: Use TVDB name "%s" for "%s"' % (showtitle_tvdb, name))
+                            utils.addon_log_notice('addToMedialist: Use TVDB name "{0}" for "{1}"'.format(showtitle_tvdb, name))
                             name = showtitle_tvdb
-                fileSys.writeMediaList('name_orig=%s;%s' % (name_orig, url), name, cType)
-                xbmcgui.Dialog().notification(cType, name.replace('++RenamedTitle++', ''), xbmcgui.NOTIFICATION_INFO, 5000, False)
+                fileSys.writeMediaList('name_orig={0};{1}'.format(name_orig, url), name, cType)
+                xbmcgui.Dialog().notification(cType, name_orig, xbmcgui.NOTIFICATION_INFO, 5000, False)
 
                 try:
-                    plugin_id = re.search('%s([^\/\?]*)' % ("plugin:\/\/"), url)
+                    plugin_id = re.search('{0}([^\/\?]*)'.format("plugin:\/\/"), url)
                     if plugin_id:
                         module = moduleUtil.getModule(plugin_id.group(1))
                         if module and hasattr(module, 'create'):
@@ -241,32 +244,35 @@ def addToMedialist(params):
                 except:
                     pass
                 fillPluginItems(url, strm=True, strm_name=name, strm_type=cType, name_orig=name_orig)
-                xbmcgui.Dialog().notification('Writing items...', "Done", xbmcgui.NOTIFICATION_INFO, 5000, False)
+                xbmcgui.Dialog().notification('Writing items...', 'Done', xbmcgui.NOTIFICATION_INFO, 5000, False)
 
 
 def addMultipleSeasonToMediaList(params):
-    name = params.get('name')
+    name = name_orig = py2_decode(params.get('name'))
     url = params.get('url')
-    selectAction = ['Continue with original Title: %s' % name, 'Rename Title', 'Get Title from Medialist']
-    if not fileSys.writeTutList("select:Rename"):
-        tutWin = ["Adding content to your library",
-                  "You can rename your Movie, TV-Show or Music title.",
-                  "To make your scraper recognize the content, some times it is necessary to rename the title.",
-                  "Be careful, wrong title can also cause that your scraper can't recognize your content."]
+    selectAction = ['Continue with original Title: {0}'.format(name_orig), 'Rename Title', 'Get Title from Medialist']
+    if not fileSys.writeTutList('select:Rename'):
+        tutWin = ['Adding content to your library',
+                  'You can rename your Movie, TV-Show or Music title.',
+                  'To make your scraper recognize the content, some times it is necessary to rename the title.',
+                  'Be careful, wrong title can also cause that your scraper can\'t recognize your content.']
         xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
-    choice = guiTools.selectDialog('Title for MediaList entry: %s' % name, selectAction)
+    choice = guiTools.selectDialog('Title for MediaList entry: {0}'.format(name_orig), selectAction)
     if choice != -1:
         cType = None
+        if name:
+            name = stringUtils.cleanLabels(name)
+
         if choice == 1 or name == None or name == '':
             name = guiTools.editDialog(name).strip()
             name = "{0}++RenamedTitle++".format(name) if name else name
 
         if choice == 2:
-            item = guiTools.mediaListDialog(False, False, header_prefix='Get Title from Medialist for %s' % name, preselect_name=name, cTypeFilter='TV-Shows')
+            item = guiTools.mediaListDialog(False, False, header_prefix='Get Title from Medialist for {0}'.format(name_orig), preselect_name=name, cTypeFilter='TV-Shows')
             splits = item.get('entry').split('|') if item else None
             name = splits[1] if splits else None
             cType = splits[0] if splits else None
-        utils.addon_log_notice('addMultipleSeasonToMediaList: name = %s, cType = %s' % (name, cType))
+        utils.addon_log_notice('addMultipleSeasonToMediaList: name = {0}, cType = {1}'.format(name, cType))
         if name:
 
             if not cType:
@@ -276,7 +282,7 @@ def addMultipleSeasonToMediaList(params):
                 details = jsonUtils.requestList(url, 'video').get('files', [])
                 retry_count = 1
                 while len(details) == 0 and retry_count <= 3:
-                    utils.addon_log('requestList: try=%d data = %s)' % (retry_count, details))
+                    utils.addon_log('requestList: try={0} data = {1})'.format(retry_count, details))
                     details = jsonUtils.requestList(url, 'video').get('files', [])
                     retry_count = retry_count + 1
                 seasonList = []
@@ -287,15 +293,15 @@ def addMultipleSeasonToMediaList(params):
                     if label.find('COLOR') != -1:
                         label = stringUtils.cleanLabels(label) + ' (*)'
                     showtitle = detail['showtitle']
-                    name_orig = '%s - %s' % (showtitle, label)
+                    name_orig = '{0} - {1}'.format(showtitle, label)
                     if filetype == 'directory':
-                        seasonList.append({'label': label.encode('utf-8'), 'name': name.encode('utf-8'), 'name_orig': name_orig.encode('utf-8'), 'url': file.encode('utf-8'), 'cType': cType, 'noninteractive': True})
+                        seasonList.append({'label': label, 'name': name, 'name_orig': name_orig, 'url': file, 'cType': cType, 'noninteractive': True})
 
                 sItems = sorted([item.get('label') for item in seasonList], key=lambda k: utils.key_natural_sort(k.lower()))
                 preselect = [i for i, item in enumerate(sItems) if item.find(' (*)') == -1]
-                selectedItemsIndex = guiTools.selectDialog("Select Seasons to add for %s" % showtitle, sItems, multiselect=True, preselect=preselect)
+                selectedItemsIndex = guiTools.selectDialog('Select Seasons to add for {0}'.format(showtitle), sItems, multiselect=True, preselect=preselect)
                 seasonList = [item for item in seasonList for index in selectedItemsIndex if item.get('label') == sItems[index]] if selectedItemsIndex and len(selectedItemsIndex) > 0 else None
-                utils.addon_log_notice('addMultipleSeasonToMediaList: seasonList = %s' % seasonList)
+                utils.addon_log_notice('addMultipleSeasonToMediaList: seasonList = {0}'.format(seasonList))
                 if seasonList and len(seasonList) > 0:
                     for season in seasonList:
                         addToMedialist(season)
@@ -309,22 +315,22 @@ def renameMediaListEntry(selectedItems):
         choice = 1
         if cType.find('TV-Shows') != -1:
             selectAction = ['Get Title from TVDB', 'Enter new Title']
-            choice = guiTools.selectDialog('Rename MediaList entry: %s' % name_old, selectAction)
+            choice = guiTools.selectDialog('Rename MediaList entry: {0}'.format(name_old), selectAction)
         if choice != -1:
             if choice == 1:
                 name = guiTools.editDialog(name_old).strip()
-                name = "{0}++RenamedTitle++".format(name) if name else name
+                name = '{0}++RenamedTitle++'.format(name) if name else name
             elif choice == 0:
                 show_data = tvdb.getShowByName(name_old, re.sub('TV-Shows\((.*)\)', r'\g<1>', cType))
                 if show_data:
-                    name = show_data.get('seriesName', name_old).encode('utf-8')
+                    name = show_data.get('seriesName', name_old)
             if name and name_old != name:
-                utils.addon_log_notice('renameMediaListEntry: Use new name "%s" for "%s"' % (name, name_old))
+                utils.addon_log_notice('renameMediaListEntry: Use new name "{0}" for "{1}"'.format(name, name_old))
                 item['name_new'] = name
-                removeAndReaddMedialistEntry([item])
+                removeAndReadMedialistEntry([item])
 
 
-def removeAndReaddMedialistEntry(selectedItems):
+def removeAndReadMedialistEntry(selectedItems):
     for item in selectedItems:
         splits = item.get('entry').split('|')
         cType = splits[0]
@@ -361,7 +367,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
         return contentList
 
     while pagesDone < int(PAGINGalbums):
-        if not contentList[0] == "palyableSingleMedia":
+        if not contentList[0] == 'playableSingleMedia':
             artThumb = contentList[0].get('art', {})
             aThumb = urlUtils.stripUnquoteURL(artThumb.get('thumb', ''))
 
@@ -369,11 +375,11 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                 art = detailInfo.get('art', {})
                 file = detailInfo['file'].replace("\\\\", "\\")
                 filetype = detailInfo['filetype']
-                label = detailInfo['label'].strip().encode("utf8")
+                label = detailInfo['label'].strip()
                 thumb = art.get('thumb', '')
                 fanart = art.get('fanart', '')
                 track = detailInfo.get('track', 0) if detailInfo.get('track', 0) > 0 else index + 1
-                album = detailInfo['album'].strip().encode("utf8")
+                album = detailInfo['album'].strip()
                 duration = detailInfo.get('duration', 0)
 
                 if filetype == 'directory':
@@ -392,16 +398,16 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                 artistList = []
                 for i, sArtist in enumerate(contentList):
                     for artist in sArtist.get('artist'):
-                        if artist.encode("utf8") not in artistList:
-                            artistList.append(artist.encode("utf8"))
+                        if artist not in artistList:
+                            artistList.append(artist)
 
                 if len(artistList) == 1:
                     artist = artistList[0]
                 else:
-                    artist = 'Various Artists'.encode("utf8")
+                    artist = 'Various Artists'
 
                 thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing File: ", " Title: " + label)
-                path = os.path.join(strm_type, stringUtils.cleanStrmFilesys(artist), stringUtils.cleanStrmFilesys(strm_name.decode('utf8'))).encode('utf8')
+                path = os.path.join(strm_type, stringUtils.cleanStrmFilesys(artist), stringUtils.cleanStrmFilesys(strm_name))
                 if album and artist and label and path and link and track:
                     albumList.append({'path': path, 'label': label, 'link': link, 'album': album, 'artist': artist, 'track': track, 'duration': duration, 'thumb': thumb})
                 j = j + 100 / (len(contentList) * int(PAGINGalbums))
@@ -412,7 +418,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                 contentList = [item for sublist in dirList for item in sublist]
                 dirList = []
         else:
-            albumList.append({'path': os.path.join(strm_type, strm_name.decode('utf8'), label).encode('utf8'), 'label': stringUtils.cleanByDictReplacements(label), 'link': link})
+            albumList.append({'path': os.path.join(strm_type, strm_name, label), 'label': stringUtils.cleanByDictReplacements(label), 'link': link})
             pagesDone = int(PAGINGalbums)
 
     # Write strms for all values in albumList
@@ -426,7 +432,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
             cType = splits[0]
             fileSys.writeMediaList(url, strm_name, cType, albumartist=artist)
     for album in albumList:
-        strm_link = "%s|%s" % (album.get('link'), album.get('label')) if addon.getSetting('Link_Type') == '0' else album.get('link')
+        strm_link = '{0}|{1}'.format(album.get('link'), album.get('label')) if addon.getSetting('Link_Type') == '0' else album.get('link')
         fullpath, fileModTime = fileSys.writeSTRM(album.get('path'), stringUtils.cleanStrms(album.get('label').rstrip(".")) , strm_link)
         kodiDB.musicDatabase(album.get('album'), album.get('artist'), album.get('label'), album.get('path'), album.get('link'), album.get('track'), album.get('duration'), aThumb, fileModTime)
     thisDialog.dialogeBG.close()
@@ -445,13 +451,13 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a", name
         return
 
     while pagesDone < int(PAGINGMovies):
-        if not contentList[0] == "palyableSingleMedia":
+        if not contentList[0] == 'playableSingleMedia':
             for detailInfo in contentList:
                 file = detailInfo.get('file').replace("\\\\", "\\") if detailInfo.get('file', None) else None
                 if name_orig != '' and file.find('name_orig=') == -1:
-                    file = 'name_orig=%s;%s' % (name_orig , file if isinstance(file, str) else file.encode('utf-8'))
+                    file = 'name_orig={0};{1}'.format(name_orig , file if isinstance(file, str) else file)
                 filetype = detailInfo.get('filetype', None)
-                label = detailInfo.get('label').encode("utf-8") if detailInfo.get('label', None) else None
+                label = detailInfo.get('label') if detailInfo.get('label', None) else None
                 imdbnumber = detailInfo.get('imdbnumber').strip() if detailInfo.get('imdbnumber', None) else None
 
                 if label and strm_name:
@@ -475,7 +481,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a", name
                 contentList = jsonUtils.requestList(file, 'video').get('files', [])
                 retry_count = 1
                 while len(contentList) == 0 and retry_count <= 3:
-                    utils.addon_log('requestList: try=%d data = %s)' % (retry_count, details))
+                    utils.addon_log('requestList: try={0} data = {1})'.format(retry_count, details))
                     contentList = jsonUtils.requestList(file, 'video').get('files', [])
                     retry_count = retry_count + 1
             else:
@@ -484,10 +490,10 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a", name
             provider = stringUtils.getProviderId(contentList[1])
             url = contentList[1]
             if name_orig != '' and file.find('name_orig=') == -1:
-                url = 'name_orig=%s;%s' % (name_orig , url if isinstance(url, str) else url.encode('utf-8'))
+                url = 'name_orig={0};{1}'.format(name_orig , url if isinstance(url, str) else url)
             m_path = stringUtils.getMovieStrmPath(strm_type, strm_name)
             m_title = stringUtils.getStrmname(strm_name)
-            movieList.append({'path': m_path, 'title':  m_title, 'name_orig': name_orig, 'url': url, 'provider': provider.get('providerId')})
+            movieList.append({'path': m_path, 'title':  stringUtils.cleanStrmFilesys(m_title), 'url': url, 'provider': provider.get('providerId')})
             pagesDone = int(PAGINGMovies)
 
     if addon.getSetting('Link_Type') == '0':
@@ -497,8 +503,8 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a", name
     # Write strms for all values in movieList
     for movie in movieList:
         thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing Movies: ", movie.get('title'))
-        strm_link = "plugin://%s/?url=plugin&mode=10&mediaType=movie&id=%d|%s" % (addon_id, movie.get('movieID'), movie.get('title')) if addon.getSetting('Link_Type') == '0' else movie.get('url')
-        utils.addon_log("write movie = %s" % (movie))
+        strm_link = 'plugin://{0}/?url=plugin&mode=10&mediaType=movie&id={1}|{2}'.format(addon_id, movie.get('movieID'), movie.get('title')) if addon.getSetting('Link_Type') == '0' else movie.get('url')
+        utils.addon_log('write movie = {0}'.format(movie))
         fileSys.writeSTRM(stringUtils.cleanStrms(movie.get('path')), stringUtils.cleanStrms(movie.get('title')), strm_link)
 
         j = j + 100 / len(movieList)
@@ -513,7 +519,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
         lang = strm_type[strm_type.find('(') + 1:strm_type.find(')')]
     showtitle = stringUtils.getStrmname(strm_name)
     if isinstance (showtitle, str):
-        showtitle = showtitle.decode("utf-8")
+        showtitle = showtitle
 
     while pagesDone < int(PAGINGTVshows):
         strm_type = strm_type.replace('Shows-Collection', 'TV-Shows')
@@ -527,7 +533,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
                     retry_count = 1
                     json_reply = jsonUtils.requestList(file, 'video').get('files', [])
                     while len(json_reply) == 0 and retry_count <= 3:
-                        utils.addon_log('requestList: try=%d data = %s)' % (retry_count, json_reply))
+                        utils.addon_log('requestList: try={0} data = {1})'.format(retry_count, json_reply))
                         json_reply = jsonUtils.requestList(file, 'video').get('files', [])
                         retry_count = retry_count + 1
                     dirList.append(json_reply)
@@ -536,7 +542,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
                     episodetitle = detailInfo.get('title')
                     episodeseason = detailInfo.get('season', -1)
                     episode = detailInfo.get('episode', -1)
-                    if (SEARCH_THETVDB == 2 or (SEARCH_THETVDB == 1 and detailInfo.get('season', -1) == -1 or detailInfo.get('episode', -1) == -1)):
+                    if (SEARCH_THETVDB == 2 or (SEARCH_THETVDB == 1 and (episodeseason == -1 or episode == -1))):
 
                         if showtitle and showtitle != '' and episodetitle and episodetitle != '':
 
@@ -544,25 +550,25 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
                             eptitle = eptitle.replace(u"\u201e", "'")
                             eptitle = eptitle.replace(u"\u201c", "'")
                             eptitle = eptitle.replace(u"\u2013", "-")
-                            utils.addon_log_notice('search tvdb for "%s": "S%02dE%02d - %s" (lang=%s)' % (showtitle, episodeseason, episode, eptitle, lang))
+                            utils.addon_log_notice('search tvdb for "{0}": "S{1:02d}E{2:02d} - {3}" (lang={4})'.format(showtitle, episodeseason, episode, eptitle, lang))
                             data = tvdb.getEpisodeByName(showtitle, episodeseason, episode, eptitle, lang)
 
                             if data:
                                 detailInfo['season'] = data.get('season')
                                 detailInfo['episode'] = data.get('episode')
                                 detailInfo['episodeName'] = data.get('episodeName', None)
-                                utils.addon_log_notice('found tvdb entry for "%s": "S%02dE%02d - %s" matched to "S%02dE%02d - %s"' %
-                                                       (showtitle, episodeseason, episode, episodetitle,
+                                utils.addon_log_notice('found tvdb entry for "{0}": "S{1:02d}E{2:02d} - {3}" matched to "S{4:02d}E{5:02d} - {6}"'
+                                                       .format(showtitle, episodeseason, episode, episodetitle,
                                                        detailInfo['season'], detailInfo['episode'], detailInfo['episodeName']))
                             else:
                                 detailInfo['season'] = -1
                                 detailInfo['episode'] = -1
-                                utils.addon_log_notice('no tvdb entry found for "%s": "S%02dE%02d - %s"' %
-                                                       (showtitle, episodeseason, episode, episodetitle))
+                                utils.addon_log_notice('no tvdb entry found for "{0}": "S{1:02d}E{2:02d} - {3}"'
+                                                       .format(showtitle, episodeseason, episode, episodetitle))
 
                     get_title_with_OV = True
-                    if HIDE_title_in_OV == "true":
-                        label = detailInfo.get('label').strip().encode("utf-8") if detailInfo.get('label', None) else None
+                    if HIDE_title_in_OV == 'true':
+                        label = detailInfo.get('label').strip() if detailInfo.get('label', None) else None
                         label = stringUtils.cleanLabels(label)
                         if re.search('(\WOV\W)', label):
                             get_title_with_OV = False
@@ -570,20 +576,18 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
                     if detailInfo.get('season', -1) > -1 and detailInfo.get('episode', -1) > -1:
                         if NOE0_STRMS_EXPORT == "false" or detailInfo.get('episode') > 0 and get_title_with_OV == True:
                             if  episodetitle.find('Teil 1 und 2') >= 0 or episodetitle.find('Parts 1 & 2') >= 0 :
-                                utils.addon_log_notice('found tvdb entry for "%s": "S%02dE%02d - %s" (multi) matched to "S%02dE%02d - %s"' %
-                                    (showtitle, episodeseason, episode, episodetitle,
-                                    detailInfo['season'], detailInfo['episode'], detailInfo['episodeName']))
+                                utils.addon_log_notice('found tvdb entry for "{0}": "S{1:02d}E{2:02d} - {3}" (multi) matched to "S{4:02d}E{5:02d} - {6}"'
+                                    .format(showtitle, episodeseason, episode, episodetitle, detailInfo['season'], detailInfo['episode'], detailInfo['episodeName']))
                                 data = tvdb.getEpisodeByName(showtitle, episodeseason, episode + 1, re.sub('(Teil 1 und 2|Parts 1 & 2)', '(2)', eptitle), lang)
                                 if data:
-                                    utils.addon_log_notice('found tvdb entry for "%s": "S%02dE%02d - %s" (multi) matched to "S%02dE%02d - %s"' %
-                                        (showtitle, episodeseason, episode, episodetitle,
-                                        detailInfo['season'], detailInfo['episode'] + 1, data.get('episodeName', None)))
+                                    utils.addon_log_notice('found tvdb entry for "{0}": "S{1:02d}E{2:02d} - {3}" (multi) matched to "S{4:02d}E{5:02d} - {6}"'
+                                        .format(showtitle, episodeseason, episode, episodetitle, detailInfo['season'], detailInfo['episode'] + 1, data.get('episodeName', None)))
                                 detailInfo['multi_episode'] = True
                                 detailInfo['episode'] = [detailInfo['episode'], detailInfo['episode'] + 1]
 
-                            episodetitles = filter(None, re.split(' / | , ', episodetitle))
+                            episodetitles = list(filter(None, re.split(' / | , ', episodetitle)))
                             if episodetitles[0] != episodetitle and not re.search(' *(-|\(|:)* *([tT]eil|[pP]art|[pP]t\.) (\d+|\w+)\)*', episodetitle):
-                                utils.addon_log_notice('check multi episode "%s": "S%02dE%02d - %s"' % (showtitle, episodeseason, episode, episodetitle))
+                                utils.addon_log_notice('check multi episode "{0}": "S{1:02d}E{2:02d} - {3}"'.format(showtitle, episodeseason, episode, episodetitle))
                                 seasonm = []
                                 episodem = []
                                 episodeNamem = []
@@ -598,17 +602,17 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
                                     detailInfo['multi_episode'] = True
                                     detailInfo['episode'] = episodem
                                     for e, ep in enumerate(episodem):
-                                        utils.addon_log_notice('found tvdb entry for "%s": "S%02dE%02d - %s" (multi) matched to "S%02dE%02d - %s"' %
-                                            (showtitle, episodeseason, episode, episodetitle,
+                                        utils.addon_log_notice('found tvdb entry for "{0}": "S{1:02d}E{2:02d} - {3}" (multi) matched to "S{4:02d}E{5:02d} - {6}"'
+                                            .format(showtitle, episodeseason, episode, episodetitle,
                                             detailInfo['season'], episodem[e], episodeNamem[e]))
 
                             episodesList.append(detailInfo)
 
         step = float(100.0 / len(episodesList) if len(episodesList) > 0 else 1)
         if pagesDone == 0:
-            thisDialog.dialogeBG.update(int(step), "Initialisation of TV-Shows: " + stringUtils.getStrmname(strm_name))
+            thisDialog.dialogeBG.update(int(step), 'Initialisation of TV-Shows: {0}'.format(stringUtils.getStrmname(strm_name)))
         else:
-            thisDialog.dialogeBG.update(int(step), "Page: %d %s" % (pagesDone, stringUtils.getStrmname(strm_name)))
+            thisDialog.dialogeBG.update(int(step), 'Page: {0} {1}'.format(pagesDone, stringUtils.getStrmname(strm_name)))
 
         split_episode = 0
         for index, episode in enumerate(episodesList):
@@ -622,7 +626,8 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
                         split_episode_names = []
                         for s in range(0, split_episode + 1):
                             split_episode_names.insert(0, episodesList[index - s - 1]['title'])
-                        utils.addon_log_notice('Split Episode for %s: "%s" matched to "S%02dE%02d - %s"' % (showtitle, ', '.join(split_episode_names),
+                        utils.addon_log_notice('Split Episode for {0}: "{1}" matched to "S{2:02d}E{3:02d} - {4}"'
+                                            .format(showtitle, ', '.join(split_episode_names),
                                             episodesList[index - split_episode].get('season', None),
                                             episodesList[index - split_episode].get('episode', None),
                                             episodesList[index - split_episode].get('episodeName', None)))
@@ -646,34 +651,34 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
 def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0, name_orig=''):
     episode = None
 
-    utils.addon_log("detailInfo: %s" % (episode_item))
+    utils.addon_log('detailInfo: {0}'.format(episode_item))
     file = episode_item.get('file', None)
 
     if name_orig != '' and file.find('name_orig=') == -1:
-        file = 'name_orig=%s;%s' % (name_orig , file if isinstance(file, str) else file.encode('utf-8'))
+        file = 'name_orig={0};{1}'.format(name_orig, file if isinstance(file, str) else file)
     episode = episode_item.get('episode', -1)
     split_episode = episode_item.get('split_episode', -1)
     multi_episode = episode_item.get('multi_episode', False)
     season = episode_item.get('season', -1)
     if split_episode > 0:
-        strSeasonEpisode = 's%de%d.%d' % (season, episode, split_episode)
+        strSeasonEpisode = 's{0}e{1}.{2}'.format(season, episode, split_episode)
     else:
         if multi_episode:
-            strSeasonEpisode = ('s%de' % season) + '-'.join(map(str, episode))
+            strSeasonEpisode = 's{0}e{1}'.format(season, '-'.join(map(str, episode)))
         else:
-            strSeasonEpisode = 's%de%d' % (season, episode)
-    showtitle = episode_item.get('showtitle', None).encode("utf-8")
+            strSeasonEpisode = 's{0}e{1}'.format(season, episode)
+    showtitle = episode_item.get('showtitle', None)
     provider = stringUtils.getProviderId(file)
 
-    if showtitle is not None and showtitle != "" and strm_type != "":
+    if showtitle is not None and showtitle != '' and strm_type != '':
         path = os.path.join(strm_type, stringUtils.cleanStrmFilesys(showtitle))
-        episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': showtitle, 'name_orig': name_orig, 'provider': provider.get('providerId')}
+        episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': stringUtils.cleanStrmFilesys(showtitle), 'provider': provider.get('providerId')}
 
         if addon.getSetting('Link_Type') == '0':
             episode = kodiDB.writeShow(episode)
 
         if episode is not None:
-            strm_link = 'plugin://%s/?url=plugin&mode=10&mediaType=show&episode=%s&showid=%d|%s' % (addon_id, episode.get('strSeasonEpisode'), episode.get('showID'), episode.get('tvShowTitle')) if addon.getSetting('Link_Type') == '0' else episode.get('url')
+            strm_link = 'plugin://{0}/?url=plugin&mode=10&mediaType=show&episode={1}&showid={2}|{3}'.format(addon_id, episode.get('strSeasonEpisode'), episode.get('showID'), episode.get('tvShowTitle')) if addon.getSetting('Link_Type') == '0' else episode.get('url')
             fileSys.writeSTRM(episode.get('path'), episode.get('strSeasonEpisode'), strm_link)
 
     return pagesDone
