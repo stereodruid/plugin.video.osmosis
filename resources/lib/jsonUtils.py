@@ -16,10 +16,9 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
+from kodi_six.utils import py2_decode
 import utils
 import xbmc
-
-from . import stringUtils
 
 try:
     import json
@@ -81,7 +80,7 @@ def parse_jsonrpc(json_raw):
         utils.addon_log('Empty response from Kodi')
         return {}
 
-    utils.addon_log('Response from Kodi: {0}'.format(json_raw))
+    utils.addon_log('Response from Kodi: {0}'.format(py2_decode(json_raw)))
     parsed = json.loads(json_raw)
     if parsed.get('error', False):
         utils.addon_log('Kodi returned an error: {0}'.format(parsed.get('error')))

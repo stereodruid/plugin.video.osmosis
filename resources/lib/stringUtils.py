@@ -210,7 +210,7 @@ def getAddonname(addonid):
     if addonid not in addonList:
         result = jsonUtils.jsonrpc('Addons.GetAddonDetails', {"addonid": addonid, "properties": ["name"]})
         if len(result) > 0:
-            addonList[addonid] = result["result"]["addon"]["name"]
+            addonList[addonid] = result["addon"]["name"]
             return addonList[addonid]
         else:
             return addonid

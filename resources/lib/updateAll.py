@@ -74,7 +74,7 @@ def strm_update(selectedItems=None, actor=0):
                 dialogeBG.close()
                 return
 
-            step = j = int(100 / iUrls)
+            step = j = 100 / iUrls
             for splittedEntry in splittedEntries:
                 cType, name, url = splittedEntry[0], splittedEntry[1], splittedEntry[2]
 
@@ -86,7 +86,7 @@ def strm_update(selectedItems=None, actor=0):
                         if module and hasattr(module, 'update'):
                             plugin_id = module.update(name, plugin_id, 'video', thelist)
 
-                    dialogeBG.update(j, 'OSMOSIS total update process' , 'Current Item: {0}; Items left: {1}'.format(stringUtils.getStrmname(name), iUrls))
+                    dialogeBG.update(int(j), 'OSMOSIS total update process' , 'Current Item: {0}; Items left: {1}'.format(stringUtils.getStrmname(name), iUrls))
                     j += step
 
                     create.fillPluginItems(plugin_id, strm=True, strm_name=name, strm_type=cType, name_orig=name_orig)

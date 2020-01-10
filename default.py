@@ -185,6 +185,12 @@ if __name__ == '__main__':
                       "Mark/select content, do not play a Movie or enter a TV-Show.",
                       "Open context menu on the selected and select *create strms*."]
             xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
+    elif mode == 102:
+        favs = jsonUtils.jsonrpc('Favourites.GetFavourites', {"properties": ["path", "window", "windowparameter", "thumbnail"]}).get('favourites', {})
+        for fav in favs:
+            if params.get('type') == 'video' and fav.get('window') == 'videos':
+                guiTools.addDir(fav.get('title'), fav.get('windowparameter'), 101, {'thumb': fav.get('thumbnail')}, type=type)
+        xbmcplugin.endOfDirectory(int(sys.argv[1]))
     elif mode == 200:
         utils.addon_log("write multi strms")
         create.addToMedialist(params)

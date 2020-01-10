@@ -110,6 +110,7 @@ def getSources():
     art = {'fanart': FANART, 'thumb': folderIcon}
     addDir('Video Plugins', 'video', 1, art)
     addDir('Music Plugins', 'audio', 1, art)
+    addDir('Video Favoriten', '', 102, {'thumb': 'DefaultFavourites.png'}, type='video')
     addItem('Update', 4, updateIcon)
     addItem('Update (with removal of unused .strm files)', 42, updateIcon)
     addFunction('Update all')
@@ -234,7 +235,7 @@ def handle_wait(time_to_wait, header, title):
         secs += 1
         percent = increment * secs
         secs_left = str((time_to_wait - secs))
-        remaining_display = "Starts In " + str(secs_left) + " seconds, Cancel Channel Change?"
+        remaining_display = "Starts In {0} seconds, Cancel Channel Change?".format(secs_left)
         dlg.update(percent, title, remaining_display)
         xbmc.sleep(1000)
         if (dlg.iscanceled()):

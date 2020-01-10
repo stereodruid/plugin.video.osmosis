@@ -49,16 +49,16 @@ thisDialog.dialogeBG = None
 thisDialog.dialoge = None
 
 
-def initialize_DialogBG(mess1, mess2, barType="BG"):
-    if barType == "BG":
+def initialize_DialogBG(mess1, mess2, barType='BG'):
+    if barType == 'BG':
         if not thisDialog.dialogeBG:
             thisDialog.dialogeBG = xbmcgui.DialogProgressBG()
-            thisDialog.dialogeBG.create("OSMOSIS: " + mess1 + ": " , " " + mess2)
+            thisDialog.dialogeBG.create('OSMOSIS: {0}'.format(mess1), '{0}'.format(mess2))
 
     else:
         if not thisDialog.dialoge:
             thisDialog.dialoge = xbmcgui.DialogProgress()
-            thisDialog.dialoge.create("OSMOSIS: " + mess1 + ": " , " " + mess2)
+            thisDialog.dialoge.create('OSMOSIS: {0}'.format(mess1), '{0}'.format(mess2))
 
 
 def fillPlugins(cType='video'):
@@ -77,41 +77,40 @@ def fillPlugins(cType='video'):
 
         if cType in addontypes and not addon['addonid'] == addon_id:
             art = {'thumb': addon['thumbnail'], 'fanart': addon['fanart']}
-            guiTools.addDir(addon['name'], 'plugin://{0}'.format(addon['addonid']), 101, art, addon['description'], cType, 'date', 'credits')
+            guiTools.addDir(addon['name'], 'plugin://{0}'.format(addon['addonid']), 101, art, addon['description'], type=cType)
 
 
 def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None', name_parent='', name_orig=''):
-    details = []
+    details = {}
     name_orig_from_url, plugin_id = stringUtils.parseMediaListURL(url)
     name_orig = name_orig_from_url if name_orig_from_url != '' else name_orig
 
-    if plugin_id.find('playMode=play') == -1:
-        details = jsonUtils.requestList(plugin_id, media_type).get('files', [])
+    if url.find('playMode=play') == -1:
+        details = jsonUtils.requestList(url, media_type).get('files', {})
         retry_count = 1
         while len(details) == 0 and retry_count <= 3:
             utils.addon_log('requestList: try={0} data = {1})'.format(retry_count, details))
-            details = jsonUtils.requestList(plugin_id, media_type).get('files', [])
+            details = jsonUtils.requestList(url, media_type).get('files', {})
             retry_count = retry_count + 1
     else:
-        details.append('playableSingleMedia')
-        details.append(plugin_id)
+        details.update({'playableSingleMedia': True, 'url': url, 'providerid': plugin_id})
 
     if strm_type.find('Cinema') != -1 or strm_type.find('YouTube') != -1 or strm_type.find('Movies') != -1:
-        initialize_DialogBG("Movie", "Adding")
+        initialize_DialogBG('Movie', 'Adding')
         addMovies(details, strm_name, strm_type, name_orig=name_orig)
         thisDialog.dialogeBG.close()
         thisDialog.dialogeBG = None
         return
 
     if strm_type.find('TV-Show') != -1 or strm_type.find('Shows-Collection') != -1:
-        initialize_DialogBG("Adding TV-Shows", "working..")
+        initialize_DialogBG('Adding TV-Shows', 'working..')
         getTVShowFromList(details, strm_name, strm_type, name_orig=name_orig)
         thisDialog.dialogeBG.close()
         thisDialog.dialogeBG = None
         return
 
     if strm_type.find('Album') != -1 :
-        initialize_DialogBG("Album", "Adding")
+        initialize_DialogBG('Album', 'Adding')
         addAlbum(details, strm_name, strm_type)
         thisDialog.dialogeBG.close()
         thisDialog.dialogeBG = None
@@ -367,10 +366,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
         return contentList
 
     while pagesDone < int(PAGINGalbums):
-        if not contentList[0] == 'playableSingleMedia':
-            artThumb = contentList[0].get('art', {})
-            aThumb = urlUtils.stripUnquoteURL(artThumb.get('thumb', ''))
-
+        if not contentList.get('playableSingleMedia'):
             for index, detailInfo in enumerate(contentList):
                 art = detailInfo.get('art', {})
                 file = detailInfo['file'].replace("\\\\", "\\")
@@ -406,14 +402,14 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
                 else:
                     artist = 'Various Artists'
 
-                thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing File: ", " Title: " + label)
+                thisDialog.dialogeBG.update(int(j), ADDON_NAME + ": Writing File", " Title: " + label)
                 path = os.path.join(strm_type, stringUtils.cleanStrmFilesys(artist), stringUtils.cleanStrmFilesys(strm_name))
                 if album and artist and label and path and link and track:
                     albumList.append({'path': path, 'label': label, 'link': link, 'album': album, 'artist': artist, 'track': track, 'duration': duration, 'thumb': thumb})
                 j = j + 100 / (len(contentList) * int(PAGINGalbums))
 
             pagesDone += 1
-            contentList = []
+            contentList = {}
             if pagesDone < int(PAGINGalbums) and len(dirList) > 0:
                 contentList = [item for sublist in dirList for item in sublist]
                 dirList = []
@@ -434,7 +430,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums="1"):
     for album in albumList:
         strm_link = '{0}|{1}'.format(album.get('link'), album.get('label')) if addon.getSetting('Link_Type') == '0' else album.get('link')
         fullpath, fileModTime = fileSys.writeSTRM(album.get('path'), stringUtils.cleanStrms(album.get('label').rstrip(".")) , strm_link)
-        kodiDB.musicDatabase(album.get('album'), album.get('artist'), album.get('label'), album.get('path'), album.get('link'), album.get('track'), album.get('duration'), aThumb, fileModTime)
+        kodiDB.musicDatabase(album.get('album'), album.get('artist'), album.get('label'), album.get('path'), album.get('link'), album.get('track'), album.get('duration'), album.get('thumb'), fileModTime)
     thisDialog.dialogeBG.close()
 
     return albumList
@@ -451,7 +447,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a", name
         return
 
     while pagesDone < int(PAGINGMovies):
-        if not contentList[0] == 'playableSingleMedia':
+        if not contentList.get('playableSingleMedia'):
             for detailInfo in contentList:
                 file = detailInfo.get('file').replace("\\\\", "\\") if detailInfo.get('file', None) else None
                 if name_orig != '' and file.find('name_orig=') == -1:
@@ -469,7 +465,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a", name
 
                     provider = stringUtils.getProviderId(file)
 
-                    thisDialog.dialogeBG.update(j, ADDON_NAME + ": Getting Movies: ", " Video: " + label)
+                    thisDialog.dialogeBG.update(int(j), ADDON_NAME + ": Getting Movies", " Video: " + label)
                     if filetype is not None and filetype == 'file' and get_title_with_OV == True:
                         m_path = stringUtils.getMovieStrmPath(strm_type, strm_name, label)
                         m_title = stringUtils.getStrmname(label)
@@ -478,17 +474,17 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a", name
 
             pagesDone += 1
             if filetype != '' and filetype != 'file' and pagesDone < int(PAGINGMovies):
-                contentList = jsonUtils.requestList(file, 'video').get('files', [])
+                contentList = jsonUtils.requestList(file, 'video').get('files', {})
                 retry_count = 1
                 while len(contentList) == 0 and retry_count <= 3:
                     utils.addon_log('requestList: try={0} data = {1})'.format(retry_count, details))
-                    contentList = jsonUtils.requestList(file, 'video').get('files', [])
+                    contentList = jsonUtils.requestList(file, 'video').get('files', {})
                     retry_count = retry_count + 1
             else:
                 pagesDone = int(PAGINGMovies)
         else:
-            provider = stringUtils.getProviderId(contentList[1])
-            url = contentList[1]
+            provider = stringUtils.getProviderId(contentList.get('providerid'))
+            url = contentList.get('url')
             if name_orig != '' and file.find('name_orig=') == -1:
                 url = 'name_orig={0};{1}'.format(name_orig , url if isinstance(url, str) else url)
             m_path = stringUtils.getMovieStrmPath(strm_type, strm_name)
@@ -502,7 +498,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider="n.a", name
     j = 100 / len(movieList) if len(movieList) > 0 else 1
     # Write strms for all values in movieList
     for movie in movieList:
-        thisDialog.dialogeBG.update(j, ADDON_NAME + ": Writing Movies: ", movie.get('title'))
+        thisDialog.dialogeBG.update(int(j), ADDON_NAME + ": Writing Movies", movie.get('title'))
         strm_link = 'plugin://{0}/?url=plugin&mode=10&mediaType=movie&id={1}|{2}'.format(addon_id, movie.get('movieID'), movie.get('title')) if addon.getSetting('Link_Type') == '0' else movie.get('url')
         utils.addon_log('write movie = {0}'.format(movie))
         fileSys.writeSTRM(stringUtils.cleanStrms(movie.get('path')), stringUtils.cleanStrms(movie.get('title')), strm_link)
