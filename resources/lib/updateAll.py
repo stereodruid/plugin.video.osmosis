@@ -56,7 +56,7 @@ def strm_update(selectedItems=None, actor=0):
         else:
             cTypeFilter = None
 
-        items = selectedItems if selectedItems else [{'entry': py2_decode(item)} for item in thelist]
+        items = selectedItems if selectedItems else [{'entry': item} for item in thelist]
         if len(items) > 0:
             dialogeBG = xbmcgui.DialogProgressBG()
             dialogeBG.create('OSMOSIS total update process')

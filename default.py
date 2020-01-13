@@ -35,16 +35,18 @@ from resources.lib import updateAll
 from resources.lib import urlUtils
 
 try:
-    import urllib.parse as urlparse
+    from urllib.parse import parse_qsl
 except:
-    import urlparse
+    from urlparse import parse_qsl
 
 addon = xbmcaddon.Addon()
 home = py2_decode(xbmc.translatePath(addon.getAddonInfo('path')))
 FANART = os.path.join(home, 'fanart.jpg')
 
 if __name__ == '__main__':
-    params = dict(urlparse.parse_qsl(sys.argv[2][1:]))
+    params = dict(parse_qsl(sys.argv[2][1:]))
+    for paramKey in params.keys():
+        params[paramKey] = py2_decode(params.get(paramKey))
     utils.addon_log('params = {0}'.format(params))
 
     mode = int(params.get('mode')) if params.get('mode') else None

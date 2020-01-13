@@ -124,14 +124,10 @@ def isInMediaList(mediaTitle, url, cType='Other'):
     if not xbmcvfs.exists(MediaList_LOC):
         xbmcvfs.File(MediaList_LOC, 'a').close()
 
-    fle = xbmcvfs.File(MediaList_LOC, 'r')
-    thelist = fle.read().split(py2_encode('\n'))
-    fle.close()
-    del fle
-
+    thelist = readMediaList()
     if len(thelist) > 0:
         for i in thelist:
-            splits = i.strip().split(py2_encode('|'))
+            splits = i.strip().split('|')
             if stringUtils.getStrmname(splits[1]) == stringUtils.getStrmname(mediaTitle):
                 splitPlugin = re.search('plugin:\/\/([^\/\?]*)', splits[2])
                 mediaPlugin = re.search('plugin:\/\/([^\/\?]*)', url)
@@ -155,7 +151,7 @@ def writeMediaList(url, name, cType='Other', cleanName=True, albumartist=None):
 
     thelist = readMediaList()
 
-    thelist = [py2_decode(x) for x in thelist if py2_decode(x) != '']
+    thelist = [x for x in thelist if x != '']
     if len(thelist) > 0 :
         for entry in thelist:
             splits = entry.strip().split('|')
@@ -272,13 +268,12 @@ def removeMediaList(delList):
 
         newlist = []
         for entry in thelist:
-            entry = py2_decode(entry)
             additem = True
             for item in delList:
-                if entry.find(py2_decode(item.get('url'))) > -1:
+                if entry.find(item.get('url')) > -1:
                     if entry.find('<next>') > -1:
-                        entry = entry.replace('name_orig={0};{1}'.format(item.get('name_orig', ''), py2_decode(item.get('url'))), '')
-                        entry = entry.replace(py2_decode(item.get('url')), '')
+                        entry = entry.replace('name_orig={0};{1}'.format(item.get('name_orig', ''), item.get('url')), '')
+                        entry = entry.replace(item.get('url'), '')
                         splits = entry.split('|')
                         splits[2] = '<next>'.join(list(filter(None, splits[2].split('<next>'))))
                         entry = '|'.join(splits)
@@ -300,7 +295,7 @@ def removeMediaList(delList):
 def readMediaList():
     if xbmcvfs.exists(MediaList_LOC):
         fle = xbmcvfs.File(MediaList_LOC, 'r')
-        thelist = fle.read().splitlines()
+        thelist = py2_decode(fle.read()).splitlines()
         fle.close()
         return thelist
 
@@ -323,16 +318,16 @@ def delNotInMediaList(delList):
                 itemPath = stringUtils.getStrmname(splits[1])
                 path = xbmc.translatePath(os.path.join(path, stringUtils.cleanStrmFilesys(itemPath)))
 
-            path = py2_decode(stringUtils.completePath(path))
+            path = stringUtils.completePath(py2_decode(path))
 
             utils.addon_log('remove: {0}'.format(path))
 
             deleteFromFileSystem = True
-            for split2 in splits[2].split(py2_encode('<next>')):
+            for split2 in splits[2].split('<next>'):
                 streams = None
                 if type.lower().find('tv-shows') > -1 or type.lower().find('movies') > -1:
                     deleteFromFileSystem = False
-                    streams = [stream[0] for stream in kodiDB.delStream(path[len(STRM_LOC) + 1:len(path)], py2_decode(stringUtils.getProviderId(item.get('url')).get('providerId')), type.lower().find('tv-shows') > -1)]
+                    streams = [stream[0] for stream in kodiDB.delStream(path[len(STRM_LOC) + 1:len(path)], stringUtils.getProviderId(item.get('url')).get('providerId'), type.lower().find('tv-shows') > -1)]
                     if len(streams) > 0:
                         dirs, files = xbmcvfs.listdir(path)
                         for file in files:

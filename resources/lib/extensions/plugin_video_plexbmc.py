@@ -26,7 +26,7 @@ def update(strm_name, url, media_type, thelist):
 
                         output_file = xbmcvfs.File(thefile, 'w')
                         for index, linje in enumerate(thelist):
-                            entry = ('{0}\n' if index < len(thelist) - 1 else '{0}').format(py2_decode(linje.strip()))
+                            entry = ('{0}\n' if index < len(thelist) - 1 else '{0}').format(linje.strip())
                             output_file.write(py2_encode(entry))
 
                         return serverurl

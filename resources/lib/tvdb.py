@@ -180,7 +180,7 @@ def removeShowsFromTVDBCache(selectedItems=None):
 
     if xbmcvfs.exists(MediaList_LOC):
         thelist = fileSys.readMediaList()
-        items = selectedItems if selectedItems else [{'entry': py2_decode(item)} for item in thelist]
+        items = selectedItems if selectedItems else [{'entry': item} for item in thelist]
         if len(items) > 0:
             splittedEntries = []
             if not selectedItems:

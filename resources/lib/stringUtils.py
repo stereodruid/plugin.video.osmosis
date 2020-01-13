@@ -16,7 +16,6 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-from kodi_six.utils import py2_encode
 import os, re
 import xbmcaddon, xbmc
 
@@ -69,7 +68,7 @@ def cleanLabels(text, formater=''):
 
     text = utils.multiple_reSub(text, dictresub)
     text = utils.multiple_replace(text, *replacements)
-    text = re.sub('[\/*?<>|!]', '', text)
+    text = cleanStrmFilesys(text)
     text = re.sub('\(.\d*\)', "", text)
     if formater == 'title':
         text = text.title().replace("'S", "'s")
@@ -153,7 +152,7 @@ def removeStringElem(lst, string=''):
 
 
 def replaceStringElem(lst, old='', new=''):
-    return ([x.replace(old, py2_encode(new)) for x in lst])
+    return ([x.replace(old, new) for x in lst])
 
 
 def cleanByDictReplacements(string):
@@ -179,7 +178,7 @@ def getMovieStrmPath(strmTypePath, mediaListEntry_name, movie_name=None):
 
 
 def getStrmname(strm_name):
-    return strm_name.replace(py2_encode('++RenamedTitle++'), py2_encode('')).strip()
+    return strm_name.replace('++RenamedTitle++', '').strip()
 
 
 def parseMediaListURL(url):
@@ -190,17 +189,17 @@ def parseMediaListURL(url):
 
 
 def invCommas(string):
-   string = string.replace(py2_encode("'"), py2_encode("''"))
+   string = string.replace("'", "''")
    return string
 
 
 def cleanTitle(string):
-   string = string.replace(py2_encode(".strm"), py2_encode(""))
+   string = string.replace(".strm", "")
    return string
 
 
 def completePath(filepath):
-    if not filepath.endswith(py2_encode("\\")) and not filepath.endswith(py2_encode("/")):
+    if not filepath.endswith("\\") and not filepath.endswith("/"):
         filepath += os.sep
 
     return filepath

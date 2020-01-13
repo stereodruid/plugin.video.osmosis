@@ -57,7 +57,7 @@ def addItem(label, mode, icon):
 
 def addFunction(labels):
     utils.addon_log('addItem')
-    u = "plugin://{0}/?{1}".format(addon_id, urllib.urlencode({'mode': 666, 'fanart': updateIcon}))
+    u = 'plugin://{0}/?{1}'.format(addon_id, urllib.urlencode({'mode': 666, 'fanart': updateIcon}))
     liz = xbmcgui.ListItem(labels)
     liz.setInfo(type="Video", infoLabels={"Title": labels})
     liz.setArt({'icon': updateIcon, 'thumb': updateIcon, 'fanart':  FANART})
@@ -67,7 +67,7 @@ def addFunction(labels):
 
 def addDir(name, url, mode, art, plot=None, genre=None, date=None, credits=None, showcontext=False, name_parent='', type=None):
     utils.addon_log('addDir: {0} ({1})'.format(py2_decode(name), py2_decode(name_parent)))
-    u = "{0}?{1}".format(sys.argv[0], urllib.urlencode({'url': url, 'name': py2_encode(name), 'type': type, 'name_parent': py2_encode(name_parent), 'fanart': art.get('fanart', '')}))
+    u = '{0}?{1}'.format(sys.argv[0], urllib.urlencode({'url': url, 'name': py2_encode(name), 'type': type, 'name_parent': py2_encode(name_parent), 'fanart': art.get('fanart', '')}))
     contextMenu = []
     liz = xbmcgui.ListItem(name)
     liz.setInfo(type="Video", infoLabels={"Title": name, "Plot": plot, "Genre": genre, "dateadded": date, "credits": credits})
@@ -75,10 +75,13 @@ def addDir(name, url, mode, art, plot=None, genre=None, date=None, credits=None,
     if type == 'tvshow':
         contextMenu.append(('Add TV-Show to MediaList', 'XBMC.RunPlugin({0}&mode={1})'.format(u, 200)))
         contextMenu.append(('Add seasons individually to MediaList', 'XBMC.RunPlugin({0}&mode={1})'.format(u, 202)))
+        xbmcplugin.setContent(int(sys.argv[1]), 'tvshows')
     elif re.findall('( - |, )*([sS](taffel|eason|erie[s]{0,1})|[pP]art|[tT]eil) \d+.*', name):
         contextMenu.append(('Add Season to MediaList', 'XBMC.RunPlugin({0}&mode={1})'.format(u, 200)))
+        xbmcplugin.setContent(int(sys.argv[1]), 'tvshows')
     elif type == 'movie':  # ???
         contextMenu.append(('Add Movie to MediaList', 'XBMC.RunPlugin({0}&mode={1})'.format(u, 200)))
+        xbmcplugin.setContent(int(sys.argv[1]), 'movies')
     else:
         contextMenu.append(('Create Strms', 'XBMC.RunPlugin({0}&mode={1})'.format(u, 200)))
     liz.addContextMenuItems(contextMenu)
@@ -96,10 +99,11 @@ def addLink(name, url, mode, art, plot, genre, date, showcontext, playlist, rege
     liz.setProperty('IsPlayable', 'true')
     if type == 'movie':
         contextMenu.append(('Add Movie to MediaList', 'XBMC.RunPlugin({0}&mode={1}&filetype=file)'.format(u, 200)))
+        xbmcplugin.setContent(int(sys.argv[1]), 'movies')
     else:
         contextMenu.append(('Create Strm', 'XBMC.RunPlugin({0}&mode={1}&filetype=file)'.format(u, 200)))
+
     liz.addContextMenuItems(contextMenu)
-    xbmcplugin.setContent(int(sys.argv[1]), 'movies')
 
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url='{0}&mode={1}'.format(u, mode), listitem=liz, totalItems=total)
 
@@ -181,9 +185,7 @@ def selectDialog(header, list, autoclose=0, multiselect=False, useDetails=False,
 
 
 def editDialog(nameToChange):
-    dialog = xbmcgui.Dialog()
-    select = dialog.input(nameToChange, type=xbmcgui.INPUT_ALPHANUM, defaultt=nameToChange)
-    return select
+    return py2_decode(xbmcgui.Dialog().input(nameToChange, type=xbmcgui.INPUT_ALPHANUM, defaultt=nameToChange))
 
 
 # Before executing the code below we need to know the movie original title (string variable originaltitle) and the year (string variable year). They can be obtained from the infolabels of the listitem. The code filters the database for items with the same original title and the same year, year-1 and year+1 to avoid errors identifying the media.
@@ -309,11 +311,10 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
             return
 
     for index, entry in enumerate(thelist):
-        entry = py2_decode(entry)
         splits = entry.strip().split('|')
         if cTypeFilter and not re.findall(cTypeFilter, splits[0]):
             continue
-        name = py2_decode(stringUtils.getStrmname(splits[1]))
+        name = stringUtils.getStrmname(splits[1])
         cType = splits[0].replace('(', '/').replace(')', '')
         matches = re.findall('(?:name_orig=([^;]*);)*(plugin:\/\/[^<]*)', splits[2])
         iconImage = ''
@@ -334,7 +335,7 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
                     indent_text = '    '
                     indent_text2 = '{0} '.format(indent_text)
                 for match in matches:
-                    name_orig = py2_decode(match[0])
+                    name_orig = match[0]
                     url = match[1]
                     item_entry = '|'.join([splits[0], name, 'name_orig={0};{1}'.format(name_orig, url) if name_orig != '' else url])
                     items.append({'index': index, 'entry': item_entry, 'name': name, 'text': '{2}{0} [{1}]'.format(name, cType, indent_text), \
@@ -352,8 +353,6 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
         sItems = sorted([item.get('text') for item in items], key=lambda k: utils.key_natural_sort(k.lower()))
         if preselect_name:
             preselect_idx = [i for i, item in enumerate(sItems) if item.find(preselect_name) != -1 ]
-            if preselect_idx and len(preselect_idx) > 0:
-                preselect_idx = preselect_idx[0]
     else:
         liz = []
         for item in items:
@@ -361,22 +360,24 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
             li.setArt({'icon': item.get('iconImage')})
             liz.append(li)
         sItems = sorted(liz,
-            key=lambda k: (re.sub('.* \[([^/]*)/.*\]', '\g<1>', k.getLabel()),
+            key=lambda k: (re.sub('.* \[([^/]*)/.*\]', '\g<1>', py2_decode(k.getLabel())),
                             utils.key_natural_sort(re.sub('^ *', '', py2_decode(k.getLabel().lower()))),
                             utils.key_natural_sort(re.sub('( - |, )*([sS](taffel|eason|erie[s]{0,1})|[pP]art|[tT]eil) (?P<number>\d+).*', '\g<number>', py2_decode(k.getLabel2().lower()))),
                             utils.key_natural_sort(re.sub('^ *', '', py2_decode(k.getLabel2().lower())))
                             )
                         )
-        if preselect_name != None:
+        if preselect_name:
             preselect_idx = [i for i, item in enumerate(sItems) if item.getLabel().find(preselect_name) != -1 ]
 
+    if multiselect == False and preselect_idx and isinstance(preselect_idx, list) and len(preselect_idx) > 0:
+        preselect_idx = preselect_idx[0]
+
+    selectedItemsIndex = selectDialog('{0}: Select items'.format(header_prefix), sItems, multiselect=multiselect, useDetails=expand, preselect=preselect_idx)
     if multiselect:
-        selectedItemsIndex = selectDialog('{0}: Select items'.format(header_prefix), sItems, multiselect=True, useDetails=expand, preselect=preselect_idx)
         if expand == False:
             return [item for item in items for index in selectedItemsIndex if item.get('text') == py2_decode(sItems[index])] if selectedItemsIndex and len(selectedItemsIndex) > 0 else None
         else:
             return [item for item in items for index in selectedItemsIndex if item.get('text') == py2_decode(sItems[index].getLabel()) and item.get('text2') == py2_decode(sItems[index].getLabel2())] if selectedItemsIndex and len(selectedItemsIndex) > 0 else None
     else:
-        selectedItemIndex = selectDialog('{0}: Select items'.format(header_prefix), sItems, useDetails=expand, preselect=preselect_idx)
-        selectedList = [item for index, item in enumerate(items) if selectedItemIndex > -1 and item.get('text') == py2_decode(sItems[selectedItemIndex])]
+        selectedList = [item for index, item in enumerate(items) if selectedItemsIndex > -1 and item.get('text') == py2_decode(sItems[selectedItemsIndex])]
         return selectedList[0] if len(selectedList) == 1 else None

@@ -152,13 +152,13 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             if strm:
                 fillPluginItems(file, media_type, file_type, strm, label, strm_type, name_orig=name_orig)
             else:
-                if isinstance (name_parent, str):
+                if isinstance(name_parent, str):
                     name_parent = name_parent
                 guiTools.addDir(label, file, 101, art, plot, '', '', '', name_parent=name_parent, type=detail.get('type', None))
 
 
 def addToMedialist(params):
-    name = name_orig = py2_decode(params.get('name'))
+    name = name_orig = params.get('name')
     # A dialog to rename the Change Title for Folder and MediaList entry:
     if params.get('noninteractive', False) == False:
         name = re.sub('( - |, )*([sS](taffel|eason|erie[s]{0,1})|[pP]art|[tT]eil) \d+', '', name_orig)
@@ -172,7 +172,7 @@ def addToMedialist(params):
             name_orig = '{0} - {1}'.format(name, name_orig)
         if params.get('type') == 'movie' and params.get('year'):
             name = '{0} ({1})'.format(name, params.get('year'))
-        selectAction = ['Continue with original Title: {0}'.format(py2_decode(name)), 'Rename Title', 'Get Title from Medialist']
+        selectAction = ['Continue with original Title: {0}'.format(name), 'Rename Title', 'Get Title from Medialist']
         if not fileSys.writeTutList('select:Rename'):
             tutWin = ['Adding content to your library',
                       'You can rename your Movie, TV-Show or Music title.',
@@ -247,7 +247,7 @@ def addToMedialist(params):
 
 
 def addMultipleSeasonToMediaList(params):
-    name = name_orig = py2_decode(params.get('name'))
+    name = name_orig = params.get('name')
     url = params.get('url')
     selectAction = ['Continue with original Title: {0}'.format(name_orig), 'Rename Title', 'Get Title from Medialist']
     if not fileSys.writeTutList('select:Rename'):
