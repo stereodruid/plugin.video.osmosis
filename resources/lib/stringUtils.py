@@ -20,13 +20,13 @@ import os, re
 import xbmcaddon, xbmc
 
 import utils
+from . import cache
 from . import moduleUtil
 from . import jsonUtils
 
 addon = xbmcaddon.Addon()
 folder_medialistentry_movie = addon.getSetting('folder_medialistentry_movie')
 folder_movie = addon.getSetting('folder_movie')
-addonList = {}
 
 
 def cleanString(string):
@@ -206,15 +206,11 @@ def completePath(filepath):
 
 
 def getAddonname(addonid):
-    if addonid not in addonList:
-        result = jsonUtils.jsonrpc('Addons.GetAddonDetails', {"addonid": addonid, "properties": ["name"]})
-        if len(result) > 0:
-            addonList[addonid] = result["addon"]["name"]
-            return addonList[addonid]
-        else:
-            return addonid
+    result = jsonUtils.jsonrpc('Addons.GetAddonDetails', {"addonid": addonid, "properties": ["name"]})
+    if len(result) > 0:
+        return result["addon"]["name"]
     else:
-        return addonList[addonid]
+        return addonid
 
 
 def getProviderId(url):
@@ -241,6 +237,6 @@ def getProvidername(url):
         if module and hasattr(module, 'getProvidername'):
             provider = module.getProvidername(provider.get('plugin_id'), url)
         else:
-            provider = getAddonname(provider.get('plugin_id'))
+            provider = cache.getAddonnameCache().cacheFunction(getAddonname, provider.get('plugin_id'))
 
     return provider
