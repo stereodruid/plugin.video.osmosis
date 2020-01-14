@@ -25,7 +25,6 @@ from . import fileSys
 from . import guiTools
 from . import jsonUtils
 from . import stringUtils
-from . import urlUtils
 from . import kodiDB
 from . import tvdb
 
@@ -77,19 +76,19 @@ def fillPlugins(cType='video'):
 
 
 def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None', name_parent='', name_orig=None):
-    name_orig_from_url, plugin_id = stringUtils.parseMediaListURL(url)
+    name_orig_from_url, plugin_url = stringUtils.parseMediaListURL(url)
     if not name_orig:
         name_orig = name_orig_from_url
 
     if url.find('playMode=play') == -1:
-        details = jsonUtils.requestList(url, media_type).get('files', [])
+        details = jsonUtils.requestList(plugin_url, media_type).get('files', [])
         retry_count = 1
         while len(details) == 0 and retry_count <= 3:
             utils.addon_log('requestList: try={0} data = {1})'.format(retry_count, details))
-            details = jsonUtils.requestList(url, media_type).get('files', [])
+            details = jsonUtils.requestList(plugin_url, media_type).get('files', [])
             retry_count = retry_count + 1
     else:
-        details = [dict(playableSingleMedia=True, url=url, providerid=plugin_id)]
+        details = [dict(playableSingleMedia=True, url=url)]
 
     if strm_type.find('Cinema') != -1 or strm_type.find('YouTube') != -1 or strm_type.find('Movies') != -1:
         initialize_DialogBG('Movie', 'Adding')
@@ -333,8 +332,8 @@ def removeAndReadMedialistEntry(selectedItems):
         name = item.get('name_new', splits[1])
         urls = splits[2].split('<next>')
         for url in urls:
-            name_orig, plugin_id = stringUtils.parseMediaListURL(url)
-            params = {'cType': cType, 'name': name, 'name_orig': name_orig, 'url': plugin_id, 'choice': 99, 'noninteractive': True}
+            name_orig, plugin_url = stringUtils.parseMediaListURL(url)
+            params = {'cType': cType, 'name': name, 'name_orig': name_orig, 'url': plugin_url, 'choice': 99, 'noninteractive': True}
             addToMedialist(params)
 
 
@@ -479,7 +478,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider='n.a.', nam
             else:
                 pagesDone = int(PAGINGMovies)
         else:
-            provider = contentList[0].get('providerid')
+            provider = stringUtils.getProviderId(contentList[0].get('url')).get('providerId')
             url = contentList[0].get('url')
             if name_orig and file.find('name_orig=') == -1:
                 url = 'name_orig={0};{1}'.format(name_orig , url if isinstance(url, str) else url)

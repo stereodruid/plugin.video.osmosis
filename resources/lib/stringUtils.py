@@ -183,10 +183,10 @@ def getStrmname(strm_name):
 
 
 def parseMediaListURL(url):
-    match = re.findall('(?:name_orig=([^;]*);)?(?:plugin:\/\/([^\/\?]*))', url)
-    name_orig = match.group(1) if match.group(1) and match.group(1) != '' else None
-    plugin_id = match.group(2)
-    return name_orig, plugin_id
+    match = re.findall('(?:name_orig=([^;]*);)?(.*)', url)
+    name_orig = match[0][0] if match[0][0] and match[0][0] != '' else None
+    plugin_url = match[0][1]
+    return [name_orig, plugin_url]
 
 
 def invCommas(string):

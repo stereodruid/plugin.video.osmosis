@@ -80,7 +80,8 @@ def strm_update(selectedItems=None, actor=0):
 
                 urls = url.split('<next>')
                 for url in urls:
-                    name_orig, plugin_id = stringUtils.parseMediaListURL(url)
+                    name_orig, plugin_url = stringUtils.parseMediaListURL(url)
+                    plugin_id = stringUtils.getProviderId(plugin_url).get('plugin_id')
                     if plugin_id:
                         module = moduleUtil.getModule(plugin_id)
                         if module and hasattr(module, 'update'):

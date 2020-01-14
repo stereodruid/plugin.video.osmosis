@@ -37,7 +37,7 @@ def requestItem(file, type='video'):
 def requestList(path, type='video'):
     utils.addon_log('requestList, path = {0}'.format(path))
     if path.find('playMode=play') != -1:
-        return requestItem(path, fletype)
+        return requestItem(path, type)
 
     return jsonrpc('Files.GetDirectory', dict(directory=path, media=type, properties=['art', 'title', 'year', 'track', 'mpaa', 'imdbnumber', 'description', 'season', 'episode', 'playcount', 'genre', 'duration', 'runtime', 'showtitle', 'album', 'artist', 'plot', 'plotoutline', 'tagline', 'tvshowid']))
 

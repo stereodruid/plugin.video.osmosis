@@ -13,7 +13,7 @@ addon = xbmcaddon.Addon()
 def update(strm_name, url, media_type, thelist):
     plex_details = jsonUtils.requestList('plugin://plugin.video.composite_for_plex', media_type).get('files', [])
     for plex_detail in plex_details:
-        orig_name, plugin_id = stringUtils.parseMediaListURL(url)
+        orig_name, plugin_url = stringUtils.parseMediaListURL(url)
         if (orig_name and orig_name == plex_detail['label']) \
             or (stringUtils.getStrmname(strm_name) == stringUtils.cleanLabels(plex_detail['label'])):
             serverurl = plex_detail['file']

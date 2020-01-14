@@ -284,12 +284,12 @@ def browse(type, heading, shares, mask='', useThumbs=False, treatAsFolder=False,
 def resumePointDialog(resumePoint):
     if resumePoint:
         xmldialogs.show_modal_dialog(xmldialogs.Skip,
-             'plugin-video-osmosis-continue.xml',
-             addon.getAddonInfo('path'),
-             minutes=0,
-             seconds=15,
-             skip_to=int(resumePoint[0]) - 5,
-             label=addon.getLocalizedString(39000).format(utils.zeitspanne(int(resumePoint[0]))[5]))
+            'plugin-video-osmosis-continue.xml',
+            addon.getAddonInfo('path'),
+            minutes=0,
+            seconds=15,
+            skip_to=int(resumePoint[0]) - 5,
+            label=addon.getLocalizedString(39000).format(utils.zeitspanne(int(resumePoint[0]))[5]))
 
 
 def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_prefix=ADDON_NAME, preselect_name=None):
