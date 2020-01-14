@@ -36,12 +36,4 @@
 		<language>en de</language>
 		<reuselanguageinvoker>true</reuselanguageinvoker>
 	</extension>
-	<extension point="kodi.context.item">
-		<menu id="kodi.core.main">
-			<item library="addon.py">
-				<label>Osmosis: Update</label>
-				<visible>true</visible>
-			</item>
-		</menu>
-	</extension>
 </addon>
