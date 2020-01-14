@@ -65,7 +65,7 @@ def makeSTRM(filepath, filename, url):
             if not xbmcvfs.exists(filepath):
                 xbmcvfs.mkdir(filepath)
 
-    if not STRM_LOC.startswith("smb:") and not STRM_LOC.startswith('nfs:'):
+    if not STRM_LOC.startswith('smb:') and not STRM_LOC.startswith('nfs:'):
         fullpath = '{0}.strm'.format(py2_decode(os.path.normpath(xbmc.translatePath(os.path.join(filepath, filename)))))
     else:
         fullpath = '{0}{1}.strm'.format(filepath, filename)
@@ -327,13 +327,14 @@ def delNotInMediaList(delList):
                 streams = None
                 if type.lower().find('tv-shows') > -1 or type.lower().find('movies') > -1:
                     deleteFromFileSystem = False
-                    streams = [stream[0] for stream in kodiDB.delStream(path[len(STRM_LOC) + 1:len(path)], stringUtils.getProviderId(item.get('url')).get('providerId'), type.lower().find('tv-shows') > -1)]
+                    streams = [py2_decode(stream[0]) for stream in kodiDB.delStream(path[len(STRM_LOC) + 1:len(path)], stringUtils.getProviderId(item.get('url')).get('providerId'), type.lower().find('tv-shows') > -1)]
                     if len(streams) > 0:
                         dirs, files = xbmcvfs.listdir(path)
                         for file in files:
                             if py2_decode(file).replace('.strm', '') in streams:
-                                utils.addon_log_notice('delNotInMediaList: delete file = "{0}"'.format(py2_decode(os.path.join(path, file))))
-                                xbmcvfs.delete(xbmc.translatePath(os.path.join(path, file)))
+                                filePath = os.path.join(py2_encode(path), file)
+                                utils.addon_log_notice('delNotInMediaList: delete file = \'{0}\''.format(py2_decode(filePath)))
+                                xbmcvfs.delete(xbmc.translatePath(filePath))
                     dirs, files = xbmcvfs.listdir(path)
                     if not files and not dirs:
                         deleteFromFileSystem = True

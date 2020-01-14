@@ -47,9 +47,9 @@ updateIcon = os.path.join(home, 'resources/media/updateIcon.png')
 
 def addItem(label, mode, icon):
     utils.addon_log('addItem')
-    u = "plugin://{0}/?{1}".format(addon_id, urllib.urlencode({'mode': mode, 'fanart': icon}))
+    u = 'plugin://{0}/?{1}'.format(addon_id, urllib.urlencode({'mode': mode, 'fanart': icon}))
     liz = xbmcgui.ListItem(label)
-    liz.setInfo(type="Video", infoLabels={"Title": label})
+    liz.setInfo(type='Video', infoLabels={'Title': label})
     liz.setArt({'icon': icon, 'thumb': icon, 'fanart': FANART})
 
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
@@ -59,7 +59,7 @@ def addFunction(labels):
     utils.addon_log('addItem')
     u = 'plugin://{0}/?{1}'.format(addon_id, urllib.urlencode({'mode': 666, 'fanart': updateIcon}))
     liz = xbmcgui.ListItem(labels)
-    liz.setInfo(type="Video", infoLabels={"Title": labels})
+    liz.setInfo(type='Video', infoLabels={'Title': labels})
     liz.setArt({'icon': updateIcon, 'thumb': updateIcon, 'fanart':  FANART})
 
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
@@ -70,7 +70,7 @@ def addDir(name, url, mode, art, plot=None, genre=None, date=None, credits=None,
     u = '{0}?{1}'.format(sys.argv[0], urllib.urlencode({'url': url, 'name': py2_encode(name), 'type': type, 'name_parent': py2_encode(name_parent), 'fanart': art.get('fanart', '')}))
     contextMenu = []
     liz = xbmcgui.ListItem(name)
-    liz.setInfo(type="Video", infoLabels={"Title": name, "Plot": plot, "Genre": genre, "dateadded": date, "credits": credits})
+    liz.setInfo(type='Video', infoLabels={'Title': name, 'Plot': plot, 'Genre': genre, 'dateadded': date, 'credits': credits})
     liz.setArt(art)
     if type == 'tvshow':
         contextMenu.append(('Add TV-Show to MediaList', 'XBMC.RunPlugin({0}&mode={1})'.format(u, 200)))
@@ -89,12 +89,12 @@ def addDir(name, url, mode, art, plot=None, genre=None, date=None, credits=None,
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url='{0}&mode={1}'.format(u, mode), listitem=liz, isFolder=True)
 
 
-def addLink(name, url, mode, art, plot, genre, date, showcontext, playlist, regexs, total, setCookie="", type=None, year=None):
+def addLink(name, url, mode, art, plot, genre, date, showcontext, playlist, regexs, total, setCookie='', type=None, year=None):
     utils.addon_log('addLink: {0}'.format(py2_decode(name)))
     u = '{0}?{1}'.format(sys.argv[0], urllib.urlencode({'url': url, 'name': py2_encode(name), 'fanart': art.get('fanart', ''), 'type': type, 'year': year}))
     contextMenu = []
     liz = xbmcgui.ListItem(name)
-    liz.setInfo(type="Video", infoLabels={"Title": name, "Plot": plot, "Genre": genre, "dateadded": date})
+    liz.setInfo(type='Video', infoLabels={'Title': name, 'Plot': plot, 'Genre': genre, 'dateadded': date})
     liz.setArt(art)
     liz.setProperty('IsPlayable', 'true')
     if type == 'movie':
@@ -119,15 +119,11 @@ def getSources():
     addItem('Update (with removal of unused .strm files)', 42, updateIcon)
     addFunction('Update all')
     addItem('Rename', 41, updateIcon)
-    addItem("Remove Media", 5, iconRemove)
+    addItem('Remove Media', 5, iconRemove)
     addItem('Remove Shows from TVDB cache', 51, iconRemove)
     addItem('Remove all Shows from TVDB cache', 52, iconRemove)
     if xbmc.getCondVisibility('System.HasAddon(service.watchdog)') != 1:
-        addon_details = jsonUtils.jsonrpc('Addons.GetAddonDetails',
-                            {
-                                "addonid": "service.watchdog",
-                                "properties": ["enabled", "installed"]
-                            }).get('addon')
+        addon_details = jsonUtils.jsonrpc('Addons.GetAddonDetails', dict(addonid='service.watchdog', properties=['enabled', 'installed'])).get('addon')
         if addon_details and addon_details.get('installed'):
             addItem('Activate Watchdog', 7, icon)
         else:
@@ -192,43 +188,43 @@ def editDialog(nameToChange):
 def markMovie(movID, pos, total, done):
     if done:
         try:
-            jsonUtils.jsonrpc('VideoLibrary.SetMovieDetails', {"movieid" : movID, "playcount" : 1})
-            xbmc.executebuiltin("XBMC.Container.Refresh")
+            jsonUtils.jsonrpc('VideoLibrary.SetMovieDetails', dict(movieid=movID, playcount=1))
+            xbmc.executebuiltin('XBMC.Container.Refresh')
         except:
-            print("markMovie: Movie not in DB!?")
+            print('markMovie: Movie not in DB!?')
             pass
     else:
         if xbmc.getCondVisibility('Library.HasContent(Movies)') and pos > 0 and total > 0:
             try:
-                jsonUtils.jsonrpc('VideoLibrary.SetMovieDetails', {"movieid": movID, "resume": {"position": pos, "total": total}})
-                xbmc.executebuiltin("XBMC.Container.Refresh")
+                jsonUtils.jsonrpc('VideoLibrary.SetMovieDetails', dict(movieid=movID, resume=dict(position=pos, total=total)))
+                xbmc.executebuiltin('XBMC.Container.Refresh')
             except:
-                print("markMovie: Movie not in DB!?")
+                print('markMovie: Movie not in DB!?')
                 pass
 
 
 def markSeries(epID, pos, total, done):
     if done:
         try:
-            jsonUtils.jsonrpc('VideoLibrary.SetEpisodeDetails', {"episodeid": epID, "playcount" : 1})
-            xbmc.executebuiltin("XBMC.Container.Refresh")
+            jsonUtils.jsonrpc('VideoLibrary.SetEpisodeDetails', dict(episodeid=epID, playcount=1))
+            xbmc.executebuiltin('XBMC.Container.Refresh')
         except:
-            print("markMovie: Episode not in DB!?")
+            print('markMovie: Episode not in DB!?')
             pass
     else:
         if xbmc.getCondVisibility('Library.HasContent(TVShows)') and pos > 0 and total > 0:
             try:
-                jsonUtils.jsonrpc('VideoLibrary.SetEpisodeDetails', {"episodeid": epID, "resume": {"position": pos, "total": total}})
-                xbmc.executebuiltin("XBMC.Container.Refresh")
+                jsonUtils.jsonrpc('VideoLibrary.SetEpisodeDetails', dict(episodeid=epID, resume=dict(position=pos, total=total)))
+                xbmc.executebuiltin('XBMC.Container.Refresh')
             except:
-                print("markSeries: Show not in DB!?")
+                print('markSeries: Show not in DB!?')
                 pass
 
 
 # Functions not in usee yet:
 def handle_wait(time_to_wait, header, title):
     dlg = xbmcgui.DialogProgress()
-    dlg.create("OSMOSIS", header)
+    dlg.create('OSMOSIS', header)
     secs = 0
     percent = 0
     increment = int(100 / time_to_wait)
@@ -237,7 +233,7 @@ def handle_wait(time_to_wait, header, title):
         secs += 1
         percent = increment * secs
         secs_left = str((time_to_wait - secs))
-        remaining_display = "Starts In {0} seconds, Cancel Channel Change?".format(secs_left)
+        remaining_display = 'Starts In {0} seconds, Cancel Channel Change?'.format(secs_left)
         dlg.update(percent, title, remaining_display)
         xbmc.sleep(1000)
         if (dlg.iscanceled()):
@@ -337,7 +333,7 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
                 for match in matches:
                     name_orig = match[0]
                     url = match[1]
-                    item_entry = '|'.join([splits[0], name, 'name_orig={0};{1}'.format(name_orig, url) if name_orig != '' else url])
+                    item_entry = '|'.join([splits[0], name, 'name_orig={0};{1}'.format(name_orig, url) if name_orig else url])
                     items.append({'index': index, 'entry': item_entry, 'name': name, 'text': '{2}{0} [{1}]'.format(name, cType, indent_text), \
                                   'text2': ('{2}{1}\n{2}[{0}]' if name_orig else '{2}[{0}]').format(stringUtils.getProvidername(url), name_orig, indent_text2), \
                                   'iconImage': iconImage, 'url': url, 'name_orig': name_orig})

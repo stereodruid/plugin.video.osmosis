@@ -28,10 +28,10 @@ addon_id = addon.getAddonInfo('id')
 
 
 def stripUnquoteURL(url):
-    if url.startswith("image://"):
-        url = urllib.unquote_plus(url.replace("image://", "").strip("/"))
+    if url.startswith('image://'):
+        url = urllib.unquote_plus(url.replace('image://', '').strip('/'))
     else:
-        url = urllib.unquote_plus(url.strip("/"))
+        url = urllib.unquote_plus(url.strip('/'))
     return url
 
 

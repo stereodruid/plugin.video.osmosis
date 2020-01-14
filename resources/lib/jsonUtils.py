@@ -26,50 +26,31 @@ except:
     import simplejson as json
 
 
-def requestItem(file, fletype='video'):
+def requestItem(file, type='video'):
     utils.addon_log('requestItem, file = {0}'.format(file))
-    if file.find("playMode=play") == -1:
-        return requestList(file, fletype)
+    if file.find('playMode=play') == -1:
+        return requestList(file, type)
 
-    return jsonrpc('Player.GetItem',
-                {
-                    "playerid": 1,
-                    "properties": ["art", "title", "year", "mpaa", "imdbnumber", "description", "season", "episode", "playcount", "genre", "duration", "runtime", "showtitle", "album", "artist", "plot", "plotoutline", "tagline", "tvshowid"]
-                })
+    return jsonrpc('Player.GetItem', dict(playerid=1, properties=['art', 'title', 'year', 'mpaa', 'imdbnumber', 'description', 'season', 'episode', 'playcount', 'genre', 'duration', 'runtime', 'showtitle', 'album', 'artist', 'plot', 'plotoutline', 'tagline', 'tvshowid']))
 
 
-def requestList(path, fletype='video'):
+def requestList(path, type='video'):
     utils.addon_log('requestList, path = {0}'.format(path))
     if path.find('playMode=play') != -1:
         return requestItem(path, fletype)
 
-    return jsonrpc('Files.GetDirectory',
-                {
-                    "directory": path,
-                    "media": fletype,
-                    "properties": ["art", "title", "year", "track", "mpaa", "imdbnumber", "description", "season", "episode", "playcount", "genre", "duration", "runtime", "showtitle", "album", "artist", "plot", "plotoutline", "tagline", "tvshowid"]
-                }
-            )
+    return jsonrpc('Files.GetDirectory', dict(directory=path, media=type, properties=['art', 'title', 'year', 'track', 'mpaa', 'imdbnumber', 'description', 'season', 'episode', 'playcount', 'genre', 'duration', 'runtime', 'showtitle', 'album', 'artist', 'plot', 'plotoutline', 'tagline', 'tvshowid']))
 
 
 def jsonrpc(action, arguments=None):
-    """ put some JSON together for the JSON-RPC APIv6 """
+    ''' put some JSON together for the JSON-RPC APIv6 '''
     if arguments is None:
         arguments = {}
 
     if arguments:
-        request = json.dumps({
-            'id': 1,
-            'jsonrpc': '2.0',
-            'method': action,
-            'params': arguments
-        })
+        request = json.dumps(dict(id=1, jsonrpc='2.0', method=action, params=arguments))
     else:
-        request = json.dumps({
-            'id': 1,
-            'jsonrpc': '2.0',
-            'method': action
-        })
+        request = json.dumps(dict(id=1, jsonrpc='2.0', method=action))
 
     utils.addon_log('Sending request to Kodi: {0}'.format(request))
     return parse_jsonrpc(xbmc.executeJSONRPC(request))

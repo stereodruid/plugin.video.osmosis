@@ -48,30 +48,30 @@ def cleanLabels(text, formater=''):
     dictresub = {'\[COLOR (.+?)\]' : '', '\[/COLOR\]' : '', '\[COLOR=(.+?)\]' : '', '\[color (.+?)\]': '',
                  '\[/color\]': '', '\[Color=(.+?)\]': '', '\[/Color\]': ''}
 
-    replacements = (("[]", ''), ("[UPPERCASE]", ''),
-                   ("[/UPPERCASE]", ''), ("[LOWERCASE]", ''),
-                   ("[/LOWERCASE]", ''), ("[B]", ''), ("[/B]", ''),
-                   ("[I]", ''), ("[/I]", ''),
+    replacements = (('[]', ''), ('[UPPERCASE]', ''),
+                   ('[/UPPERCASE]', ''), ('[LOWERCASE]', ''),
+                   ('[/LOWERCASE]', ''), ('[B]', ''), ('[/B]', ''),
+                   ('[I]', ''), ('[/I]', ''),
                    ('[D]', ''), ('[F]', ''),
-                   ("[CR]", ''), ("[HD]", ''),
-                   ("()", ''), ("[CC]", ''),
-                   ("[Cc]", ''), ("[Favorite]", ""),
-                   ("[DRM]", ""), ('(cc).', ''),
-                   ('(n)', ''), ("(SUB)", ''),
-                   ("(DUB)", ''), ('(repeat)', ''),
-                   ("(English Subtitled)", ""), ("*", ""),
-                   ("\n", ""), ("\r", ""),
-                   ("\t", ""), ("\ ", ''),
-                   ("/ ", ''), ("\\", '/'),
-                   ("//", '/'), ('plugin.video.', ''),
+                   ('[CR]', ''), ('[HD]', ''),
+                   ('()', ''), ('[CC]', ''),
+                   ('[Cc]', ''), ('[Favorite]', ''),
+                   ('[DRM]', ''), ('(cc).', ''),
+                   ('(n)', ''), ('(SUB)', ''),
+                   ('(DUB)', ''), ('(repeat)', ''),
+                   ('(English Subtitled)', ''), ('*', ''),
+                   ('\n', ''), ('\r', ''),
+                   ('\t', ''), ('\ ', ''),
+                   ('/ ', ''), ('\\', '/'),
+                   ('//', '/'), ('plugin.video.', ''),
                    ('plugin.audio.', ''))
 
     text = utils.multiple_reSub(text, dictresub)
     text = utils.multiple_replace(text, *replacements)
     text = cleanStrmFilesys(text)
-    text = re.sub('\(.\d*\)', "", text)
+    text = re.sub('\(.\d*\)', '', text)
     if formater == 'title':
-        text = text.title().replace("'S", "'s")
+        text = text.title().replace('\'S', '\'s')
     elif formater == 'upper':
         text = text.upper()
     elif formater == 'lower':
@@ -85,7 +85,7 @@ def cleanLabels(text, formater=''):
 def cleanStrms(text, formater=''):
     text = text.replace('Full Episodes', '')
     if formater == 'title':
-        text = text.title().replace("'S", "'s")
+        text = text.title().replace('\'S', '\'s')
     elif formater == 'upper':
         text = text.upper()
     elif formater == 'lower':
@@ -110,13 +110,13 @@ def removeHTMLTAGS(text):
     return re.sub('<[^<]+?>', '', text)
 
 
-def removeNonAscii(s): return "".join(filter(lambda x: ord(x) < 128, s))
+def removeNonAscii(s): return ''.join(filter(lambda x: ord(x) < 128, s))
 
 
 def unicodetoascii(text):
 
     TEXT = (text.
-            replace('\xe2\x80\x99', "'").
+            replace('\xe2\x80\x99', '\'').
             replace('\xc3\xa9', 'e').
             replace('\xe2\x80\x90', '-').
             replace('\xe2\x80\x91', '-').
@@ -124,25 +124,25 @@ def unicodetoascii(text):
             replace('\xe2\x80\x93', '-').
             replace('\xe2\x80\x94', '-').
             replace('\xe2\x80\x94', '-').
-            replace('\xe2\x80\x98', "'").
-            replace('\xe2\x80\x9b', "'").
+            replace('\xe2\x80\x98', '\'').
+            replace('\xe2\x80\x9b', '\'').
             replace('\xe2\x80\x9c', '"').
             replace('\xe2\x80\x9c', '"').
             replace('\xe2\x80\x9d', '"').
             replace('\xe2\x80\x9e', '"').
             replace('\xe2\x80\x9f', '"').
             replace('\xe2\x80\xa6', '...').
-            replace('\xe2\x80\xb2', "'").
-            replace('\xe2\x80\xb3', "'").
-            replace('\xe2\x80\xb4', "'").
-            replace('\xe2\x80\xb5', "'").
-            replace('\xe2\x80\xb6', "'").
-            replace('\xe2\x80\xb7', "'").
-            replace('\xe2\x81\xba', "+").
-            replace('\xe2\x81\xbb', "-").
-            replace('\xe2\x81\xbc', "=").
-            replace('\xe2\x81\xbd', "(").
-            replace('\xe2\x81\xbe', ")")
+            replace('\xe2\x80\xb2', '\'').
+            replace('\xe2\x80\xb3', '\'').
+            replace('\xe2\x80\xb4', '\'').
+            replace('\xe2\x80\xb5', '\'').
+            replace('\xe2\x80\xb6', '\'').
+            replace('\xe2\x80\xb7', '\'').
+            replace('\xe2\x81\xba', '+').
+            replace('\xe2\x81\xbb', '-').
+            replace('\xe2\x81\xbc', '=').
+            replace('\xe2\x81\xbd', '(').
+            replace('\xe2\x81\xbe', ')')
             )
     return TEXT
 
@@ -156,24 +156,25 @@ def replaceStringElem(lst, old='', new=''):
 
 
 def cleanByDictReplacements(string):
-    dictReplacements = {"'\(\\d+\)'" : '', '()' : '', 'Kinofilme' : '',
-                        '  ' : ' ', '\(de\)':'', '\(en\)':'',
-                        "\(TVshow\)":"", 'Movies' : '', 'Filme' : '',
-                        'Movie' : '', "'.'" : ' ', '\(\)' : '',
+    dictReplacements = {'\'\(\\d+\)\'': '', '()': '', 'Kinofilme': '',
+                        '  ': ' ', '\(de\)': '', '\(en\)': '',
+                        '\(TVshow\)': '', 'Movies': '', 'Filme': '',
+                        'Movie': '', '\'.\'': ' ', '\(\)': '',
                         '"?"': '', '"':''}
 
     return utils.multiple_reSub(string, dictReplacements)
 
 
 def getMovieStrmPath(strmTypePath, mediaListEntry_name, movie_name=None):
-    if folder_medialistentry_movie and folder_medialistentry_movie == 'true':
-        mediaListEntry_name = cleanByDictReplacements(mediaListEntry_name) if mediaListEntry_name.find('++RenamedTitle++') == -1 else getStrmname(mediaListEntry_name)
+    if folder_medialistentry_movie == 'true':
+        mediaListEntry_name = cleanByDictReplacements(getStrmname(mediaListEntry_name))
         mediaListEntry_name = cleanStrmFilesys(mediaListEntry_name)
         strmTypePath = os.path.join(strmTypePath, mediaListEntry_name)
-    if movie_name and folder_movie and folder_movie == 'true':
+    if movie_name and folder_movie == 'true':
         movie_name = cleanByDictReplacements(getStrmname(movie_name))
         movie_name = cleanStrmFilesys(movie_name)
         strmTypePath = os.path.join(strmTypePath, movie_name)
+
     return strmTypePath
 
 
@@ -182,33 +183,33 @@ def getStrmname(strm_name):
 
 
 def parseMediaListURL(url):
-    match = re.findall('(?:name_orig=([^;]*);)*(plugin:\/\/[^<]*)', url)
-    name_orig = match[0][0]
-    plugin_id = match[0][1]
-    return [name_orig, plugin_id]
+    match = re.findall('(?:name_orig=([^;]*);)?(?:plugin:\/\/([^\/\?]*))', url)
+    name_orig = match.group(1) if match.group(1) and match.group(1) != '' else None
+    plugin_id = match.group(2)
+    return name_orig, plugin_id
 
 
 def invCommas(string):
-   string = string.replace("'", "''")
+   string = string.replace('\'', '\'\'')
    return string
 
 
 def cleanTitle(string):
-   string = string.replace(".strm", "")
+   string = string.replace('.strm', '')
    return string
 
 
 def completePath(filepath):
-    if not filepath.endswith("\\") and not filepath.endswith("/"):
+    if not filepath.endswith('\\') and not filepath.endswith('/'):
         filepath += os.sep
 
     return filepath
 
 
 def getAddonname(addonid):
-    result = jsonUtils.jsonrpc('Addons.GetAddonDetails', {"addonid": addonid, "properties": ["name"]})
+    result = jsonUtils.jsonrpc('Addons.GetAddonDetails', dict(addonid=addonid, properties=['name']))
     if len(result) > 0:
-        return result["addon"]["name"]
+        return result['addon']['name']
     else:
         return addonid
 
@@ -224,7 +225,7 @@ def getProviderId(url):
         else:
             providerId = plugin_id.group(1)
 
-        provider = {'plugin_id': plugin_id.group(1), 'providerId': providerId}
+        provider = dict(plugin_id=plugin_id.group(1), providerId=providerId)
 
     return provider
 

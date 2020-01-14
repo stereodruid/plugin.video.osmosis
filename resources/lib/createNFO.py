@@ -25,24 +25,24 @@ import xbmcvfs
 global torrent_path
 global torrent_name
 
-"""Everything matching these patterns, and everything to the right
+'''Everything matching these patterns, and everything to the right
 of the pattern, will be removed from the torrent name before searching
 the TVDB api.
 
 Add or remove as needed to suit your needs.
 
-"""
+'''
 global regexes
 
-"""Set to logging.DEBUG for verbose log output,
+'''Set to logging.DEBUG for verbose log output,
 logging.WARNING for log output when an nfo cannot be generated,
 or logging.ERROR to show only unexpected errors,
 or logging.CRITICAL to disable logging completely.
 
-"""
+'''
 # global log_level
 
-"""The location of the log file, change as desired."""
+'''The location of the log file, change as desired.'''
 # global log_location
 
 ##############################################################################
@@ -78,18 +78,18 @@ def setNamePath(tPath, tName, logll):
     # log = logging.getLogger('tvshow_nfo')
     main()
 
-"""Set to logging.DEBUG for verbose log output,
+'''Set to logging.DEBUG for verbose log output,
 logging.WARNING for log output when an nfo cannot be generated,
 or logging.ERROR to show only unexpected errors,
 or logging.CRITICAL to disable logging completely.
 
-"""
+'''
 
-"""The location of the log file, change as desired."""
+'''The location of the log file, change as desired.'''
 
 
 def _is_tv_show(torrent_path):
-    """Check if torrent is a TV show.
+    '''Check if torrent is a TV show.
 
     The default here is to check if the last part
     of the path, the direct parent directory where we
@@ -99,13 +99,13 @@ def _is_tv_show(torrent_path):
     to differentiate.  If you have no way to tell, just
     return True here, and let the TVDB lookup fail later.
 
-    """
+    '''
     return True
     # return os.path.split(torrent_path)[1] == 'tv'
 
 
 def _get_show_name(torrent_name):
-    """Parse show name from torrent name.
+    '''Parse show name from torrent name.
 
     This could be the crucial step that fails.
     First, compile our regex, which looks for a string like S02
@@ -113,7 +113,7 @@ def _get_show_name(torrent_name):
     Next, grab the first part of that split
     Finally, replace all dots with spaces and return the result.
 
-    """
+    '''
     for regex in regexes:
         compiled_regex = re.compile(regex)
         split_string = re.split(compiled_regex, torrent_name)
@@ -124,7 +124,7 @@ def _get_show_name(torrent_name):
 
 
 def get_show_url(torrent_name):
-    """Get thetvdb.com url for this series."""
+    '''Get thetvdb.com url for this series.'''
     t = tvdb_api.Tvdb()
     show_id = None
     failed_names = []
@@ -147,10 +147,10 @@ def get_show_url(torrent_name):
 
 
 def main():
-    """First arg should be directory for our new data,
+    '''First arg should be directory for our new data,
     second arg should be the name of the torrent.
 
-    """
+    '''
 
     # _configure_logging()
 
@@ -181,8 +181,8 @@ def main():
 
     # Create nfo and write our URL to it
     try:
-        if not xbmcvfs.exists(torrent_path + "\\" + torrent_name):
-            xbmcvfs.mkdirs(torrent_path + "\\" + torrent_name)
+        if not xbmcvfs.exists(torrent_path + '\\' + torrent_name):
+            xbmcvfs.mkdirs(torrent_path + '\\' + torrent_name)
 
     except:
         pass
@@ -194,5 +194,5 @@ def main():
     nfo_file.close()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

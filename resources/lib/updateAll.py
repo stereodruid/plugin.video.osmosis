@@ -84,17 +84,17 @@ def strm_update(selectedItems=None, actor=0):
                     if plugin_id:
                         module = moduleUtil.getModule(plugin_id)
                         if module and hasattr(module, 'update'):
-                            plugin_id = module.update(name, plugin_id, 'video', thelist)
+                            url = module.update(name, url, 'video', thelist)
 
                     dialogeBG.update(int(j), 'OSMOSIS total update process' , 'Current Item: {0}; Items left: {1}'.format(stringUtils.getStrmname(name), iUrls))
                     j += step
 
-                    create.fillPluginItems(plugin_id, strm=True, strm_name=name, strm_type=cType, name_orig=name_orig)
+                    create.fillPluginItems(url, strm=True, strm_name=name, strm_type=cType, name_orig=name_orig)
                     iUrls -= 1
 
             dialogeBG.close()
             if actor == actor_update_periodictime:
-                xbmc.executebuiltin('Notification({0}, {1}, {2}, {3})'.format(addon_name, "Next update in: {0}h".format(addon.getSetting('Automatic_Update_Time')), 5000, represent))
+                xbmc.executebuiltin('Notification({0}, {1}, {2}, {3})'.format(addon_name, 'Next update in: {0}h'.format(addon.getSetting('Automatic_Update_Time')), 5000, represent))
             elif actor == actor_update_fixtime:
                 next_run = addon.getSetting('update_time')[:5]
-                xbmc.executebuiltin('Notification({0}, {1}, {2}, {3})'.format(addon_name, "Next update: {0}h".format(next_run), 5000, represent))
+                xbmc.executebuiltin('Notification({0}, {1}, {2}, {3})'.format(addon_name, 'Next update: {0}h'.format(next_run), 5000, represent))

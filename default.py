@@ -56,21 +56,21 @@ if __name__ == '__main__':
         guiTools.getSources()
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
-        if not fileSys.writeTutList("select:PluginType"):
-            tutWin = ["Adding content to your library",
-                      "Welcome, this is your first time using OSMOSIS. Here, you can select the content type you want to add:",
-                      "Video Plugins: Select to add Movies, TV-Shows, YouTube Videos",
-                      "Music Plugins: Select to add Music"]
+        if not fileSys.writeTutList('select:PluginType'):
+            tutWin = ['Adding content to your library',
+                      'Welcome, this is your first time using OSMOSIS. Here, you can select the content type you want to add:',
+                      'Video Plugins: Select to add Movies, TV-Shows, YouTube Videos',
+                      'Music Plugins: Select to add Music']
             xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
     elif mode == 1:
         create.fillPlugins(params.get('url'))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
-        if not fileSys.writeTutList("select:Addon"):
-            tutWin = ["Adding content to your library",
-                      "Here, you can select the Add-on:",
-                      "The selected Add-on should provide Video/Music content in the right structure.",
-                      "Take a look at ++ Naming video files/TV shows ++ http://kodi.wiki/view/naming_video_files/TV_shows."]
+        if not fileSys.writeTutList('select:Addon'):
+            tutWin = ['Adding content to your library',
+                      'Here, you can select the Add-on:',
+                      'The selected Add-on should provide Video/Music content in the right structure.',
+                      'Take a look at ++ Naming video files/TV shows ++ http://kodi.wiki/view/naming_video_files/TV_shows.']
             xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
     elif mode == 2:
         create.fillPluginItems(params.get('url'))
@@ -99,10 +99,10 @@ if __name__ == '__main__':
         tvdb.removeShowsFromTVDBCache()
     elif mode == 6:
         xbmc.executebuiltin('InstallAddon(service.watchdog)')
-        xbmc.executebuiltin("XBMC.Container.Refresh")
+        xbmc.executebuiltin('XBMC.Container.Refresh')
     elif mode == 7:
-        jsonUtils.jsonrpc('Addons.SetAddonEnabled', { "addonid": "service.watchdog", "enabled": True})
-        xbmc.executebuiltin("XBMC.Container.Refresh")
+        jsonUtils.jsonrpc('Addons.SetAddonEnabled', dict(addonid='service.watchdog', enabled=True))
+        xbmc.executebuiltin('XBMC.Container.Refresh')
     elif mode == 10:
         selectedEntry = None
         mediaType = params.get('mediaType')
@@ -159,7 +159,7 @@ if __name__ == '__main__':
                 counter = 0
                 activePlayers = {}
                 title = params.get('episode') if mediaType == 'show' else stringUtils.cleanStrmFilesys(infoLabels.get('title'))
-                while len(activePlayers) == 0 or (xbmc.Player().isPlayingVideo() and xbmc.getInfoLabel('Player.Filename') != "{0}.strm".format(title)):
+                while len(activePlayers) == 0 or (xbmc.Player().isPlayingVideo() and xbmc.getInfoLabel('Player.Filename') != '{0}.strm'.format(title)):
                     activePlayers = jsonUtils.jsonrpc('Player.GetActivePlayers')
                     xbmc.sleep(100)
                     counter += 1
@@ -181,25 +181,25 @@ if __name__ == '__main__':
         create.fillPluginItems(params.get('url'), name_parent=params.get('name', ''))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
-        if not fileSys.writeTutList("select:AddonNavi"):
-            tutWin = ["Adding content to your library",
-                      "Search for your Movie, TV-Show or Music.",
-                      "Mark/select content, do not play a Movie or enter a TV-Show.",
-                      "Open context menu on the selected and select *create strms*."]
+        if not fileSys.writeTutList('select:AddonNavi'):
+            tutWin = ['Adding content to your library',
+                      'Search for your Movie, TV-Show or Music.',
+                      'Mark/select content, do not play a Movie or enter a TV-Show.',
+                      'Open context menu on the selected and select *create strms*.']
             xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
     elif mode == 102:
-        favs = jsonUtils.jsonrpc('Favourites.GetFavourites', {"properties": ["path", "window", "windowparameter", "thumbnail"]}).get('favourites', {})
+        favs = jsonUtils.jsonrpc('Favourites.GetFavourites', dict(properties=['path', 'window', 'windowparameter', 'thumbnail'])).get('favourites', {})
         for fav in favs:
             if params.get('type') == 'video' and fav.get('window') == 'videos':
                 guiTools.addDir(fav.get('title'), fav.get('windowparameter'), 101, {'thumb': fav.get('thumbnail')}, type=type)
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
     elif mode == 200:
-        utils.addon_log("write multi strms")
+        utils.addon_log('write multi strms')
         create.addToMedialist(params)
     elif mode == 201:
-        utils.addon_log("write single strm")
+        utils.addon_log('write single strm')
         # create.fillPluginItems(url)
         # makeSTRM(name, name, url)
     elif mode == 202:
-        utils.addon_log("Add all season individually to MediaList")
+        utils.addon_log('Add all season individually to MediaList')
         create.addMultipleSeasonToMediaList(params)

@@ -47,7 +47,7 @@ STRM_LOC = py2_decode(xbmc.translatePath(addon.getSetting('STRM_LOC')))
 def replacer(*key_values):
     replace_dict = dict(key_values)
     replacement_function = lambda match: replace_dict[match.group(0)]
-    pattern = re.compile("|".join([re.escape(k) for k, v in key_values]), re.M)
+    pattern = re.compile('|'.join([re.escape(k) for k, v in key_values]), re.M)
     return lambda string: pattern.sub(replacement_function, string)
 
 
@@ -113,14 +113,14 @@ def addon_log(string):
 
 
 def addon_log_notice(string):
-    message = "[{0}-{1}]: {2}".format(addon_id, addon_version, string)
+    message = '[{0}-{1}]: {2}'.format(addon_id, addon_version, string)
     xbmc.log(py2_encode(message), xbmc.LOGNOTICE)
 
 
 def zeitspanne(sekunden):
     delta = datetime.timedelta(seconds=sekunden)
-    delta_str = str(delta)[-8:]  # z.B: " 1:01:01"
-    hours, minutes, seconds = [ int(val) for val in delta_str.split(":", 3) ]
+    delta_str = str(delta)[-8:]  # z.B: ' 1:01:01'
+    hours, minutes, seconds = [ int(val) for val in delta_str.split(':', 3) ]
     weeks = delta.days // 7
     days = delta.days % 7
     timePlayed = datetime.time(hours, minutes, seconds)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""XML based dialogs"""
+'''XML based dialogs'''
 from __future__ import unicode_literals
 
 from platform import machine
@@ -14,11 +14,11 @@ CMD_AUTOCLOSE_DIALOG = 'AlarmClock(closedialog,Dialog.Close(all,true),' \
 
 
 def show_modal_dialog(dlg_class, xml, path, **kwargs):
-    """
+    '''
     Show a modal Dialog in the UI.
     Pass kwargs minutes and/or seconds to have the dialog automatically
     close after the specified time.
-    """
+    '''
     dlg = dlg_class(xml, path, 'default', '1080i', **kwargs)
     minutes = kwargs.get('minutes', 0)
     seconds = kwargs.get('seconds', 0)
@@ -28,9 +28,9 @@ def show_modal_dialog(dlg_class, xml, path, **kwargs):
 
 
 class Skip(xbmcgui.WindowXMLDialog):
-    """
+    '''
     Dialog for skipping video parts (intro, recap, ...)
-    """
+    '''
 
 
     def __init__(self, *args, **kwargs):
