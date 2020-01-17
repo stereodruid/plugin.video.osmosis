@@ -699,7 +699,7 @@ def getKodiMovieID(sTitle):
         sTitle = stringUtils.invCommas(sTitle)
 
         # c00 = title; c14 = genre
-        cursor.execute('SELECT idMovie, idFile, premiered, c14 FROM movie WHERE c00 LIKE \'{}\';'.format(sTitle))
+        cursor.execute('SELECT movie.idMovie, movie.idFile, movie.premiered, movie.c14 FROM movie INNER JOIN files on files.idFile = movie.idFile WHERE files.strFilename LIKE \'{}.strm\';'.format(sTitle))
         dbMovie = cursor.fetchone()
     finally:
         cursor.close()
@@ -717,8 +717,7 @@ def getKodiEpisodeID(sTVShowTitle, iSeason, iEpisode):
         sTVShowTitle = stringUtils.invCommas(sTVShowTitle)
 
         # episode.c00 = title; episode.c05 = aired; episode.c06 = thumb; episode.c12 = season; episode.c13 = episode; tvshow.c00 = title
-        query = 'SELECT episode.idEpisode, episode.idFile, episode.c00, episode.c05, episode.c06 FROM episode INNER JOIN tvshow ON tvshow.idShow = episode.idShow WHERE episode.c12 = {} and episode.c13 = {} and tvshow.c00 LIKE \'{}\';'
-
+        query = 'SELECT episode.idEpisode, episode.idFile, episode.c00, episode.c05, episode.c06 FROM episode INNER JOIN tvshow ON tvshow.idShow = episode.idShow WHERE episode.c12 = {0} and episode.c13 = {1} and tvshow.c00 LIKE \'{2}\';'
         cursor.execute(query.format(iSeason, iEpisode, sTVShowTitle))
         dbEpisode = cursor.fetchone()
     finally:

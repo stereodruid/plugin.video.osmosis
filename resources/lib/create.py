@@ -88,7 +88,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             details = jsonUtils.requestList(plugin_url, media_type).get('files', [])
             retry_count = retry_count + 1
     else:
-        details = [dict(playableSingleMedia=True, url=url)]
+        details = [dict(playableSingleMedia=True, url=plugin_url)]
 
     if strm_type.find('Cinema') != -1 or strm_type.find('YouTube') != -1 or strm_type.find('Movies') != -1:
         initialize_DialogBG('Movie', 'Adding')
@@ -147,8 +147,6 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             if strm:
                 fillPluginItems(file, media_type, file_type, strm, label, strm_type, name_orig=name_orig)
             else:
-                if isinstance(name_parent, str):
-                    name_parent = name_parent
                 guiTools.addDir(label, file, 101, art, plot, '', '', '', name_parent=name_parent, type=detail.get('type', None))
 
 
@@ -446,7 +444,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider='n.a.', nam
             for detailInfo in contentList:
                 file = detailInfo.get('file').replace('\\\\', '\\') if detailInfo.get('file', None) else None
                 if name_orig and file.find('name_orig=') == -1:
-                    file = 'name_orig={0};{1}'.format(name_orig , file if isinstance(file, str) else file)
+                    file = 'name_orig={0};{1}'.format(name_orig, file)
                 filetype = detailInfo.get('filetype', None)
                 label = detailInfo.get('label') if detailInfo.get('label', None) else None
                 imdbnumber = detailInfo.get('imdbnumber').strip() if detailInfo.get('imdbnumber', None) else None
@@ -481,7 +479,7 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider='n.a.', nam
             provider = stringUtils.getProviderId(contentList[0].get('url')).get('providerId')
             url = contentList[0].get('url')
             if name_orig and file.find('name_orig=') == -1:
-                url = 'name_orig={0};{1}'.format(name_orig , url if isinstance(url, str) else url)
+                url = 'name_orig={0};{1}'.format(name_orig , url)
             m_path = stringUtils.getMovieStrmPath(strm_type, strm_name)
             m_title = stringUtils.getStrmname(strm_name)
             movieList.append({'path': m_path, 'title':  stringUtils.cleanStrmFilesys(m_title), 'url': url, 'provider': provider})
@@ -509,8 +507,6 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
     if strm_type.lower().find('other') == -1:
         lang = strm_type[strm_type.find('(') + 1:strm_type.find(')')]
     showtitle = stringUtils.getStrmname(strm_name)
-    if isinstance (showtitle, str):
-        showtitle = showtitle
 
     while pagesDone < int(PAGINGTVshows):
         strm_type = strm_type.replace('Shows-Collection', 'TV-Shows')
@@ -646,7 +642,7 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0, name_orig=N
     file = episode_item.get('file', None)
 
     if name_orig and file.find('name_orig=') == -1:
-        file = 'name_orig={0};{1}'.format(name_orig, file if isinstance(file, str) else file)
+        file = 'name_orig={0};{1}'.format(name_orig, file)
     episode = episode_item.get('episode', -1)
     split_episode = episode_item.get('split_episode', -1)
     multi_episode = episode_item.get('multi_episode', False)

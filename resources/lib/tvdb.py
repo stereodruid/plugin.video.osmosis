@@ -138,20 +138,17 @@ def getTVShowFromTVDBID(tvdb_id, lang):
 
 
 def getTVShowFromCache(showName):
-    showName = showName if isinstance(showName, str) else showName
     data = cache.getShowCache().get(showName)
     utils.addon_log('tvdb getTVShowCache: showName = {0}; data = {1}'.format(showName, data))
     return eval(data) if data and len(data.strip()) > 0 else None
 
 
 def setTVShowCache(showName, data):
-    showName = showName if isinstance(showName, str) else showName
     utils.addon_log('tvdb setTVShowCache: showName = {0}; data = {1}'.format(showName, data))
     cache.getShowCache().set(showName, repr(data))
 
 
 def deleteTVShowFromCache(showName):
-    showName = showName if isinstance(showName, str) else showName
     cache.getShowCache().delete(showName)
     utils.addon_log('tvdb deleteTVShowCache: showName = {0}'.format(showName))
 
@@ -482,7 +479,6 @@ def findEpisodeByName(show_data, episodeSeason, episodeNr, episodeName, lang, si
 
 
 def getEpisodeFromCache(episodeSeason, episodeName, showid):
-    episodeName = episodeName if isinstance(episodeName, str) else episodeName
     entry = '{0}_{1}_{2}'.format(episodeSeason, episodeName, showid)
     data_tmp = cache.getEpisodeCache().get(entry)
     if not data_tmp:
@@ -503,7 +499,6 @@ def getEpisodeFromCache(episodeSeason, episodeName, showid):
 
 
 def setEpisodeCache(episodeSeason, episodeName, showid, data, user_entry=False):
-    episodeName = episodeName if isinstance(episodeName, str) else episodeName
     entry = '{0}_{1}_{2}'.format(episodeSeason, episodeName, showid)
     if user_entry == True:
         utils.addon_log('tvdb setEpisodeCache (user entry): season = {0}; episodeName = \'{1}\'; showid = {2}; data = {3}'.format(episodeSeason, episodeName, showid, data))
@@ -515,7 +510,6 @@ def setEpisodeCache(episodeSeason, episodeName, showid, data, user_entry=False):
 
 
 def deleteEpisodeFromCache(episodeSeason, episodeName, showid, user_entry=False):
-    episodeName = episodeName if isinstance(episodeName, str) else episodeName
     entry = '{0}_{1}_{2}'.format(episodeSeason, episodeName, showid)
     if user_entry == True:
         utils.addon_log('tvdb deleteEpisodeFromCache (user entry): season = {0}; episodeName = \'{1}\'; showid = {2}'.format(episodeSeason, episodeName, showid))

@@ -16,7 +16,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-from kodi_six.utils import py2_decode
+from kodi_six.utils import PY2, py2_decode
 import os, sys
 import time
 import re
@@ -42,8 +42,10 @@ FANART = os.path.join(home, 'fanart.jpg')
 
 if __name__ == '__main__':
     params = dict(parse_qsl(sys.argv[2][1:]))
-    for paramKey in params.keys():
-        params[paramKey] = py2_decode(params.get(paramKey))
+    if PY2:
+        sys.argv[0] = py2_decode(sys.argv[0])
+        for paramKey in params.keys():
+            params[paramKey] = py2_decode(params.get(paramKey))
     utils.addon_log('params = {0}'.format(params))
 
     mode = int(params.get('mode')) if params.get('mode') else None

@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
+from kodi_six.utils import PY2, py2_encode, py2_decode
 import re
 import xbmc
 import xbmcgui
 import xbmcplugin
+import utils
 
 from resources.lib import guiTools
 from resources.lib import jsonUtils
@@ -18,6 +20,8 @@ def play(argv, params):
     if mediaType:
         if params.get('id') or params.get('showid'):
             providers = kodiDB.getVideo(params.get('id')) if params.get('id') else kodiDB.getVideo(params.get('showid'), params.get('episode'))
+            if PY2:
+                providers = [tuple(map(lambda x: py2_decode(x), provider)) for provider in providers]
             if len(providers) == 1:
                 selectedEntry = providers[0]
             else:
@@ -31,7 +35,7 @@ def play(argv, params):
 
             props = None
             infoLabels = dict()
-
+            utils.addon_log(argv[0])
             if mediaType == 'show':
                 sTVShowTitle = argv[0][argv[0].index('|') + 1:]
                 sTVShowTitle = stringUtils.unicodetoascii(sTVShowTitle)
@@ -57,21 +61,22 @@ def play(argv, params):
 
             if len(infoLabels) > 0:
                 item.setInfo('video', infoLabels)
-
+            item.setProperty('resumetime', str(605))
+            item.setProperty('totaltime', '1')
             xbmcplugin.setResolvedUrl(int(argv[1]), True, item)
 
             # Wait until the media is started in player
             counter = 0
             activePlayers = {}
-            title = params.get('episode') if mediaType == 'show' else stringUtils.cleanStrmFilesys(infoLabels.get('title'))
-            while len(activePlayers) == 0 or (xbmc.Player().isPlayingVideo() and xbmc.getInfoLabel('Player.Filename') != '{0}.strm'.format(title)):
+            title = py2_encode('{0}.strm'.format(params.get('episode') if mediaType == 'show' else stringUtils.cleanStrmFilesys(infoLabels.get('title'))))
+            while len(activePlayers) == 0 or (xbmc.Player().isPlayingVideo() and xbmc.getInfoLabel('Player.Filename') != title):
                 activePlayers = jsonUtils.jsonrpc('Player.GetActivePlayers')
                 xbmc.sleep(100)
                 counter += 1
                 if counter >= 600:
                     raise
 
-            resumePoint = kodiDB.getPlayedURLResumePoint({'filename': xbmc.getInfoLabel('Player.Filename'), 'path': xbmc.getInfoLabel('Player.Folderpath')})
+            resumePoint = kodiDB.getPlayedURLResumePoint({'filename': py2_decode(xbmc.getInfoLabel('Player.Filename')), 'path': py2_decode(xbmc.getInfoLabel('Player.Folderpath'))})
             guiTools.resumePointDialog(resumePoint)
         elif mediaType == 'audio' and params.get('url', '').startswith('plugin://'):
             xbmcplugin.setResolvedUrl(int(argv[1]), True, xbmcgui.ListItem(path=params.get('url')))
