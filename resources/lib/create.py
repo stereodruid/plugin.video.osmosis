@@ -641,7 +641,7 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0, name_orig=N
     utils.addon_log('detailInfo: {0}'.format(episode_item))
     file = episode_item.get('file', None)
 
-    if name_orig and file.find('name_orig=') == -1:
+    if name_orig and file.find('name_orig=') == -1 and addon.getSetting('Link_Type') == '0':
         file = 'name_orig={0};{1}'.format(name_orig, file)
     episode = episode_item.get('episode', -1)
     split_episode = episode_item.get('split_episode', -1)
@@ -655,10 +655,10 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0, name_orig=N
         else:
             strSeasonEpisode = 's{0}e{1}'.format(season, episode)
     showtitle = episode_item.get('showtitle', None)
-    provider = stringUtils.getProviderId(file)
 
     if showtitle is not None and showtitle != '' and strm_type != '':
         path = os.path.join(strm_type, stringUtils.cleanStrmFilesys(showtitle))
+        provider = stringUtils.getProviderId(file)
         episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': stringUtils.cleanStrmFilesys(showtitle), 'provider': provider.get('providerId')}
 
         if addon.getSetting('Link_Type') == '0':
