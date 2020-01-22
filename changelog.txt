@@ -1,5 +1,7 @@
+1.3.11
+  Maven85  Fixed creating movie streams when streamref is original plugin
 1.3.10
-  Maven85  Fixed creating streams when streamref is original plugin
+  Maven85  Fixed creating episode streams when streamref is original plugin
 1.3.9
   Maven85  Fixed playing streams with umlauts
   Maven85  Fixed stream url for individually added movies
