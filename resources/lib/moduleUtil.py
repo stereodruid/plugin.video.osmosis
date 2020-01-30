@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-import utils
+
+from .utils import addon_log
 
 
 def getModule(plugin_id):
@@ -11,6 +12,6 @@ def getModule(plugin_id):
         try:
             extension = __import__('resources.lib.extensions.{0}'.format(plugin_id), fromlist=[plugin_id])
         except ImportError:
-            utils.addon_log('Extension {0} could not be found'.format(plugin_id))
+            addon_log('Extension {0} could not be found'.format(plugin_id))
 
     return extension

@@ -14,21 +14,17 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 from __future__ import unicode_literals
-from kodi_six.utils import py2_decode
+from kodi_six.utils import py2_decode, py2_encode
 import os
 import re
 import sys
 import datetime
 import xbmc, xbmcaddon, xbmcvfs
 import xml.etree.ElementTree as ET
-from kodi_six.utils import py2_encode
 
-from resources.lib import stringUtils
+from .common import Globals
 
-addon = xbmcaddon.Addon()
-addon_id = addon.getAddonInfo('id')
-addon_version = addon.getAddonInfo('version')
-STRM_LOC = py2_decode(xbmc.translatePath(addon.getSetting('STRM_LOC')))
+globals = Globals()
 
 
 #***************************************************************************************
@@ -86,6 +82,7 @@ def multiple_reSub(text, dic):
 
 def createSongNFO(filepath, filename , strm_ty='type', artists='none', albums='no album', titls='title', typese='types'):
     # create .nfo xml file
+    STRM_LOC = py2_decode(xbmc.translatePath(globals.addon.getSetting('STRM_LOC')))
     filepath = os.path.join(STRM_LOC, filepath)
 
     if not xbmcvfs.exists(filepath):
@@ -108,12 +105,12 @@ def createSongNFO(filepath, filename , strm_ty='type', artists='none', albums='n
 
 
 def addon_log(string):
-    message = '[{0}-{1}]: {2}'.format(addon_id, addon_version, string)
+    message = '[{0}-{1}]: {2}'.format(globals.PLUGIN_ID, globals.PLUGIN_VERSION, string)
     xbmc.log(py2_encode(message))
 
 
 def addon_log_notice(string):
-    message = '[{0}-{1}]: {2}'.format(addon_id, addon_version, string)
+    message = '[{0}-{1}]: {2}'.format(globals.PLUGIN_ID, globals.PLUGIN_VERSION, string)
     xbmc.log(py2_encode(message), xbmc.LOGNOTICE)
 
 

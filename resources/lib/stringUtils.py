@@ -16,17 +16,19 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-import os, re
-import xbmcaddon, xbmc
+import os
+import re
+import xbmc
+import xbmcaddon
 
-import utils
-from . import cache
-from . import moduleUtil
-from . import jsonUtils
+from .cache import Globals, getAddonnameCache
+from .common import jsonrpc
+from .moduleUtil import getModule
+from .utils import multiple_replace, multiple_reSub
 
-addon = xbmcaddon.Addon()
-folder_medialistentry_movie = addon.getSetting('folder_medialistentry_movie')
-folder_movie = addon.getSetting('folder_movie')
+globals = Globals()
+folder_medialistentry_movie = globals.addon.getSetting('folder_medialistentry_movie')
+folder_movie = globals.addon.getSetting('folder_movie')
 
 
 def cleanString(string):
@@ -66,8 +68,8 @@ def cleanLabels(text, formater=''):
                    ('//', '/'), ('plugin.video.', ''),
                    ('plugin.audio.', ''))
 
-    text = utils.multiple_reSub(text, dictresub)
-    text = utils.multiple_replace(text, *replacements)
+    text = multiple_reSub(text, dictresub)
+    text = multiple_replace(text, *replacements)
     text = cleanStrmFilesys(text)
     text = re.sub('\(.\d*\)', '', text)
     if formater == 'title':
@@ -162,7 +164,7 @@ def cleanByDictReplacements(string):
                         'Movie': '', '\'.\'': ' ', '\(\)': '',
                         '"?"': '', '"':''}
 
-    return utils.multiple_reSub(string, dictReplacements)
+    return multiple_reSub(string, dictReplacements)
 
 
 def getMovieStrmPath(strmTypePath, mediaListEntry_name, movie_name=None):
@@ -207,7 +209,7 @@ def completePath(filepath):
 
 
 def getAddonname(addonid):
-    result = jsonUtils.jsonrpc('Addons.GetAddonDetails', dict(addonid=addonid, properties=['name']))
+    result = jsonrpc('Addons.GetAddonDetails', dict(addonid=addonid, properties=['name']))
     if len(result) > 0:
         return result['addon']['name']
     else:
@@ -219,7 +221,7 @@ def getProviderId(url):
     plugin_id = re.search('plugin:\/\/([^\/\?]*)', url)
 
     if plugin_id:
-        module = moduleUtil.getModule(plugin_id.group(1))
+        module = getModule(plugin_id.group(1))
         if module and hasattr(module, 'getProviderId'):
             providerId = module.getProviderId(plugin_id.group(1), url)
         else:
@@ -234,10 +236,10 @@ def getProvidername(url):
     provider = getProviderId(url)
 
     if provider:
-        module = moduleUtil.getModule(provider.get('plugin_id'))
+        module = getModule(provider.get('plugin_id'))
         if module and hasattr(module, 'getProvidername'):
             provider = module.getProvidername(provider.get('plugin_id'), url)
         else:
-            provider = cache.getAddonnameCache().cacheFunction(getAddonname, provider.get('plugin_id'))
+            provider = getAddonnameCache().cacheFunction(getAddonname, provider.get('plugin_id'))
 
     return provider

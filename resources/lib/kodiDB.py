@@ -20,56 +20,60 @@ from kodi_six.utils import py2_decode
 import os
 import sys
 import datetime
-import xbmc
-import xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
 import sqlite3
 import mysql.connector
+import xbmc
+import xbmcaddon
+import xbmcgui
+import xbmcvfs
+import xbmcplugin
 
-import utils
-from . import stringUtils
+from .common import Globals
+from .stringUtils import cleanStrmFilesys, cleanTitle, completePath, invCommas
+from .utils import addon_log
 
-addon = xbmcaddon.Addon()
-profile = py2_decode(xbmc.translatePath(addon.getAddonInfo('profile')))
+globals = Globals()
+profile = py2_decode(xbmc.translatePath(globals.DATA_PATH))
 MusicDB_LOC = os.path.join(profile, 'Musik.db')
 MODBPATH = os.path.join(profile, 'Movies.db')
 SHDBPATH = os.path.join(profile, 'Shows.db')
 MODBPATH_MYSQL = os.path.join(profile, 'Movies')
 SHDBPATH_MYSQL = os.path.join(profile, 'TVShows')
-STRM_LOC = py2_decode(xbmc.translatePath(addon.getSetting('STRM_LOC')))
-DATABASE_MYSQL = addon.getSetting('USE_MYSQL')
+STRM_LOC = py2_decode(xbmc.translatePath(globals.addon.getSetting('STRM_LOC')))
+DATABASE_MYSQL = globals.addon.getSetting('USE_MYSQL')
 
 # Databases
-KMDBUSERNAME = addon.getSetting('KMusic-DB username')
-KMDBPASSWORD = addon.getSetting('KMusic-DB password')
-KMDBNAME = addon.getSetting('KMusic-DB name')
-KMDBPATH = py2_decode(xbmc.translatePath(addon.getSetting('KMusic-DB path')))
-KMDBIP = addon.getSetting('KMusic-DB IP')
-KMDBPORT = addon.getSetting('KMusic-DB port')
+KMDBUSERNAME = globals.addon.getSetting('KMusic-DB username')
+KMDBPASSWORD = globals.addon.getSetting('KMusic-DB password')
+KMDBNAME = globals.addon.getSetting('KMusic-DB name')
+KMDBPATH = py2_decode(xbmc.translatePath(globals.addon.getSetting('KMusic-DB path')))
+KMDBIP = globals.addon.getSetting('KMusic-DB IP')
+KMDBPORT = globals.addon.getSetting('KMusic-DB port')
 
-KMODBUSERNAME = addon.getSetting('KMovie-DB username')
-KMODBPASSWORD = addon.getSetting('KMovie-DB password')
-KMODBNAME = addon.getSetting('KMovie-DB name')
-KMODBPATH = py2_decode(xbmc.translatePath(addon.getSetting('KMovie-DB path')))
-KMODBIP = addon.getSetting('KMovie-DB IP')
-KMODBPORT = addon.getSetting('KMovie-DB port')
+KMODBUSERNAME = globals.addon.getSetting('KMovie-DB username')
+KMODBPASSWORD = globals.addon.getSetting('KMovie-DB password')
+KMODBNAME = globals.addon.getSetting('KMovie-DB name')
+KMODBPATH = py2_decode(xbmc.translatePath(globals.addon.getSetting('KMovie-DB path')))
+KMODBIP = globals.addon.getSetting('KMovie-DB IP')
+KMODBPORT = globals.addon.getSetting('KMovie-DB port')
 
-MOVDBUSERNAME = addon.getSetting('Movies-DB username')
-MOVDBPASSWORD = addon.getSetting('Movies-DB password')
-MOVDBNAME = addon.getSetting('Movies-DB name')
-MOVDBIP = addon.getSetting('Movies-DB IP')
-MOVDBPORT = addon.getSetting('Movies-DB port')
+MOVDBUSERNAME = globals.addon.getSetting('Movies-DB username')
+MOVDBPASSWORD = globals.addon.getSetting('Movies-DB password')
+MOVDBNAME = globals.addon.getSetting('Movies-DB name')
+MOVDBIP = globals.addon.getSetting('Movies-DB IP')
+MOVDBPORT = globals.addon.getSetting('Movies-DB port')
 
-TVSDBUSERNAME = addon.getSetting('TV-Show-DB username')
-TVSDBPASSWORD = addon.getSetting('TV-Show-DB password')
-TVSDBNAME = addon.getSetting('TV-Show-DB name')
-TVSDBIP = addon.getSetting('TV-Show-DB IP')
-TVSDBPORT = addon.getSetting('TV-Show-DB port')
+TVSDBUSERNAME = globals.addon.getSetting('TV-Show-DB username')
+TVSDBPASSWORD = globals.addon.getSetting('TV-Show-DB password')
+TVSDBNAME = globals.addon.getSetting('TV-Show-DB name')
+TVSDBIP = globals.addon.getSetting('TV-Show-DB IP')
+TVSDBPORT = globals.addon.getSetting('TV-Show-DB port')
 
-MDBUSERNAME = addon.getSetting('Music-DB username')
-MDBPASSWORD = addon.getSetting('Music-DB password')
-MDBNAME = addon.getSetting('Music-DB name')
-MDBIP = addon.getSetting('Music-DB IP')
-MDBPORT = addon.getSetting('Music-DB port')
+MDBUSERNAME = globals.addon.getSetting('Music-DB username')
+MDBPASSWORD = globals.addon.getSetting('Music-DB password')
+MDBNAME = globals.addon.getSetting('Music-DB name')
+MDBIP = globals.addon.getSetting('Music-DB IP')
+MDBPORT = globals.addon.getSetting('Music-DB port')
 
 kodi_version = int(xbmc.getInfoLabel('System.BuildVersion')[:2])
 
@@ -146,7 +150,7 @@ class Config(object):
 
 
 def musicDatabase(strAlbumName, strArtistName, strSongTitle, strPath, strURL, iTrack, iDuration, strArtPath, tFileModTime=None):
-    strPath = stringUtils.completePath(os.path.join(STRM_LOC, strPath))
+    strPath = completePath(os.path.join(STRM_LOC, strPath))
 
     # Write to music db and get id's
     iRoleID = writeRole('Artist')
@@ -252,8 +256,8 @@ def writeSong(iPathID, iAlbumID, strArtist, strTitle, iDuration, iTrack, tFileMo
     strDateAdded = tDateAdded.strftime('%Y-%m-%d %H:%M:%S')
     iYear = int(datetime.datetime.now().strftime('%Y'))
     artistCol = 'strArtistDisp' if kodi_version >= 18 else 'strArtists'
-    strTitle = stringUtils.invCommas(strTitle)
-    strFileName = stringUtils.cleanStrmFilesys(strTitle)
+    strTitle = invCommas(strTitle)
+    strFileName = cleanStrmFilesys(strTitle)
     strFileName = '{0}.strm'.format(strFileName)
 
     selectQuery = 'SELECT idSong FROM song WHERE {} LIKE \'{}\' AND strTitle LIKE \'{}\';'
@@ -450,7 +454,7 @@ def kmovieExists(title, imdbnumber):
     try:
         con, cursor = openDB(KMODBPATH, 'KMovies')
 
-        # title = stringUtils.invCommas(title)
+        # title = invCommas(title)
         cursor.execute('SELECT strFileName FROM movie_view WHERE uniqueid_value LIKE \'{}\';'.format(imdbnumber))
 
         dbMovieName = cursor.fetchone()
@@ -459,7 +463,7 @@ def kmovieExists(title, imdbnumber):
             dbMovieName = title
         else:
             dbMovieName = dbMovieName[0]
-        dbMovieName = stringUtils.cleanTitle(dbMovieName)
+        dbMovieName = cleanTitle(dbMovieName)
     finally:
         cursor.close()
         con.close()
@@ -472,13 +476,13 @@ def movieExists(title, path):
     try:
         con, cursor = openDB(MODBPATH, 'Movies')
 
-        title = stringUtils.invCommas(title)
+        title = invCommas(title)
 
         cursor.execute('SELECT id, title, filePath FROM movies WHERE title LIKE \'{}\';'.format(title))
         dbMovie = cursor.fetchone()
 
-        path = stringUtils.completePath(path) if DATABASE_MYSQL == 'false' else stringUtils.completePath(path).replace('\\', '\\\\')
-        path = stringUtils.invCommas(path)
+        path = completePath(path) if DATABASE_MYSQL == 'false' else completePath(path).replace('\\', '\\\\')
+        path = invCommas(path)
         if dbMovie is None:
             cursor.execute('INSERT INTO movies (title, filePath) VALUES (\'{}\', \'{}\');'.format(title, path))
             con.commit()
@@ -510,11 +514,11 @@ def movieStreamExists(movieID, provider, url):
             dbMovie = []
 
         if len(dbMovie) == 0:
-            cursor.execute('INSERT INTO stream_ref (mov_id, provider, url) VALUES ({}, \'{}\', \'{}\');'.format(movieID, provider, stringUtils.invCommas(url)))
+            cursor.execute('INSERT INTO stream_ref (mov_id, provider, url) VALUES ({}, \'{}\', \'{}\');'.format(movieID, provider, invCommas(url)))
             con.commit()
         else:
             if py2_decode(dbMovie[0][1]) != url:
-                cursor.execute('UPDATE stream_ref SET url=\'{}\' WHERE mov_id = {};'.format(stringUtils.invCommas(url), movieID))
+                cursor.execute('UPDATE stream_ref SET url=\'{}\' WHERE mov_id = {};'.format(invCommas(url), movieID))
                 con.commit()
     finally:
         cursor.close()
@@ -526,14 +530,14 @@ def showExists(title, path):
     try:
         con, cursor = openDB(SHDBPATH, 'TVShows')
 
-        title = stringUtils.invCommas(title)
+        title = invCommas(title)
 
         cursor.execute('SELECT id, showTitle FROM shows WHERE showTitle LIKE \'{}\';'.format(title))
         dbShow = cursor.fetchone()
 
         if dbShow is None:
-            path = stringUtils.completePath(path) if DATABASE_MYSQL == 'false' else stringUtils.completePath(path).replace('\\', '\\\\')
-            path = stringUtils.invCommas(path)
+            path = completePath(path) if DATABASE_MYSQL == 'false' else completePath(path).replace('\\', '\\\\')
+            path = invCommas(path)
             cursor.execute('INSERT INTO shows (showTitle, filePath) VALUES (\'{}\', \'{}\');'.format(title, path))
             con.commit()
             dbShowID = cursor.lastrowid
@@ -561,11 +565,11 @@ def episodeStreamExists(showID, seEp, provider, url):
             dbShow = []
 
         if len(dbShow) == 0:
-            cursor.execute('INSERT INTO stream_ref (show_id, seasonEpisode, provider, url) VALUES ({}, \'{}\', \'{}\', \'{}\');'.format(showID, seEp, provider, stringUtils.invCommas(url)))
+            cursor.execute('INSERT INTO stream_ref (show_id, seasonEpisode, provider, url) VALUES ({}, \'{}\', \'{}\', \'{}\');'.format(showID, seEp, provider, invCommas(url)))
             con.commit()
         else:
             if py2_decode(dbShow[0][1]) != url:
-                cursor.execute('UPDATE stream_ref SET url = \'{}\' WHERE show_id = {} AND seasonEpisode LIKE \'{}\' AND provider LIKE \'{}\';'.format(stringUtils.invCommas(url), showID, seEp, provider))
+                cursor.execute('UPDATE stream_ref SET url = \'{}\' WHERE show_id = {} AND seasonEpisode LIKE \'{}\' AND provider LIKE \'{}\';'.format(invCommas(url), showID, seEp, provider))
                 con.commit()
     finally:
         cursor.close()
@@ -580,10 +584,10 @@ def getVideo(ID, seasonEpisode=None):
         con, cursor = openDB(**args)
 
         if seasonEpisode is None:
-            query = 'SELECT url, provider FROM stream_ref WHERE mov_id = {};'
+            query = 'SELECT stream_ref.url, stream_ref.provider, movies.filePath FROM stream_ref INNER JOIN movies ON stream_ref.mov_id = movies.id WHERE stream_ref.mov_id = {};'
             args = (ID,)
         else:
-            query = 'SELECT url, provider FROM stream_ref WHERE show_id = {} AND seasonEpisode LIKE \'{}\';'
+            query = 'SELECT stream_ref.url, stream_ref.provider, shows.filePath FROM stream_ref INNER JOIN shows ON stream_ref.show_id = shows.id WHERE stream_ref.show_id = {} AND stream_ref.seasonEpisode LIKE \'{}\';'
             args = (ID, seasonEpisode)
 
         cursor.execute(query.format(*args))
@@ -598,18 +602,18 @@ def getVideo(ID, seasonEpisode=None):
 def delStream(path, provider, isShow):
     streams = []
 
-    utils.addon_log('delStream: path = {0}, provider = {1}, isShow = {2}'.format(py2_decode(path), py2_decode(provider), isShow))
+    addon_log('delStream: path = {0}, provider = {1}, isShow = {2}'.format(py2_decode(path), py2_decode(provider), isShow))
     try:
         args = {'sqliteDB': MODBPATH, 'mysqlDB': 'Movies'} if not isShow or isShow == False else {'sqliteDB': SHDBPATH, 'mysqlDB': 'TVShows'}
         con, cursor = openDB(**args)
 
-        path = stringUtils.invCommas(path)
+        path = invCommas(path)
         if isShow == False:
             query = 'SELECT movies.title FROM movies WHERE movies.id IN (SELECT stream_ref.mov_id FROM stream_ref WHERE stream_ref.mov_id IN (SELECT movies.id FROM movies WHERE movies.filePath like \'{0}\') and stream_ref.provider like \'{1}\');'
         else:
             query = 'SELECT stream_ref.seasonEpisode FROM stream_ref WHERE stream_ref.show_id IN (SELECT shows.id FROM shows WHERE shows.filePath like \'{0}\') and stream_ref.provider like \'{1}\';'
         args = [path, provider]
-        utils.addon_log('delStream: query{0} = {1}'.format('{args}', query.format(*args)))
+        addon_log('delStream: query = {0}'.format(query.format(*args)))
         cursor.execute(query.format(*args))
         streams_delete = cursor.fetchall()
 
@@ -617,7 +621,7 @@ def delStream(path, provider, isShow):
             query = 'DELETE FROM stream_ref WHERE stream_ref.mov_id IN (SELECT movies.id FROM movies WHERE movies.filePath like \'{0}\') and stream_ref.provider like \'{1}\';'
         else:
             query = 'DELETE FROM stream_ref WHERE stream_ref.show_id IN (SELECT shows.id FROM shows WHERE shows.filePath like \'{0}\') and stream_ref.provider like \'{1}\';'
-        utils.addon_log('delStream: query{0} = {1}'.format('{args}', query.format(*args)))
+        addon_log('delStream: query = {0}'.format(query.format(*args)))
         cursor.execute(query.format(*args))
         con.commit()
 
@@ -625,7 +629,7 @@ def delStream(path, provider, isShow):
             query = 'SELECT movies.title FROM movies WHERE movies.id IN (SELECT stream_ref.mov_id FROM stream_ref WHERE stream_ref.mov_id IN (SELECT movies.id FROM movies WHERE movies.filePath like \'{0}\'));'
         else:
             query = 'SELECT stream_ref.seasonEpisode FROM stream_ref WHERE stream_ref.show_id IN (SELECT shows.id FROM shows WHERE shows.filePath like \'{0}\');'
-        utils.addon_log('delStream: query{0} = {1}'.format('{args}', query.format(*args)))
+        addon_log('delStream: query = {0}'.format(query.format(*args)))
         cursor.execute(query.format(*args))
         streams_keep = cursor.fetchall()
 
@@ -637,30 +641,6 @@ def delStream(path, provider, isShow):
         con.close()
 
     return streams
-
-
-def getPlayedURLResumePoint(args):
-    urlResumePoint = None
-
-    try:
-        con, cursor = openDB(KMODBPATH, 'KMovies')
-
-        query = 'SELECT timeInSeconds, totalTimeInSeconds, idBookmark FROM bookmark INNER JOIN files on files.idFile = bookmark.idFile'
-        if(args.get('url', None)):
-            url = stringUtils.invCommas(args.get('url'))
-            query = '{0}  WHERE files.strFilename LIKE \'{1}\';'.format(query, url)
-        else:
-            filename = stringUtils.invCommas(args.get('filename'))
-            path = stringUtils.invCommas(args.get('path'))
-            query = '{0} INNER JOIN path on path.idPath = files.idPath WHERE files.strFilename LIKE \'{1}\' AND path.strPath LIKE \'{2}\';'.format(query, filename, path)
-
-        cursor.execute(query)
-        urlResumePoint = cursor.fetchone()
-    finally:
-        cursor.close()
-        con.close()
-
-    return urlResumePoint
 
 
 def delBookMark(bookmarkID, fileID):
@@ -690,17 +670,19 @@ def delBookMark(bookmarkID, fileID):
         con.close()
 
 
-def getKodiMovieID(sTitle):
+def getKodiMovieID(sFilePath):
     dbMovie = None
 
     try:
         con, cursor = openDB(KMODBPATH, 'KMovies')
 
-        sTitle = stringUtils.invCommas(sTitle)
+        sFilePath = invCommas(sFilePath)
 
-        # c00 = title; c14 = genre
-        cursor.execute('SELECT movie.idMovie, movie.idFile, movie.premiered, movie.c14 FROM movie INNER JOIN files on files.idFile = movie.idFile WHERE files.strFilename LIKE \'{}.strm\';'.format(sTitle))
+        # movie.c00 = title; movie.c14 = genre; movie.c22 = filepath
+        cursor.execute('SELECT movie.idMovie, movie.idFile, movie.premiered, movie.c14, movie.c22 FROM movie WHERE movie.c22 LIKE \'%{0}%\';'.format(sFilePath))
         dbMovie = cursor.fetchone()
+        if dbMovie:
+            dbMovie = {'id': dbMovie[0], 'fileid': dbMovie[1], 'premiered': dbMovie[2], 'genre': dbMovie[3], 'filepath': dbEpisode[4]}
     finally:
         cursor.close()
         con.close()
@@ -708,18 +690,20 @@ def getKodiMovieID(sTitle):
     return dbMovie
 
 
-def getKodiEpisodeID(sTVShowTitle, iSeason, iEpisode):
+def getKodiEpisodeID(sFilePath, iSeason, iEpisode):
     dbEpisode = None
 
     try:
         con, cursor = openDB(KMODBPATH, 'KMovies')
 
-        sTVShowTitle = stringUtils.invCommas(sTVShowTitle)
+        sFilePath = invCommas(sFilePath)
 
-        # episode.c00 = title; episode.c05 = aired; episode.c06 = thumb; episode.c12 = season; episode.c13 = episode; tvshow.c00 = title
-        query = 'SELECT episode.idEpisode, episode.idFile, episode.c00, episode.c05, episode.c06 FROM episode INNER JOIN tvshow ON tvshow.idShow = episode.idShow WHERE episode.c12 = {0} and episode.c13 = {1} and tvshow.c00 LIKE \'{2}\';'
-        cursor.execute(query.format(iSeason, iEpisode, sTVShowTitle))
+        # episode.c00 = title; episode.c05 = aired; episode.c06 = thumb; episode.c12 = season; episode.c13 = episode; episode.c18 = filepath;
+        query = 'SELECT episode.idEpisode, episode.idFile, episode.c00, episode.c05, episode.c06, episode.c18 FROM episode WHERE episode.c12 = {0} and episode.c13 = {1} and episode.c18 LIKE \'%{2}%\';'
+        cursor.execute(query.format(iSeason, iEpisode, sFilePath))
         dbEpisode = cursor.fetchone()
+        if dbEpisode:
+            dbEpisode = {'id': dbEpisode[0], 'fileid': dbEpisode[1], 'title': dbEpisode[2], 'aired': dbEpisode[3], 'thumb': dbEpisode[4], 'filepath': dbEpisode[5]}
     finally:
         cursor.close()
         con.close()

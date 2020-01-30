@@ -21,33 +21,35 @@ import os, sys
 import time
 import re
 import xbmc
-import xbmcplugin, xbmcgui, xbmcaddon
+import xbmcaddon
+import xbmcgui
+import xbmcplugin
 
-import utils
-from . import fileSys
-from . import jsonUtils
-from . import stringUtils
-from . import xmldialogs
+from .common import Globals, jsonrpc
+from .fileSys import readMediaList
+from .stringUtils import getProvidername, getStrmname
+from .utils import addon_log, key_natural_sort, zeitspanne
+from .xmldialogs import show_modal_dialog, Skip
 
 try:
     import urllib.parse as urllib
 except:
     import urllib
 
-addon = xbmcaddon.Addon()
-addon_id = addon.getAddonInfo('id')
-ADDON_NAME = addon.getAddonInfo('name')
-home = py2_decode(xbmc.translatePath(addon.getAddonInfo('path')))
-icon = os.path.join(home, 'resources/media/icon.png')
-iconRemove = os.path.join(home, 'resources/media/iconRemove.png')
-FANART = os.path.join(home, 'resources/media/fanart.jpg')
-folderIcon = os.path.join(home, 'resources/media/folderIcon.png')
-updateIcon = os.path.join(home, 'resources/media/updateIcon.png')
+globals = Globals()
+PLUGIN_ID = globals.PLUGIN_ID
+PLUGIN_NAME = globals.PLUGIN_NAME
+PLUGIN_PATH = py2_decode(xbmc.translatePath(globals.PLUGIN_PATH))
+icon = os.path.join(PLUGIN_PATH, 'resources/media/icon.png')
+iconRemove = os.path.join(PLUGIN_PATH, 'resources/media/iconRemove.png')
+FANART = os.path.join(PLUGIN_PATH, 'resources/media/fanart.jpg')
+folderIcon = os.path.join(PLUGIN_PATH, 'resources/media/folderIcon.png')
+updateIcon = os.path.join(PLUGIN_PATH, 'resources/media/updateIcon.png')
 
 
 def addItem(label, mode, icon):
-    utils.addon_log('addItem')
-    u = 'plugin://{0}/?{1}'.format(addon_id, urllib.urlencode({'mode': mode, 'fanart': icon}))
+    addon_log('addItem')
+    u = 'plugin://{0}/?{1}'.format(PLUGIN_ID, urllib.urlencode({'mode': mode, 'fanart': icon}))
     liz = xbmcgui.ListItem(label)
     liz.setInfo(type='Video', infoLabels={'Title': label})
     liz.setArt({'icon': icon, 'thumb': icon, 'fanart': FANART})
@@ -56,8 +58,8 @@ def addItem(label, mode, icon):
 
 
 def addFunction(labels):
-    utils.addon_log('addItem')
-    u = 'plugin://{0}/?{1}'.format(addon_id, urllib.urlencode({'mode': 666, 'fanart': updateIcon}))
+    addon_log('addItem')
+    u = 'plugin://{0}/?{1}'.format(PLUGIN_ID, urllib.urlencode({'mode': 666, 'fanart': updateIcon}))
     liz = xbmcgui.ListItem(labels)
     liz.setInfo(type='Video', infoLabels={'Title': labels})
     liz.setArt({'icon': updateIcon, 'thumb': updateIcon, 'fanart':  FANART})
@@ -66,7 +68,7 @@ def addFunction(labels):
 
 
 def addDir(name, url, mode, art, plot=None, genre=None, date=None, credits=None, showcontext=False, name_parent='', type=None):
-    utils.addon_log('addDir: {0} ({1})'.format(py2_decode(name), py2_decode(name_parent)))
+    addon_log('addDir: {0} ({1})'.format(py2_decode(name), py2_decode(name_parent)))
     u = '{0}?{1}'.format(sys.argv[0], urllib.urlencode({'url': url, 'name': py2_encode(name), 'type': type, 'name_parent': py2_encode(name_parent), 'fanart': art.get('fanart', '')}))
     contextMenu = []
     liz = xbmcgui.ListItem(name)
@@ -90,7 +92,7 @@ def addDir(name, url, mode, art, plot=None, genre=None, date=None, credits=None,
 
 
 def addLink(name, url, mode, art, plot, genre, date, showcontext, playlist, regexs, total, setCookie='', type=None, year=None):
-    utils.addon_log('addLink: {0}'.format(py2_decode(name)))
+    addon_log('addLink: {0}'.format(py2_decode(name)))
     u = '{0}?{1}'.format(sys.argv[0], urllib.urlencode({'url': url, 'name': py2_encode(name), 'fanart': art.get('fanart', ''), 'type': type, 'year': year}))
     contextMenu = []
     liz = xbmcgui.ListItem(name)
@@ -109,7 +111,7 @@ def addLink(name, url, mode, art, plot, genre, date, showcontext, playlist, rege
 
 
 def getSources():
-    utils.addon_log('getSources')
+    addon_log('getSources')
     xbmcplugin.setContent(int(sys.argv[1]), 'files')
     art = {'fanart': FANART, 'thumb': folderIcon}
     addDir('Video Plugins', 'video', 1, art)
@@ -123,7 +125,7 @@ def getSources():
     addItem('Remove Shows from TVDB cache', 51, iconRemove)
     addItem('Remove all Shows from TVDB cache', 52, iconRemove)
     if xbmc.getCondVisibility('System.HasAddon(service.watchdog)') != 1:
-        addon_details = jsonUtils.jsonrpc('Addons.GetAddonDetails', dict(addonid='service.watchdog', properties=['enabled', 'installed'])).get('addon')
+        addon_details = jsonrpc('Addons.GetAddonDetails', dict(addonid='service.watchdog', properties=['enabled', 'installed'])).get('addon')
         if addon_details and addon_details.get('installed'):
             addItem('Activate Watchdog', 7, icon)
         else:
@@ -188,7 +190,7 @@ def editDialog(nameToChange):
 def markMovie(movID, pos, total, done):
     if done:
         try:
-            jsonUtils.jsonrpc('VideoLibrary.SetMovieDetails', dict(movieid=movID, playcount=1))
+            jsonrpc('VideoLibrary.SetMovieDetails', dict(movieid=movID, playcount=1))
             xbmc.executebuiltin('XBMC.Container.Refresh')
         except:
             print('markMovie: Movie not in DB!?')
@@ -196,7 +198,7 @@ def markMovie(movID, pos, total, done):
     else:
         if xbmc.getCondVisibility('Library.HasContent(Movies)') and pos > 0 and total > 0:
             try:
-                jsonUtils.jsonrpc('VideoLibrary.SetMovieDetails', dict(movieid=movID, resume=dict(position=pos, total=total)))
+                jsonrpc('VideoLibrary.SetMovieDetails', dict(movieid=movID, resume=dict(position=pos, total=total)))
                 xbmc.executebuiltin('XBMC.Container.Refresh')
             except:
                 print('markMovie: Movie not in DB!?')
@@ -206,7 +208,7 @@ def markMovie(movID, pos, total, done):
 def markSeries(epID, pos, total, done):
     if done:
         try:
-            jsonUtils.jsonrpc('VideoLibrary.SetEpisodeDetails', dict(episodeid=epID, playcount=1))
+            jsonrpc('VideoLibrary.SetEpisodeDetails', dict(episodeid=epID, playcount=1))
             xbmc.executebuiltin('XBMC.Container.Refresh')
         except:
             print('markMovie: Episode not in DB!?')
@@ -214,7 +216,7 @@ def markSeries(epID, pos, total, done):
     else:
         if xbmc.getCondVisibility('Library.HasContent(TVShows)') and pos > 0 and total > 0:
             try:
-                jsonUtils.jsonrpc('VideoLibrary.SetEpisodeDetails', dict(episodeid=epID, resume=dict(position=pos, total=total)))
+                jsonrpc('VideoLibrary.SetEpisodeDetails', dict(episodeid=epID, resume=dict(position=pos, total=total)))
                 xbmc.executebuiltin('XBMC.Container.Refresh')
             except:
                 print('markSeries: Show not in DB!?')
@@ -262,16 +264,16 @@ def Error(header, line1='', line2='', line3=''):
     del dlg
 
 
-def infoDialog(str, header=ADDON_NAME, time=10000):
+def infoDialog(str, header=PLUGIN_NAME, time=10000):
     try: xbmcgui.Dialog().notification(header, str, icon, time, sound=False)
     except: xbmc.executebuiltin('Notification({0}, {1}, {2}, {3})'.format(header, str, time, THUMB))
 
 
-def okDialog(str1, str2='', header=ADDON_NAME):
+def okDialog(str1, str2='', header=PLUGIN_NAME):
     xbmcgui.Dialog().ok(header, str1, str2)
 
 
-def yesnoDialog(str1, str2='', header=ADDON_NAME, yes='', no=''):
+def yesnoDialog(str1, str2='', header=PLUGIN_NAME, yes='', no=''):
     answer = xbmcgui.Dialog().yesno(header, str1, str2, '', yes, no)
     return answer
 
@@ -281,19 +283,24 @@ def browse(type, heading, shares, mask='', useThumbs=False, treatAsFolder=False,
     return retval
 
 
-def resumePointDialog(resumePoint):
-    if resumePoint:
-        xmldialogs.show_modal_dialog(xmldialogs.Skip,
-            'plugin-video-osmosis-continue.xml',
-            addon.getAddonInfo('path'),
-            minutes=0,
-            seconds=15,
-            skip_to=int(resumePoint[0]) - 5,
-            label=addon.getLocalizedString(39000).format(utils.zeitspanne(int(resumePoint[0]))[5]))
+def resumePointDialog(resume):
+    if resume and resume.get('position') > 0.0:
+        position = int(resume.get('position')) - 5
+    #    show_modal_dialog(Skip,
+    #        'plugin-video-osmosis-continue.xml',
+    #        addon.getAddonInfo('path'),
+    #        minutes=0,
+    #        seconds=15,
+    #        skip_to=position,
+    #        label=addon.getLocalizedString(39000).format(zeitspanne(position)[5]))
+        sel = xbmcgui.Dialog().contextmenu([xbmc.getLocalizedString(12022).format(time.strftime("%H:%M:%S", time.gmtime(position))), xbmc.getLocalizedString(12021)])
+        if sel > -1:
+            return position if sel == 0 else 0
+    return 0
 
 
-def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_prefix=ADDON_NAME, preselect_name=None):
-    thelist = fileSys.readMediaList()
+def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_prefix=PLUGIN_NAME, preselect_name=None):
+    thelist = readMediaList()
     items = []
     if not cTypeFilter:
         selectAction = ['Movies', 'TV-Shows', 'Audio', 'All']
@@ -310,7 +317,7 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
         splits = entry.strip().split('|')
         if cTypeFilter and not re.findall(cTypeFilter, splits[0]):
             continue
-        name = stringUtils.getStrmname(splits[1])
+        name = getStrmname(splits[1])
         cType = splits[0].replace('(', '/').replace(')', '')
         matches = re.findall('(?:name_orig=([^;]*);)*(plugin:\/\/[^<]*)', splits[2])
         iconImage = ''
@@ -335,18 +342,18 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
                     url = match[1]
                     item_entry = '|'.join([splits[0], name, 'name_orig={0};{1}'.format(name_orig, url) if name_orig else url])
                     items.append({'index': index, 'entry': item_entry, 'name': name, 'text': '{2}{0} [{1}]'.format(name, cType, indent_text), \
-                                  'text2': ('{2}{1}\n{2}[{0}]' if name_orig else '{2}[{0}]').format(stringUtils.getProvidername(url), name_orig, indent_text2), \
+                                  'text2': ('{2}{1}\n{2}[{0}]' if name_orig else '{2}[{0}]').format(getProvidername(url), name_orig, indent_text2), \
                                   'iconImage': iconImage, 'url': url, 'name_orig': name_orig})
 
             else:
-                pluginnames = sorted(set([stringUtils.getProvidername(match[1]) for match in matches]), key=lambda k: k.lower())
+                pluginnames = sorted(set([getProvidername(match[1]) for match in matches]), key=lambda k: k.lower())
                 items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} ({1}: {2})'.format(name, cType, ', '.join(pluginnames)), 'url': splits[2]})
         else:
             items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} ({1})'.format(name, cType), 'url': splits[2]})
 
     preselect_idx = None
     if expand == False:
-        sItems = sorted([item.get('text') for item in items], key=lambda k: utils.key_natural_sort(k.lower()))
+        sItems = sorted([item.get('text') for item in items], key=lambda k: key_natural_sort(k.lower()))
         if preselect_name:
             preselect_idx = [i for i, item in enumerate(sItems) if item.find(preselect_name) != -1 ]
     else:
@@ -357,9 +364,9 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
             liz.append(li)
         sItems = sorted(liz,
             key=lambda k: (re.sub('.* \[([^/]*)/.*\]', '\g<1>', py2_decode(k.getLabel())),
-                            utils.key_natural_sort(re.sub('^ *', '', py2_decode(k.getLabel().lower()))),
-                            utils.key_natural_sort(re.sub('( - |, )*([sS](taffel|eason|erie[s]{0,1})|[pP]art|[tT]eil) (?P<number>\d+).*', '\g<number>', py2_decode(k.getLabel2().lower()))),
-                            utils.key_natural_sort(re.sub('^ *', '', py2_decode(k.getLabel2().lower())))
+                            key_natural_sort(re.sub('^ *', '', py2_decode(k.getLabel().lower()))),
+                            key_natural_sort(re.sub('( - |, )*([sS](taffel|eason|erie[s]{0,1})|[pP]art|[tT]eil) (?P<number>\d+).*', '\g<number>', py2_decode(k.getLabel2().lower()))),
+                            key_natural_sort(re.sub('^ *', '', py2_decode(k.getLabel2().lower())))
                             )
                         )
         if preselect_name:

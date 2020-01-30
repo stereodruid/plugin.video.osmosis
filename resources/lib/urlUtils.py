@@ -16,15 +16,13 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-import xbmcaddon
+
+from .common import Globals
 
 try:
     import urllib.parse as urllib
 except:
     import urllib
-
-addon = xbmcaddon.Addon()
-addon_id = addon.getAddonInfo('id')
 
 
 def stripUnquoteURL(url):
@@ -36,8 +34,9 @@ def stripUnquoteURL(url):
 
 
 def getURL(par):
+    globals = Globals()
     try:
-        if par.startswith('?url=plugin://{0}/'.format(addon_id)):
+        if par.startswith('?url=plugin://{0}/'.format(globals.PLUGIN_ID)):
             url = par.split('?url=')[1]
         else:
             url = par.split('?url=')[1]

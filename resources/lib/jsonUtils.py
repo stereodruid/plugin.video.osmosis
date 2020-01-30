@@ -17,17 +17,14 @@
 
 from __future__ import unicode_literals
 from kodi_six.utils import py2_decode
-import utils
 import xbmc
 
-try:
-    import json
-except:
-    import simplejson as json
+from .common import jsonrpc
+from .utils import addon_log
 
 
 def requestItem(file, type='video'):
-    utils.addon_log('requestItem, file = {0}'.format(file))
+    addon_log('requestItem, file = {0}'.format(file))
     if file.find('playMode=play') == -1:
         return requestList(file, type)
 
@@ -35,34 +32,8 @@ def requestItem(file, type='video'):
 
 
 def requestList(path, type='video'):
-    utils.addon_log('requestList, path = {0}'.format(path))
+    addon_log('requestList, path = {0}'.format(path))
     if path.find('playMode=play') != -1:
         return requestItem(path, type)
 
     return jsonrpc('Files.GetDirectory', dict(directory=path, media=type, properties=['art', 'title', 'year', 'track', 'mpaa', 'imdbnumber', 'description', 'season', 'episode', 'playcount', 'genre', 'duration', 'runtime', 'showtitle', 'album', 'artist', 'plot', 'plotoutline', 'tagline', 'tvshowid']))
-
-
-def jsonrpc(action, arguments=None):
-    ''' put some JSON together for the JSON-RPC APIv6 '''
-    if arguments is None:
-        arguments = {}
-
-    if arguments:
-        request = json.dumps(dict(id=1, jsonrpc='2.0', method=action, params=arguments))
-    else:
-        request = json.dumps(dict(id=1, jsonrpc='2.0', method=action))
-
-    utils.addon_log('Sending request to Kodi: {0}'.format(request))
-    return parse_jsonrpc(xbmc.executeJSONRPC(request))
-
-
-def parse_jsonrpc(json_raw):
-    if not json_raw:
-        utils.addon_log('Empty response from Kodi')
-        return {}
-
-    utils.addon_log('Response from Kodi: {0}'.format(py2_decode(json_raw)))
-    parsed = json.loads(json_raw)
-    if parsed.get('error', False):
-        utils.addon_log('Kodi returned an error: {0}'.format(parsed.get('error')))
-    return parsed.get('result', {})

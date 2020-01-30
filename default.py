@@ -17,28 +17,29 @@
 
 from __future__ import unicode_literals
 from kodi_six.utils import PY2, py2_decode
-import os, sys
+import os
+import sys
 import time
 import re
-import xbmc, xbmcaddon, xbmcgui, xbmcplugin
+import xbmc
+import xbmcaddon
+import xbmcgui
+import xbmcplugin
 
-import utils
-from resources.lib import create
-from resources.lib import fileSys
-from resources.lib import guiTools
-from resources.lib import jsonUtils
-from resources.lib import player
-from resources.lib import tvdb
-from resources.lib import updateAll
+from resources.lib.common import jsonrpc
+from resources.lib.create import addMultipleSeasonToMediaList, addToMedialist, fillPlugins, \
+    fillPluginItems, removeAndReadMedialistEntry, removeItemsFromMediaList, renameMediaListEntry
+from resources.lib.fileSys import writeTutList
+from resources.lib.guiTools import addDir, getSources, mediaListDialog
+from resources.lib.playback import play
+from resources.lib.tvdb import removeShowsFromTVDBCache
+from resources.lib.updateAll import strm_update
+from resources.lib.utils import addon_log
 
 try:
     from urllib.parse import parse_qsl
 except:
     from urlparse import parse_qsl
-
-addon = xbmcaddon.Addon()
-home = py2_decode(xbmc.translatePath(addon.getAddonInfo('path')))
-FANART = os.path.join(home, 'fanart.jpg')
 
 if __name__ == '__main__':
     params = dict(parse_qsl(sys.argv[2][1:]))
@@ -46,89 +47,89 @@ if __name__ == '__main__':
         sys.argv[0] = py2_decode(sys.argv[0])
         for paramKey in params.keys():
             params[paramKey] = py2_decode(params.get(paramKey))
-    utils.addon_log('params = {0}'.format(params))
+    addon_log('params = {0}'.format(params))
 
     mode = int(params.get('mode')) if params.get('mode') else None
 
     if mode == None:
-        guiTools.getSources()
+        getSources()
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
-        if not fileSys.writeTutList('select:PluginType'):
+        if not writeTutList('select:PluginType'):
             tutWin = ['Adding content to your library',
                       'Welcome, this is your first time using OSMOSIS. Here, you can select the content type you want to add:',
                       'Video Plugins: Select to add Movies, TV-Shows, YouTube Videos',
                       'Music Plugins: Select to add Music']
             xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
     elif mode == 1:
-        create.fillPlugins(params.get('url'))
+        fillPlugins(params.get('url'))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
-        if not fileSys.writeTutList('select:Addon'):
+        if not writeTutList('select:Addon'):
             tutWin = ['Adding content to your library',
                       'Here, you can select the Add-on:',
                       'The selected Add-on should provide Video/Music content in the right structure.',
                       'Take a look at ++ Naming video files/TV shows ++ http://kodi.wiki/view/naming_video_files/TV_shows.']
             xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
     elif mode == 2:
-        create.fillPluginItems(params.get('url'))
+        fillPluginItems(params.get('url'))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
     elif mode == 666:
-        updateAll.strm_update()
+        strm_update()
     elif mode == 4:
-        selectedItems = guiTools.mediaListDialog(header_prefix='Update')
+        selectedItems = mediaListDialog(header_prefix='Update')
         if selectedItems and len(selectedItems) > 0:
-            updateAll.strm_update(selectedItems)
+            strm_update(selectedItems)
     elif mode == 41:
-        selectedItems = guiTools.mediaListDialog(header_prefix='Rename', expand=False)
+        selectedItems = mediaListDialog(header_prefix='Rename', expand=False)
         if selectedItems and len(selectedItems) > 0:
-            create.renameMediaListEntry(selectedItems)
+            renameMediaListEntry(selectedItems)
     elif mode == 42:
-        selectedItems = guiTools.mediaListDialog(header_prefix='Update')
+        selectedItems = mediaListDialog(header_prefix='Update')
         if selectedItems and len(selectedItems) > 0:
-            create.removeAndReadMedialistEntry(selectedItems)
+            removeAndReadMedialistEntry(selectedItems)
     elif mode == 5:
-        create.removeItemsFromMediaList('list')
+        removeItemsFromMediaList('list')
     elif mode == 51:
-        selectedItems = guiTools.mediaListDialog(True, False, header_prefix='Remove Shows from TVDB cache', cTypeFilter='TV-Shows')
+        selectedItems = mediaListDialog(True, False, header_prefix='Remove Shows from TVDB cache', cTypeFilter='TV-Shows')
         if selectedItems and len(selectedItems) > 0:
-            tvdb.removeShowsFromTVDBCache(selectedItems)
+            removeShowsFromTVDBCache(selectedItems)
     elif mode == 52:
-        tvdb.removeShowsFromTVDBCache()
+        removeShowsFromTVDBCache()
     elif mode == 6:
         xbmc.executebuiltin('InstallAddon(service.watchdog)')
         xbmc.executebuiltin('XBMC.Container.Refresh')
     elif mode == 7:
-        jsonUtils.jsonrpc('Addons.SetAddonEnabled', dict(addonid='service.watchdog', enabled=True))
+        jsonrpc('Addons.SetAddonEnabled', dict(addonid='service.watchdog', enabled=True))
         xbmc.executebuiltin('XBMC.Container.Refresh')
     elif mode == 10:
-        player.play(sys.argv, params)
+        play(sys.argv, params)
     elif mode == 100:
-        create.fillPlugins(params.get('url'))
+        fillPlugins(params.get('url'))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
     elif mode == 101:
-        create.fillPluginItems(params.get('url'), name_parent=params.get('name', ''))
+        fillPluginItems(params.get('url'), name_parent=params.get('name', ''))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
-        if not fileSys.writeTutList('select:AddonNavi'):
+        if not writeTutList('select:AddonNavi'):
             tutWin = ['Adding content to your library',
                       'Search for your Movie, TV-Show or Music.',
                       'Mark/select content, do not play a Movie or enter a TV-Show.',
                       'Open context menu on the selected and select *create strms*.']
             xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
     elif mode == 102:
-        favs = jsonUtils.jsonrpc('Favourites.GetFavourites', dict(properties=['path', 'window', 'windowparameter', 'thumbnail'])).get('favourites', {})
+        favs = jsonrpc('Favourites.GetFavourites', dict(properties=['path', 'window', 'windowparameter', 'thumbnail'])).get('favourites', {})
         for fav in favs:
             if params.get('type') == 'video' and fav.get('window') == 'videos':
-                guiTools.addDir(fav.get('title'), fav.get('windowparameter'), 101, {'thumb': fav.get('thumbnail')}, type=type)
+                addDir(fav.get('title'), fav.get('windowparameter'), 101, {'thumb': fav.get('thumbnail')}, type=type)
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
     elif mode == 200:
-        utils.addon_log('write multi strms')
-        create.addToMedialist(params)
+        addon_log('write multi strms')
+        addToMedialist(params)
     elif mode == 201:
-        utils.addon_log('write single strm')
-        # create.fillPluginItems(url)
+        addon_log('write single strm')
+        # fillPluginItems(url)
         # makeSTRM(name, name, url)
     elif mode == 202:
-        utils.addon_log('Add all season individually to MediaList')
-        create.addMultipleSeasonToMediaList(params)
+        addon_log('Add all season individually to MediaList')
+        addMultipleSeasonToMediaList(params)

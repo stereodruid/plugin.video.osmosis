@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 '''XML based dialogs'''
 from __future__ import unicode_literals
-
 from platform import machine
 
 import xbmc
