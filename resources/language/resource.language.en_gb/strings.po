@@ -307,3 +307,7 @@ msgstr ""
 msgctxt "#34004"
 msgid "Resume video before playback point (seconds)"
 msgstr ""
+
+msgctxt "#34005"
+msgid "Addons that should be ignored by the playback dialog"
+msgstr "Addons, die vom  Wiedergabedialog ignoriert werden sollen"

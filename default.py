@@ -24,11 +24,12 @@ import re
 import xbmc
 import xbmcplugin
 
-from resources.lib.common import Globals, jsonrpc
+from resources.lib.common import Globals, Settings, jsonrpc
 from resources.lib.create import addMultipleSeasonToMediaList, addToMedialist, fillPlugins, \
-    fillPluginItems, removeAndReadMedialistEntry, removeItemsFromMediaList, renameMediaListEntry
+    fillPluginItems, removeAndReadMedialistEntry, removeItemsFromMediaList, renameMediaListEntry, \
+    searchAddons
 from resources.lib.fileSys import writeTutList
-from resources.lib.guiTools import addDir, getSources, mediaListDialog
+from resources.lib.guiTools import addDir, getSources, mediaListDialog, selectDialog
 from resources.lib.playback import play
 from resources.lib.tvdb import removeShowsFromTVDBCache
 from resources.lib.updateAll import strm_update
@@ -122,6 +123,14 @@ if __name__ == '__main__':
             if params.get('type') == 'video' and fav.get('window') == 'videos':
                 addDir(fav.get('title'), fav.get('windowparameter'), 101, {'thumb': fav.get('thumbnail')}, type=type)
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
+    elif mode == 103:
+        addons = searchAddons('video')
+        list = [addon.get('name') for addon in addons]
+        ignore_addons = Settings().PLAYBACK_IGNORE_ADDON_STRING.split('|')
+        preselects = [i for i, addon in enumerate(addons) if addon.get('addonid') in ignore_addons]
+        selects = selectDialog('Addons that should be ignored by the playback dialog', list, multiselect=True, preselect=preselects)
+        if selects:
+            globals.addon.setSetting('playback_ignore_addon_string', '|'.join([addons[select].get('addonid') for select in selects]))
     elif mode == 200:
         addon_log('write multi strms')
         addToMedialist(params)

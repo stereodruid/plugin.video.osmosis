@@ -139,6 +139,7 @@ class Settings(Singleton):
         elif 'PAGING_MOVIES' == name: return int(self._gs('paging_movies'))
         elif 'PAGING_TVSHOWS' == name: return int(self._gs('paging_tvshows'))
         elif 'PLAYBACK_DIALOG' == name: return int(self._gs('playback_dialog'))
+        elif 'PLAYBACK_IGNORE_ADDON_STRING' == name: return self._gs('playback_ignore_addon_string')
         elif 'PLAYBACK_REWIND' == name: return int(self._gs('playback_rewind'))
         elif 'SEARCH_THETVDB' == name: return int(self._gs('search_thetvdb'))
         elif 'STRM_LOC' == name: return py2_decode(xbmc.translatePath(self._gs('STRM_LOC')))

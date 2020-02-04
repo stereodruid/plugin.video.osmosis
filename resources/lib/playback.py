@@ -112,6 +112,7 @@ class Player(xbmc.Player):
     def __init__(self):
         super(Player, self).__init__()
         self.globals = Globals()
+        self.settings = Settings()
         self.log = None
         self.pluginhandle = None
         self.monitor = None
@@ -138,7 +139,9 @@ class Player(xbmc.Player):
 
     def checkResume(self, dialog, playback_rewind):
         resume = None
-        if not re.search('(plugin\.video\.amazon)', self.url) and self.filepath:
+        ignore_addons = self.settings.PLAYBACK_IGNORE_ADDON_STRING.replace('.', '\.').split('|')
+        pattern = '{0}[\/?]+'.format('[\/?]+|'.join(ignore_addons))
+        if not re.search(pattern, self.url) and self.filepath:
             resume = jsonrpc('Files.GetFileDetails', {'file': self.filepath, 'media': 'video', 'properties': ['resume']}).get('filedetails', {}).get('resume', {})
         return resumePointDialog(resume, dialog, playback_rewind)
 

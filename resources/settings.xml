@@ -82,5 +82,7 @@
 	<category label="34000">
 		<setting label="34001" type="enum" id="playback_dialog" lvalues='34002|34003' default="0"/>
 		<setting label="34004" type="slider" id="playback_rewind" default="5" range="0,10" option="int"/>
+		<setting label="34005" type="action" id="playback_ignore_addon" action="RunPlugin(plugin://plugin.video.osmosis/?mode=103)" option="close"/>
+		<setting label="34006" type="text" id="playback_ignore_addon_string" visible="false"/>
 	</category>
 </settings>
