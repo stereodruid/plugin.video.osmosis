@@ -8,7 +8,7 @@ import xbmc
 import xbmcgui
 import xbmcplugin
 
-from .common import Globals, sleep
+from .common import Globals, Settings, sleep
 from .guiTools import resumePointDialog, selectDialog
 from .jsonUtils import jsonrpc
 from .kodiDB import getKodiEpisodeID, getKodiMovieID, getVideo
@@ -17,7 +17,6 @@ from .utils import addon_log
 
 
 def play(argv, params):
-    globals = Globals()
     selectedEntry = None
     mediaType = params.get('mediaType')
     if mediaType:
@@ -66,29 +65,37 @@ def play(argv, params):
             if not props:
                 props = dict()
 
-            resume = None
-            if not re.search('(plugin\.video\.amazon)', url) and props.get('filepath'):
-                resume = jsonrpc('Files.GetFileDetails', {'file': props.get('filepath'), 'media': 'video', 'properties': ['resume']}).get('filedetails', {}).get('resume', {})
-            position = resumePointDialog(resume)
-
+            globals = Globals()
             player = Player()
             player.log = addon_log
             player.pluginhandle = int(argv[1])
             player.monitor = globals.monitor
             player.url = url
             player.filepath = props.get('filepath')
+
+            position = 0
+            settings = Settings()
+            dialog = settings.PLAYBACK_DIALOG
+            playback_rewind = settings.PLAYBACK_REWIND
+            if dialog == 0:
+                position = player.checkResume(dialog, playback_rewind)
+
             player.resolve(item)
 
             title = py2_encode('{0}.strm'.format(params.get('episode') if mediaType == 'show' else cleanStrmFilesys(infoLabels.get('title'))))
-            while not globals.monitor.abortRequested() and player.running and xbmc.getInfoLabel('Player.Filename') != title:
-                globals.monitor.waitForAbort(player.sleeptm)
+            while not player.monitor.abortRequested() and player.running and xbmc.getInfoLabel('Player.Filename') != title:
+                player.monitor.waitForAbort(player.sleeptm)
+
+            if dialog == 1:
+                position = player.checkResume(dialog, playback_rewind)
+
             player.resume(position)
 
             if not player.filepath:
                 player.filepath = xbmc.getInfoLabel('Player.Filenameandpath')
 
-            while not globals.monitor.abortRequested() and xbmc.getInfoLabel('Player.Filename') == title:
-                globals.monitor.waitForAbort(player.sleeptm)
+            while not player.monitor.abortRequested() and xbmc.getInfoLabel('Player.Filename') == title:
+                player.monitor.waitForAbort(player.sleeptm)
             player.finished()
             del player
         elif mediaType == 'audio' and params.get('url', '').startswith('plugin://'):
@@ -127,6 +134,13 @@ class Player(xbmc.Player):
 
     def onPlayBackStopped(self):
         self.finished()
+
+
+    def checkResume(self, dialog, playback_rewind):
+        resume = None
+        if not re.search('(plugin\.video\.amazon)', self.url) and self.filepath:
+            resume = jsonrpc('Files.GetFileDetails', {'file': self.filepath, 'media': 'video', 'properties': ['resume']}).get('filedetails', {}).get('resume', {})
+        return resumePointDialog(resume, dialog, playback_rewind)
 
 
     def resume(self, position):

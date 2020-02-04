@@ -57,7 +57,7 @@ msgid "Do not export '.strm' files that contain '[OV]' in the title"
 msgstr ""
 
 msgctxt "#31000"
-msgid "Content"
+msgid "Library"
 msgstr ""
 
 msgctxt "#31001"
@@ -113,7 +113,7 @@ msgid "Show confirmation dialog of the manually saved episode data"
 msgstr ""
 
 msgctxt "#31306"
-msgid "Time until the confirmation dialog closes automatically (sec)"
+msgid "Time until the confirmation dialog closes automatically (seconds)"
 msgstr ""
 
 msgctxt "#32000"
@@ -125,11 +125,11 @@ msgid "Update at startup"
 msgstr ""
 
 msgctxt "#32002"
-msgid "Automatic Update"
+msgid "Scheduled update"
 msgstr ""
 
 msgctxt "#32003"
-msgid "Update Every (Hours)"
+msgid "Update interval in hours"
 msgstr ""
 
 msgctxt "#32004"
@@ -288,6 +288,22 @@ msgctxt "#33506"
 msgid "Music-DB directory"
 msgstr ""
 
-msgctxt "#39000"
-msgid "Continue at {0}"
+msgctxt "#34000"
+msgid "Playback"
+msgstr ""
+
+msgctxt "#34001"
+msgid "Dialog to continue the video"
+msgstr ""
+
+msgctxt "#34002"
+msgid "Context menu before video start"
+msgstr ""
+
+msgctxt "#34003"
+msgid "Overlay after video start"
+msgstr ""
+
+msgctxt "#34004"
+msgid "Resume video before playback point (seconds)"
 msgstr ""

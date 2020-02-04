@@ -24,6 +24,9 @@ def show_modal_dialog(dlg_class, xml, path, **kwargs):
     if minutes > 0 or seconds > 0:
         xbmc.executebuiltin(CMD_AUTOCLOSE_DIALOG.format(minutes, seconds))
     dlg.doModal()
+    skip = dlg.skip
+    del dlg
+    return skip
 
 
 class Skip(xbmcgui.WindowXMLDialog):
@@ -33,6 +36,7 @@ class Skip(xbmcgui.WindowXMLDialog):
 
 
     def __init__(self, *args, **kwargs):
+        self.skip = None
         self.skip_to = kwargs['skip_to']
         self.label = kwargs['label']
         if OS_MACHINE[0:5] == 'armv7':
@@ -48,5 +52,5 @@ class Skip(xbmcgui.WindowXMLDialog):
 
     def onClick(self, controlID):
         if controlID == 6012:
-            xbmc.Player().seekTime(self.skip_to)
+            self.skip = True
             self.close()

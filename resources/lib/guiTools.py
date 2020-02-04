@@ -270,19 +270,26 @@ def browse(type, heading, shares, mask='', useThumbs=False, treatAsFolder=False,
     return globals.dialog.browse(type, heading, shares, mask, useThumbs, treatAsFolder, path, enableMultiple)
 
 
-def resumePointDialog(resume):
+def resumePointDialog(resume, dialog, playback_rewind):
     if resume and resume.get('position') > 0.0:
-        position = int(resume.get('position')) - 5
-    #    show_modal_dialog(Skip,
-    #        'plugin-video-osmosis-continue.xml',
-    #        addon.getAddonInfo('path'),
-    #        minutes=0,
-    #        seconds=15,
-    #        skip_to=position,
-    #        label=addon.getLocalizedString(39000).format(zeitspanne(position)[5]))
-        sel = globals.dialog.contextmenu([xbmc.getLocalizedString(12022).format(time.strftime("%H:%M:%S", time.gmtime(position))), xbmc.getLocalizedString(12021)])
-        if sel > -1:
-            return position if sel == 0 else 0
+        position = int(resume.get('position')) - playback_rewind
+        resumeLabel = xbmc.getLocalizedString(12022).format(time.strftime("%H:%M:%S", time.gmtime(position)))
+        if dialog == 0:
+            sel = globals.dialog.contextmenu([resumeLabel, xbmc.getLocalizedString(12021)])
+            if sel > -1:
+                return position if sel == 0 else 0
+        elif dialog == 1:
+            skip = show_modal_dialog(Skip,
+                'plugin-video-osmosis-continue.xml',
+                globals.PLUGIN_PATH,
+                minutes=0,
+                seconds=15,
+                skip_to=position,
+                label=resumeLabel
+            )
+            if skip:
+                return position
+
     return 0
 
 

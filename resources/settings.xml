@@ -22,7 +22,7 @@
 		<setting label="31103" type="bool" id="folder_movie" default="false"/>
 		
 		<setting label="31200" type="lsep"/>
-		<setting label="31201" type="slider" id="paging_tvshows" default="2" range="1,100" option="int"/>		
+		<setting label="31201" type="slider" id="paging_tvshows" default="2" range="1,100" option="int"/>
 		
 		<setting label="31300" type="lsep"/>
 		<setting label="31301" type="enum" id="search_thetvdb" lvalues='31302|31303|31304' default="0"/>
@@ -78,5 +78,9 @@
 		<setting label="33504" type="ipaddress" id="Music-DB IP" default="localhost" visible="eq(-34,true)"/>
 		<setting label="33505" type="number" id="Music-DB port" default="3306" visible="eq(-35,true)"/>
 		<setting label="33506" type="folder" id="Music-DB path" source="auto" option="writeable" default="special://profile/addon_data/plugin.video.osmosis" visible="eq(-36,false)"/>
+	</category>
+	<category label="34000">
+		<setting label="34001" type="enum" id="playback_dialog" lvalues='34002|34003' default="0"/>
+		<setting label="34004" type="slider" id="playback_rewind" default="5" range="0,10" option="int"/>
 	</category>
 </settings>

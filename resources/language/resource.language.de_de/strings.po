@@ -57,12 +57,12 @@ msgid "Do not export '.strm' files that contain '[OV]' in the title"
 msgstr "'.strm'-Dateien nicht exportieren, die '[OV]' im Titel beinhalten"
 
 msgctxt "#31000"
-msgid "Content"
-msgstr "Medien"
+msgid "Library"
+msgstr "Bibliothek"
 
 msgctxt "#31001"
 msgid "Write NFOs (ComingSoon)"
-msgstr "NFO's anlegen (In Kürze)"
+msgstr "Videos fortsetzen"
 
 msgctxt "#31100"
 msgid "Movies"
@@ -77,8 +77,8 @@ msgid "Save the streams pro MediaList entry in a superfolder"
 msgstr "Pro MediaList-Eintrag die Streams in einem Oberordner speichern"
 
 msgctxt "#31103"
-msgid "Save each stream file in its own folder"
-msgstr "Jede Stream-Datei in eigenem Ordner speichern"
+msgid "Save each '.strm' file in its own folder"
+msgstr "Jede '.strm'-Datei in eigenem Ordner speichern"
 
 msgctxt "#31200"
 msgid "TV-Shows"
@@ -113,7 +113,7 @@ msgid "Show confirmation dialog of the manually saved episode data"
 msgstr "Bestätigungsdialog der manuell gespeicherten Episodendaten anzeigen"
 
 msgctxt "#31306"
-msgid "Time until the confirmation dialog closes automatically (sec)"
+msgid "Time until the confirmation dialog closes automatically (seconds)"
 msgstr "Zeit bis der Bestätigungsdialog automatisch geschlossen wird (Sekunden)"
 
 msgctxt "#32000"
@@ -125,12 +125,12 @@ msgid "Update at startup"
 msgstr "Aktualisierung bei Start"
 
 msgctxt "#32002"
-msgid "Automatic Update"
-msgstr "Automatische Aktualisierung"
+msgid "Scheduled update"
+msgstr "Zeitgesteuerte Aktualisierung"
 
 msgctxt "#32003"
-msgid "Update Every (Hours)"
-msgstr "Update alle (Stunde/n)"
+msgid "Update interval in hours"
+msgstr "Updateintervall in Stunden"
 
 msgctxt "#32004"
 msgid "Force Update at (00:00 to disable)"
@@ -288,6 +288,22 @@ msgctxt "#33506"
 msgid "Music-DB directory"
 msgstr "Musik-DB Speicherort"
 
-msgctxt "#39000"
-msgid "Continue at {0}"
-msgstr "Bei {0} fortsetzen"
+msgctxt "#34000"
+msgid "Playback"
+msgstr "Wiedergabe"
+
+msgctxt "#34001"
+msgid "Dialog to continue the video"
+msgstr "Dialog zum Fortetzen des Videos"
+
+msgctxt "#34002"
+msgid "Context menu before video start"
+msgstr "Kontextmenü vor Videostart"
+
+msgctxt "#34003"
+msgid "Overlay after video start"
+msgstr "Overlay nach Videostart"
+
+msgctxt "#34004"
+msgid "Resume video before playback point (seconds)"
+msgstr "Video vor Wiedergabepunkt fortsetzen (Sekunden)"
