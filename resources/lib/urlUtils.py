@@ -19,13 +19,13 @@ from __future__ import unicode_literals
 
 from .common import Globals
 
-try:
-    import urllib.parse as urllib
-except:
-    import urllib
-
 
 def stripUnquoteURL(url):
+    try:
+        import urllib.parse as urllib
+    except:
+        import urllib
+
     if url.startswith('image://'):
         url = urllib.unquote_plus(url.replace('image://', '').strip('/'))
     else:

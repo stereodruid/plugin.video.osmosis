@@ -21,22 +21,14 @@ import os
 import re
 import sys
 import xbmc
-import xbmcaddon
-import xbmcgui
 import xbmcvfs
 
-from .common import Globals
+from .common import Globals, Settings
 from .create import fillPluginItems
 from .fileSys import readMediaList
 from .guiTools import selectDialog
 from .moduleUtil import getModule
 from .stringUtils import getProviderId, getStrmname, parseMediaListURL
-
-globals = Globals()
-ADDON_PATH = py2_decode(xbmc.translatePath(globals.addon.getAddonInfo('path')))
-MEDIALIST_PATH = py2_decode(xbmc.translatePath(globals.addon.getSetting('MediaList_LOC')))
-MediaList_LOC = os.path.join(MEDIALIST_PATH, 'MediaList.xml')
-represent = os.path.join(ADDON_PATH, 'resources/media/icon.png')
 
 actor_update_manual = 0
 actor_update_periodictime = 1
@@ -44,7 +36,9 @@ actor_update_fixtime = 2
 
 
 def strm_update(selectedItems=None, actor=0):
-    if xbmcvfs.exists(MediaList_LOC):
+    globals = Globals()
+    settings = Settings()
+    if xbmcvfs.exists(settings.MEDIALIST_FILENNAME_AND_PATH):
         thelist = sorted(readMediaList())
         if not selectedItems and actor == actor_update_manual:
             selectAction = ['Movies', 'TV-Shows', 'Audio', 'All']
@@ -60,8 +54,8 @@ def strm_update(selectedItems=None, actor=0):
 
         items = selectedItems if selectedItems else [{'entry': item} for item in thelist]
         if len(items) > 0:
-            dialogeBG = xbmcgui.DialogProgressBG()
-            dialogeBG.create('OSMOSIS total update process')
+            pDialog = globals.dialogProgressBG
+            pDialog.create('OSMOSIS total update process')
 
             iUrls = 0
             splittedEntries = []
@@ -73,7 +67,7 @@ def strm_update(selectedItems=None, actor=0):
                 splittedEntries.append(splits)
 
             if iUrls == 0:
-                dialogeBG.close()
+                pDialog.close()
                 return
 
             step = j = 100 / iUrls
@@ -89,15 +83,16 @@ def strm_update(selectedItems=None, actor=0):
                         if module and hasattr(module, 'update'):
                             url = module.update(name, url, 'video', thelist)
 
-                    dialogeBG.update(int(j), 'OSMOSIS total update process' , 'Current Item: {0}; Items left: {1}'.format(getStrmname(name), iUrls))
+                    pDialog.update(int(j), message='Current Item: {0}; Items left: {1}'.format(getStrmname(name), iUrls))
                     j += step
 
-                    fillPluginItems(url, strm=True, strm_name=name, strm_type=cType, name_orig=name_orig)
+                    fillPluginItems(url, strm=True, strm_name=name, strm_type=cType, name_orig=name_orig, pDialog=pDialog)
                     iUrls -= 1
-
-            dialogeBG.close()
+            xbmc.log("updateAll: dialog isFinished = {0}".format(pDialog.isFinished()))
+            pDialog.close()
+            xbmc.log("updateAll: dialog isFinished = {0}".format(pDialog.isFinished()))
             if actor == actor_update_periodictime:
-                xbmc.executebuiltin('Notification({0}, {1}, {2}, {3})'.format(globals.PLUGIN_NAME, 'Next update in: {0}h'.format(globals.addon.getSetting('Automatic_Update_Time')), 5000, represent))
+                xbmc.executebuiltin('Notification({0}, {1}, {2}, {3})'.format(globals.PLUGIN_NAME, 'Next update in: {0}h'.format(settings.AUTOMATIC_UPDATE_TIME), 5000, globals.MEDIA_ICON))
             elif actor == actor_update_fixtime:
-                next_run = globals.addon.getSetting('update_time')[:5]
-                xbmc.executebuiltin('Notification({0}, {1}, {2}, {3})'.format(globals.PLUGIN_NAME, 'Next update: {0}h'.format(next_run), 5000, represent))
+                next_run = settings.UPDATE_TIME[:5]
+                xbmc.executebuiltin('Notification({0}, {1}, {2}, {3})'.format(globals.PLUGIN_NAME, 'Next update: {0}h'.format(next_run), 5000, globals.MEDIA_ICON))

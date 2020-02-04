@@ -18,17 +18,10 @@
 from __future__ import unicode_literals
 import os
 import re
-import xbmc
-import xbmcaddon
 
-from .cache import Globals, getAddonnameCache
-from .common import jsonrpc
+from .common import Globals, jsonrpc
 from .moduleUtil import getModule
 from .utils import multiple_replace, multiple_reSub
-
-globals = Globals()
-folder_medialistentry_movie = globals.addon.getSetting('folder_medialistentry_movie')
-folder_movie = globals.addon.getSetting('folder_movie')
 
 
 def cleanString(string):
@@ -168,11 +161,11 @@ def cleanByDictReplacements(string):
 
 
 def getMovieStrmPath(strmTypePath, mediaListEntry_name, movie_name=None):
-    if folder_medialistentry_movie == 'true':
+    if settings.FOLDER_MEDIALISTENTRY_MOVIE:
         mediaListEntry_name = cleanByDictReplacements(getStrmname(mediaListEntry_name))
         mediaListEntry_name = cleanStrmFilesys(mediaListEntry_name)
         strmTypePath = os.path.join(strmTypePath, mediaListEntry_name)
-    if movie_name and folder_movie == 'true':
+    if movie_name and FOLDER_MOVIE:
         movie_name = cleanByDictReplacements(getStrmname(movie_name))
         movie_name = cleanStrmFilesys(movie_name)
         strmTypePath = os.path.join(strmTypePath, movie_name)
@@ -240,6 +233,7 @@ def getProvidername(url):
         if module and hasattr(module, 'getProvidername'):
             provider = module.getProvidername(provider.get('plugin_id'), url)
         else:
-            provider = getAddonnameCache().cacheFunction(getAddonname, provider.get('plugin_id'))
+            globals = Globals()
+            provider = globals.CACHE_ADDONNAME.cacheFunction(getAddonname, provider.get('plugin_id'))
 
     return provider

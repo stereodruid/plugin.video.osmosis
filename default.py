@@ -22,11 +22,9 @@ import sys
 import time
 import re
 import xbmc
-import xbmcaddon
-import xbmcgui
 import xbmcplugin
 
-from resources.lib.common import jsonrpc
+from resources.lib.common import Globals, jsonrpc
 from resources.lib.create import addMultipleSeasonToMediaList, addToMedialist, fillPlugins, \
     fillPluginItems, removeAndReadMedialistEntry, removeItemsFromMediaList, renameMediaListEntry
 from resources.lib.fileSys import writeTutList
@@ -42,6 +40,7 @@ except:
     from urlparse import parse_qsl
 
 if __name__ == '__main__':
+    globals = Globals()
     params = dict(parse_qsl(sys.argv[2][1:]))
     if PY2:
         sys.argv[0] = py2_decode(sys.argv[0])
@@ -60,7 +59,7 @@ if __name__ == '__main__':
                       'Welcome, this is your first time using OSMOSIS. Here, you can select the content type you want to add:',
                       'Video Plugins: Select to add Movies, TV-Shows, YouTube Videos',
                       'Music Plugins: Select to add Music']
-            xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
+            globals.dialog.ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
     elif mode == 1:
         fillPlugins(params.get('url'))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -70,7 +69,7 @@ if __name__ == '__main__':
                       'Here, you can select the Add-on:',
                       'The selected Add-on should provide Video/Music content in the right structure.',
                       'Take a look at ++ Naming video files/TV shows ++ http://kodi.wiki/view/naming_video_files/TV_shows.']
-            xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
+            globals.dialog.ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
     elif mode == 2:
         fillPluginItems(params.get('url'))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -116,7 +115,7 @@ if __name__ == '__main__':
                       'Search for your Movie, TV-Show or Music.',
                       'Mark/select content, do not play a Movie or enter a TV-Show.',
                       'Open context menu on the selected and select *create strms*.']
-            xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
+            globals.dialog.ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
     elif mode == 102:
         favs = jsonrpc('Favourites.GetFavourites', dict(properties=['path', 'window', 'windowparameter', 'thumbnail'])).get('favourites', {})
         for fav in favs:

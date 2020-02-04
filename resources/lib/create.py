@@ -18,13 +18,12 @@
 from __future__ import unicode_literals
 from kodi_six.utils import py2_encode, py2_decode
 import os
-import sys
 import re
+import sys
 import xbmc
 import xbmcgui
-import xbmcaddon
 
-from .common import Globals, jsonrpc
+from .common import Globals, Settings, jsonrpc
 from .fileSys import readMediaList, removeMediaList, writeMediaList, writeSTRM, writeTutList
 from .guiTools import addDir, addLink, editDialog, getType, getTypeLangOnly, mediaListDialog, selectDialog
 from .jsonUtils import requestList
@@ -40,28 +39,7 @@ except:
     import urllib
 
 globals = Globals()
-HIDE_title_in_OV = globals.addon.getSetting('Hide_tilte_in_OV')
-PAGINGTVshows = globals.addon.getSetting('paging_tvshows')
-PAGINGMovies = globals.addon.getSetting('paging_movies')
-STRM_LOC = py2_decode(xbmc.translatePath(globals.addon.getSetting('STRM_LOC')))
-NOE0_STRMS_EXPORT = globals.addon.getSetting('noE0_Strms_Export')
-SEARCH_THETVDB = int(globals.addon.getSetting('search_thetvdb'))
-
-thisDialog = sys.modules[__name__]
-thisDialog.dialogeBG = None
-thisDialog.dialoge = None
-
-
-def initialize_DialogBG(mess1, mess2, barType='BG'):
-    if barType == 'BG':
-        if not thisDialog.dialogeBG:
-            thisDialog.dialogeBG = xbmcgui.DialogProgressBG()
-            thisDialog.dialogeBG.create('OSMOSIS: {0}'.format(mess1), '{0}'.format(mess2))
-
-    else:
-        if not thisDialog.dialoge:
-            thisDialog.dialoge = xbmcgui.DialogProgress()
-            thisDialog.dialoge.create('OSMOSIS: {0}'.format(mess1), '{0}'.format(mess2))
+settings = Settings()
 
 
 def fillPlugins(cType='video'):
@@ -79,7 +57,7 @@ def fillPlugins(cType='video'):
             addDir(addon['name'], 'plugin://{0}'.format(addon['addonid']), 101, art, addon['description'], type=cType)
 
 
-def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None', name_parent='', name_orig=None):
+def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None', name_parent='', name_orig=None, pDialog=None):
     name_orig_from_url, plugin_url = parseMediaListURL(url)
     if not name_orig:
         name_orig = name_orig_from_url
@@ -95,25 +73,32 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         details = [dict(playableSingleMedia=True, url=plugin_url)]
 
     if strm_type.find('Cinema') != -1 or strm_type.find('YouTube') != -1 or strm_type.find('Movies') != -1:
-        initialize_DialogBG('Movie', 'Adding')
-        addMovies(details, strm_name, strm_type, name_orig=name_orig)
-        thisDialog.dialogeBG.close()
-        thisDialog.dialogeBG = None
+        # pDialog = globals.dialogProgressBG
+        pDialog.update(heading='{0}: Movie'.format(globals.PLUGIN_NAME), message='Adding')
+        addMovies(details, strm_name, strm_type, name_orig, pDialog)
+        xbmc.log("create movie: dialog isFinished = {0}".format(pDialog.isFinished()))
+        # pDialog.close()
+        xbmc.log("create movie: dialog isFinished = {0}".format(pDialog.isFinished()))
         return
 
-    if strm_type.find('TV-Show') != -1 or strm_type.find('Shows-Collection') != -1:
-        initialize_DialogBG('Adding TV-Shows', 'working..')
-        getTVShowFromList(details, strm_name, strm_type, name_orig=name_orig)
-        thisDialog.dialogeBG.close()
-        thisDialog.dialogeBG = None
+    elif strm_type.find('TV-Show') != -1 or strm_type.find('Shows-Collection') != -1:
+        # pDialog = globals.dialogProgressBG
+        pDialog.update(heading='{0}: Adding TV-Shows'.format(globals.PLUGIN_NAME), message='working...')
+        getTVShowFromList(details, strm_name, strm_type, name_orig, pDialog)
+        xbmc.log("create tvshow: dialog isFinished = {0}".format(pDialog.isFinished()))
+        # pDialog.close()
+        xbmc.log("create tvshow: dialog isFinished = {0}".format(pDialog.isFinished()))
         return
 
-    if strm_type.find('Album') != -1 :
-        initialize_DialogBG('Album', 'Adding')
-        addAlbum(details, strm_name, strm_type)
-        thisDialog.dialogeBG.close()
-        thisDialog.dialogeBG = None
+    elif strm_type.find('Album') != -1 :
+        # pDialog = globals.dialogProgressBG
+        pDialog.update(heading='{0}: Album'.format(globals.PLUGIN_NAME), message='Adding')
+        addAlbum(details, strm_name, strm_type, pDialog)
+        xbmc.log("create music: dialog isFinished = {0}".format(pDialog.isFinished()))
+        # pDialog.close()
+        xbmc.log("create music: dialog isFinished = {0}".format(pDialog.isFinished()))
         return
+
     for detail in details:
         filetype = detail['filetype']
         label = detail['label']
@@ -122,7 +107,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         plot = detail.get('plot', '')
         art = detail.get('art', {})
 
-        if globals.addon.getSetting('Link_Type') == '0':
+        if settings.LINK_TYPE == 0:
             link = '{0}?{1}'.format(sys.argv[0], urllib.urlencode({'url': file, 'mode': 10, 'name': py2_encode(label), 'fanart': art.get('fanart', '')}))
         else:
             link = file
@@ -153,6 +138,9 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
             else:
                 addDir(label, file, 101, art, plot, '', '', '', name_parent=name_parent, type=detail.get('type', None))
 
+    # if pDialog and not pDialog.isFinished():
+    #    pDialog.close()
+
 
 def addToMedialist(params):
     name = name_orig = params.get('name')
@@ -175,7 +163,7 @@ def addToMedialist(params):
                       'You can rename your Movie, TV-Show or Music title.',
                       'To make your scraper recognize the content, some times it is necessary to rename the title.',
                       'Be careful, wrong title can also cause that your scraper can\'t recognize your content.']
-            xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
+            globals.dialog.ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
         choice = selectDialog('Title for MediaList entry: {0}'.format(name_orig), selectAction)
     else:
         choice = params.get('choice', 0)
@@ -210,7 +198,7 @@ def addToMedialist(params):
                               'Now select your content type.',
                               'Select language or YouTube type.',
                               'Wait for done message.']
-                    xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
+                    globals.dialog.ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
 
                 if tvshow_detected or params.get('type', None) == 'tvshow':
                     cType = getTypeLangOnly('TV-Shows')
@@ -221,7 +209,7 @@ def addToMedialist(params):
             if cType != -1:
                 if params.get('filetype', 'directory') == 'file':
                     url += '&playMode=play'
-                if (SEARCH_THETVDB == 2 and cType.find('TV-Shows') != -1 and choice == 0):
+                if (settings.SEARCH_THETVDB == 2 and cType.find('TV-Shows') != -1 and choice == 0):
                     show_data = getShowByName(name, re.sub('TV-Shows\((.*)\)', r'\g<1>', cType))
                     if show_data:
                         showtitle_tvdb = show_data.get('seriesName', name)
@@ -229,7 +217,7 @@ def addToMedialist(params):
                             addon_log_notice('addToMedialist: Use TVDB name \'{0}\' for \'{1}\''.format(showtitle_tvdb, name))
                             name = showtitle_tvdb
                 writeMediaList('name_orig={0};{1}'.format(name_orig, url), name, cType)
-                xbmcgui.Dialog().notification(cType, name_orig, xbmcgui.NOTIFICATION_INFO, 5000, False)
+                globals.dialog.notification(cType, name_orig, xbmcgui.NOTIFICATION_INFO, 5000, False)
 
                 try:
                     plugin_id = re.search('{0}([^\/\?]*)'.format('plugin:\/\/'), url)
@@ -240,7 +228,7 @@ def addToMedialist(params):
                 except:
                     pass
                 fillPluginItems(url, strm=True, strm_name=name, strm_type=cType, name_orig=name_orig)
-                xbmcgui.Dialog().notification('Writing items...', 'Done', xbmcgui.NOTIFICATION_INFO, 5000, False)
+                globals.dialog.notification('Writing items...', 'Done', xbmcgui.NOTIFICATION_INFO, 5000, False)
 
 
 def addMultipleSeasonToMediaList(params):
@@ -252,7 +240,7 @@ def addMultipleSeasonToMediaList(params):
                   'You can rename your Movie, TV-Show or Music title.',
                   'To make your scraper recognize the content, some times it is necessary to rename the title.',
                   'Be careful, wrong title can also cause that your scraper can\'t recognize your content.']
-        xbmcgui.Dialog().ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
+        globals.dialog.ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
     choice = selectDialog('Title for MediaList entry: {0}'.format(name_orig), selectAction)
     if choice != -1:
         cType = None
@@ -347,10 +335,10 @@ def removeItemsFromMediaList(action='list'):
     if selectedItems:
         removeMediaList(selectedItems)
         selectedLabels = sorted(list(dict.fromkeys([item.get('name') for item in selectedItems])), key=lambda k: k.lower())
-        xbmcgui.Dialog().notification('Finished deleting:', '{0}'.format(', '.join(label for label in selectedLabels)))
+        globals.dialog.notification('Finished deleting:', '{0}'.format(', '.join(label for label in selectedLabels)))
 
 
-def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums='1'):
+def addAlbum(contentList, strm_name, strm_type, pDialog, PAGINGalbums='1'):
     strm_name = getStrmname(strm_name)
     albumList = []
     dirList = []
@@ -382,7 +370,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums='1'):
                 if duration == 0:
                     duration = 200
 
-                if globals.addon.getSetting('Link_Type') == '0':
+                if settings.LINK_TYPE == 0:
                     link = '{0}?{1}'.format(sys.argv[0], urllib.urlencode({'url': file, 'mode': 10, 'mediaType': 'audio', 'name': label, 'fanart': fanart}))
                 else:
                     link = file
@@ -399,7 +387,7 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums='1'):
                 else:
                     artist = 'Various Artists'
 
-                thisDialog.dialogeBG.update(int(j), globals.PLUGIN_NAME + ': Writing File', 'Title: {0}'.format(label))
+                pDialog.update(int(j), globals.PLUGIN_NAME + ': Writing File', 'Title: {0}'.format(label))
                 path = os.path.join(strm_type, cleanStrmFilesys(artist), cleanStrmFilesys(strm_name))
                 if album and artist and label and path and link and track:
                     albumList.append({'path': path, 'label': label, 'link': link, 'album': album, 'artist': artist, 'track': track, 'duration': duration, 'thumb': thumb})
@@ -425,29 +413,28 @@ def addAlbum(contentList, strm_name='', strm_type='Other', PAGINGalbums='1'):
             cType = splits[0]
             writeMediaList(url, strm_name, cType, albumartist=artist)
     for album in albumList:
-        strm_link = '{0}|{1}'.format(album.get('link'), album.get('label')) if globals.addon.getSetting('Link_Type') == '0' else album.get('link')
+        strm_link = '{0}|{1}'.format(album.get('link'), album.get('label')) if settings.LINK_TYPE == 0 else album.get('link')
         fullpath, fileModTime = writeSTRM(album.get('path'), cleanStrms(album.get('label').rstrip('.')) , strm_link)
         musicDatabase(album.get('album'), album.get('artist'), album.get('label'), album.get('path'), album.get('link'), album.get('track'), album.get('duration'), album.get('thumb'), fileModTime)
-    thisDialog.dialogeBG.close()
 
     return albumList
 
 
-def addMovies(contentList, strm_name='', strm_type='Other', provider='n.a.', name_orig=None):
+def addMovies(contentList, strm_name, strm_type, name_orig, pDialog, provider='n.a.'):
     movieList = []
     pagesDone = 0
     file = ''
     filetype = ''
-    j = len(contentList) * int(PAGINGMovies) / 100
+    j = len(contentList) * settings.PAGING_MOVIES / 100
 
     if len(contentList) == 0:
         return
 
-    while pagesDone < int(PAGINGMovies):
+    while pagesDone < settings.PAGING_MOVIES:
         if not contentList[0].get('playableSingleMedia'):
             for detailInfo in contentList:
                 file = detailInfo.get('file').replace('\\\\', '\\') if detailInfo.get('file', None) else None
-                if globals.addon.getSetting('Link_Type') == '0' and name_orig and file.find('name_orig=') == -1:
+                if settings.LINK_TYPE == 0 and name_orig and file.find('name_orig=') == -1:
                     file = 'name_orig={0};{1}'.format(name_orig, file)
                 filetype = detailInfo.get('filetype', None)
                 label = detailInfo.get('label') if detailInfo.get('label', None) else None
@@ -456,21 +443,21 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider='n.a.', nam
                 if label and strm_name:
                     label = cleanLabels(label)
                     get_title_with_OV = True
-                    if HIDE_title_in_OV == 'true':
+                    if settings.HIDE_TITLE_IN_OV:
                         if re.search('(\WOV\W)', label):
                             get_title_with_OV = False
 
                     provider = getProviderId(file)
 
-                    thisDialog.dialogeBG.update(int(j), globals.PLUGIN_NAME + ': Getting Movies', 'Video: {0}'.format(label))
+                    pDialog.update(int(j), globals.PLUGIN_NAME + ': Getting Movies', 'Video: {0}'.format(label))
                     if filetype is not None and filetype == 'file' and get_title_with_OV == True:
                         m_path = getMovieStrmPath(strm_type, strm_name, label)
                         m_title = getStrmname(label)
                         movieList.append({'path': m_path, 'title':  m_title, 'url': file, 'provider': provider.get('providerId'), 'imdbnumber': imdbnumber})
-                    j = j + len(contentList) * int(PAGINGMovies) / 100
+                    j = j + len(contentList) * settings.PAGING_MOVIES / 100
 
             pagesDone += 1
-            if filetype != 'file' and pagesDone < int(PAGINGMovies):
+            if filetype != 'file' and pagesDone < settings.PAGING_MOVIES:
                 contentList = requestList(file, 'video').get('files', [])
                 retry_count = 1
                 while len(contentList) == 0 and retry_count <= 3:
@@ -478,32 +465,32 @@ def addMovies(contentList, strm_name='', strm_type='Other', provider='n.a.', nam
                     contentList = requestList(file, 'video').get('files', [])
                     retry_count = retry_count + 1
             else:
-                pagesDone = int(PAGINGMovies)
+                pagesDone = settings.PAGING_MOVIES
         else:
             provider = getProviderId(contentList[0].get('url')).get('providerId')
             url = contentList[0].get('url')
-            if globals.addon.getSetting('Link_Type') == '0' and name_orig and file.find('name_orig=') == -1:
+            if settings.LINK_TYPE == 0 and name_orig and file.find('name_orig=') == -1:
                 url = 'name_orig={0};{1}'.format(name_orig , url)
             m_path = getMovieStrmPath(strm_type, strm_name)
             m_title = getStrmname(strm_name)
             movieList.append({'path': m_path, 'title':  cleanStrmFilesys(m_title), 'url': url, 'provider': provider})
-            pagesDone = int(PAGINGMovies)
+            pagesDone = settings.PAGING_MOVIES
 
-    if globals.addon.getSetting('Link_Type') == '0':
+    if settings.LINK_TYPE == 0:
         movieList = writeMovie(movieList)
 
     j = 100 / len(movieList) if len(movieList) > 0 else 1
     # Write strms for all values in movieList
     for movie in movieList:
-        thisDialog.dialogeBG.update(int(j), globals.PLUGIN_NAME + ': Writing Movies', movie.get('title'))
-        strm_link = 'plugin://{0}/?url=plugin&mode=10&mediaType=movie&id={1}|{2}'.format(globals.PLUGIN_ID, movie.get('movieID'), movie.get('title')) if globals.addon.getSetting('Link_Type') == '0' else movie.get('url')
+        pDialog.update(int(j), globals.PLUGIN_NAME + ': Writing Movies', movie.get('title'))
+        strm_link = 'plugin://{0}/?url=plugin&mode=10&mediaType=movie&id={1}|{2}'.format(globals.PLUGIN_ID, movie.get('movieID'), movie.get('title')) if settings.LINK_TYPE == 0 else movie.get('url')
         addon_log('write movie = {0}'.format(movie))
         writeSTRM(cleanStrms(movie.get('path')), cleanStrms(movie.get('title')), strm_link)
 
         j = j + 100 / len(movieList)
 
 
-def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, name_orig=None):
+def getTVShowFromList(showList, strm_name, strm_type, name_orig, pDialog, pagesDone=0):
     dirList = []
     episodesList = []
 
@@ -512,7 +499,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
         lang = strm_type[strm_type.find('(') + 1:strm_type.find(')')]
     showtitle = getStrmname(strm_name)
 
-    while pagesDone < int(PAGINGTVshows):
+    while pagesDone < settings.PAGING_TVSHOWS:
         strm_type = strm_type.replace('Shows-Collection', 'TV-Shows')
 
         for detailInfo in showList:
@@ -533,7 +520,7 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
                     episodetitle = detailInfo.get('title')
                     episodeseason = detailInfo.get('season', -1)
                     episode = detailInfo.get('episode', -1)
-                    if (SEARCH_THETVDB == 2 or (SEARCH_THETVDB == 1 and (episodeseason == -1 or episode == -1))):
+                    if (settings.SEARCH_THETVDB == 2 or (settings.SEARCH_THETVDB == 1 and (episodeseason == -1 or episode == -1))):
 
                         if showtitle and showtitle != '' and episodetitle and episodetitle != '':
 
@@ -558,14 +545,14 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
                                                        .format(showtitle, episodeseason, episode, episodetitle))
 
                     get_title_with_OV = True
-                    if HIDE_title_in_OV == 'true':
+                    if settings.HIDE_TITLE_IN_OV:
                         label = detailInfo.get('label').strip() if detailInfo.get('label', None) else None
                         label = cleanLabels(label)
                         if re.search('(\WOV\W)', label):
                             get_title_with_OV = False
 
                     if detailInfo.get('season', -1) > -1 and detailInfo.get('episode', -1) > -1:
-                        if NOE0_STRMS_EXPORT == 'false' or detailInfo.get('episode') > 0 and get_title_with_OV == True:
+                        if not settings.NO_E0_STRMS_EXPORT or detailInfo.get('episode') > 0 and get_title_with_OV == True:
                             if  episodetitle.find('Teil 1 und 2') >= 0 or episodetitle.find('Parts 1 & 2') >= 0 :
                                 addon_log_notice('found tvdb entry for \'{0}\': \'S{1:02d}E{2:02d} - {3}\' (multi) matched to \'S{4:02d}E{5:02d} - {6}\''
                                     .format(showtitle, episodeseason, episode, episodetitle, detailInfo['season'], detailInfo['episode'], detailInfo['episodeName']))
@@ -601,9 +588,9 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
 
         step = float(100.0 / len(episodesList) if len(episodesList) > 0 else 1)
         if pagesDone == 0:
-            thisDialog.dialogeBG.update(int(step), 'Initialisation of TV-Shows: {0}'.format(getStrmname(strm_name)))
+            pDialog.update(int(step), 'Initialisation of TV-Shows: {0}'.format(getStrmname(strm_name)))
         else:
-            thisDialog.dialogeBG.update(int(step), 'Page: {0} {1}'.format(pagesDone, getStrmname(strm_name)))
+            pDialog.update(int(step), 'Page: {0} {1}'.format(pagesDone, getStrmname(strm_name)))
 
         split_episode = 0
         for index, episode in enumerate(episodesList):
@@ -629,12 +616,12 @@ def getTVShowFromList(showList, strm_name='', strm_type='Other', pagesDone=0, na
 
         for index, episode in enumerate(episodesList):
             pagesDone = getEpisode(episode, strm_name, strm_type, pagesDone=pagesDone, name_orig=name_orig)
-            thisDialog.dialogeBG.update(int(step * (index + 1)))
+            pDialog.update(int(step * (index + 1)))
 
         pagesDone += 1
         episodesList = []
         showList = []
-        if pagesDone < int(PAGINGTVshows) and len(dirList) > 0:
+        if pagesDone < settings.PAGING_TVSHOWS and len(dirList) > 0:
             showList = [item for sublist in dirList for item in sublist]
             dirList = []
 
@@ -645,7 +632,7 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0, name_orig=N
     addon_log('detailInfo: {0}'.format(episode_item))
     file = episode_item.get('file', None)
 
-    if name_orig and file.find('name_orig=') == -1 and globals.addon.getSetting('Link_Type') == '0':
+    if name_orig and file.find('name_orig=') == -1 and settings.LINK_TYPE == 0:
         file = 'name_orig={0};{1}'.format(name_orig, file)
     episode = episode_item.get('episode', -1)
     split_episode = episode_item.get('split_episode', -1)
@@ -665,11 +652,11 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0, name_orig=N
         provider = getProviderId(file)
         episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': cleanStrmFilesys(showtitle), 'provider': provider.get('providerId')}
 
-        if globals.addon.getSetting('Link_Type') == '0':
+        if settings.LINK_TYPE == 0:
             episode = writeShow(episode)
 
         if episode is not None:
-            strm_link = 'plugin://{0}/?url=plugin&mode=10&mediaType=show&episode={1}&showid={2}|{3}'.format(globals.PLUGIN_ID, episode.get('strSeasonEpisode'), episode.get('showID'), episode.get('tvShowTitle')) if globals.addon.getSetting('Link_Type') == '0' else episode.get('url')
+            strm_link = 'plugin://{0}/?url=plugin&mode=10&mediaType=show&episode={1}&showid={2}|{3}'.format(globals.PLUGIN_ID, episode.get('strSeasonEpisode'), episode.get('showID'), episode.get('tvShowTitle')) if settings.LINK_TYPE == 0 else episode.get('url')
             writeSTRM(episode.get('path'), episode.get('strSeasonEpisode'), strm_link)
 
     return pagesDone

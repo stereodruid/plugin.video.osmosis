@@ -15,16 +15,18 @@
 
 from __future__ import unicode_literals
 from kodi_six.utils import py2_decode, py2_encode
+import datetime
 import os
 import re
 import sys
-import datetime
-import xbmc, xbmcaddon, xbmcvfs
 import xml.etree.ElementTree as ET
+import xbmc
+import xbmcvfs
 
-from .common import Globals
+from .common import Globals, Settings
 
 globals = Globals()
+settings = Settings()
 
 
 #***************************************************************************************
@@ -82,8 +84,7 @@ def multiple_reSub(text, dic):
 
 def createSongNFO(filepath, filename , strm_ty='type', artists='none', albums='no album', titls='title', typese='types'):
     # create .nfo xml file
-    STRM_LOC = py2_decode(xbmc.translatePath(globals.addon.getSetting('STRM_LOC')))
-    filepath = os.path.join(STRM_LOC, filepath)
+    filepath = os.path.join(settings.STRM_LOC, filepath)
 
     if not xbmcvfs.exists(filepath):
         xbmcvfs.mkdirs(filepath)

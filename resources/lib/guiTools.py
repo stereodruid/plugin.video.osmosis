@@ -21,7 +21,6 @@ import os, sys
 import time
 import re
 import xbmc
-import xbmcaddon
 import xbmcgui
 import xbmcplugin
 
@@ -37,32 +36,24 @@ except:
     import urllib
 
 globals = Globals()
-PLUGIN_ID = globals.PLUGIN_ID
-PLUGIN_NAME = globals.PLUGIN_NAME
-PLUGIN_PATH = py2_decode(xbmc.translatePath(globals.PLUGIN_PATH))
-icon = os.path.join(PLUGIN_PATH, 'resources/media/icon.png')
-iconRemove = os.path.join(PLUGIN_PATH, 'resources/media/iconRemove.png')
-FANART = os.path.join(PLUGIN_PATH, 'resources/media/fanart.jpg')
-folderIcon = os.path.join(PLUGIN_PATH, 'resources/media/folderIcon.png')
-updateIcon = os.path.join(PLUGIN_PATH, 'resources/media/updateIcon.png')
 
 
 def addItem(label, mode, icon):
     addon_log('addItem')
-    u = 'plugin://{0}/?{1}'.format(PLUGIN_ID, urllib.urlencode({'mode': mode, 'fanart': icon}))
+    u = 'plugin://{0}/?{1}'.format(globals.PLUGIN_ID, urllib.urlencode({'mode': mode, 'fanart': icon}))
     liz = xbmcgui.ListItem(label)
     liz.setInfo(type='Video', infoLabels={'Title': label})
-    liz.setArt({'icon': icon, 'thumb': icon, 'fanart': FANART})
+    liz.setArt({'icon': icon, 'thumb': icon, 'fanart': globals.MEDIA_FANART})
 
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
 
 
 def addFunction(labels):
     addon_log('addItem')
-    u = 'plugin://{0}/?{1}'.format(PLUGIN_ID, urllib.urlencode({'mode': 666, 'fanart': updateIcon}))
+    u = 'plugin://{0}/?{1}'.format(globals.PLUGIN_ID, urllib.urlencode({'mode': 666, 'fanart': globals.MEDIA_UPDATE}))
     liz = xbmcgui.ListItem(labels)
     liz.setInfo(type='Video', infoLabels={'Title': labels})
-    liz.setArt({'icon': updateIcon, 'thumb': updateIcon, 'fanart':  FANART})
+    liz.setArt({'icon': globals.MEDIA_UPDATE, 'thumb': globals.MEDIA_UPDATE, 'fanart':  globals.MEDIA_FANART})
 
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
 
@@ -113,23 +104,23 @@ def addLink(name, url, mode, art, plot, genre, date, showcontext, playlist, rege
 def getSources():
     addon_log('getSources')
     xbmcplugin.setContent(int(sys.argv[1]), 'files')
-    art = {'fanart': FANART, 'thumb': folderIcon}
+    art = {'fanart': globals.MEDIA_FANART, 'thumb': globals.MEDIA_FOLDER}
     addDir('Video Plugins', 'video', 1, art)
     addDir('Music Plugins', 'audio', 1, art)
     addDir('Video Favoriten', '', 102, {'thumb': 'DefaultFavourites.png'}, type='video')
-    addItem('Update', 4, updateIcon)
-    addItem('Update (with removal of unused .strm files)', 42, updateIcon)
+    addItem('Update', 4, globals.MEDIA_UPDATE)
+    addItem('Update (with removal of unused .strm files)', 42, globals.MEDIA_UPDATE)
     addFunction('Update all')
-    addItem('Rename', 41, updateIcon)
-    addItem('Remove Media', 5, iconRemove)
-    addItem('Remove Shows from TVDB cache', 51, iconRemove)
-    addItem('Remove all Shows from TVDB cache', 52, iconRemove)
+    addItem('Rename', 41, globals.MEDIA_UPDATE)
+    addItem('Remove Media', 5, globals.MEDIA_REMOVE)
+    addItem('Remove Shows from TVDB cache', 51, globals.MEDIA_REMOVE)
+    addItem('Remove all Shows from TVDB cache', 52, globals.MEDIA_REMOVE)
     if xbmc.getCondVisibility('System.HasAddon(service.watchdog)') != 1:
         addon_details = jsonrpc('Addons.GetAddonDetails', dict(addonid='service.watchdog', properties=['enabled', 'installed'])).get('addon')
         if addon_details and addon_details.get('installed'):
-            addItem('Activate Watchdog', 7, icon)
+            addItem('Activate Watchdog', 7, globals.MEDIA_ICON)
         else:
-            addItem('Install Watchdog', 6, icon)
+            addItem('Install Watchdog', 6, globals.MEDIA_ICON)
     # ToDo Add label
 
 
@@ -172,18 +163,18 @@ def getTypeLangOnly(Type):
 def selectDialog(header, list, autoclose=0, multiselect=False, useDetails=False, preselect=None):
     if multiselect:
         if preselect:
-            return xbmcgui.Dialog().multiselect(header, list, autoclose=autoclose, useDetails=useDetails, preselect=preselect)
+            return globals.dialog.multiselect(header, list, autoclose=autoclose, useDetails=useDetails, preselect=preselect)
         else:
-            return xbmcgui.Dialog().multiselect(header, list, autoclose=autoclose, useDetails=useDetails)
+            return globals.dialog.multiselect(header, list, autoclose=autoclose, useDetails=useDetails)
     else:
         if preselect:
-            return xbmcgui.Dialog().select(header, list, autoclose, useDetails=useDetails, preselect=preselect)
+            return globals.dialog.select(header, list, autoclose, useDetails=useDetails, preselect=preselect)
         else:
-            return xbmcgui.Dialog().select(header, list, autoclose, useDetails=useDetails)
+            return globals.dialog.select(header, list, autoclose, useDetails=useDetails)
 
 
 def editDialog(nameToChange):
-    return py2_decode(xbmcgui.Dialog().input(nameToChange, type=xbmcgui.INPUT_ALPHANUM, defaultt=nameToChange))
+    return py2_decode(globals.dialog.input(nameToChange, type=xbmcgui.INPUT_ALPHANUM, defaultt=nameToChange))
 
 
 # Before executing the code below we need to know the movie original title (string variable originaltitle) and the year (string variable year). They can be obtained from the infolabels of the listitem. The code filters the database for items with the same original title and the same year, year-1 and year+1 to avoid errors identifying the media.
@@ -225,7 +216,7 @@ def markSeries(epID, pos, total, done):
 
 # Functions not in usee yet:
 def handle_wait(time_to_wait, header, title):
-    dlg = xbmcgui.DialogProgress()
+    dlg = globals.dialogProgress
     dlg.create('OSMOSIS', header)
     secs = 0
     percent = 0
@@ -259,28 +250,24 @@ def hide_busy_dialog():
 
 
 def Error(header, line1='', line2='', line3=''):
-    dlg = xbmcgui.Dialog()
-    dlg.ok(header, line1, line2, line3)
-    del dlg
+    globals.dialog.ok(header, line1, line2, line3)
 
 
-def infoDialog(str, header=PLUGIN_NAME, time=10000):
-    try: xbmcgui.Dialog().notification(header, str, icon, time, sound=False)
+def infoDialog(str, header=globals.PLUGIN_NAME, time=10000):
+    try: globals.dialog.notification(header, str, globals.MEDIA_ICON, time, sound=False)
     except: xbmc.executebuiltin('Notification({0}, {1}, {2}, {3})'.format(header, str, time, THUMB))
 
 
-def okDialog(str1, str2='', header=PLUGIN_NAME):
-    xbmcgui.Dialog().ok(header, str1, str2)
+def okDialog(str1, str2='', header=globals.PLUGIN_NAME):
+    globals.dialog.ok(header, str1, str2)
 
 
-def yesnoDialog(str1, str2='', header=PLUGIN_NAME, yes='', no=''):
-    answer = xbmcgui.Dialog().yesno(header, str1, str2, '', yes, no)
-    return answer
+def yesnoDialog(str1, str2='', header=globals.PLUGIN_NAME, yes='', no=''):
+    return globals.dialog.yesno(header, str1, str2, '', yes, no)
 
 
 def browse(type, heading, shares, mask='', useThumbs=False, treatAsFolder=False, path='', enableMultiple=False):
-    retval = xbmcgui.Dialog().browse(type, heading, shares, mask, useThumbs, treatAsFolder, path, enableMultiple)
-    return retval
+    return globals.dialog.browse(type, heading, shares, mask, useThumbs, treatAsFolder, path, enableMultiple)
 
 
 def resumePointDialog(resume):
@@ -293,13 +280,13 @@ def resumePointDialog(resume):
     #        seconds=15,
     #        skip_to=position,
     #        label=addon.getLocalizedString(39000).format(zeitspanne(position)[5]))
-        sel = xbmcgui.Dialog().contextmenu([xbmc.getLocalizedString(12022).format(time.strftime("%H:%M:%S", time.gmtime(position))), xbmc.getLocalizedString(12021)])
+        sel = globals.dialog.contextmenu([xbmc.getLocalizedString(12022).format(time.strftime("%H:%M:%S", time.gmtime(position))), xbmc.getLocalizedString(12021)])
         if sel > -1:
             return position if sel == 0 else 0
     return 0
 
 
-def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_prefix=PLUGIN_NAME, preselect_name=None):
+def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_prefix=globals.PLUGIN_NAME, preselect_name=None):
     thelist = readMediaList()
     items = []
     if not cTypeFilter:

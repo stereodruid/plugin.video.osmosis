@@ -12,8 +12,7 @@ import xbmcaddon
 import xbmcgui
 import xbmcvfs
 
-from .cache import getEpisodeCache, getEpisodeCacheManual, getShowCache, getTvdbDataCache
-from .common import Globals
+from .common import Globals, Settings
 from .fileSys import readMediaList
 from .stringUtils import getStrmname
 from .utils import addon_log, addon_log_notice, multiple_reSub
@@ -26,11 +25,7 @@ except:
     use_fuzzy_matching = False
 
 globals = Globals()
-medialist_path = py2_decode(xbmc.translatePath(globals.addon.getSetting('MediaList_LOC')))
-MediaList_LOC = os.path.join(medialist_path, 'MediaList.xml')
-tvdb_token_loc = os.path.join(medialist_path, 'tvdb_token.txt')
-CONFIRM_USER_ENTRIES = globals.addon.getSetting('confirm_user_entries')
-dialog_autoclose_time = int(globals.addon.getSetting('tvdb_dialog_autoclose_time'))
+settings = Settings()
 
 api_baseurl = 'https://api.thetvdb.com/{0}'
 
@@ -74,13 +69,12 @@ def getShowByName(showName, lang):
                             showInfoDialogList.append(ListItem)
                             showInfoList.append(show)
 
-                    dialog = xbmcgui.Dialog()
                     time1 = time.time()
-                    selected = dialog.select('{0}: multiple entries found on TVDB'
-                                            .format(showName), showInfoDialogList, useDetails=True, autoclose=dialog_autoclose_time * 1000,
+                    selected = globals.dialog.select('{0}: multiple entries found on TVDB'
+                                            .format(showName), showInfoDialogList, useDetails=True, autoclose=settings.TVDB_DIALOG_AUTOCLOSE_TIME * 1000,
                                             preselect=int(delta_selected - 1 if preselected is None else preselected + delta_selected))
                     time2 = time.time()
-                    if  dialog_autoclose_time > 0 and int(time2 - time1) >= dialog_autoclose_time:
+                    if  settings.TVDB_DIALOG_AUTOCLOSE_TIME > 0 and int(time2 - time1) >= settings.TVDB_DIALOG_AUTOCLOSE_TIME:
                         selected = -1
                     if selected >= delta_selected:
                         show_data = showInfoList[selected - delta_selected]
@@ -94,10 +88,9 @@ def getShowByName(showName, lang):
                      show_data = show_data_tvdb[0]
                      break
         if not show_data and selected == 0:
-            dialog = xbmcgui.Dialog()
             tvdb_id = 0
             try:
-                tvdb_id = int(dialog.numeric(0, '{0} not found: Enter TVDB ID'.format(showName)))
+                tvdb_id = int(globals.dialog.numeric(0, '{0} not found: Enter TVDB ID'.format(showName)))
             except:
                 pass
             if tvdb_id > 0:
@@ -142,26 +135,26 @@ def getTVShowFromTVDBID(tvdb_id, lang):
 
 
 def getTVShowFromCache(showName):
-    data = getShowCache().get(showName)
+    data = globals.CACHE_TVSHOWS.get(showName)
     addon_log('tvdb getTVShowCache: showName = {0}; data = {1}'.format(showName, data))
     return eval(data) if data and len(data.strip()) > 0 else None
 
 
 def setTVShowCache(showName, data):
     addon_log('tvdb setTVShowCache: showName = {0}; data = {1}'.format(showName, data))
-    getShowCache().set(showName, repr(data))
+    globals.CACHE_TVSHOWS.set(showName, repr(data))
 
 
 def deleteTVShowFromCache(showName):
-    getShowCache().delete(showName)
+    globals.CACHE_TVSHOWS.delete(showName)
     addon_log('tvdb deleteTVShowCache: showName = {0}'.format(showName))
 
 
 def removeShowsFromTVDBCache(selectedItems=None):
-    if not selectedItems and not xbmcgui.Dialog().yesno('Remove all Shows from TVDB cache', 'Are you sure to delete all shows from cache?'):
+    if not selectedItems and not globals.dialog.yesno('Remove all Shows from TVDB cache', 'Are you sure to delete all shows from cache?'):
         return
 
-    delete_type = xbmcgui.Dialog().select('Which data should be deleted from cache?',
+    delete_type = globals.dialog.select('Which data should be deleted from cache?',
                                                 ['all cached data for show (includes automatched and user entries for episodes)',
                                                 'automatched entries for episodes',
                                                 'user entries for episode',
@@ -169,7 +162,7 @@ def removeShowsFromTVDBCache(selectedItems=None):
                                                 ],
                                                 preselect=1)
 
-    if xbmcvfs.exists(MediaList_LOC):
+    if xbmcvfs.exists(settings.MEDIALIST_FILENNAME_AND_PATH):
         thelist = readMediaList()
         items = selectedItems if selectedItems else [{'entry': item} for item in thelist]
         if len(items) > 0:
@@ -227,13 +220,13 @@ def findEpisodeByName(show_data, episodeSeason, episodeNr, episodeName, lang, si
     addon_log_notice('tvdb findEpisodeByName: \'{0}\'; showname = \'{1}\', showid = {2}, lang = {3}'.format(episodeName, showname, showid, lang))
     episode_data = getEpisodeFromCache(episodeSeason, episodeName, showid)
 
-    if episode_data and episode_data.get('user_entry') == True and CONFIRM_USER_ENTRIES == 'true':
+    if episode_data and episode_data.get('user_entry') == True and settings.CONFIRM_USER_ENTRIES:
         if silent == False and fallback_en == False:
-            confirmed = xbmcgui.Dialog().yesno('Confirm user entry for {0} is correct?'.format(showname),
+            confirmed = globals.dialog.yesno('Confirm user entry for {0} is correct?'.format(showname),
                                                'S{0:02d}E{1:02d} - {2}'.format(episodeSeason, episodeNr, episodeName),
                                                'User Entry: S{0:02d}E{1:02d} - {2}'.format(episode_data.get('season'),
                                                episode_data.get('episode'), episode_data.get('episodeName', None)),
-                                               autoclose=dialog_autoclose_time * 1000)
+                                               autoclose=settings.TVDB_DIALOG_AUTOCLOSE_TIME * 1000)
             if confirmed == False:
                 episode_data = None;
         else:
@@ -250,7 +243,7 @@ def findEpisodeByName(show_data, episodeSeason, episodeNr, episodeName, lang, si
         episodecountcurrentseason = 0
         preselected = None
 
-        json_data = getTvdbDataCache().cacheFunction(getEpisodeDataFromTVDB, showid, lang)
+        json_data = globals.CACHE_TVDB_DATA.cacheFunction(getEpisodeDataFromTVDB, showid, lang)
         json_data = sorted(json_data, key=lambda x: (x['airedSeason'] == 0,
                                                     x['airedSeason'] != episodeSeason or x['airedEpisodeNumber'] != episodeNr,
                                                     x['airedSeason'] != episodeSeason,
@@ -425,22 +418,21 @@ def findEpisodeByName(show_data, episodeSeason, episodeNr, episodeName, lang, si
                 match_found_fallback_en = True
 
         # if match_found == False and silent == False and ratio_max >= 60 and ratio_max/ratio_max2 > 1.05:
-            # match_found = xbmcgui.Dialog().yesno('Match for {0}?'.format(showname),
+            # match_found = globals.dialog.yesno('Match for {0}?'.format(showname),
                                # 'from Addon: \'S{0:02d}E{1:02d} - {2}\''.format( episodeSeason, episodeNr, episodeName),
                                # 'TVDB:       \'S{0:02d}E{1:02d} - {2}\''.format(episode_data.get('season'), episode_data.get('episode'), episode_data.get('episodeName')),
                                # 'ratio = {0:0.1f} ({1:0.1f}) [{2:0.1f}]'.format(ratio_max, ratio_max2, ratio_max/ratio_max2),
-                               # autoclose = dialog_autoclose_time*1000 )
+                               # autoclose = settings.TVDB_DIALOG_AUTOCLOSE_TIME*1000 )
             if match_found == True:
                 match_userentry = True
 
         if match_found == False and silent == False:
-            dialog = xbmcgui.Dialog()
             time1 = time.time()
-            selected = dialog.select('No match found for {0}: \'S{1:02d}E{2:02d} - {3}\''.format(showname, episodeSeason, episodeNr, episodeName) ,
-                                     episodeListDialog, useDetails=True, autoclose=dialog_autoclose_time * 1000,
+            selected = globals.dialog.select('No match found for {0}: \'S{1:02d}E{2:02d} - {3}\''.format(showname, episodeSeason, episodeNr, episodeName) ,
+                                     episodeListDialog, useDetails=True, autoclose=settings.TVDB_DIALOG_AUTOCLOSE_TIME * 1000,
                                      preselect=int(0 if preselected is None else preselected + delta_selected))
             time2 = time.time()
-            if dialog_autoclose_time > 0 and int(time2 - time1) >= dialog_autoclose_time:
+            if settings.TVDB_DIALOG_AUTOCLOSE_TIME > 0 and int(time2 - time1) >= settings.TVDB_DIALOG_AUTOCLOSE_TIME:
                 selected = -1
 
             if selected >= delta_selected and selected < episodecount + delta_selected:
@@ -449,8 +441,8 @@ def findEpisodeByName(show_data, episodeSeason, episodeNr, episodeName, lang, si
                 match_userentry = True
             elif selected == 1:
                 try:
-                    season_input = int(dialog.numeric(0, 'Season for \'{0}\': \'S{1:02d}E{2:02d} - {3}\''.format(showname, episodeSeason, episodeNr, episodeName), str(episodeSeason)))
-                    episode_input = int(dialog.numeric(0, 'Episode for \'{0}\': \'S{1:02d}E{2:02d} - {3}\''.format(showname, episodeSeason, episodeNr, episodeName), str(episodeNr)))
+                    season_input = int(globals.dialog.numeric(0, 'Season for \'{0}\': \'S{1:02d}E{2:02d} - {3}\''.format(showname, episodeSeason, episodeNr, episodeName), str(episodeSeason)))
+                    episode_input = int(globals.dialog.numeric(0, 'Episode for \'{0}\': \'S{1:02d}E{2:02d} - {3}\''.format(showname, episodeSeason, episodeNr, episodeName), str(episodeNr)))
                     episode_data = {'season': season_input, 'episode': episode_input, 'episodeName': episodeName, 'match_ratio':-1}
                     setEpisodeCache(episodeSeason, episodeName, showid, episode_data, user_entry=True)
                     match_found = True
@@ -484,9 +476,9 @@ def findEpisodeByName(show_data, episodeSeason, episodeNr, episodeName, lang, si
 
 def getEpisodeFromCache(episodeSeason, episodeName, showid):
     entry = '{0}_{1}_{2}'.format(episodeSeason, episodeName, showid)
-    data_tmp = getEpisodeCache().get(entry)
+    data_tmp = globals.CACHE_EPISODES.get(entry)
     if not data_tmp:
-        data_tmp = getEpisodeCacheManual().get(entry)
+        data_tmp = globals.CACHE_EPISODES_MANUAL.get(entry)
         if data_tmp:
             addon_log('tvdb getEpisodeCache (user entry): season = {0}; episodeName = \'{1}\'; showid = {2}; data = {3}'.format(episodeSeason, episodeName, showid, data_tmp))
             user_entry = True
@@ -506,10 +498,10 @@ def setEpisodeCache(episodeSeason, episodeName, showid, data, user_entry=False):
     entry = '{0}_{1}_{2}'.format(episodeSeason, episodeName, showid)
     if user_entry == True:
         addon_log('tvdb setEpisodeCache (user entry): season = {0}; episodeName = \'{1}\'; showid = {2}; data = {3}'.format(episodeSeason, episodeName, showid, data))
-        getEpisodeCacheManual().set(entry, repr(data))
-        getEpisodeCache().delete(entry)
+        globals.CACHE_EPISODES_MANUAL.set(entry, repr(data))
+        globals.CACHE_EPISODES.delete(entry)
     else:
-        getEpisodeCache().set(entry, repr(data))
+        globals.CACHE_EPISODES.set(entry, repr(data))
         addon_log('tvdb setEpisodeCache: season = {0}; episodeName = \'{1}\'; showid = {2}; data = {3}'.format(episodeSeason, episodeName, showid, data))
 
 
@@ -517,9 +509,9 @@ def deleteEpisodeFromCache(episodeSeason, episodeName, showid, user_entry=False)
     entry = '{0}_{1}_{2}'.format(episodeSeason, episodeName, showid)
     if user_entry == True:
         addon_log('tvdb deleteEpisodeFromCache (user entry): season = {0}; episodeName = \'{1}\'; showid = {2}'.format(episodeSeason, episodeName, showid))
-        getEpisodeCacheManual().delete(entry)
+        globals.CACHE_EPISODES_MANUAL.delete(entry)
     else:
-        getEpisodeCache().delete(entry)
+        globals.CACHE_EPISODES.delete(entry)
         addon_log('tvdb deleteEpisodeFromCache: season = {0}; episodeName = \'{1}\'; showid = {2}'.format(episodeSeason, episodeName, showid))
 
 
@@ -547,10 +539,10 @@ def getJsonFromTVDB(url, lang, params=''):
 def getToken():
     token = None
 
-    if xbmcvfs.exists(tvdb_token_loc):
-        file_time = xbmcvfs.Stat(tvdb_token_loc).st_mtime()
+    if xbmcvfs.exists(settings.TVDB_TOKEN_LOC):
+        file_time = xbmcvfs.Stat(settings.TVDB_TOKEN_LOC).st_mtime()
         if (time.time() - file_time) / 3600 < 24:
-            file = xbmcvfs.File(tvdb_token_loc, 'r')
+            file = xbmcvfs.File(settings.TVDB_TOKEN_LOC, 'r')
             token = file.read()
             file.close()
 
@@ -572,7 +564,7 @@ def refreshToken(token):
 def writeToken(res):
     if res.status_code == 200 and res.json().get('token', None):
         token = res.json().get('token')
-        file = xbmcvfs.File(tvdb_token_loc, 'w')
+        file = xbmcvfs.File(settings.TVDB_TOKEN_LOC, 'w')
         file.write(bytearray(token, 'utf-8'))
         file.close()
         return token

@@ -2,8 +2,8 @@
 
 from __future__ import unicode_literals
 from kodi_six.utils import PY2, py2_encode, py2_decode
-import re
 import os
+import re
 import xbmc
 import xbmcgui
 import xbmcplugin
@@ -139,9 +139,10 @@ class Player(xbmc.Player):
     def finished(self):
         if self.running:
             self.running = False
-            resume = jsonrpc("Files.GetFileDetails", {"file": self.filepath, "media": "video", "properties": ["resume"]}).get('filedetails', {}).get('resume', {})
-            if resume:
-                jsonrpc("Files.SetFileDetails", {"file": self.url, "media": "video", "resume": {"position": resume.get('position'), "total": resume.get('total')}})
+            if self.globals.FEATURE_PLUGIN_RESUME_SYNC:
+                resume = jsonrpc("Files.GetFileDetails", {"file": self.filepath, "media": "video", "properties": ["resume"]}).get('filedetails', {}).get('resume', {})
+                if resume:
+                    jsonrpc("Files.SetFileDetails", {"file": self.url, "media": "video", "resume": {"position": resume.get('position'), "total": resume.get('total')}})
 
 
     def getTimes(self):

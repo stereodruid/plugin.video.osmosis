@@ -6,13 +6,14 @@ import os
 import xbmc
 import xbmcvfs
 
-from ..common import Globals
+from ..common import Globals, Settings
 from ..jsonUtils import requestList
 from ..stringUtils import cleanLabels, getStrmname, parseMediaListURL, replaceStringElem
 
 
 def update(strm_name, url, media_type, thelist):
     globals = Globals()
+    settings = Settings()
     plex_details = requestList('plugin://plugin.video.composite_for_plex', media_type).get('files', [])
     for plex_detail in plex_details:
         orig_name, plugin_url = parseMediaListURL(url)
@@ -26,9 +27,8 @@ def update(strm_name, url, media_type, thelist):
                         splits[2] = serverurl
                         newentry = '|'.join(splits)
                         thelist = replaceStringElem(thelist, entry, newentry)
-                        thefile = py2_decode(xbmc.translatePath(os.path.join(globals.addon.getSetting('MediaList_LOC'), 'MediaList.xml')))
 
-                        output_file = xbmcvfs.File(thefile, 'w')
+                        output_file = xbmcvfs.File(settings.MEDIALIST_FILENNAME_AND_PATH, 'w')
                         for index, linje in enumerate(thelist):
                             entry = ('{0}\n' if index < len(thelist) - 1 else '{0}').format(linje.strip())
                             output_file.write(py2_encode(entry))

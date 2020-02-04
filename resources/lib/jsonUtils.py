@@ -17,7 +17,6 @@
 
 from __future__ import unicode_literals
 from kodi_six.utils import py2_decode
-import xbmc
 
 from .common import jsonrpc
 from .utils import addon_log
