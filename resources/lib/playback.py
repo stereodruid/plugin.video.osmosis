@@ -77,7 +77,7 @@ def play(argv, params):
             settings = Settings()
             dialog = settings.PLAYBACK_DIALOG
             playback_rewind = settings.PLAYBACK_REWIND
-            if dialog == 0:
+            if dialog == 0 or settings.MYVIDEOS_SELECTACTION == 2:
                 position = player.checkResume(dialog, playback_rewind)
 
             player.resolve(item)
@@ -86,7 +86,7 @@ def play(argv, params):
             while not player.monitor.abortRequested() and player.running and xbmc.getInfoLabel('Player.Filename') != title:
                 player.monitor.waitForAbort(player.sleeptm)
 
-            if dialog == 1:
+            if dialog == 1 and settings.MYVIDEOS_SELECTACTION != 2:
                 position = player.checkResume(dialog, playback_rewind)
 
             player.resume(position)
@@ -143,11 +143,11 @@ class Player(xbmc.Player):
         pattern = '{0}[\/?]+'.format('[\/?]+|'.join(ignore_addons))
         if not re.search(pattern, self.url) and self.filepath:
             resume = jsonrpc('Files.GetFileDetails', {'file': self.filepath, 'media': 'video', 'properties': ['resume']}).get('filedetails', {}).get('resume', {})
-        return resumePointDialog(resume, dialog, playback_rewind)
+        return resume.get('position') if self.settings.MYVIDEOS_SELECTACTION == 2 else resumePointDialog(resume, dialog, playback_rewind)
 
 
     def resume(self, position):
-        if position > 0:
+        if position and position > 0:
             while not self.monitor.abortRequested() and self.running and (((self.getTime() + 10) < position) or (position < (self.getTime() - 10))):
                 self.seekTime(position)
                 self.monitor.waitForAbort(self.sleeptm)

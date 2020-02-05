@@ -280,7 +280,7 @@ def resumePointDialog(resume, dialog, playback_rewind):
                 return position if sel == 0 else 0
         elif dialog == 1:
             skip = show_modal_dialog(Skip,
-                'plugin-video-osmosis-continue.xml',
+                'plugin-video-osmosis-resume.xml',
                 globals.PLUGIN_PATH,
                 minutes=0,
                 seconds=15,

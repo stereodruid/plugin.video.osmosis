@@ -135,6 +135,7 @@ class Settings(Singleton):
         elif 'LINK_TYPE' == name: return int(self._gs('Link_Type'))
         elif 'MEDIALIST_PATH' == name: return py2_decode(xbmc.translatePath(self._gs('MediaList_LOC')))
         elif 'MEDIALIST_FILENNAME_AND_PATH' == name: return py2_decode(OSPJoin(self.MEDIALIST_PATH, 'MediaList.xml'))
+        elif 'MYVIDEOS_SELECTACTION' == name: return jsonrpc('Settings.GetSettingValue', dict(setting='myvideos.selectaction')).get('value')
         elif 'NO_E0_STRMS_EXPORT' == name: return self._gs('noE0_Strms_Export') == 'true'
         elif 'PAGING_MOVIES' == name: return int(self._gs('paging_movies'))
         elif 'PAGING_TVSHOWS' == name: return int(self._gs('paging_tvshows'))

@@ -293,7 +293,7 @@ msgid "Playback"
 msgstr ""
 
 msgctxt "#34001"
-msgid "Dialog to continue the video"
+msgid "Dialog to resume the video"
 msgstr ""
 
 msgctxt "#34002"

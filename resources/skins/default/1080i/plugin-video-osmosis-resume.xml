@@ -10,7 +10,7 @@
 			<width>250</width>
 			<control type="group">
 				<control type="button" id="6012">
-					<description>Continue video</description>
+					<description>Resume video</description>
 					<width>250</width>
 					<height>80</height>
 					<font>font12</font>
