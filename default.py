@@ -119,9 +119,10 @@ if __name__ == '__main__':
             globals.dialog.ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
     elif mode == 102:
         favs = jsonrpc('Favourites.GetFavourites', dict(properties=['path', 'window', 'windowparameter', 'thumbnail'])).get('favourites', {})
-        for fav in favs:
-            if params.get('type') == 'video' and fav.get('window') == 'videos':
-                addDir(fav.get('title'), fav.get('windowparameter'), 101, {'thumb': fav.get('thumbnail')}, type=type)
+        if favs:
+            for fav in favs:
+                if params.get('type') == 'video' and fav.get('window') == 'videos':
+                    addDir(fav.get('title'), fav.get('windowparameter'), 101, {'thumb': fav.get('thumbnail')}, type=type)
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
     elif mode == 103:
         addons = searchAddons('video')
