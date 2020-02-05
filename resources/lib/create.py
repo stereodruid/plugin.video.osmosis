@@ -80,37 +80,33 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
     else:
         details = [dict(playableSingleMedia=True, url=plugin_url)]
 
-    if strm_type.find('Cinema') != -1 or strm_type.find('YouTube') != -1 or strm_type.find('Movies') != -1:
-        # pDialog = globals.dialogProgressBG
-        pDialog.update(heading='{0}: Movie'.format(globals.PLUGIN_NAME), message='Adding')
-        addMovies(details, strm_name, strm_type, name_orig, pDialog)
-        xbmc.log("create movie: dialog isFinished = {0}".format(pDialog.isFinished()))
-        # pDialog.close()
-        xbmc.log("create movie: dialog isFinished = {0}".format(pDialog.isFinished()))
-        return
+    if re.search('Movies|YouTube|TV-Shows|Album', strm_type):
+        pDialogToClose = not pDialog
+        if not pDialog:
+            pDialog = globals.dialogProgressBG
+            updateDialog = pDialog.create
+        else:
+            updateDialog = pDialog.update
 
-    elif strm_type.find('TV-Show') != -1 or strm_type.find('Shows-Collection') != -1:
-        # pDialog = globals.dialogProgressBG
-        pDialog.update(heading='{0}: Adding TV-Shows'.format(globals.PLUGIN_NAME), message='working...')
-        getTVShowFromList(details, strm_name, strm_type, name_orig, pDialog)
-        xbmc.log("create tvshow: dialog isFinished = {0}".format(pDialog.isFinished()))
-        # pDialog.close()
-        xbmc.log("create tvshow: dialog isFinished = {0}".format(pDialog.isFinished()))
-        return
+        if re.search('Movies|YouTube', strm_type):
+            updateDialog(heading='{0}: Movie'.format(globals.PLUGIN_NAME), message='Adding')
+            addMovies(details, strm_name, strm_type, name_orig, pDialog)
+        elif re.search('TV-Shows', strm_type):
+            updateDialog(heading='{0}: Adding TV-Shows'.format(globals.PLUGIN_NAME), message='working...')
+            getTVShowFromList(details, strm_name, strm_type, name_orig, pDialog)
+        elif re.search('Album', strm_type):
+            updateDialog(heading='{0}: Album'.format(globals.PLUGIN_NAME), message='Adding')
+            addAlbum(details, strm_name, strm_type, pDialog)
 
-    elif strm_type.find('Album') != -1 :
-        # pDialog = globals.dialogProgressBG
-        pDialog.update(heading='{0}: Album'.format(globals.PLUGIN_NAME), message='Adding')
-        addAlbum(details, strm_name, strm_type, pDialog)
-        xbmc.log("create music: dialog isFinished = {0}".format(pDialog.isFinished()))
-        # pDialog.close()
-        xbmc.log("create music: dialog isFinished = {0}".format(pDialog.isFinished()))
+        if pDialogToClose:
+            pDialog.close()
+
         return
 
     for detail in details:
-        filetype = detail['filetype']
-        label = detail['label']
-        file = detail['file'].replace('\\\\', '\\')
+        filetype = detail.get('filetype')
+        label = detail.get('label')
+        file = detail.get('file')
         strm_name = cleanByDictReplacements(strm_name.strip())
         plot = detail.get('plot', '')
         art = detail.get('art', {})
@@ -145,9 +141,6 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
                 fillPluginItems(file, media_type, file_type, strm, label, strm_type, name_orig=name_orig)
             else:
                 addDir(label, file, 101, art, plot, '', '', '', name_parent=name_parent, type=detail.get('type', None))
-
-    # if pDialog and not pDialog.isFinished():
-    #    pDialog.close()
 
 
 def addToMedialist(params):
@@ -235,6 +228,7 @@ def addToMedialist(params):
                             url = module.create(name, url, 'video')
                 except:
                     pass
+
                 fillPluginItems(url, strm=True, strm_name=name, strm_type=cType, name_orig=name_orig)
                 globals.dialog.notification('Writing items...', 'Done', xbmcgui.NOTIFICATION_INFO, 5000, False)
 

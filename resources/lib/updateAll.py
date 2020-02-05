@@ -88,9 +88,8 @@ def strm_update(selectedItems=None, actor=0):
 
                     fillPluginItems(url, strm=True, strm_name=name, strm_type=cType, name_orig=name_orig, pDialog=pDialog)
                     iUrls -= 1
-            xbmc.log("updateAll: dialog isFinished = {0}".format(pDialog.isFinished()))
+
             pDialog.close()
-            xbmc.log("updateAll: dialog isFinished = {0}".format(pDialog.isFinished()))
             if actor == actor_update_periodictime:
                 xbmc.executebuiltin('Notification({0}, {1}, {2}, {3})'.format(globals.PLUGIN_NAME, 'Next update in: {0}h'.format(settings.AUTOMATIC_UPDATE_TIME), 5000, globals.MEDIA_ICON))
             elif actor == actor_update_fixtime:

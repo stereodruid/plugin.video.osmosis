@@ -192,9 +192,7 @@ def writeMediaList(url, name, cType='Other', cleanName=True, albumartist=None):
         thelist.append(newentry)
 
     output_file = xbmcvfs.File(settings.MEDIALIST_FILENNAME_AND_PATH, 'w')
-    for index, linje in enumerate(thelist):
-        entry = ('{0}\n' if index < len(thelist) - 1 else '{0}').format(linje.strip())
-        output_file.write(py2_encode(entry))
+    output_file.write(bytearray('\n'.join(thelist).strip(), 'utf-8'))
 
 
 def writeTutList(step):
@@ -260,7 +258,7 @@ def removeMediaList(delList):
     addon_log('Removing items')
 
     if xbmcvfs.exists(settings.MEDIALIST_FILENNAME_AND_PATH):
-        delNotInMediaList(delList)
+        removeStreamsFromDatabaseAndFilesystem(delList)
 
         thelist = readMediaList()
 
@@ -298,7 +296,7 @@ def readMediaList():
         return thelist
 
 
-def delNotInMediaList(delList):
+def removeStreamsFromDatabaseAndFilesystem(delList):
     for item in delList:
         try:
             splits = item.get('entry').split('|')
@@ -331,12 +329,12 @@ def delNotInMediaList(delList):
                         for file in files:
                             if py2_decode(file).replace('.strm', '') in streams:
                                 filePath = os.path.join(py2_encode(path), file)
-                                addon_log_notice('delNotInMediaList: delete file = \'{0}\''.format(py2_decode(filePath)))
+                                addon_log_notice('removeStreamsFromDatabaseAndFilesystem: delete file = \'{0}\''.format(py2_decode(filePath)))
                                 xbmcvfs.delete(xbmc.translatePath(filePath))
                     dirs, files = xbmcvfs.listdir(path)
                     if not files and not dirs:
                         deleteFromFileSystem = True
-                        addon_log_notice('delNotInMediaList: delete empty directory = {0}'.format(path))
+                        addon_log_notice('removeStreamsFromDatabaseAndFilesystem: delete empty directory = {0}'.format(path))
 
             if deleteFromFileSystem:
                 xbmcvfs.rmdir(path, force=True)
