@@ -19,18 +19,17 @@ from __future__ import unicode_literals
 from kodi_six.utils import py2_encode, py2_decode
 import fileinput
 import os
-import sys
 import re
 import shutil
 import codecs
 import errno
 import xbmc
-import xbmcaddon
+import xbmcgui
 import xbmcvfs
-import xbmcplugin
 
 from .common import Globals, Settings, jsonrpc
 from .kodiDB import delStream
+from .l10n import getString
 from .stringUtils import cleanByDictReplacements, cleanStrmFilesys, completePath, \
     getMovieStrmPath, getProviderId, getStrmname, multiRstrip, parseMediaListURL, replaceStringElem
 from .utils import addon_log, addon_log_notice
@@ -141,6 +140,7 @@ def isInMediaList(mediaTitle, url, cType='Other'):
 def writeMediaList(url, name, cType='Other', cleanName=True, albumartist=None):
     addon_log('writeMediaList')
     existInList = False
+    replaced = False
 
     if not xbmcvfs.exists(globals.DATA_PATH):
         xbmcvfs.mkdirs(globals.DATA_PATH)
@@ -161,7 +161,7 @@ def writeMediaList(url, name, cType='Other', cleanName=True, albumartist=None):
                 name_orig = re.sub('(?:name_orig=([^;]*);)(plugin:\/\/[^<]*)', '\g<1>', url)
 
                 replaced = False
-                splits2 = filter(None, splits[2].split('<next>'))
+                splits2 = list(filter(None, splits[2].split('<next>')))
                 for s, split2 in enumerate(splits2):
                     split2_plugin = re.sub('.*(plugin:\/\/[^<]*)', '\g<1>', split2)
                     split2_name_orig = re.sub('(?:name_orig=([^;]*);)(plugin:\/\/[^<]*)', '\g<1>', split2)
@@ -181,10 +181,9 @@ def writeMediaList(url, name, cType='Other', cleanName=True, albumartist=None):
                         splits.append(albumartist)
 
                 newentry = '|'.join(splits)
-                globals.dialog.notification(entry, 'Adding to MediaList', os.path.join(globals.ADDON_PATH, 'resources/media/representerIcon.png'), 5000)
                 thelist = replaceStringElem(thelist, entry, newentry)
 
-    if existInList != True:
+    if not existInList:
         newentry = [cType, name, url]
         if albumartist:
             newentry.append(albumartist)
@@ -193,6 +192,9 @@ def writeMediaList(url, name, cType='Other', cleanName=True, albumartist=None):
 
     output_file = xbmcvfs.File(settings.MEDIALIST_FILENNAME_AND_PATH, 'w')
     output_file.write(bytearray('\n'.join(thelist).strip(), 'utf-8'))
+
+    if not existInList or not replaced:
+        globals.dialog.notification(getString(39141, globals.addon), getStrmname(name), globals.MEDIA_ICON, 2000)
 
 
 def writeTutList(step):

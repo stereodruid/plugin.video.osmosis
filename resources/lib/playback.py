@@ -12,6 +12,7 @@ from .common import Globals, Settings, sleep
 from .guiTools import resumePointDialog, selectDialog
 from .jsonUtils import jsonrpc
 from .kodiDB import getKodiEpisodeID, getKodiMovieID, getVideo
+from .l10n import getString
 from .stringUtils import cleanStrmFilesys, getProvidername, parseMediaListURL
 from .utils import addon_log
 
@@ -20,6 +21,7 @@ def play(argv, params):
     selectedEntry = None
     mediaType = params.get('mediaType')
     if mediaType:
+        globals = Globals()
         if params.get('id') or params.get('showid'):
             providers = getVideo(params.get('id')) if params.get('id') else getVideo(params.get('showid'), params.get('episode'))
             if PY2:
@@ -29,7 +31,7 @@ def play(argv, params):
             else:
                 selectProvider = ['[{0}] {1}'.format(getProvidername(provider[0]), parseMediaListURL(provider[0])[0]) for provider in providers]
 
-                choice = selectDialog('OSMOSIS: Select provider!', selectProvider)
+                choice = selectDialog(getString(39132, globals.addon), selectProvider)
                 if choice > -1: selectedEntry = providers[choice]
 
         if selectedEntry:
@@ -65,7 +67,6 @@ def play(argv, params):
             if not props:
                 props = dict()
 
-            globals = Globals()
             player = Player()
             player.log = addon_log
             player.pluginhandle = int(argv[1])

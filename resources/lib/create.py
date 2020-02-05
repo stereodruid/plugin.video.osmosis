@@ -28,6 +28,7 @@ from .fileSys import readMediaList, removeMediaList, writeMediaList, writeSTRM, 
 from .guiTools import addDir, addLink, editDialog, getType, getTypeLangOnly, mediaListDialog, selectDialog
 from .jsonUtils import requestList
 from .kodiDB import musicDatabase, writeMovie, writeShow
+from .l10n import getString
 from .stringUtils import cleanByDictReplacements, cleanStrmFilesys, cleanLabels, cleanStrms, getMovieStrmPath, \
     getProviderId, getStrmname, parseMediaListURL
 from .tvdb import getEpisodeByName, getShowByName
@@ -84,18 +85,13 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
         pDialogToClose = not pDialog
         if not pDialog:
             pDialog = globals.dialogProgressBG
-            updateDialog = pDialog.create
-        else:
-            updateDialog = pDialog.update
+            pDialog.create(heading='\'{0}\' {1}'.format(strm_name, getString(39138, globals.addon)))
 
         if re.search('Movies|YouTube', strm_type):
-            updateDialog(heading='{0}: Movie'.format(globals.PLUGIN_NAME), message='Adding')
             addMovies(details, strm_name, strm_type, name_orig, pDialog)
         elif re.search('TV-Shows', strm_type):
-            updateDialog(heading='{0}: Adding TV-Shows'.format(globals.PLUGIN_NAME), message='working...')
             getTVShowFromList(details, strm_name, strm_type, name_orig, pDialog)
         elif re.search('Album', strm_type):
-            updateDialog(heading='{0}: Album'.format(globals.PLUGIN_NAME), message='Adding')
             addAlbum(details, strm_name, strm_type, pDialog)
 
         if pDialogToClose:
@@ -158,14 +154,14 @@ def addToMedialist(params):
             name_orig = '{0} - {1}'.format(name, name_orig)
         if params.get('type') == 'movie' and params.get('year'):
             name = '{0} ({1})'.format(name, params.get('year'))
-        selectAction = ['Continue with original Title: {0}'.format(name), 'Rename Title', 'Get Title from Medialist']
+        selectAction = ['{0}: \'{1}\''.format(getString(39106, globals.addon), name), getString(39107, globals.addon), getString(39108, globals.addon)]
         if not writeTutList('select:Rename'):
             tutWin = ['Adding content to your library',
                       'You can rename your Movie, TV-Show or Music title.',
                       'To make your scraper recognize the content, some times it is necessary to rename the title.',
                       'Be careful, wrong title can also cause that your scraper can\'t recognize your content.']
             globals.dialog.ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
-        choice = selectDialog('Title for MediaList entry: {0}'.format(name_orig), selectAction)
+        choice = selectDialog('{0}: \'{1}\''.format(getString(39105, globals.addon), name_orig), selectAction)
     else:
         choice = params.get('choice', 0)
         name = params.get('name')
@@ -186,7 +182,7 @@ def addToMedialist(params):
                 cTypeFilter = 'TV-Shows'
             elif params.get('type', None) == 'movie':
                 cTypeFilter = 'Movies'
-            item = mediaListDialog(False, False, header_prefix='Get Title from Medialist for {0}'.format(name_orig), cTypeFilter=cTypeFilter, preselect_name=name)
+            item = mediaListDialog(False, False, header_prefix=getString(39125, globals.addon).format(name_orig), cTypeFilter=cTypeFilter, preselect_name=name)
             splits = item.get('entry').split('|') if item else None
             name = splits[1] if splits else None
             cType = splits[0] if splits else None
@@ -218,7 +214,7 @@ def addToMedialist(params):
                             addon_log_notice('addToMedialist: Use TVDB name \'{0}\' for \'{1}\''.format(showtitle_tvdb, name))
                             name = showtitle_tvdb
                 writeMediaList('name_orig={0};{1}'.format(name_orig, url), name, cType)
-                globals.dialog.notification(cType, name_orig, xbmcgui.NOTIFICATION_INFO, 5000, False)
+                # globals.dialog.notification(cType, name_orig, globals.MEDIA_ICON, 2000, False)
 
                 try:
                     plugin_id = re.search('{0}([^\/\?]*)'.format('plugin:\/\/'), url)
@@ -230,20 +226,20 @@ def addToMedialist(params):
                     pass
 
                 fillPluginItems(url, strm=True, strm_name=name, strm_type=cType, name_orig=name_orig)
-                globals.dialog.notification('Writing items...', 'Done', xbmcgui.NOTIFICATION_INFO, 5000, False)
+                # globals.dialog.notification(getString(39126, globals.addon), getString(39127, globals.addon), globals.MEDIA_ICON, 2000, True)
 
 
 def addMultipleSeasonToMediaList(params):
     name = name_orig = params.get('name')
     url = params.get('url')
-    selectAction = ['Continue with original Title: {0}'.format(name_orig), 'Rename Title', 'Get Title from Medialist']
+    selectAction = ['{0}: \'{1}\''.format(getString(39106, globals.addon), name), getString(39107, globals.addon), getString(39108, globals.addon)]
     if not writeTutList('select:Rename'):
         tutWin = ['Adding content to your library',
                   'You can rename your Movie, TV-Show or Music title.',
                   'To make your scraper recognize the content, some times it is necessary to rename the title.',
                   'Be careful, wrong title can also cause that your scraper can\'t recognize your content.']
         globals.dialog.ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
-    choice = selectDialog('Title for MediaList entry: {0}'.format(name_orig), selectAction)
+    choice = selectDialog('{0}: \'{1}\''.format(getString(39105, globals.addon), name_orig), selectAction)
     if choice != -1:
         cType = None
         if name:
@@ -254,7 +250,7 @@ def addMultipleSeasonToMediaList(params):
             name = '{0}++RenamedTitle++'.format(name) if name else name
 
         if choice == 2:
-            item = mediaListDialog(False, False, header_prefix='Get Title from Medialist for {0}'.format(name_orig), preselect_name=name, cTypeFilter='TV-Shows')
+            item = mediaListDialog(False, False, header_prefix=getString(39125, globals.addon).format(name_orig), preselect_name=name, cTypeFilter='TV-Shows')
             splits = item.get('entry').split('|') if item else None
             name = splits[1] if splits else None
             cType = splits[0] if splits else None
@@ -285,7 +281,7 @@ def addMultipleSeasonToMediaList(params):
 
                 sItems = sorted([item.get('label') for item in seasonList], key=lambda k: key_natural_sort(k.lower()))
                 preselect = [i for i, item in enumerate(sItems) if item.find(' (*)') == -1]
-                selectedItemsIndex = selectDialog('Select Seasons to add for {0}'.format(showtitle), sItems, multiselect=True, preselect=preselect)
+                selectedItemsIndex = selectDialog(getString(39128, globals.addon).format(showtitle), sItems, multiselect=True, preselect=preselect)
                 seasonList = [item for item in seasonList for index in selectedItemsIndex if item.get('label') == sItems[index]] if selectedItemsIndex and len(selectedItemsIndex) > 0 else None
                 addon_log_notice('addMultipleSeasonToMediaList: seasonList = {0}'.format(seasonList))
                 if seasonList and len(seasonList) > 0:
@@ -300,8 +296,8 @@ def renameMediaListEntry(selectedItems):
         name_old = getStrmname(splits[1])
         choice = 1
         if cType.find('TV-Shows') != -1:
-            selectAction = ['Get Title from TVDB', 'Enter new Title']
-            choice = selectDialog('Rename MediaList entry: {0}'.format(name_old), selectAction)
+            selectAction = [getString(39129, globals.addon), getString(39130, globals.addon)]
+            choice = selectDialog('{0}: {1}'.format(getString(39006, globals.addon), name_old), selectAction)
         if choice != -1:
             if choice == 1:
                 name = editDialog(name_old).strip()
@@ -332,12 +328,12 @@ def removeAndReadMedialistEntry(selectedItems):
 def removeItemsFromMediaList(action='list'):
     addon_log('removingitemsdialog')
 
-    selectedItems = mediaListDialog(header_prefix='Remove item(s) from Medialist', multiselect=True)
+    selectedItems = mediaListDialog(header_prefix=getString(39007, globals.addon), multiselect=True)
 
     if selectedItems:
         removeMediaList(selectedItems)
         selectedLabels = sorted(list(dict.fromkeys([item.get('name') for item in selectedItems])), key=lambda k: k.lower())
-        globals.dialog.notification('Finished deleting:', '{0}'.format(', '.join(label for label in selectedLabels)))
+        globals.dialog.notification(getString(39131, globals.addon), '{0}'.format(', '.join(label for label in selectedLabels), globals.MEDIA_ICON, 2000, True))
 
 
 def addAlbum(contentList, strm_name, strm_type, pDialog, PAGINGalbums='1'):
@@ -389,7 +385,7 @@ def addAlbum(contentList, strm_name, strm_type, pDialog, PAGINGalbums='1'):
                 else:
                     artist = 'Various Artists'
 
-                pDialog.update(int(j), globals.PLUGIN_NAME + ': Writing File', 'Title: {0}'.format(label))
+                pDialog.update(int(j), message='\'{0}\' {1}'.format(label, getString(39138, globals.addon)))
                 path = os.path.join(strm_type, cleanStrmFilesys(artist), cleanStrmFilesys(strm_name))
                 if album and artist and label and path and link and track:
                     albumList.append({'path': path, 'label': label, 'link': link, 'album': album, 'artist': artist, 'track': track, 'duration': duration, 'thumb': thumb})
@@ -451,7 +447,7 @@ def addMovies(contentList, strm_name, strm_type, name_orig, pDialog, provider='n
 
                     provider = getProviderId(file)
 
-                    pDialog.update(int(j), globals.PLUGIN_NAME + ': Getting Movies', 'Video: {0}'.format(label))
+                    pDialog.update(int(j), message='\'{0}\' {1}'.format(label, getString(39138, globals.addon)))
                     if filetype is not None and filetype == 'file' and get_title_with_OV == True:
                         m_path = getMovieStrmPath(strm_type, strm_name, label)
                         m_title = getStrmname(label)
@@ -484,7 +480,7 @@ def addMovies(contentList, strm_name, strm_type, name_orig, pDialog, provider='n
     j = 100 / len(movieList) if len(movieList) > 0 else 1
     # Write strms for all values in movieList
     for movie in movieList:
-        pDialog.update(int(j), globals.PLUGIN_NAME + ': Writing Movies', movie.get('title'))
+        pDialog.update(int(j), message='\'{0}\' {1}'.format(movie.get('title'), getString(39138, globals.addon)))
         strm_link = 'plugin://{0}/?url=plugin&mode=10&mediaType=movie&id={1}|{2}'.format(globals.PLUGIN_ID, movie.get('movieID'), movie.get('title')) if settings.LINK_TYPE == 0 else movie.get('url')
         addon_log('write movie = {0}'.format(movie))
         writeSTRM(cleanStrms(movie.get('path')), cleanStrms(movie.get('title')), strm_link)
@@ -589,10 +585,8 @@ def getTVShowFromList(showList, strm_name, strm_type, name_orig, pDialog, pagesD
                             episodesList.append(detailInfo)
 
         step = float(100.0 / len(episodesList) if len(episodesList) > 0 else 1)
-        if pagesDone == 0:
-            pDialog.update(int(step), 'Initialisation of TV-Shows: {0}'.format(getStrmname(strm_name)))
-        else:
-            pDialog.update(int(step), 'Page: {0} {1}'.format(pagesDone, getStrmname(strm_name)))
+        if pagesDone > 0:
+            pDialog.update(int(step), '\'{0}\' {1}: {2} {3}'.format(getStrmname(strm_name), getString(39138, globals.addon), pagesDone, getString(39139, globals.addon), pagesDone))
 
         split_episode = 0
         for index, episode in enumerate(episodesList):

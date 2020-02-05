@@ -30,6 +30,7 @@ from resources.lib.create import addMultipleSeasonToMediaList, addToMedialist, f
     searchAddons
 from resources.lib.fileSys import writeTutList
 from resources.lib.guiTools import addDir, getSources, mediaListDialog, selectDialog
+from resources.lib.l10n import getString
 from resources.lib.playback import play
 from resources.lib.tvdb import removeShowsFromTVDBCache
 from resources.lib.updateAll import strm_update
@@ -77,21 +78,21 @@ if __name__ == '__main__':
     elif mode == 666:
         strm_update()
     elif mode == 4:
-        selectedItems = mediaListDialog(header_prefix='Update')
+        selectedItems = mediaListDialog(header_prefix=getString(39123, globals.addon))
         if selectedItems and len(selectedItems) > 0:
             strm_update(selectedItems)
     elif mode == 41:
-        selectedItems = mediaListDialog(header_prefix='Rename', expand=False)
+        selectedItems = mediaListDialog(header_prefix=getString(39006, globals.addon), expand=False)
         if selectedItems and len(selectedItems) > 0:
             renameMediaListEntry(selectedItems)
     elif mode == 42:
-        selectedItems = mediaListDialog(header_prefix='Update')
+        selectedItems = mediaListDialog(header_prefix=getString(39123, globals.addon))
         if selectedItems and len(selectedItems) > 0:
             removeAndReadMedialistEntry(selectedItems)
     elif mode == 5:
         removeItemsFromMediaList('list')
     elif mode == 51:
-        selectedItems = mediaListDialog(True, False, header_prefix='Remove Shows from TVDB cache', cTypeFilter='TV-Shows')
+        selectedItems = mediaListDialog(True, False, header_prefix=getString(39008, globals.addon), cTypeFilter='TV-Shows')
         if selectedItems and len(selectedItems) > 0:
             removeShowsFromTVDBCache(selectedItems)
     elif mode == 52:

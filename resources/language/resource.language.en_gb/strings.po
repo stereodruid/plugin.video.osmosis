@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: en_GB\n"
+"Language: de_DE\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgctxt "#30000"
@@ -77,7 +77,7 @@ msgid "Save the streams pro MediaList entry in a superfolder"
 msgstr ""
 
 msgctxt "#31103"
-msgid "Save each stream file in its own folder"
+msgid "Save each '.strm' file in its own folder"
 msgstr ""
 
 msgctxt "#31200"
@@ -310,4 +310,222 @@ msgstr ""
 
 msgctxt "#34005"
 msgid "Addons that should be ignored by the playback dialog"
-msgstr "Addons, die vom  Wiedergabedialog ignoriert werden sollen"
+msgstr ""
+
+# Main menu
+msgctxt "#39000"
+msgid "Video Addons"
+msgstr ""
+
+msgctxt "#39001"
+msgid "Music Addons"
+msgstr ""
+
+msgctxt "#39002"
+msgid "Video Favorites"
+msgstr ""
+
+msgctxt "#39003"
+msgid "Update the Library using the MediaList entry"
+msgstr ""
+
+msgctxt "#39004"
+msgid "Update the Library using the MediaList entry and delete invalid '.strm' files"
+msgstr ""
+
+msgctxt "#39005"
+msgid "Update Library using all MediaList entries"
+msgstr ""
+
+msgctxt "#39006"
+msgid "Rename MediaList entry"
+msgstr ""
+
+msgctxt "#39007"
+msgid "Delete MediaList entry with associated '.strm' files"
+msgstr ""
+
+msgctxt "#39008"
+msgid "Delete TV Shows from the TVDB cache"
+msgstr ""
+
+msgctxt "#39009"
+msgid "Delete all TV Shows from the TVDB cache"
+msgstr ""
+
+msgctxt "#39010"
+msgid "Activate addon 'Watchdog'"
+msgstr ""
+
+msgctxt "#39011"
+msgid "Install addon 'Watchdog'"
+msgstr ""
+
+# Dialogs
+msgctxt "#39100"
+msgid "Add to Library"
+msgstr ""
+
+msgctxt "#39101"
+msgid "Add Movie to Library"
+msgstr ""
+
+msgctxt "#39102"
+msgid "Add TV Show to Library"
+msgstr ""
+
+msgctxt "#39103"
+msgid "Add Season to Library"
+msgstr ""
+
+msgctxt "#39104"
+msgid "Add individual Seasons to Library"
+msgstr ""
+
+msgctxt "#39105"
+msgid "Title for MediaList entry"
+msgstr ""
+
+msgctxt "#39106"
+msgid "Continue with original title"
+msgstr ""
+
+msgctxt "#39107"
+msgid "Rename title"
+msgstr ""
+
+msgctxt "#39108"
+msgid "Get title from 'MediaList.xml'"
+msgstr ""
+
+msgctxt "#39109"
+msgid "Select media type"
+msgstr ""
+
+msgctxt "#39110"
+msgid "Select language"
+msgstr ""
+
+msgctxt "#39111"
+msgid "Movie"
+msgstr ""
+
+msgctxt "#39112"
+msgid "TV-Show"
+msgstr ""
+
+msgctxt "#39113"
+msgid "Music"
+msgstr ""
+
+msgctxt "#39114"
+msgid "Album"
+msgstr ""
+
+msgctxt "#39115"
+msgid "Single"
+msgstr ""
+
+msgctxt "#39116"
+msgid "YouTube"
+msgstr ""
+
+msgctxt "#39117"
+msgid "Other"
+msgstr ""
+
+msgctxt "#39118"
+msgid "de"
+msgstr ""
+
+msgctxt "#39119"
+msgid "en"
+msgstr ""
+
+msgctxt "#39120"
+msgid "sp"
+msgstr ""
+
+msgctxt "#39121"
+msgid "tr"
+msgstr ""
+
+msgctxt "#39122"
+msgid "All"
+msgstr ""
+
+msgctxt "#39123"
+msgid "Update Library"
+msgstr ""
+
+msgctxt "#39124"
+msgid "Select entry"
+msgstr ""
+
+msgctxt "#39125"
+msgid "Get title from 'MediaList.xml' for '{0}'"
+msgstr ""
+
+msgctxt "#39126"
+msgid "Create '.strm' files"
+msgstr ""
+
+msgctxt "#39127"
+msgid "Done"
+msgstr ""
+
+msgctxt "#39128"
+msgid "Select Seasons to add for '{0}'"
+msgstr ""
+
+msgctxt "#39129"
+msgid "Get Title from TheTVDB"
+msgstr ""
+
+msgctxt "#39130"
+msgid "Enter new Title"
+msgstr ""
+
+msgctxt "#39131"
+msgid "Delete successfully"
+msgstr ""
+
+msgctxt "#39132"
+msgid "Select stream provider"
+msgstr ""
+
+msgctxt "#39133"
+msgid "Current entry"
+msgstr ""
+
+msgctxt "#39134"
+msgid "will be updated"
+msgstr ""
+
+msgctxt "#39135"
+msgid "To be updated"
+msgstr ""
+
+msgctxt "#39136"
+msgid "Next update in"
+msgstr ""
+
+msgctxt "#39137"
+msgid "Next update at"
+msgstr ""
+
+msgctxt "#39138"
+msgid "will be added"
+msgstr ""
+
+msgctxt "#39139"
+msgid "Page"
+msgstr ""
+
+msgctxt "#39140"
+msgid "Library is being updated"
+msgstr ""
+
+msgctxt "#39141"
+msgid "Add to library successful"
+msgstr ""

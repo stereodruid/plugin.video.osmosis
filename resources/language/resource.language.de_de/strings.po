@@ -311,3 +311,221 @@ msgstr "Video vor Wiedergabepunkt fortsetzen (Sekunden)"
 msgctxt "#34005"
 msgid "Addons that should be ignored by the playback dialog"
 msgstr "Addons, die vom  Wiedergabedialog ignoriert werden sollen"
+
+# Main menu
+msgctxt "#39000"
+msgid "Video Addons"
+msgstr "Video-Addons"
+
+msgctxt "#39001"
+msgid "Music Addons"
+msgstr "Musik-Addons"
+
+msgctxt "#39002"
+msgid "Video Favorites"
+msgstr "Video-Favoriten"
+
+msgctxt "#39003"
+msgid "Update the Library using the MediaList entry"
+msgstr "Bibliothek mittels MediaList-Eintrag aktualisieren"
+
+msgctxt "#39004"
+msgid "Update the Library using the MediaList entry and delete invalid '.strm' files"
+msgstr "Bibliothek mittels MediaList-Eintrag aktualisieren und ungültige '.strm'-Dateien löschen"
+
+msgctxt "#39005"
+msgid "Update Library using all MediaList entries"
+msgstr "Bibliothek mittels aller MediaList-Einträge aktualisieren"
+
+msgctxt "#39006"
+msgid "Rename MediaList entry"
+msgstr "MediaList-Eintrag umbenennen"
+
+msgctxt "#39007"
+msgid "Delete MediaList entry with associated '.strm' files"
+msgstr "MediaList-Eintrag mit dazugehörigen '.strm'-Dateien löschen"
+
+msgctxt "#39008"
+msgid "Delete TV Shows from the TVDB cache"
+msgstr "Serien aus dem TVDB-Cache löschen"
+
+msgctxt "#39009"
+msgid "Delete all TV Shows from the TVDB cache"
+msgstr "Alle Serien aus dem TVDB-Cache löschen"
+
+msgctxt "#39010"
+msgid "Activate addon 'Watchdog'"
+msgstr "Addon 'Watchdog' aktivieren"
+
+msgctxt "#39011"
+msgid "Install addon 'Watchdog'"
+msgstr "Addon 'Watchdog' installieren"
+
+# Dialogs
+msgctxt "#39100"
+msgid "Add to Library"
+msgstr "Zur Bibliothek hinzufügen"
+
+msgctxt "#39101"
+msgid "Add Movie to Library"
+msgstr "Film zur Bibliothek hinzufügen"
+
+msgctxt "#39102"
+msgid "Add TV Show to Library"
+msgstr "Serie zur Bibliothek hinzufügen"
+
+msgctxt "#39103"
+msgid "Add Season to Library"
+msgstr "Staffel zur Bibliothek hinzufügen"
+
+msgctxt "#39104"
+msgid "Add individual Seasons to Library"
+msgstr "Einzelne Staffeln zur Bibliothek hinzufügen"
+
+msgctxt "#39105"
+msgid "Title for MediaList entry"
+msgstr "Titel für den MediaList-Eintrag"
+
+msgctxt "#39106"
+msgid "Continue with original title"
+msgstr "Mit Originaltitel fortfahren"
+
+msgctxt "#39107"
+msgid "Rename title"
+msgstr "Titel umbenennen"
+
+msgctxt "#39108"
+msgid "Get title from 'MediaList.xml'"
+msgstr "Titel aus 'MediaList.xml' auswählen"
+
+msgctxt "#39109"
+msgid "Select media type"
+msgstr "Medientyp auswählen"
+
+msgctxt "#39110"
+msgid "Select language"
+msgstr "Sprache auswählen"
+
+msgctxt "#39111"
+msgid "Movie"
+msgstr "Film"
+
+msgctxt "#39112"
+msgid "TV-Show"
+msgstr "Serie"
+
+msgctxt "#39113"
+msgid "Music"
+msgstr "Musik"
+
+msgctxt "#39114"
+msgid "Album"
+msgstr "Album"
+
+msgctxt "#39115"
+msgid "Single"
+msgstr "Single"
+
+msgctxt "#39116"
+msgid "YouTube"
+msgstr "YouTube"
+
+msgctxt "#39117"
+msgid "Other"
+msgstr "Sonstiges"
+
+msgctxt "#39118"
+msgid "de"
+msgstr "de"
+
+msgctxt "#39119"
+msgid "en"
+msgstr "en"
+
+msgctxt "#39120"
+msgid "sp"
+msgstr "sp"
+
+msgctxt "#39121"
+msgid "tr"
+msgstr "tr"
+
+msgctxt "#39122"
+msgid "All"
+msgstr "Alle"
+
+msgctxt "#39123"
+msgid "Update Library"
+msgstr "Bibliothek aktualisieren"
+
+msgctxt "#39124"
+msgid "Select entry"
+msgstr "Eintrag auswählen"
+
+msgctxt "#39125"
+msgid "Get title from 'MediaList.xml' for '{0}'"
+msgstr "Titel aus 'MediaList.xml' für '{0}' auswählen"
+
+msgctxt "#39126"
+msgid "Create '.strm' files"
+msgstr "'.strm'-Dateien erstellen"
+
+msgctxt "#39127"
+msgid "Done"
+msgstr "Fertig"
+
+msgctxt "#39128"
+msgid "Select Seasons to add for '{0}'"
+msgstr "Staffeln von '{0}' auswählen"
+
+msgctxt "#39129"
+msgid "Get Title from TheTVDB"
+msgstr "Titel von TheTVDB auswählen"
+
+msgctxt "#39130"
+msgid "Enter new Title"
+msgstr "Neuen Titel eingeben"
+
+msgctxt "#39131"
+msgid "Delete successfully"
+msgstr "Löschen erfolgreich"
+
+msgctxt "#39132"
+msgid "Select stream provider"
+msgstr "Stream-Anbieter auswählen"
+
+msgctxt "#39133"
+msgid "Current entry"
+msgstr "Aktuller Eintrag"
+
+msgctxt "#39134"
+msgid "will be updated"
+msgstr "wird aktualisiert"
+
+msgctxt "#39135"
+msgid "To be updated"
+msgstr "Noch zu aktualisieren"
+
+msgctxt "#39136"
+msgid "Next update in"
+msgstr "Nächste Aktualisierung in"
+
+msgctxt "#39137"
+msgid "Next update at"
+msgstr "Nächste Aktualisierung um"
+
+msgctxt "#39138"
+msgid "will be added"
+msgstr "wird hinzugefügt"
+
+msgctxt "#39139"
+msgid "Page"
+msgstr "Seite"
+
+msgctxt "#39140"
+msgid "Library is being updated"
+msgstr "Bibliothek wird aktualisiert"
+
+msgctxt "#39141"
+msgid "Add to library successful"
+msgstr "Hinzufügen zur Bibliothek erfolgreich"
