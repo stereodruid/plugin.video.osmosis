@@ -90,7 +90,6 @@ def strm_update(selectedItems=None, actor=0):
 
             pDialog.close()
             if actor == actor_update_periodictime:
-                globals.dialog.notification(getString(39123, globals.addon), '{0} {1}h'.format(getString(39136, globals.addon), settings.AUTOMATIC_UPDATE_TIME), globals.MEDIA_ICON, 2000, True)
+                globals.dialog.notification(getString(39123, globals.addon), '{0} {1}h'.format(getString(39136, globals.addon), settings.SCHEDULED_UPDATE_INTERVAL), globals.MEDIA_ICON, 2000, True)
             elif actor == actor_update_fixtime:
-                next_run = settings.UPDATE_TIME[:5]
-                globals.dialog.notification(getString(39123, globals.addon), '{0} {1}h'.format(getString(39137, globals.addon), next_run), globals.MEDIA_ICON, 2000, True)
+                globals.dialog.notification(getString(39123, globals.addon), '{0} {1}h'.format(getString(39137, globals.addon), settings.SCHEDULED_UPDATE_TIME), globals.MEDIA_ICON, 2000, True)

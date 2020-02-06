@@ -17,17 +17,17 @@
 
 from __future__ import unicode_literals
 from kodi_six.utils import py2_decode
+from json import dumps, loads
 import os
-import re
-import time
+from re import search
+from time import ctime, mktime, strftime, strptime, time
 import xbmc
 import xbmcvfs
 
-from resources.lib.common import Globals, Settings
+from resources.lib.common import Globals, Settings, sleep
 
 globals = Globals()
 settings = Settings()
-startup_time = None
 
 
 def setDBs(files, path):
@@ -39,9 +39,9 @@ def setDBs(files, path):
             if file.lower().startswith('my{0}'.format(dbtype)):
                 if dbname is None:
                     dbname = file
-                elif re.search('(\d+)', dbname) and re.search('(\d+)', file):
-                    dbnumber = int(re.search('(\d+)', dbname).group(1))
-                    filedbnumber = int(re.search('(\d+)', file).group(1))
+                elif search('(\d+)', dbname) and search('(\d+)', file):
+                    dbnumber = int(search('(\d+)', dbname).group(1))
+                    filedbnumber = int(search('(\d+)', file).group(1))
                     if filedbnumber > dbnumber:
                         dbname = file
 
@@ -50,6 +50,12 @@ def setDBs(files, path):
             dbsetting = settings.DATABASE_SQLLITE_KODI_VIDEO_FILENAME_AND_PATH if dbtype == 'video' else settings.DATABASE_SQLLITE_KODI_MUSIC_FILENAME_AND_PATH
             if dbpath != dbsetting:
                 globals.addon.setSetting('KMovie-DB path', dbpath) if dbtype == 'video' else globals.addon.setSetting('KMusic-DB path', dbpath)
+
+
+def writeFile(path, content):
+    file = xbmcvfs.File(path, 'w')
+    file.write(bytearray(content, 'utf-8'))
+    file.close()
 
 
 if __name__ == '__main__':
@@ -64,26 +70,31 @@ if __name__ == '__main__':
 
     monitor = globals.monitor
     while not monitor.abortRequested():
-        # Sleep/wait for abort for 10 seconds
-        if monitor.waitForAbort(10):
-            # Abort was requested while waiting. We should exit
-            break
+        if settings.SCHEDULED_UPDATE == 1:
+            now = time()
+            next = None
+            next_json = None
+            if not next_json:
+                if not xbmcvfs.exists(settings.SCHEDULED_UPDATE_INTERVAL_FILENNAME_AND_PATH):
+                    next = now + (settings.SCHEDULED_UPDATE_INTERVAL * 60 * 60)
+                    next_json = dict(interval=settings.SCHEDULED_UPDATE_INTERVAL, time=ctime(next))
+                    writeFile(settings.SCHEDULED_UPDATE_INTERVAL_FILENNAME_AND_PATH, dumps(next_json))
+                else:
+                    file = xbmcvfs.File(settings.SCHEDULED_UPDATE_INTERVAL_FILENNAME_AND_PATH, 'r')
+                    next_json = loads(file.read())
+                    next = mktime(strptime(next_json.get('time')))
+                    file.close()
 
-        if settings.AUTOMATIC_UPDATE_RUN:
-            if startup_time is None:
-                startup_time = time.time()
+            if next_json.get('interval') != settings.SCHEDULED_UPDATE_INTERVAL:
+                next = mktime(strptime(next_json.get('time'))) + ((settings.SCHEDULED_UPDATE_INTERVAL - next_json.get('interval')) * 60 * 60)
+                next_json.update(dict(interval=settings.SCHEDULED_UPDATE_INTERVAL, time=ctime(next)))
+                writeFile(settings.SCHEDULED_UPDATE_INTERVAL_FILENNAME_AND_PATH, dumps(next_json))
 
-            next_peridoc_update = startup_time + (settings.AUTOMATIC_UPDATE_TIME * 60 * 60)
-            if (next_peridoc_update <= time.time()):
-                startup_time = time.time()
-                xbmc.executebuiltin('XBMC.RunPlugin(plugin://{0}/?url=&mode=666&updateActor=1)'.format(globals.PLUGIN_ID))
-                monitor.waitForAbort(60)
-        else:
-            if startup_time is not None:
-                startup_time = None
-
-            Timed_Update_Run = settings.UPDATE_TIME[:5] if settings.UPDATE_TIME != '' else settings.UPDATE_TIME('update_time')
-            if Timed_Update_Run != '' and Timed_Update_Run != '00:00':
-                if time.strftime('%H:%M') == Timed_Update_Run:
-                    xbmc.executebuiltin('XBMC.RunPlugin(plugin://{0}/?url=&mode=666&updateActor=2)'.format(globals.PLUGIN_ID))
-                    monitor.waitForAbort(60)
+            if (next <= now):
+                next = now + (settings.SCHEDULED_UPDATE_INTERVAL * 60 * 60)
+                writeFile(settings.SCHEDULED_UPDATE_INTERVAL_FILENNAME_AND_PATH, ctime(next))
+                xbmc.executebuiltin('XBMC.RunPlugin(plugin://{0}/?mode=666&updateActor=1)'.format(globals.PLUGIN_ID))
+        if settings.SCHEDULED_UPDATE == 2 and strftime('%H:%M') == strftime('%H:%M', settings.SCHEDULED_UPDATE_TIME):
+            xbmc.executebuiltin('XBMC.RunPlugin(plugin://{0}/?mode=666&updateActor=2)'.format(globals.PLUGIN_ID))
+            sleep(60)
+        sleep(30)

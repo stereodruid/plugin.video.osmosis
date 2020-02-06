@@ -100,18 +100,6 @@ def makeSTRM(filepath, filename, url):
     return fullpath, mtime
 
 
-def updateStream(strm_Fullpath, replace_text):
-    addon_log('updateStream')
-    for line in fileinput.input(strm_Fullpath, inplace=1):
-        if not line == replace_text:
-            line = line.replace(line, replace_text)
-            addon_log('Updated: {0}'.format(strm_Fullpath))
-
-    while os.stat(strm_Fullpath).st_size == 0:
-        with open(strm_Fullpath, 'w') as newF:
-            newF.write(replace_text)
-
-
 def isInMediaList(mediaTitle, url, cType='Other'):
     addon_log('isInMediaList')
     existInList = False

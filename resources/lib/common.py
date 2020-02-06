@@ -86,10 +86,7 @@ class Settings(Singleton):
 
 
     def __getattr__(self, name):
-        if 'AUTOMATIC_TIME' == name: return self._gs('Automatic_Time')
-        elif 'AUTOMATIC_UPDATE_RUN' == name: return self._gs('Automatic_Update_Run') == 'true'
-        elif 'AUTOMATIC_UPDATE_TIME' == name: return int(self._gs('Automatic_Update_Time'))
-        elif 'CLEAR_STRMS' == name: return self._gs('Clear_Strms') == 'true'
+        if 'CLEAR_STRMS' == name: return self._gs('Clear_Strms') == 'true'
         elif 'CONFIRM_USER_ENTRIES' == name: return self._gs('confirm_user_entries') == 'true'
 
         elif 'DATABASE_MYSQL_KODI_MUSIC_DATABASENAME' == name: return globals.addon.getSetting('KMusic-DB name')
@@ -142,12 +139,15 @@ class Settings(Singleton):
         elif 'PLAYBACK_DIALOG' == name: return int(self._gs('playback_dialog'))
         elif 'PLAYBACK_IGNORE_ADDON_STRING' == name: return self._gs('playback_ignore_addon_string')
         elif 'PLAYBACK_REWIND' == name: return int(self._gs('playback_rewind'))
+        elif 'SCHEDULED_UPDATE' == name: return int(self._gs('scheduled_update'))
+        elif 'SCHEDULED_UPDATE_INTERVAL' == name: return int(self._gs('scheduled_update_interval'))
+        elif 'SCHEDULED_UPDATE_INTERVAL_FILENNAME_AND_PATH' == name: return py2_decode(OSPJoin(self.MEDIALIST_PATH, 'scheduled_update_interval.txt'))
+        elif 'SCHEDULED_UPDATE_TIME' == name: return strptime(self._gs('scheduled_update_time'), '%H:%M')
         elif 'SEARCH_THETVDB' == name: return int(self._gs('search_thetvdb'))
         elif 'STRM_LOC' == name: return py2_decode(xbmc.translatePath(self._gs('STRM_LOC')))
         elif 'TVDB_DIALOG_AUTOCLOSE_TIME' == name: return int(self._gs('tvdb_dialog_autoclose_time'))
-        elif 'TVDB_TOKEN_LOC' == name: return py2_decode(OSPJoin(self.MEDIALIST_PATH, 'tvdb_token.txt'))
+        elif 'TVDB_TOKEN_FILENNAME_AND_PATH' == name: return py2_decode(OSPJoin(self.MEDIALIST_PATH, 'tvdb_token.txt'))
         elif 'UPDATE_AT_STARTUP' == name: return self._gs('Update_at_startup') == 'true'
-        elif 'UPDATE_TIME' == name: return self._gs('update_time')
         elif 'USE_MYSQL' == name: return self._gs('USE_MYSQL') == 'true'
 
 
@@ -179,8 +179,12 @@ def parse_jsonrpc(json_raw, addon_log):
 
 
 def sleep(sec):
-    from .utils import addon_log
     if Globals().monitor.waitForAbort(sec):
-        import sys
-        addon_log('Abort requested - exiting addon')
-        sys.exit()
+        exit()
+
+
+def exit():
+    from .utils import addon_log
+    import sys
+    addon_log('Abort requested - exiting addon')
+    sys.exit()

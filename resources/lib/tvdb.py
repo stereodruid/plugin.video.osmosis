@@ -12,7 +12,7 @@ import xbmcaddon
 import xbmcgui
 import xbmcvfs
 
-from .common import Globals, Settings
+from .common import Globals, Settings, exit
 from .fileSys import readMediaList
 from .stringUtils import getStrmname
 from .utils import addon_log, addon_log_notice, multiple_reSub
@@ -196,7 +196,7 @@ def getEpisodeDataFromTVDB(showid, lang):
     page = 1
     maxpages = 1
     json_data = []
-    while page and maxpages and page <= maxpages:
+    while not globals.monitor.abortRequested() and page and maxpages and page <= maxpages:
         params = {'page': page}
         path = 'series/{0}/episodes/query'.format(showid)
         res_ep = getJsonFromTVDB(api_baseurl.format(path), lang, params)
@@ -208,6 +208,9 @@ def getEpisodeDataFromTVDB(showid, lang):
             json_data = json_data + json_ep.get('data')
         else:
             break
+
+    if globals.monitor.abortRequested():
+        exit()
 
     return json_data
 
@@ -522,7 +525,7 @@ def getJsonFromTVDB(url, lang, params=''):
 
         res = None
         retry_count = 0
-        while res is None and retry_count <= 3:
+        while not globals.monitor.abortRequested() and res is None and retry_count <= 3:
             try:
                 res = requests.get(url, headers=headers, params=params)
                 if res.status_code == 401:
@@ -533,16 +536,19 @@ def getJsonFromTVDB(url, lang, params=''):
                 pass
             retry_count = retry_count + 1
 
+        if globals.monitor.abortRequested():
+            exit()
+
     return res
 
 
 def getToken():
     token = None
 
-    if xbmcvfs.exists(settings.TVDB_TOKEN_LOC):
-        file_time = xbmcvfs.Stat(settings.TVDB_TOKEN_LOC).st_mtime()
+    if xbmcvfs.exists(settings.TVDB_TOKEN_FILENNAME_AND_PATH):
+        file_time = xbmcvfs.Stat(settings.TVDB_TOKEN_FILENNAME_AND_PATH).st_mtime()
         if (time.time() - file_time) / 3600 < 24:
-            file = xbmcvfs.File(settings.TVDB_TOKEN_LOC, 'r')
+            file = xbmcvfs.File(settings.TVDB_TOKEN_FILENNAME_AND_PATH, 'r')
             token = file.read()
             file.close()
 
@@ -564,7 +570,7 @@ def refreshToken(token):
 def writeToken(res):
     if res.status_code == 200 and res.json().get('token', None):
         token = res.json().get('token')
-        file = xbmcvfs.File(settings.TVDB_TOKEN_LOC, 'w')
+        file = xbmcvfs.File(settings.TVDB_TOKEN_FILENNAME_AND_PATH, 'w')
         file.write(bytearray(token, 'utf-8'))
         file.close()
         return token

@@ -23,7 +23,7 @@ import sys
 import xbmc
 import xbmcgui
 
-from .common import Globals, Settings, jsonrpc
+from .common import Globals, Settings, exit, jsonrpc
 from .fileSys import readMediaList, removeMediaList, writeMediaList, writeSTRM, writeTutList
 from .guiTools import addDir, addLink, editDialog, getType, getTypeLangOnly, mediaListDialog, selectDialog
 from .jsonUtils import requestList
@@ -74,10 +74,13 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
     if url.find('playMode=play') == -1:
         details = requestList(plugin_url, media_type).get('files', [])
         retry_count = 1
-        while len(details) == 0 and retry_count <= 3:
+        while not globals.monitor.abortRequested() and len(details) == 0 and retry_count <= 3:
             addon_log('requestList: try={0} data = {1})'.format(retry_count, details))
             details = requestList(plugin_url, media_type).get('files', [])
             retry_count = retry_count + 1
+
+        if globals.monitor.abortRequested():
+            exit()
     else:
         details = [dict(playableSingleMedia=True, url=plugin_url)]
 
@@ -263,10 +266,14 @@ def addMultipleSeasonToMediaList(params):
             if cType != -1:
                 details = requestList(url, 'video').get('files', [])
                 retry_count = 1
-                while len(details) == 0 and retry_count <= 3:
+                while not globals.monitor.abortRequested() and len(details) == 0 and retry_count <= 3:
                     addon_log('requestList: try={0} data = {1})'.format(retry_count, details))
                     details = requestList(url, 'video').get('files', [])
                     retry_count = retry_count + 1
+
+                if globals.monitor.abortRequested():
+                    exit()
+
                 seasonList = []
                 for detail in details:
                     file = detail['file'].replace('\\\\', '\\')
@@ -348,7 +355,7 @@ def addAlbum(contentList, strm_name, strm_type, pDialog, PAGINGalbums='1'):
     if len(contentList) == 0:
         return contentList
 
-    while pagesDone < int(PAGINGalbums):
+    while not globals.monitor.abortRequested() and pagesDone < int(PAGINGalbums):
         if not contentList[0].get('playableSingleMedia'):
             for index, detailInfo in enumerate(contentList):
                 art = detailInfo.get('art', {})
@@ -400,6 +407,9 @@ def addAlbum(contentList, strm_name, strm_type, pDialog, PAGINGalbums='1'):
             albumList.append({'path': os.path.join(strm_type, strm_name, label), 'label': cleanByDictReplacements(label), 'link': link})
             pagesDone = int(PAGINGalbums)
 
+    if globals.monitor.abortRequested():
+        exit()
+
     # Write strms for all values in albumList
     thelist = readMediaList()
     for entry in thelist:
@@ -428,7 +438,7 @@ def addMovies(contentList, strm_name, strm_type, name_orig, pDialog, provider='n
     if len(contentList) == 0:
         return
 
-    while pagesDone < settings.PAGING_MOVIES:
+    while not globals.monitor.abortRequested() and pagesDone < settings.PAGING_MOVIES:
         if not contentList[0].get('playableSingleMedia'):
             for detailInfo in contentList:
                 file = detailInfo.get('file').replace('\\\\', '\\') if detailInfo.get('file', None) else None
@@ -458,10 +468,13 @@ def addMovies(contentList, strm_name, strm_type, name_orig, pDialog, provider='n
             if filetype != 'file' and pagesDone < settings.PAGING_MOVIES:
                 contentList = requestList(file, 'video').get('files', [])
                 retry_count = 1
-                while len(contentList) == 0 and retry_count <= 3:
+                while not globals.monitor.abortRequested() and len(contentList) == 0 and retry_count <= 3:
                     addon_log('requestList: try={0} data = {1})'.format(retry_count, contentList))
                     contentList = requestList(file, 'video').get('files', [])
                     retry_count = retry_count + 1
+
+                if globals.monitor.abortRequested():
+                    exit()
             else:
                 pagesDone = settings.PAGING_MOVIES
         else:
@@ -473,6 +486,9 @@ def addMovies(contentList, strm_name, strm_type, name_orig, pDialog, provider='n
             m_title = getStrmname(strm_name)
             movieList.append({'path': m_path, 'title':  cleanStrmFilesys(m_title), 'url': url, 'provider': provider})
             pagesDone = settings.PAGING_MOVIES
+
+    if globals.monitor.abortRequested():
+        exit()
 
     if settings.LINK_TYPE == 0:
         movieList = writeMovie(movieList)
@@ -497,7 +513,7 @@ def getTVShowFromList(showList, strm_name, strm_type, name_orig, pDialog, pagesD
         lang = strm_type[strm_type.find('(') + 1:strm_type.find(')')]
     showtitle = getStrmname(strm_name)
 
-    while pagesDone < settings.PAGING_TVSHOWS:
+    while not globals.monitor.abortRequested() and pagesDone < settings.PAGING_TVSHOWS:
         strm_type = strm_type.replace('Shows-Collection', 'TV-Shows')
 
         for detailInfo in showList:
@@ -508,10 +524,14 @@ def getTVShowFromList(showList, strm_name, strm_type, name_orig, pDialog, pagesD
                 if filetype == 'directory':
                     retry_count = 1
                     json_reply = requestList(file, 'video').get('files', [])
-                    while len(json_reply) == 0 and retry_count <= 3:
+                    while not globals.monitor.abortRequested() and len(json_reply) == 0 and retry_count <= 3:
                         addon_log('requestList: try={0} data = {1})'.format(retry_count, json_reply))
                         json_reply = requestList(file, 'video').get('files', [])
                         retry_count = retry_count + 1
+
+                    if globals.monitor.abortRequested():
+                        exit()
+
                     dirList.append(json_reply)
                     continue
                 elif filetype == 'file':

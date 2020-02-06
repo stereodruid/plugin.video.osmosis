@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: de_DE\n"
+"Language: en_GB\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgctxt "#30000"
@@ -89,226 +89,230 @@ msgid "Number of levels to search"
 msgstr ""
 
 msgctxt "#31300"
-msgid "TheTVDB"
+msgid "Update"
 msgstr ""
 
 msgctxt "#31301"
-msgid "Search TheTVDB for episode info"
+msgid "At startup"
 msgstr ""
 
 msgctxt "#31302"
-msgid "Never"
+msgid "Scheduled update"
 msgstr ""
 
 msgctxt "#31303"
-msgid "For insufficient information"
+msgid "Never"
 msgstr ""
 
 msgctxt "#31304"
-msgid "Always"
+msgid "Interval"
 msgstr ""
 
 msgctxt "#31305"
-msgid "Show confirmation dialog of the manually saved episode data"
+msgid "Time"
 msgstr ""
 
 msgctxt "#31306"
+msgid "Interval (hours)"
+msgstr ""
+
+msgctxt "#31400"
+msgid "TheTVDB"
+msgstr ""
+
+msgctxt "#31401"
+msgid "Search TheTVDB for episode info"
+msgstr ""
+
+msgctxt "#31402"
+msgid "For insufficient information"
+msgstr ""
+
+msgctxt "#31403"
+msgid "Always"
+msgstr ""
+
+msgctxt "#31404"
+msgid "Show confirmation dialog of the manually saved episode data"
+msgstr ""
+
+msgctxt "#31405"
 msgid "Time until the confirmation dialog closes automatically (seconds)"
 msgstr ""
 
 msgctxt "#32000"
-msgid "Update Configuration"
-msgstr ""
-
-msgctxt "#32001"
-msgid "Update at startup"
-msgstr ""
-
-msgctxt "#32002"
-msgid "Scheduled update"
-msgstr ""
-
-msgctxt "#32003"
-msgid "Update interval in hours"
-msgstr ""
-
-msgctxt "#32004"
-msgid "Force Update at (00:00 to disable)"
-msgstr ""
-
-msgctxt "#33000"
 msgid "Database"
 msgstr ""
 
-msgctxt "#33001"
+msgctxt "#32001"
 msgid "Kodi is using MYSQL-Database"
 msgstr ""
 
-msgctxt "#33002"
+msgctxt "#32002"
 msgid "Detect Kodi's SQLite DBs automatically"
 msgstr ""
 
-msgctxt "#33100"
+msgctxt "#32100"
 msgid "Kodi Movie database"
 msgstr ""
 
-msgctxt "#33101"
+msgctxt "#32101"
 msgid "Movie-DB username"
 msgstr ""
 
-msgctxt "#33102"
+msgctxt "#32102"
 msgid "Movie-DB password"
 msgstr ""
 
-msgctxt "#33103"
+msgctxt "#32103"
 msgid "Movie-DB filename"
 msgstr ""
 
-msgctxt "#33104"
+msgctxt "#32104"
 msgid "Movie-DB IP"
 msgstr ""
 
-msgctxt "#33105"
+msgctxt "#32105"
 msgid "Movie-DB Port"
 msgstr ""
 
-msgctxt "#33106"
+msgctxt "#32106"
 msgid "Movie-DB directory"
 msgstr ""
 
-msgctxt "#33200"
+msgctxt "#32200"
 msgid "Kodi Music database"
 msgstr ""
 
-msgctxt "#33201"
+msgctxt "#32201"
 msgid "Music-DB username"
 msgstr ""
 
-msgctxt "#33202"
+msgctxt "#32202"
 msgid "Music-DB password"
 msgstr ""
 
-msgctxt "#33203"
+msgctxt "#32203"
 msgid "Music-DB filename"
 msgstr ""
 
-msgctxt "#33204"
+msgctxt "#32204"
 msgid "Music-DB IP"
 msgstr ""
 
-msgctxt "#33205"
+msgctxt "#32205"
 msgid "Music-DB Port"
 msgstr ""
 
-msgctxt "#33206"
+msgctxt "#32206"
 msgid "Music-DB directory"
 msgstr ""
 
-msgctxt "#33300"
+msgctxt "#32300"
 msgid "Osmosis TV-Show database"
 msgstr ""
 
-msgctxt "#33301"
+msgctxt "#32301"
 msgid "TV-Show-DB username"
 msgstr ""
 
-msgctxt "#33302"
+msgctxt "#32302"
 msgid "TV-Show-DB password"
 msgstr ""
 
-msgctxt "#33303"
+msgctxt "#32303"
 msgid "TV-Show-DB filename"
 msgstr ""
 
-msgctxt "#33304"
+msgctxt "#32304"
 msgid "TV-Show-DB IP"
 msgstr ""
 
-msgctxt "#33305"
+msgctxt "#32305"
 msgid "TV-Show-DB Port"
 msgstr ""
 
-msgctxt "#33306"
+msgctxt "#32306"
 msgid "TV-Show-DB directory"
 msgstr ""
 
-msgctxt "#33400"
+msgctxt "#32400"
 msgid "Osmosis Movie database"
 msgstr ""
 
-msgctxt "#33401"
+msgctxt "#32401"
 msgid "Movie-DB username"
 msgstr ""
 
-msgctxt "#33402"
+msgctxt "#32402"
 msgid "Movie-DB password"
 msgstr ""
 
-msgctxt "#33403"
+msgctxt "#32403"
 msgid "Movie-DB filename"
 msgstr ""
 
-msgctxt "#33404"
+msgctxt "#32404"
 msgid "Movie-DB IP"
 msgstr ""
 
-msgctxt "#33405"
+msgctxt "#32405"
 msgid "Movie-DB Port"
 msgstr ""
 
-msgctxt "#33406"
+msgctxt "#32406"
 msgid "Movie-DB directory"
 msgstr ""
 
-msgctxt "#33500"
+msgctxt "#32500"
 msgid "Osmosis Music database"
 msgstr ""
 
-msgctxt "#33501"
+msgctxt "#32501"
 msgid "Music-DB username"
 msgstr ""
 
-msgctxt "#33502"
+msgctxt "#32502"
 msgid "Music-DB password"
 msgstr ""
 
-msgctxt "#33503"
+msgctxt "#32503"
 msgid "Music-DB filename"
 msgstr ""
 
-msgctxt "#33504"
+msgctxt "#32504"
 msgid "Music-DB IP"
 msgstr ""
 
-msgctxt "#33505"
+msgctxt "#32505"
 msgid "Music-DB Port"
 msgstr ""
 
-msgctxt "#33506"
+msgctxt "#32506"
 msgid "Music-DB directory"
 msgstr ""
 
-msgctxt "#34000"
+msgctxt "#33000"
 msgid "Playback"
 msgstr ""
 
-msgctxt "#34001"
+msgctxt "#33001"
 msgid "Dialog to resume the video"
 msgstr ""
 
-msgctxt "#34002"
+msgctxt "#33002"
 msgid "Context menu before video start"
 msgstr ""
 
-msgctxt "#34003"
+msgctxt "#33003"
 msgid "Overlay after video start"
 msgstr ""
 
-msgctxt "#34004"
+msgctxt "#33004"
 msgid "Resume video before playback point (seconds)"
 msgstr ""
 
-msgctxt "#34005"
+msgctxt "#33005"
 msgid "Addons that should be ignored by the playback dialog"
 msgstr ""
 

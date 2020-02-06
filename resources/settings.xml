@@ -25,64 +25,64 @@
 		<setting label="31201" type="slider" id="paging_tvshows" default="2" range="1,100" option="int"/>
 		
 		<setting label="31300" type="lsep"/>
-		<setting label="31301" type="enum" id="search_thetvdb" lvalues='31302|31303|31304' default="0"/>
-		<setting label="31305" type="bool" id="confirm_user_entries" default="false" visible="gt(-1,0)"/>
-		<setting label="31306" type="number" id="tvdb_dialog_autoclose_time" default="60" visible="gt(-2,0)"/>
+		<setting label="31301" type="bool" id="Update_at_startup" default="true"/>
+		<setting label="31302" type="enum" id="scheduled_update" lvalues='31303|31304|31305' default="0"/>
+		<setting label="31306" type="select" id="scheduled_update_interval" subsetting="true" visible="eq(-1,1)" values="1|3|6|12|24|48|72" default="6" option="int"/>
+		<setting label="31305" type="time" id="scheduled_update_time" default="0:00" subsetting="true" visible="eq(-2,2)"/>
+		
+		<setting label="31400" type="lsep"/>
+		<setting label="31401" type="enum" id="search_thetvdb" lvalues='31303|31302|31303' default="0"/>
+		<setting label="31404" type="bool" id="confirm_user_entries" default="false" visible="gt(-1,0)"/>
+		<setting label="31405" type="number" id="tvdb_dialog_autoclose_time" default="60" visible="gt(-2,0)"/>
 	</category>
 	<category label="32000">
-		<setting label="32001" type="bool" id="Update_at_startup" default="true"/>
-		<setting label="32002" type="bool" id="Automatic_Update_Run" default="true" />
-		<setting label="32003" type="select" id="Automatic_Update_Time" subsetting="true" visible="eq(-1,true)" values="1|3|6|12|24|48|72" default="6" option="int"/>
-		<setting label="32004" type="time" id="update_time" default="00:00" enable="eq(-2,false)"/>
+		<setting label="32001" type="bool" id="USE_MYSQL" default="false"/>
+		<setting label="32002" type="bool" id="Find_SQLite_DB" default="true" subsetting="true" visible="eq(-1,false)"/>
+
+		<setting label="32100" type="lsep"/>
+		<setting label="32101" type="text" id="KMovie-DB username" visible="eq(-3,true)"/>
+		<setting label="32102" type="text" option="hidden" id="KMovie-DB password" visible="eq(-4,true)"/>
+		<setting label="32103" type="text" id="KMovie-DB name" visible="eq(-5,true)"/>
+		<setting label="32104" type="ipaddress" id="KMovie-DB IP" default="localhost" visible="eq(-6,true)"/>
+		<setting label="32105" type="number" id="KMovie-DB port" default="3206" visible="eq(-7,true)"/>
+		<setting label="32106" type="file" id="KMovie-DB path" source="auto" default="" visible="eq(-8,false)"/>
+
+		<setting label="32200" type="lsep"/>
+		<setting label="32201" type="text" id="KMusic-DB username" visible="eq(-10,true)"/>
+		<setting label="32202" type="text" option="hidden" id="KMusic-DB password" visible="eq(-11,true)"/>
+		<setting label="32203" type="text" id="KMusic-DB name" visible="eq(-12,true)"/>
+		<setting label="32204" type="ipaddress" id="KMusic-DB IP" default="localhost" visible="eq(-13,true)"/>
+		<setting label="32205" type="number" id="KMusic-DB port" default="3206" visible="eq(-14,true)"/>
+		<setting label="32206" type="file" id="KMusic-DB path" source="auto" default="" visible="eq(-15,false)"/>
+
+		<setting label="32300" type="lsep"/>
+		<setting label="32301" type="text" id="Movies-DB username" visible="eq(-17,true)"/>
+		<setting label="32302" type="text" option="hidden" id="Movies-DB password" visible="eq(-18,true)"/>
+		<setting label="32303" type="text" id="Movies-DB name" visible="eq(-19,true)"/>
+		<setting label="32304" type="ipaddress" id="Movies-DB IP" default="localhost" visible="eq(-20,true)"/>
+		<setting label="32305" type="number" id="Movies-DB port" default="3206" visible="eq(-21,true)"/>
+		<setting label="32306" type="folder" id="Movies-DB path" source="auto" option="writeable" default="special://profile/addon_data/plugin.video.osmosis" visible="eq(-22,false)"/>
+
+		<setting label="32400" type="lsep"/>
+		<setting label="32401" type="text" id="TV-Show-DB username" visible="eq(-24,true)"/>
+		<setting label="32402" type="text" option="hidden" id="TV-Show-DB password" visible="eq(-25,true)"/>
+		<setting label="32403" type="text" id="TV-Show-DB name" visible="eq(-26,true)"/>
+		<setting label="32404" type="ipaddress" id="TV-Show-DB IP" default="localhost" visible="eq(-27,true)"/>
+		<setting label="32405" type="number" id="TV-Show-DB port" default="3206" visible="eq(-28,true)"/>
+		<setting label="32406" type="folder" id="TV-Show-DB path" source="auto" option="writeable" default="special://profile/addon_data/plugin.video.osmosis" visible="eq(-29,false)"/>
+
+		<setting label="32500" type="lsep"/>
+		<setting label="32501" type="text" id="Music-DB username" visible="eq(-31,true)"/>
+		<setting label="32502" type="text" option="hidden" id="Music-DB password" visible="eq(-32,true)"/>
+		<setting label="32503" type="text" id="Music-DB name" visible="eq(-33,true)"/>
+		<setting label="32504" type="ipaddress" id="Music-DB IP" default="localhost" visible="eq(-34,true)"/>
+		<setting label="32505" type="number" id="Music-DB port" default="3206" visible="eq(-35,true)"/>
+		<setting label="32506" type="folder" id="Music-DB path" source="auto" option="writeable" default="special://profile/addon_data/plugin.video.osmosis" visible="eq(-36,false)"/>
 	</category>
 	<category label="33000">
-		<setting label="33001" type="bool" id="USE_MYSQL" default="false"/>
-		<setting label="33002" type="bool" id="Find_SQLite_DB" default="true" subsetting="true" visible="eq(-1,false)"/>
-
-		<setting label="33100" type="lsep"/>
-		<setting label="33101" type="text" id="KMovie-DB username" visible="eq(-3,true)"/>
-		<setting label="33102" type="text" option="hidden" id="KMovie-DB password" visible="eq(-4,true)"/>
-		<setting label="33103" type="text" id="KMovie-DB name" visible="eq(-5,true)"/>
-		<setting label="33104" type="ipaddress" id="KMovie-DB IP" default="localhost" visible="eq(-6,true)"/>
-		<setting label="33105" type="number" id="KMovie-DB port" default="3306" visible="eq(-7,true)"/>
-		<setting label="33106" type="file" id="KMovie-DB path" source="auto" default="" visible="eq(-8,false)"/>
-
-		<setting label="33200" type="lsep"/>
-		<setting label="33201" type="text" id="KMusic-DB username" visible="eq(-10,true)"/>
-		<setting label="33202" type="text" option="hidden" id="KMusic-DB password" visible="eq(-11,true)"/>
-		<setting label="33203" type="text" id="KMusic-DB name" visible="eq(-12,true)"/>
-		<setting label="33204" type="ipaddress" id="KMusic-DB IP" default="localhost" visible="eq(-13,true)"/>
-		<setting label="33205" type="number" id="KMusic-DB port" default="3306" visible="eq(-14,true)"/>
-		<setting label="33206" type="file" id="KMusic-DB path" source="auto" default="" visible="eq(-15,false)"/>
-
-		<setting label="33300" type="lsep"/>
-		<setting label="33301" type="text" id="Movies-DB username" visible="eq(-17,true)"/>
-		<setting label="33302" type="text" option="hidden" id="Movies-DB password" visible="eq(-18,true)"/>
-		<setting label="33303" type="text" id="Movies-DB name" visible="eq(-19,true)"/>
-		<setting label="33304" type="ipaddress" id="Movies-DB IP" default="localhost" visible="eq(-20,true)"/>
-		<setting label="33305" type="number" id="Movies-DB port" default="3306" visible="eq(-21,true)"/>
-		<setting label="33306" type="folder" id="Movies-DB path" source="auto" option="writeable" default="special://profile/addon_data/plugin.video.osmosis" visible="eq(-22,false)"/>
-
-		<setting label="33400" type="lsep"/>
-		<setting label="33401" type="text" id="TV-Show-DB username" visible="eq(-24,true)"/>
-		<setting label="33402" type="text" option="hidden" id="TV-Show-DB password" visible="eq(-25,true)"/>
-		<setting label="33403" type="text" id="TV-Show-DB name" visible="eq(-26,true)"/>
-		<setting label="33404" type="ipaddress" id="TV-Show-DB IP" default="localhost" visible="eq(-27,true)"/>
-		<setting label="33405" type="number" id="TV-Show-DB port" default="3306" visible="eq(-28,true)"/>
-		<setting label="33406" type="folder" id="TV-Show-DB path" source="auto" option="writeable" default="special://profile/addon_data/plugin.video.osmosis" visible="eq(-29,false)"/>
-
-		<setting label="33500" type="lsep"/>
-		<setting label="33501" type="text" id="Music-DB username" visible="eq(-31,true)"/>
-		<setting label="33502" type="text" option="hidden" id="Music-DB password" visible="eq(-32,true)"/>
-		<setting label="33503" type="text" id="Music-DB name" visible="eq(-33,true)"/>
-		<setting label="33504" type="ipaddress" id="Music-DB IP" default="localhost" visible="eq(-34,true)"/>
-		<setting label="33505" type="number" id="Music-DB port" default="3306" visible="eq(-35,true)"/>
-		<setting label="33506" type="folder" id="Music-DB path" source="auto" option="writeable" default="special://profile/addon_data/plugin.video.osmosis" visible="eq(-36,false)"/>
-	</category>
-	<category label="34000">
-		<setting label="34001" type="enum" id="playback_dialog" lvalues='34002|34003' default="0"/>
-		<setting label="34004" type="slider" id="playback_rewind" default="5" range="0,10" option="int"/>
-		<setting label="34005" type="action" id="playback_ignore_addon" action="RunPlugin(plugin://plugin.video.osmosis/?mode=103)" option="close"/>
-		<setting label="34006" type="text" id="playback_ignore_addon_string" visible="false"/>
+		<setting label="33001" type="enum" id="playback_dialog" lvalues='33002|33003' default="0"/>
+		<setting label="33004" type="slider" id="playback_rewind" default="5" range="0,10" option="int"/>
+		<setting label="33005" type="action" id="playback_ignore_addon" action="RunPlugin(plugin://plugin.video.osmosis/?mode=103)" option="close"/>
+		<setting label="33006" type="text" id="playback_ignore_addon_string" visible="false"/>
 	</category>
 </settings>
