@@ -644,7 +644,7 @@ def getKodiMovieID(sFilePath):
         cursor.execute('SELECT movie.idMovie, movie.idFile, movie.premiered, movie.c14, movie.c22 FROM movie WHERE movie.c22 LIKE \'%{0}%\';'.format(sFilePath))
         dbMovie = cursor.fetchone()
         if dbMovie:
-            dbMovie = {'id': dbMovie[0], 'fileid': dbMovie[1], 'premiered': dbMovie[2], 'genre': dbMovie[3], 'filepath': dbEpisode[4]}
+            dbMovie = {'id': dbMovie[0], 'fileid': dbMovie[1], 'premiered': dbMovie[2], 'genre': dbMovie[3], 'filepath': dbMovie[4]}
     finally:
         cursor.close()
         con.close()
