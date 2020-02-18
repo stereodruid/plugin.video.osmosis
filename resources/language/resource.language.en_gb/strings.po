@@ -17,7 +17,7 @@ msgid "General"
 msgstr ""
 
 msgctxt "#30001"
-msgid "Location of the '.strm' files"
+msgid "Location of the STRM"
 msgstr ""
 
 msgctxt "#30002"
@@ -29,23 +29,23 @@ msgid "Internal stream reference"
 msgstr ""
 
 msgctxt "#30004"
-msgid "Delete old strms before generating new ones"
+msgid "Delete outdated STRM"
 msgstr ""
 
 msgctxt "#30005"
-msgid "Update old strms before generating new ones"
+msgid "Update old STRM before generating new ones"
 msgstr ""
 
 msgctxt "#30006"
-msgid "Run Library Scan when finished"
+msgid "Run Library scan when finished"
 msgstr ""
 
 msgctxt "#30007"
-msgid "Clean Database when finished"
+msgid "Clean database when finished"
 msgstr ""
 
 msgctxt "#30008"
-msgid "Clear Strm folder before each run"
+msgid "Clear STRM folder before each run"
 msgstr ""
 
 msgctxt "#30009"
@@ -53,7 +53,7 @@ msgid "Do not export bonus episodes"
 msgstr ""
 
 msgctxt "#30010"
-msgid "Do not export '.strm' files that contain '[OV]' in the title"
+msgid "Do not export STRM files that contain '[OV]' in the title"
 msgstr ""
 
 msgctxt "#31000"
@@ -73,11 +73,11 @@ msgid "Number of levels to search"
 msgstr ""
 
 msgctxt "#31102"
-msgid "Save the streams pro MediaList entry in a superfolder"
+msgid "Save STRM for each MediaList entry in an upper folder"
 msgstr ""
 
 msgctxt "#31103"
-msgid "Save each '.strm' file in its own folder"
+msgid "Save each STRM in its own folder"
 msgstr ""
 
 msgctxt "#31200"
@@ -93,11 +93,11 @@ msgid "Update"
 msgstr ""
 
 msgctxt "#31301"
-msgid "At startup"
+msgid "When Kodi starts"
 msgstr ""
 
 msgctxt "#31302"
-msgid "Scheduled update"
+msgid "Scheduled"
 msgstr ""
 
 msgctxt "#31303"
@@ -145,7 +145,7 @@ msgid "Database"
 msgstr ""
 
 msgctxt "#32001"
-msgid "Kodi is using MYSQL-Database"
+msgid "Kodi is using MySQL-Database"
 msgstr ""
 
 msgctxt "#32002"
@@ -330,15 +330,15 @@ msgid "Video Favorites"
 msgstr ""
 
 msgctxt "#39003"
-msgid "Update the Library using the MediaList entry"
+msgid "Update individual Library contents"
 msgstr ""
 
 msgctxt "#39004"
-msgid "Update the Library using the MediaList entry and delete invalid '.strm' files"
+msgid "Update individual Library contents and delete outdated STRM"
 msgstr ""
 
 msgctxt "#39005"
-msgid "Update Library using all MediaList entries"
+msgid "Update all Library contents"
 msgstr ""
 
 msgctxt "#39006"
@@ -346,15 +346,15 @@ msgid "Rename MediaList entry"
 msgstr ""
 
 msgctxt "#39007"
-msgid "Delete MediaList entry with associated '.strm' files"
+msgid "Delete MediaList entry incl. STRM"
 msgstr ""
 
 msgctxt "#39008"
-msgid "Delete TV Shows from the TVDB cache"
+msgid "Delete TV Show from the TheTVDB cache"
 msgstr ""
 
 msgctxt "#39009"
-msgid "Delete all TV Shows from the TVDB cache"
+msgid "Delete all TV Shows from the TheTVDB cache"
 msgstr ""
 
 msgctxt "#39010"
@@ -403,7 +403,7 @@ msgid "Get title from 'MediaList.xml'"
 msgstr ""
 
 msgctxt "#39109"
-msgid "Select media type"
+msgid "Select content type"
 msgstr ""
 
 msgctxt "#39110"
@@ -471,7 +471,7 @@ msgid "Get title from 'MediaList.xml' for '{0}'"
 msgstr ""
 
 msgctxt "#39126"
-msgid "Create '.strm' files"
+msgid "Create STRM"
 msgstr ""
 
 msgctxt "#39127"
@@ -531,5 +531,5 @@ msgid "Library is being updated"
 msgstr ""
 
 msgctxt "#39141"
-msgid "Add to library successful"
+msgid "Add to Library successful"
 msgstr ""
