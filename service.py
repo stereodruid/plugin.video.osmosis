@@ -52,6 +52,18 @@ def setDBs(files, path):
                 globals.addon.setSetting('KMovie-DB path', dbpath) if dbtype == 'video' else globals.addon.setSetting('KMusic-DB path', dbpath)
 
 
+def writeScheduledUpdate(now, next=None):
+    if not next:
+        next = now + (settings.SCHEDULED_UPDATE_INTERVAL * 60 * 60)
+    next_json = dict(interval=settings.SCHEDULED_UPDATE_INTERVAL, time=ctime(next))
+
+    file = xbmcvfs.File(settings.SCHEDULED_UPDATE_INTERVAL_FILENNAME_AND_PATH, 'w')
+    file.write(bytearray(dumps(next_json), 'utf-8'))
+    file.close()
+
+    return next, next_json
+
+
 def writeFile(path, content):
     file = xbmcvfs.File(path, 'w')
     file.write(bytearray(content, 'utf-8'))
@@ -66,7 +78,8 @@ if __name__ == '__main__':
             setDBs(files, path)
 
     if settings.UPDATE_AT_STARTUP:
-        xbmc.executebuiltin('XBMC.RunPlugin(plugin://{0}/?url=&mode=666)'.format(globals.PLUGIN_ID))
+        writeScheduledUpdate(time())
+        xbmc.executebuiltin('XBMC.RunPlugin(plugin://{0}/?url=&mode=666&updateActor=3)'.format(globals.PLUGIN_ID))
 
     monitor = globals.monitor
     while not monitor.abortRequested():
@@ -76,9 +89,7 @@ if __name__ == '__main__':
             next_json = None
             if not next_json:
                 if not xbmcvfs.exists(settings.SCHEDULED_UPDATE_INTERVAL_FILENNAME_AND_PATH):
-                    next = now + (settings.SCHEDULED_UPDATE_INTERVAL * 60 * 60)
-                    next_json = dict(interval=settings.SCHEDULED_UPDATE_INTERVAL, time=ctime(next))
-                    writeFile(settings.SCHEDULED_UPDATE_INTERVAL_FILENNAME_AND_PATH, dumps(next_json))
+                    next, next_json = writeScheduledUpdate(now)
                 else:
                     file = xbmcvfs.File(settings.SCHEDULED_UPDATE_INTERVAL_FILENNAME_AND_PATH, 'r')
                     next_json = loads(file.read())
@@ -87,12 +98,10 @@ if __name__ == '__main__':
 
             if next_json.get('interval') != settings.SCHEDULED_UPDATE_INTERVAL:
                 next = mktime(strptime(next_json.get('time'))) + ((settings.SCHEDULED_UPDATE_INTERVAL - next_json.get('interval')) * 60 * 60)
-                next_json.update(dict(interval=settings.SCHEDULED_UPDATE_INTERVAL, time=ctime(next)))
-                writeFile(settings.SCHEDULED_UPDATE_INTERVAL_FILENNAME_AND_PATH, dumps(next_json))
+                next, next_json = writeScheduledUpdate(now, next)
 
             if (next <= now):
-                next = now + (settings.SCHEDULED_UPDATE_INTERVAL * 60 * 60)
-                writeFile(settings.SCHEDULED_UPDATE_INTERVAL_FILENNAME_AND_PATH, ctime(next))
+                next, next_json = writeScheduledUpdate(now)
                 xbmc.executebuiltin('XBMC.RunPlugin(plugin://{0}/?mode=666&updateActor=1)'.format(globals.PLUGIN_ID))
         if settings.SCHEDULED_UPDATE == 2 and strftime('%H:%M') == strftime('%H:%M', settings.SCHEDULED_UPDATE_TIME):
             xbmc.executebuiltin('XBMC.RunPlugin(plugin://{0}/?mode=666&updateActor=2)'.format(globals.PLUGIN_ID))

@@ -31,6 +31,7 @@ from .stringUtils import getProviderId, getStrmname, parseMediaListURL
 actor_update_manual = 0
 actor_update_periodictime = 1
 actor_update_fixtime = 2
+actor_update_kodistart = 3
 
 
 def strm_update(selectedItems=None, actor=0):
@@ -90,6 +91,6 @@ def strm_update(selectedItems=None, actor=0):
 
             pDialog.close()
             if actor == actor_update_periodictime:
-                globals.dialog.notification(getString(39123, globals.addon), '{0} {1}h'.format(getString(39136, globals.addon), settings.SCHEDULED_UPDATE_INTERVAL), globals.MEDIA_ICON, 2000, True)
+                globals.dialog.notification(getString(39123, globals.addon), '{0} {1}h'.format(getString(39136, globals.addon), settings.SCHEDULED_UPDATE_INTERVAL), globals.MEDIA_ICON, 5000, True)
             elif actor == actor_update_fixtime:
-                globals.dialog.notification(getString(39123, globals.addon), '{0} {1}h'.format(getString(39137, globals.addon), settings.SCHEDULED_UPDATE_TIME), globals.MEDIA_ICON, 2000, True)
+                globals.dialog.notification(getString(39123, globals.addon), '{0} {1}h'.format(getString(39137, globals.addon), settings.SCHEDULED_UPDATE_TIME), globals.MEDIA_ICON, 5000, True)
