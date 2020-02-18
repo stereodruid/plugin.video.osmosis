@@ -217,7 +217,7 @@ def addToMedialist(params):
                             addon_log_notice('addToMedialist: Use TVDB name \'{0}\' for \'{1}\''.format(showtitle_tvdb, name))
                             name = showtitle_tvdb
                 writeMediaList('name_orig={0};{1}'.format(name_orig, url), name, cType)
-                # globals.dialog.notification(cType, name_orig, globals.MEDIA_ICON, 2000, False)
+                # globals.dialog.notification(cType, name_orig, globals.MEDIA_ICON, 5000, False)
 
                 try:
                     plugin_id = re.search('{0}([^\/\?]*)'.format('plugin:\/\/'), url)
@@ -229,7 +229,7 @@ def addToMedialist(params):
                     pass
 
                 fillPluginItems(url, strm=True, strm_name=name, strm_type=cType, name_orig=name_orig)
-                # globals.dialog.notification(getString(39126, globals.addon), getString(39127, globals.addon), globals.MEDIA_ICON, 2000, True)
+                # globals.dialog.notification(getString(39126, globals.addon), getString(39127, globals.addon), globals.MEDIA_ICON, 5000, True)
 
 
 def addMultipleSeasonToMediaList(params):
@@ -340,7 +340,7 @@ def removeItemsFromMediaList(action='list'):
     if selectedItems:
         removeMediaList(selectedItems)
         selectedLabels = sorted(list(dict.fromkeys([item.get('name') for item in selectedItems])), key=lambda k: k.lower())
-        globals.dialog.notification(getString(39131, globals.addon), '{0}'.format(', '.join(label for label in selectedLabels), globals.MEDIA_ICON, 2000, True))
+        globals.dialog.notification(getString(39131, globals.addon), '{0}'.format(', '.join(label for label in selectedLabels), globals.MEDIA_ICON, 5000, True))
 
 
 def addAlbum(contentList, strm_name, strm_type, pDialog, PAGINGalbums='1'):

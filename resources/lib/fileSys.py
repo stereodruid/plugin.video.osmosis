@@ -182,7 +182,7 @@ def writeMediaList(url, name, cType='Other', cleanName=True, albumartist=None):
     output_file.write(bytearray('\n'.join(thelist).strip(), 'utf-8'))
 
     if not existInList or not replaced:
-        globals.dialog.notification(getString(39141, globals.addon), getStrmname(name), globals.MEDIA_ICON, 2000)
+        globals.dialog.notification(getString(39141, globals.addon), getStrmname(name), globals.MEDIA_ICON, 5000)
 
 
 def writeTutList(step):
