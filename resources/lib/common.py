@@ -185,7 +185,11 @@ def sleep(sec):
 
 
 def exit():
-    from .utils import addon_log
+    try:
+        from .utils import addon_log
+        addon_log('Abort requested - exiting addon')
+    except:
+        xbmc.log('[plugin.video.osmosis] Abort requested - exiting addon')
     import sys
-    addon_log('Abort requested - exiting addon')
+
     sys.exit()

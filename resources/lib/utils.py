@@ -106,12 +106,12 @@ def createSongNFO(filepath, filename , strm_ty='type', artists='none', albums='n
 
 
 def addon_log(string):
-    message = '[{0}-{1}]: {2}'.format(globals.PLUGIN_ID, globals.PLUGIN_VERSION, string)
+    message = '[{0}-{1}] {2}'.format(globals.PLUGIN_ID, globals.PLUGIN_VERSION, string)
     xbmc.log(py2_encode(message))
 
 
 def addon_log_notice(string):
-    message = '[{0}-{1}]: {2}'.format(globals.PLUGIN_ID, globals.PLUGIN_VERSION, string)
+    message = '[{0}-{1}] {2}'.format(globals.PLUGIN_ID, globals.PLUGIN_VERSION, string)
     xbmc.log(py2_encode(message), xbmc.LOGNOTICE)
 
 
