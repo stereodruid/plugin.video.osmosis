@@ -109,6 +109,36 @@ class Config(object):
             }
 
 
+def initDatabase():
+    if not settings.USE_MYSQL:
+        if not xbmcvfs.exists(settings.DATABASE_SQLLITE_OSMOSIS_MOVIE_FILENAME_AND_PATH):
+            createMovDB()
+        elif not valDB(settings.DATABASE_SQLLITE_OSMOSIS_MOVIE_FILENAME_AND_PATH):
+            xbmcvfs.delete(settings.DATABASE_SQLLITE_OSMOSIS_MOVIE_FILENAME_AND_PATH)
+            createMovDB()
+
+        if not xbmcvfs.exists(settings.DATABASE_SQLLITE_OSMOSIS_TVSHOW_FILENAME_AND_PATH):
+            createShowDB()
+        elif not valDB(settings.DATABASE_SQLLITE_OSMOSIS_TVSHOW_FILENAME_AND_PATH):
+            xbmcvfs.delete(settings.DATABASE_SQLLITE_OSMOSIS_TVSHOW_FILENAME_AND_PATH)
+            createShowDB()
+
+        if not xbmcvfs.exists(settings.DATABASE_SQLLITE_OSMOSIS_MUSIC_FILENAME_AND_PATH):
+            createMusicDB()
+    else:
+        if not valDB('Movies'):
+            createMovDB()
+
+        if not valDB('TVShows'):
+            createShowDB()
+
+        if not valDB('Music'):
+            createMusicDB()
+
+    if not xbmcvfs.exists(settings.DATABASE_SQLLITE_OSMOSIS_SCHEMA_VERSION_FILENAME_AND_PATH):
+        createSchemaVersionDB()
+
+
 def musicDatabase(strAlbumName, strArtistName, strSongTitle, strPath, strURL, iTrack, iDuration, strArtPath, tFileModTime=None):
     strPath = completePath(os.path.join(settings.STRM_LOC, strPath))
 
@@ -124,12 +154,6 @@ def musicDatabase(strAlbumName, strArtistName, strSongTitle, strPath, strURL, iT
     writeAlbumArtist(iArtistID, iAlbumID, strArtistName)
     writeThump(iArtistID, 'artist', 'thumb', strArtPath)
     writeThump(iAlbumID, 'album', 'thumb', strArtPath)
-
-    if not settings.USE_MYSQL:
-        if not xbmcvfs.exists(settings.DATABASE_SQLLITE_OSMOSIS_MUSIC_FILENAME_AND_PATH):
-            createMusicDB()
-    elif not valDB('Music'):
-        createMusicDB()
 
     writeIntoSongTable(strSongTitle, iSongID, strArtistName, strAlbumName, iAlbumID, strPath, iPathID, strURL, iRoleID, iArtistID, iSongArtistID, 'F')
 
@@ -331,16 +355,6 @@ def valDB(database):
 def writeMovie(movieList):
     dbMovieList = []
 
-    if not settings.USE_MYSQL:
-        if not xbmcvfs.exists(settings.DATABASE_SQLLITE_OSMOSIS_MOVIE_FILENAME_AND_PATH):
-            createMovDB()
-        elif not valDB(settings.DATABASE_SQLLITE_OSMOSIS_MOVIE_FILENAME_AND_PATH):
-            xbmcvfs.delete(settings.DATABASE_SQLLITE_OSMOSIS_MOVIE_FILENAME_AND_PATH)
-            createMovDB()
-    else:
-        if not valDB('Movies'):
-            createMovDB()
-
     for entry in movieList:
         kmovName = kmovieExists(entry.get('title'), entry.get('imdbnumber'))
         movID = movieExists(kmovName, entry.get('path'))
@@ -353,16 +367,6 @@ def writeMovie(movieList):
 
 def writeShow(episode):
     dbEpisode = None
-
-    if not settings.USE_MYSQL:
-        if not xbmcvfs.exists(settings.DATABASE_SQLLITE_OSMOSIS_TVSHOW_FILENAME_AND_PATH):
-            createShowDB()
-        elif not valDB(settings.DATABASE_SQLLITE_OSMOSIS_TVSHOW_FILENAME_AND_PATH):
-            xbmcvfs.delete(settings.DATABASE_SQLLITE_OSMOSIS_TVSHOW_FILENAME_AND_PATH)
-            createShowDB()
-    else:
-        if not valDB('TVShows'):
-            createShowDB()
 
     if episode is not None:
         showID = showExists(episode.get('tvShowTitle'), episode.get('path'))
@@ -403,6 +407,20 @@ def createShowDB():
 
         cursor.execute(sql_strm_ref)
         cursor.execute(sql_showtable)
+        con.commit()
+    finally:
+        cursor.close()
+        con.close()
+
+
+def createSchemaVersionDB():
+    try:
+        con = sqlite3.connect(settings.DATABASE_SQLLITE_OSMOSIS_SCHEMA_VERSION_FILENAME_AND_PATH)
+        cursor = con.cursor()
+
+        sql = 'CREATE TABLE schema_version (installed_rank INTEGER PRIMARY KEY, filename TEXT NOT NULL, checksum INTEGER NOT NULL, installed_on TIMESTAMP NOT NULL, success TINYINT NOT NULL);'
+
+        cursor.execute(sql)
         con.commit()
     finally:
         cursor.close()

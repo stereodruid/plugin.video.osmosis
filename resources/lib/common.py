@@ -55,6 +55,8 @@ class Globals(Singleton):
         self._globals['MEDIA_REMOVE'] = OSPJoin(self.PLUGIN_PATH, 'resources/media/iconRemove.png')
         self._globals['MEDIA_UPDATE'] = OSPJoin(self.PLUGIN_PATH, 'resources/media/updateIcon.png')
 
+        self._globals['DATABASE_SQLLITE_OSMOSIS_SCHEMA_VERSION_FILES_PATH'] = OSPJoin(self.PLUGIN_PATH, 'resources/db/migrate')
+
         bv = xbmc.getInfoLabel('System.BuildVersion')
         self._globals['KODI_VERSION'] = int(bv.split('.')[0])
         cdate = search('Git:(\d+)', bv)
@@ -125,6 +127,7 @@ class Settings(Singleton):
         elif 'DATABASE_SQLLITE_OSMOSIS_MOVIE_FILENAME_AND_PATH' == name: return py2_decode(OSPJoin(self._g.DATA_PATH, 'Movies.db'))
         elif 'DATABASE_SQLLITE_OSMOSIS_MUSIC_FILENAME_AND_PATH' == name: return py2_decode(OSPJoin(self._g.DATA_PATH, 'Musik.db'))
         elif 'DATABASE_SQLLITE_OSMOSIS_TVSHOW_FILENAME_AND_PATH' == name: return py2_decode(OSPJoin(self._g.DATA_PATH, 'Shows.db'))
+        elif 'DATABASE_SQLLITE_OSMOSIS_SCHEMA_VERSION_FILENAME_AND_PATH' == name: return py2_decode(OSPJoin(self._g.DATA_PATH, 'SchemaVersion.db'))
 
         elif 'FIND_SQLLITE_DB' == name: return self._gs('Find_SQLite_DB') == 'true'
         elif 'FOLDER_MEDIALISTENTRY_MOVIE' == name: self._gs('folder_medialistentry_movie') == 'true'

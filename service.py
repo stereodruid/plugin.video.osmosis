@@ -25,6 +25,7 @@ import xbmc
 import xbmcvfs
 
 from resources.lib.common import Globals, Settings, sleep
+from resources.lib.kodiDB import initDatabase
 
 globals = Globals()
 settings = Settings()
@@ -71,6 +72,8 @@ def writeFile(path, content):
 
 
 if __name__ == '__main__':
+    initDatabase()
+
     if not settings.USE_MYSQL and settings.FIND_SQLLITE_DB:
         path = py2_decode(os.path.join(globals.HOME_PATH, 'userdata/Database/'))
         if xbmcvfs.exists(path):
