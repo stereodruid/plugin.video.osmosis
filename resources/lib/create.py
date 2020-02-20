@@ -17,6 +17,7 @@
 
 from __future__ import unicode_literals
 from kodi_six.utils import py2_encode, py2_decode
+import json
 import os
 import re
 import sys
@@ -666,7 +667,7 @@ def getEpisode(episode_item, strm_name, strm_type, j=0, pagesDone=0, name_orig=N
     if showtitle is not None and showtitle != '' and strm_type != '':
         path = os.path.join(strm_type, cleanStrmFilesys(showtitle))
         provider = getProviderId(file)
-        episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': cleanStrmFilesys(showtitle), 'provider': provider.get('providerId')}
+        episode = {'path': path, 'strSeasonEpisode': strSeasonEpisode, 'url': file, 'tvShowTitle': cleanStrmFilesys(showtitle), 'provider': provider.get('providerId'), 'metadata': json.dumps(episode_item)}
 
         if settings.LINK_TYPE == 0:
             episode = writeShow(episode)

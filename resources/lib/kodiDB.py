@@ -393,7 +393,7 @@ def writeShow(episode):
     if episode is not None:
         showID = showExists(episode.get('tvShowTitle'), episode.get('path'))
         if showID is not None:
-            episodeStreamExists(showID, episode.get('strSeasonEpisode'), episode.get('provider'), episode.get('url'))
+            episodeStreamExists(showID, episode.get('strSeasonEpisode'), episode.get('provider'), episode.get('url'), episode.get('metadata'))
             dbEpisode = {'path': episode.get('path'), 'tvShowTitle': episode.get('tvShowTitle'), 'showID': showID, 'strSeasonEpisode': episode.get('strSeasonEpisode')}
 
     return dbEpisode
@@ -550,7 +550,7 @@ def showExists(title, path):
     return dbShowID
 
 
-def episodeStreamExists(showID, seEp, provider, url):
+def episodeStreamExists(showID, seEp, provider, url, metadata):
     try:
         con, cursor = openDB(settings.DATABASE_SQLLITE_OSMOSIS_TVSHOW_FILENAME_AND_PATH, 'TVShows')
 
@@ -565,7 +565,8 @@ def episodeStreamExists(showID, seEp, provider, url):
             dbShow = []
 
         if len(dbShow) == 0:
-            cursor.execute('INSERT INTO stream_ref (show_id, seasonEpisode, provider, url) VALUES ({}, \'{}\', \'{}\', \'{}\');'.format(showID, seEp, provider, invCommas(url)))
+            query = 'INSERT INTO stream_ref (show_id, seasonEpisode, provider, url, metadata) VALUES ({}, \'{}\', \'{}\', \'{}\', \'{}\');'.format(showID, seEp, provider, invCommas(url), invCommas(metadata))
+            cursor.execute(query)
             con.commit()
         else:
             if py2_decode(dbShow[0][1]) != url:
@@ -588,7 +589,7 @@ def getVideo(ID, seasonEpisode=None):
             query = 'SELECT stream_ref.url, stream_ref.provider, movies.filePath FROM stream_ref INNER JOIN movies ON stream_ref.mov_id = movies.id WHERE stream_ref.mov_id = {};'
             args = (ID,)
         else:
-            query = 'SELECT stream_ref.url, stream_ref.provider, shows.filePath FROM stream_ref INNER JOIN shows ON stream_ref.show_id = shows.id WHERE stream_ref.show_id = {} AND stream_ref.seasonEpisode LIKE \'{}\';'
+            query = 'SELECT stream_ref.url, stream_ref.provider, shows.filePath, stream_ref.metadata FROM stream_ref INNER JOIN shows ON stream_ref.show_id = shows.id WHERE stream_ref.show_id = {} AND stream_ref.seasonEpisode LIKE \'{}\';'
             args = (ID, seasonEpisode)
 
         cursor.execute(query.format(*args))
