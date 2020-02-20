@@ -31,7 +31,7 @@
 		<setting label="31305" type="time" id="scheduled_update_time" default="0:00" subsetting="true" visible="eq(-2,2)"/>
 		
 		<setting label="31400" type="lsep"/>
-		<setting label="31401" type="enum" id="search_thetvdb" lvalues='31303|31302|31303' default="0"/>
+		<setting label="31401" type="enum" id="search_thetvdb" lvalues='31303|31402|31403' default="0"/>
 		<setting label="31404" type="bool" id="confirm_user_entries" default="false" visible="gt(-1,0)"/>
 		<setting label="31405" type="number" id="tvdb_dialog_autoclose_time" default="60" visible="gt(-2,0)"/>
 	</category>

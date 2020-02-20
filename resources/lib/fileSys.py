@@ -284,6 +284,8 @@ def readMediaList():
         thelist = py2_decode(fle.read()).splitlines()
         fle.close()
         return thelist
+    else:
+        return list()
 
 
 def removeStreamsFromDatabaseAndFilesystem(delList):
