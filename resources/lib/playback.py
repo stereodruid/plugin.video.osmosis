@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 from kodi_six.utils import PY2, py2_encode, py2_decode
+from json import loads
 import os
 import re
 import xbmc
@@ -43,7 +44,7 @@ def play(argv, params):
             if mediaType == 'show':
                 sTVShowTitle = argv[0][argv[0].index('|') + 1:]
                 iSeason = int(params.get('episode')[1:params.get('episode').index('e')])
-                iEpisode = params.get('episode')[params.get('episode').index('e') + 1:]
+                iEpisode = int(params.get('episode')[params.get('episode').index('e') + 1:])
                 props = getKodiEpisodeID(selectedEntry[2], iSeason, iEpisode)
 
                 infoLabels.update({'tvShowTitle': sTVShowTitle, 'season': iSeason, 'episode': iEpisode, 'mediatype': 'episode'})
@@ -73,6 +74,8 @@ def play(argv, params):
             player.monitor = globals.monitor
             player.url = url
             player.filepath = props.get('filepath')
+            if mediaType == 'show':
+                player.next_episode = dict(showid=params.get('showid'), season=infoLabels.get('season'), episode=(infoLabels.get('episode') + 1))
 
             position = 0
             settings = Settings()
@@ -94,6 +97,10 @@ def play(argv, params):
 
             if not player.filepath:
                 player.filepath = xbmc.getInfoLabel('Player.Filenameandpath')
+
+            if player.next_episode:
+                k_next_episode = player.checkNextEpisode()
+                player.checkAndSetNextEpisodeRuntime(k_next_episode)
 
             while not player.monitor.abortRequested() and xbmc.getInfoLabel('Player.Filename') == title:
                 player.monitor.waitForAbort(player.sleeptm)
@@ -119,6 +126,7 @@ class Player(xbmc.Player):
         self.monitor = None
         self.url = None
         self.filepath = None
+        self.next_episode = None
         self.running = False
         self.sleeptm = 0.2
         self.video_totaltime = 0
@@ -136,6 +144,22 @@ class Player(xbmc.Player):
 
     def onPlayBackStopped(self):
         self.finished()
+
+
+    def checkNextEpisode(self):
+        next_episode_filepath = self.filepath.replace('s{0}e{1}'.format(self.next_episode.get('season'), self.next_episode.get('episode') - 1),
+                                                      's{0}e{1}'.format(self.next_episode.get('season'), self.next_episode.get('episode')))
+        return getKodiEpisodeID(next_episode_filepath, self.next_episode.get('season'), self.next_episode.get('episode'))
+
+
+    def checkAndSetNextEpisodeRuntime(self, k_next_episode):
+        next_episode_details = jsonrpc('VideoLibrary.GetEpisodeDetails', {'episodeid': k_next_episode.get('id'), 'properties': ['runtime']}).get('episodedetails', {})
+        if next_episode_details.get('runtime') == 0:
+            o_next_episode = getVideo(self.next_episode.get('showid'), 's{0}e{1}'.format(self.next_episode.get('season'), self.next_episode.get('episode')))
+            if o_next_episode:
+                o_next_episode_metadata = loads(o_next_episode[0][3])
+                if o_next_episode_metadata.get('runtime') > 0:
+                    jsonrpc('VideoLibrary.SetEpisodeDetails', {'episodeid': k_next_episode.get('id'), 'runtime': o_next_episode_metadata.get('runtime')})
 
 
     def checkResume(self, dialog, playback_rewind):
@@ -158,9 +182,9 @@ class Player(xbmc.Player):
         if self.running:
             self.running = False
             if self.globals.FEATURE_PLUGIN_RESUME_SYNC:
-                resume = jsonrpc("Files.GetFileDetails", {"file": self.filepath, "media": "video", "properties": ["resume"]}).get('filedetails', {}).get('resume', {})
+                resume = jsonrpc('Files.GetFileDetails', {'file': self.filepath, 'media': 'video', 'properties': ['resume']}).get('filedetails', {}).get('resume', {})
                 if resume:
-                    jsonrpc("Files.SetFileDetails", {"file": self.url, "media": "video", "resume": {"position": resume.get('position'), "total": resume.get('total')}})
+                    jsonrpc('Files.SetFileDetails', {'file': self.url, 'media': 'video', 'resume': {'position': resume.get('position'), 'total': resume.get('total')}})
 
 
     def getTimes(self):
