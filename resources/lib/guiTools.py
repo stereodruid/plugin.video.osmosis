@@ -146,7 +146,7 @@ def getType(url):
         return -1
 
     if selectType >= 0 and selectOption >= 0:
-        return '{0}{1}'.format(Types[selectType], subtypes[selectOption].get('id'))
+        return '{0}{1}'.format(types[selectType], subtypes[selectOption].get('id'))
 
 
 def getTypeLangOnly(Type):
