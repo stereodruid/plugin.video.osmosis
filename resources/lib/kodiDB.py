@@ -17,11 +17,10 @@
 
 from __future__ import unicode_literals
 from kodi_six.utils import py2_decode
-import os
-import sys
-import datetime
-import sqlite3
+from datetime import datetime
 import mysql.connector
+import os
+import sqlite3
 import xbmc
 import xbmcvfs
 
@@ -139,6 +138,29 @@ def initDatabase():
         createSchemaVersionDB()
 
 
+def updateDatabase():
+    dirs, files = xbmcvfs.listdir(globals.DATABASE_SQLLITE_OSMOSIS_SCHEMA_VERSION_FILES_PATH)
+    for dir in dirs:
+        dir_path = os.path.join(globals.DATABASE_SQLLITE_OSMOSIS_SCHEMA_VERSION_FILES_PATH, dir)
+        subdirs, subfiles = xbmcvfs.listdir(dir_path)
+        for subfile in subfiles:
+            file_path = os.path.join(dir, subfile)
+            if not checkSchemaVersion(file_path):
+                complete_file_path = os.path.join(dir_path, subfile)
+                file = xbmcvfs.File(complete_file_path, 'r')
+                query = file.read()
+                file.close()
+                try:
+                    args = {'sqliteDB': settings.DATABASE_SQLLITE_OSMOSIS_MOVIE_FILENAME_AND_PATH, 'mysqlDBType': 'Movies'} if type == 'movies' \
+                            else {'sqliteDB': settings.DATABASE_SQLLITE_OSMOSIS_TVSHOW_FILENAME_AND_PATH, 'mysqlDBType': 'TVShows'}
+                    con, cursor = openDB(**args)
+                    cursor.execute(query)
+                finally:
+                    cursor.close()
+                    con.close()
+                writeSchemaVersion(os.path.join(dir, subfile), datetime.now(), 1)
+
+
 def musicDatabase(strAlbumName, strArtistName, strSongTitle, strPath, strURL, iTrack, iDuration, strArtPath, tFileModTime=None):
     strPath = completePath(os.path.join(settings.STRM_LOC, strPath))
 
@@ -236,9 +258,9 @@ def writeAlbums(strAlbum, strArtist, strReleaseType='album'):
 
 
 def writeSong(iPathID, iAlbumID, strArtist, strTitle, iDuration, iTrack, tFileModTime):
-    tDateAdded = datetime.datetime.fromtimestamp(tFileModTime) if tFileModTime else datetime.datetime.now()
+    tDateAdded = datetime.fromtimestamp(tFileModTime) if tFileModTime else datetime.now()
     strDateAdded = tDateAdded.strftime('%Y-%m-%d %H:%M:%S')
-    iYear = int(datetime.datetime.now().strftime('%Y'))
+    iYear = int(datetime.now().strftime('%Y'))
     artistCol = 'strArtistDisp' if globals.KODI_VERSION >= 18 else 'strArtists'
     strTitle = invCommas(strTitle)
     strFileName = cleanStrmFilesys(strTitle)
@@ -418,7 +440,7 @@ def createSchemaVersionDB():
         con = sqlite3.connect(settings.DATABASE_SQLLITE_OSMOSIS_SCHEMA_VERSION_FILENAME_AND_PATH)
         cursor = con.cursor()
 
-        sql = 'CREATE TABLE schema_version (installed_rank INTEGER PRIMARY KEY, filename TEXT NOT NULL, checksum INTEGER NOT NULL, installed_on TIMESTAMP NOT NULL, success TINYINT NOT NULL);'
+        sql = 'CREATE TABLE schema_version (installed_rank INTEGER PRIMARY KEY, filename TEXT NOT NULL, installed_on TIMESTAMP NOT NULL, success TINYINT NOT NULL);'
 
         cursor.execute(sql)
         con.commit()
@@ -703,3 +725,32 @@ def openDB(sqliteDB, mysqlDBType):
         cursor = con.cursor()
 
     return con, cursor
+
+
+def checkSchemaVersion(filename):
+    entry = None
+
+    try:
+        con = sqlite3.connect(settings.DATABASE_SQLLITE_OSMOSIS_SCHEMA_VERSION_FILENAME_AND_PATH)
+        cursor = con.cursor()
+        query = 'SELECT * FROM schema_version WHERE schema_version.filename = \'{0}\';'.format(filename)
+        cursor.execute(query)
+        entry = cursor.fetchone()
+    finally:
+        cursor.close()
+        con.close()
+
+    return entry
+
+
+def writeSchemaVersion(filename, installed_on, success):
+    try:
+        con = sqlite3.connect(settings.DATABASE_SQLLITE_OSMOSIS_SCHEMA_VERSION_FILENAME_AND_PATH)
+        cursor = con.cursor()
+        query = 'INSERT INTO schema_version (filename, installed_on, success) VALUES (\'{0}\', \'{1}\', {2});'.format(filename, installed_on, success)
+        addon_log('writeSchemaVersion: query = {0}'.format(query))
+        cursor.execute(query)
+        con.commit()
+    finally:
+        cursor.close()
+        con.close()

@@ -25,7 +25,7 @@ import xbmc
 import xbmcvfs
 
 from resources.lib.common import Globals, Settings, sleep
-from resources.lib.kodiDB import initDatabase
+from resources.lib.kodiDB import initDatabase, updateDatabase
 
 globals = Globals()
 settings = Settings()
@@ -65,7 +65,14 @@ def writeScheduledUpdate(now, next=None):
     return next, next_json
 
 
-def writeFile(path, content):
+def readFile(path):
+    file = xbmcvfs.File(path, 'r')
+    content = file.read()
+    file.close()
+    return content
+
+
+def writeFile(path):
     file = xbmcvfs.File(path, 'w')
     file.write(bytearray(content, 'utf-8'))
     file.close()
@@ -73,6 +80,7 @@ def writeFile(path, content):
 
 if __name__ == '__main__':
     initDatabase()
+    updateDatabase()
 
     if not settings.USE_MYSQL and settings.FIND_SQLLITE_DB:
         path = py2_decode(os.path.join(globals.HOME_PATH, 'userdata/Database/'))
@@ -94,10 +102,8 @@ if __name__ == '__main__':
                 if not xbmcvfs.exists(settings.SCHEDULED_UPDATE_INTERVAL_FILENNAME_AND_PATH):
                     next, next_json = writeScheduledUpdate(now)
                 else:
-                    file = xbmcvfs.File(settings.SCHEDULED_UPDATE_INTERVAL_FILENNAME_AND_PATH, 'r')
-                    next_json = loads(file.read())
+                    next_json = loads(readFile(settings.SCHEDULED_UPDATE_INTERVAL_FILENNAME_AND_PATH))
                     next = mktime(strptime(next_json.get('time')))
-                    file.close()
 
             if next_json.get('interval') != settings.SCHEDULED_UPDATE_INTERVAL:
                 next = mktime(strptime(next_json.get('time'))) + ((settings.SCHEDULED_UPDATE_INTERVAL - next_json.get('interval')) * 60 * 60)
