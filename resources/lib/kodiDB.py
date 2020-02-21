@@ -583,20 +583,20 @@ def episodeStreamExists(showID, seEp, provider, url, metadata):
         if url.find('?url=plugin') > -1:
             url = url.strip().replace('?url=plugin', 'plugin', 1)
 
-        cursor.execute('SELECT show_id, url FROM stream_ref WHERE show_id = {} AND seasonEpisode LIKE \'{}\' AND provider LIKE \'{}\';'.format(showID, seEp, provider))
+        cursor.execute('SELECT show_id, url, metadata FROM stream_ref WHERE show_id = {0} AND seasonEpisode LIKE \'{1}\' AND provider LIKE \'{2}\';'.format(showID, seEp, provider))
         dbShow = cursor.fetchall()
 
         if len(dbShow) > 1:
-            cursor.execute('DELETE FROM stream_ref WHERE show_id = {} AND seasonEpisode LIKE \'{}\' AND provider LIKE \'{}\';'.format(showID, seEp, provider))
+            cursor.execute('DELETE FROM stream_ref WHERE show_id = {0} AND seasonEpisode LIKE \'{1}\' AND provider LIKE \'{2}\';'.format(showID, seEp, provider))
             dbShow = []
 
         if len(dbShow) == 0:
-            query = 'INSERT INTO stream_ref (show_id, seasonEpisode, provider, url, metadata) VALUES ({}, \'{}\', \'{}\', \'{}\', \'{}\');'.format(showID, seEp, provider, invCommas(url), invCommas(metadata))
+            query = 'INSERT INTO stream_ref (show_id, seasonEpisode, provider, url, metadata) VALUES ({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\');'.format(showID, seEp, provider, invCommas(url), invCommas(metadata))
             cursor.execute(query)
             con.commit()
         else:
-            if py2_decode(dbShow[0][1]) != url:
-                cursor.execute('UPDATE stream_ref SET url = \'{}\' WHERE show_id = {} AND seasonEpisode LIKE \'{}\' AND provider LIKE \'{}\';'.format(invCommas(url), showID, seEp, provider))
+            if py2_decode(dbShow[0][1]) != url or not dbShow[0][2]:
+                cursor.execute('UPDATE stream_ref SET url = \'{0}\', metadata = \'{1}\' WHERE show_id = {2} AND seasonEpisode LIKE \'{3}\' AND provider LIKE \'{4}\';'.format(invCommas(url), invCommas(metadata), showID, seEp, provider))
                 con.commit()
     finally:
         cursor.close()
