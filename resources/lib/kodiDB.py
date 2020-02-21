@@ -109,56 +109,68 @@ class Config(object):
 
 
 def initDatabase():
+    for database in globals.DATABASES:
+        if database.get('dbtype') == 'movies': database.get('db')['sqliteDB'] = settings.DATABASE_SQLLITE_OSMOSIS_MOVIE_FILENAME_AND_PATH
+        elif database.get('dbtype') == 'tvshows': database.get('db')['sqliteDB'] = settings.DATABASE_SQLLITE_OSMOSIS_TVSHOW_FILENAME_AND_PATH
+        elif database.get('dbtype') == 'music': database.get('db')['sqliteDB'] = settings.DATABASE_SQLLITE_OSMOSIS_MUSIC_FILENAME_AND_PATH
+
     if not settings.USE_MYSQL:
         if not xbmcvfs.exists(settings.DATABASE_SQLLITE_OSMOSIS_MOVIE_FILENAME_AND_PATH):
             createMovDB()
-        elif not valDB(settings.DATABASE_SQLLITE_OSMOSIS_MOVIE_FILENAME_AND_PATH):
+        elif not valDB(settings.DATABASE_SQLLITE_OSMOSIS_MOVIE_FILENAME_AND_PATH, 'Movies'):
             xbmcvfs.delete(settings.DATABASE_SQLLITE_OSMOSIS_MOVIE_FILENAME_AND_PATH)
             createMovDB()
 
         if not xbmcvfs.exists(settings.DATABASE_SQLLITE_OSMOSIS_TVSHOW_FILENAME_AND_PATH):
             createShowDB()
-        elif not valDB(settings.DATABASE_SQLLITE_OSMOSIS_TVSHOW_FILENAME_AND_PATH):
+        elif not valDB(settings.DATABASE_SQLLITE_OSMOSIS_TVSHOW_FILENAME_AND_PATH, 'TVShows'):
             xbmcvfs.delete(settings.DATABASE_SQLLITE_OSMOSIS_TVSHOW_FILENAME_AND_PATH)
             createShowDB()
 
         if not xbmcvfs.exists(settings.DATABASE_SQLLITE_OSMOSIS_MUSIC_FILENAME_AND_PATH):
             createMusicDB()
+        elif not valDB(settings.DATABASE_SQLLITE_OSMOSIS_MUSIC_FILENAME_AND_PATH, 'Music'):
+            xbmcvfs.delete(settings.DATABASE_SQLLITE_OSMOSIS_MUSIC_FILENAME_AND_PATH)
+            createMusicDB()
     else:
-        if not valDB('Movies'):
+        if not valDB(settings.DATABASE_SQLLITE_OSMOSIS_MOVIE_FILENAME_AND_PATH, 'Movies'):
             createMovDB()
 
-        if not valDB('TVShows'):
+        if not valDB(settings.DATABASE_SQLLITE_OSMOSIS_TVSHOW_FILENAME_AND_PATH, 'TVShows'):
             createShowDB()
 
-        if not valDB('Music'):
+        if not valDB(settings.DATABASE_SQLLITE_OSMOSIS_MUSIC_FILENAME_AND_PATH, 'Music'):
             createMusicDB()
 
-    if not xbmcvfs.exists(settings.DATABASE_SQLLITE_OSMOSIS_SCHEMA_VERSION_FILENAME_AND_PATH):
-        createSchemaVersionDB()
+    createSchemaVersionTable()
 
 
 def updateDatabase():
     dirs, files = xbmcvfs.listdir(globals.DATABASE_SQLLITE_OSMOSIS_SCHEMA_VERSION_FILES_PATH)
     for dir in dirs:
+        dbtype = dir.lower()
         dir_path = os.path.join(globals.DATABASE_SQLLITE_OSMOSIS_SCHEMA_VERSION_FILES_PATH, dir)
         subdirs, subfiles = xbmcvfs.listdir(dir_path)
         for subfile in subfiles:
             file_path = os.path.join(dir, subfile)
-            if not checkSchemaVersion(file_path):
+            if not checkSchemaVersion(file_path, dbtype):
                 complete_file_path = os.path.join(dir_path, subfile)
                 file = xbmcvfs.File(complete_file_path, 'r')
                 query = file.read()
                 file.close()
+                con, cursor = None, None
                 try:
-                    args = {'sqliteDB': settings.DATABASE_SQLLITE_OSMOSIS_MOVIE_FILENAME_AND_PATH, 'mysqlDBType': 'Movies'} if type == 'movies' \
-                            else {'sqliteDB': settings.DATABASE_SQLLITE_OSMOSIS_TVSHOW_FILENAME_AND_PATH, 'mysqlDBType': 'TVShows'}
-                    con, cursor = openDB(**args)
-                    cursor.execute(query)
+                    for database in globals.DATABASES:
+                        if database.get('dbtype') == dbtype:
+                            con, cursor = openDB(database.get('db').get('sqliteDB'), database.get('db').get('mysqlDBType'))
+                            cursor.execute(query)
                 finally:
-                    cursor.close()
-                    con.close()
-                writeSchemaVersion(os.path.join(dir, subfile), datetime.now(), 1)
+                    if cursor:
+                        cursor.close()
+                    if con:
+                        con.close()
+
+                writeSchemaVersion(os.path.join(dir, subfile), datetime.now(), 1, dbtype)
 
 
 def musicDatabase(strAlbumName, strArtistName, strSongTitle, strPath, strURL, iTrack, iDuration, strArtPath, tFileModTime=None):
@@ -350,21 +362,25 @@ def manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, database=se
     return dID
 
 
-def valDB(database):
-    con, cursor = openDB(database, database)
+def valDB(dbpath, dbtype):
+    con, cursor = openDB(dbpath, dbtype)
+
+    if dbtype == 'Music':
+        table = 'songs'
+    else:
+        table = 'stream_ref'
 
     if not settings.USE_MYSQL:
-        cursor.execute('SELECT * FROM sqlite_master WHERE name LIKE \'stream_ref\' and type LIKE \'table\';')
+        query = 'SELECT * FROM sqlite_master WHERE name LIKE \'{0}\' and type LIKE \'table\';'.format(table)
+
+        cursor.execute(query)
         result = cursor.fetchall()
 
         cursor.close()
         con.close()
         return True if len(result) == 1 else False
     else:
-        if database == 'Music':
-            query = 'SHOW TABLES LIKE \'songs\';'
-        else:
-            query = 'SHOW TABLES LIKE \'stream_ref\';'
+        query = 'SHOW TABLES LIKE \'{0}\';'.format(table)
 
         cursor.execute(query)
         result = cursor.fetchone()
@@ -435,18 +451,28 @@ def createShowDB():
         con.close()
 
 
-def createSchemaVersionDB():
-    try:
-        con = sqlite3.connect(settings.DATABASE_SQLLITE_OSMOSIS_SCHEMA_VERSION_FILENAME_AND_PATH)
-        cursor = con.cursor()
+def createSchemaVersionTable():
+    for database in globals.DATABASES:
+        try:
+            con, cursor = openDB(database.get('db').get('sqliteDB'), database.get('db').get('mysqlDBType'))
 
-        sql = 'CREATE TABLE schema_version (installed_rank INTEGER PRIMARY KEY, filename TEXT NOT NULL, installed_on TIMESTAMP NOT NULL, success TINYINT NOT NULL);'
+            if not settings.USE_MYSQL:
+                query = 'SELECT * FROM sqlite_master WHERE name LIKE \'schema_version\' and type LIKE \'table\';'
+                cursor.execute(query)
+                result = cursor.fetchone()
+            else:
+                query = 'SHOW TABLES LIKE \'schema_version\';'
+                cursor.execute(query)
+                result = cursor.fetchone()
 
-        cursor.execute(sql)
-        con.commit()
-    finally:
-        cursor.close()
-        con.close()
+            if not result:
+                query = 'CREATE TABLE schema_version (installed_rank INTEGER PRIMARY KEY{0}, filename TEXT NOT NULL, installed_on TIMESTAMP NOT NULL, success TINYINT NOT NULL);'
+                query = query.format('' if not settings.USE_MYSQL else ' AUTO_INCREMENT')
+                cursor.execute(query)
+                con.commit()
+        finally:
+            cursor.close()
+            con.close()
 
 
 def kmovieExists(title, imdbnumber):
@@ -728,30 +754,37 @@ def openDB(sqliteDB, mysqlDBType):
     return con, cursor
 
 
-def checkSchemaVersion(filename):
-    entry = None
+def checkSchemaVersion(filename, dbtype):
+    con, cursor, entry = None, None, None
 
     try:
-        con = sqlite3.connect(settings.DATABASE_SQLLITE_OSMOSIS_SCHEMA_VERSION_FILENAME_AND_PATH)
-        cursor = con.cursor()
-        query = 'SELECT * FROM schema_version WHERE schema_version.filename = \'{0}\';'.format(filename)
-        cursor.execute(query)
-        entry = cursor.fetchone()
+        for database in globals.DATABASES:
+            if database.get('dbtype') == dbtype:
+                con, cursor = openDB(database.get('db').get('sqliteDB'), database.get('db').get('mysqlDBType'))
+                query = 'SELECT * FROM schema_version WHERE schema_version.filename = \'{0}\';'.format(filename)
+                cursor.execute(query)
+                entry = cursor.fetchone()
     finally:
-        cursor.close()
-        con.close()
+        if cursor:
+            cursor.close()
+        if con:
+            con.close()
 
     return entry
 
 
-def writeSchemaVersion(filename, installed_on, success):
+def writeSchemaVersion(filename, installed_on, success, dbtype):
+    con, cursor, entry = None, None, None
+
     try:
-        con = sqlite3.connect(settings.DATABASE_SQLLITE_OSMOSIS_SCHEMA_VERSION_FILENAME_AND_PATH)
-        cursor = con.cursor()
-        query = 'INSERT INTO schema_version (filename, installed_on, success) VALUES (\'{0}\', \'{1}\', {2});'.format(filename, installed_on, success)
-        addon_log('writeSchemaVersion: query = {0}'.format(query))
-        cursor.execute(query)
-        con.commit()
+        for database in globals.DATABASES:
+            if database.get('dbtype') == dbtype:
+                con, cursor = openDB(database.get('db').get('sqliteDB'), database.get('db').get('mysqlDBType'))
+                query = 'INSERT INTO schema_version (filename, installed_on, success) VALUES (\'{0}\', \'{1}\', {2});'.format(filename, installed_on, success)
+                cursor.execute(query)
+                con.commit()
     finally:
-        cursor.close()
-        con.close()
+        if cursor:
+            cursor.close()
+        if con:
+            con.close()

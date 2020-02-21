@@ -55,6 +55,11 @@ class Globals(Singleton):
         self._globals['MEDIA_REMOVE'] = OSPJoin(self.PLUGIN_PATH, 'resources/media/iconRemove.png')
         self._globals['MEDIA_UPDATE'] = OSPJoin(self.PLUGIN_PATH, 'resources/media/updateIcon.png')
 
+        self._globals['DATABASES'] = [
+            {'dbtype': 'movies', 'db': {'sqliteDB': None, 'mysqlDBType': 'Movies'}},
+            {'dbtype': 'tvshows', 'db': {'sqliteDB': None, 'mysqlDBType': 'TVShows'}},
+            {'dbtype': 'music', 'db': {'sqliteDB': None, 'mysqlDBType': 'Music'}}
+        ]
         self._globals['DATABASE_SQLLITE_OSMOSIS_SCHEMA_VERSION_FILES_PATH'] = OSPJoin(self.PLUGIN_PATH, 'resources/db/migrate')
 
         bv = xbmc.getInfoLabel('System.BuildVersion')
