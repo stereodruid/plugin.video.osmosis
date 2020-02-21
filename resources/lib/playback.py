@@ -156,7 +156,7 @@ class Player(xbmc.Player):
         next_episode_details = jsonrpc('VideoLibrary.GetEpisodeDetails', {'episodeid': k_next_episode.get('id'), 'properties': ['runtime']}).get('episodedetails', {})
         if next_episode_details.get('runtime') == 0:
             o_next_episode = getVideo(self.next_episode.get('showid'), 's{0}e{1}'.format(self.next_episode.get('season'), self.next_episode.get('episode')))
-            if o_next_episode:
+            if o_next_episode and o_next_episode[0][3]:
                 o_next_episode_metadata = loads(o_next_episode[0][3])
                 if o_next_episode_metadata.get('runtime') > 0:
                     jsonrpc('VideoLibrary.SetEpisodeDetails', {'episodeid': k_next_episode.get('id'), 'runtime': o_next_episode_metadata.get('runtime')})
