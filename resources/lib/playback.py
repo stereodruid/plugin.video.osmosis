@@ -99,8 +99,7 @@ def play(argv, params):
                 player.filepath = xbmc.getInfoLabel('Player.Filenameandpath')
 
             if player.next_episode:
-                k_next_episode = player.checkNextEpisode()
-                player.checkAndSetNextEpisodeRuntime(k_next_episode)
+                player.checkAndSetNextEpisodeRuntime()
 
             while not player.monitor.abortRequested() and xbmc.getInfoLabel('Player.Filename') == title:
                 player.monitor.waitForAbort(player.sleeptm)
@@ -146,20 +145,18 @@ class Player(xbmc.Player):
         self.finished()
 
 
-    def checkNextEpisode(self):
+    def checkAndSetNextEpisodeRuntime(self):
         next_episode_filepath = self.filepath.replace('s{0}e{1}'.format(self.next_episode.get('season'), self.next_episode.get('episode') - 1),
                                                       's{0}e{1}'.format(self.next_episode.get('season'), self.next_episode.get('episode')))
-        return getKodiEpisodeID(next_episode_filepath, self.next_episode.get('season'), self.next_episode.get('episode'))
-
-
-    def checkAndSetNextEpisodeRuntime(self, k_next_episode):
-        next_episode_details = jsonrpc('VideoLibrary.GetEpisodeDetails', {'episodeid': k_next_episode.get('id'), 'properties': ['runtime']}).get('episodedetails', {})
-        if next_episode_details.get('runtime') == 0:
-            o_next_episode = getVideo(self.next_episode.get('showid'), 's{0}e{1}'.format(self.next_episode.get('season'), self.next_episode.get('episode')))
-            if o_next_episode and o_next_episode[0][3]:
-                o_next_episode_metadata = loads(o_next_episode[0][3])
-                if o_next_episode_metadata.get('runtime') > 0:
-                    jsonrpc('VideoLibrary.SetEpisodeDetails', {'episodeid': k_next_episode.get('id'), 'runtime': o_next_episode_metadata.get('runtime')})
+        k_next_episode = getKodiEpisodeID(next_episode_filepath, self.next_episode.get('season'), self.next_episode.get('episode'))
+        if k_next_episode:
+            next_episode_details = jsonrpc('VideoLibrary.GetEpisodeDetails', {'episodeid': k_next_episode.get('id'), 'properties': ['runtime']}).get('episodedetails', {})
+            if next_episode_details.get('runtime') == 0:
+                o_next_episode = getVideo(self.next_episode.get('showid'), 's{0}e{1}'.format(self.next_episode.get('season'), self.next_episode.get('episode')))
+                if o_next_episode and o_next_episode[0][3]:
+                    o_next_episode_metadata = loads(o_next_episode[0][3])
+                    if o_next_episode_metadata.get('runtime') > 0:
+                        jsonrpc('VideoLibrary.SetEpisodeDetails', {'episodeid': k_next_episode.get('id'), 'runtime': o_next_episode_metadata.get('runtime')})
 
 
     def checkResume(self, dialog, playback_rewind):
