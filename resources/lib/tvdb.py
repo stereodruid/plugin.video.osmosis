@@ -373,7 +373,7 @@ def findEpisodeByName(show_data, episodeSeason, episodeNr, episodeName, lang, si
                             else:
                                 ratio = 0.80 * ratio
 
-                        addon_log('tvdb ratio: \'{0}\'; \'{1}\' (TVDB); ratio={2:0.1f} ({3:0.1f} {4:0.1f} {5:0.1f} {6:%0.1f})'.format(epName, episode.get('episodeName'), ratio, ratio1, ratio2, ratio3, ratio4))
+                        addon_log('tvdb ratio: \'{0}\'; \'{1}\' (TVDB); ratio={2:0.1f} ({3:0.1f} {4:0.1f} {5:0.1f} {6:0.1f})'.format(epName, episode.get('episodeName'), ratio, ratio1, ratio2, ratio3, ratio4))
 
                         if ratio > ratio_max:
                             if ratio_max > 0 and not (ratio_max_season == episode.get('airedSeason') and ratio_max_episode == episode.get('airedEpisodeNumber')):
