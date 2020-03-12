@@ -234,7 +234,8 @@ def mediaListDialog(multiselect=True, expand=True, cTypeFilter=None, header_pref
                 indent_text = ''
                 indent_text2 = ''
                 if len(matches) > 1:
-                    items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} [{1}]'.format(name, cType), 'url': splits[2], 'iconImage': 'DefaultVideoPlaylists.png'})
+                    items.append({'index': index, 'entry': entry, 'name': name, 'text': '{0} [{1}]'.format(name, cType), 'text2': '', \
+                                  'url': splits[2], 'iconImage': 'DefaultVideoPlaylists.png'})
                     indent_text = '    '
                     indent_text2 = '{0} '.format(indent_text)
                 for match in matches:

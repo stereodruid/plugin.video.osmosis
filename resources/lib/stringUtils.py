@@ -230,11 +230,10 @@ def getProvidername(url):
     provider = getProviderId(url)
 
     if provider:
-        module = getModule(provider.get('plugin_id'))
+        pid = provider.get('plugin_id')
+        provider = Globals().CACHE_ADDONNAME.cacheFunction(getAddonname, pid)
+        module = getModule(pid)
         if module and hasattr(module, 'getProvidername'):
-            provider = module.getProvidername(provider.get('plugin_id'), url)
-        else:
-            globals = Globals()
-            provider = globals.CACHE_ADDONNAME.cacheFunction(getAddonname, provider.get('plugin_id'))
+            provider = module.getProvidername(provider, url)
 
     return provider
