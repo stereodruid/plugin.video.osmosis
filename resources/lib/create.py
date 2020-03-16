@@ -459,7 +459,7 @@ def addMovies(contentList, strm_name, strm_type, name_orig, pDialog, provider='n
                     provider = getProviderId(file)
 
                     pDialog.update(int(j), message='\'{0}\' {1}'.format(label, getString(39138, globals.addon)))
-                    if filetype is not None and filetype == 'file' and get_title_with_OV == True:
+                    if not filetype and filetype == 'file' and get_title_with_OV:
                         m_path = getMovieStrmPath(strm_type, strm_name, label)
                         m_title = getStrmname(label)
                         movieList.append({'path': m_path, 'title':  m_title, 'url': file, 'provider': provider.get('providerId'), 'imdbnumber': imdbnumber})
@@ -536,33 +536,6 @@ def getTVShowFromList(showList, strm_name, strm_type, name_orig, pDialog, pagesD
                     dirList.append(json_reply)
                     continue
                 elif filetype == 'file':
-                    episodetitle = detailInfo.get('title')
-                    episodeseason = detailInfo.get('season', -1)
-                    episode = detailInfo.get('episode', -1)
-                    if (settings.SEARCH_THETVDB == 2 or (settings.SEARCH_THETVDB == 1 and (episodeseason == -1 or episode == -1))) and (not settings.NO_E0_STRMS_EXPORT or episode != 0):
-
-                        if showtitle and showtitle != '' and episodetitle and episodetitle != '':
-
-                            eptitle = episodetitle
-                            eptitle = eptitle.replace('\u201e', '\'')
-                            eptitle = eptitle.replace('\u201c', '\'')
-                            eptitle = eptitle.replace('\u2013', '-')
-                            addon_log_notice('search tvdb for \'{0}\': \'S{1:02d}E{2:02d} - {3}\' (lang={4})'.format(showtitle, episodeseason, episode, eptitle, lang))
-                            data = getEpisodeByName(showtitle, episodeseason, episode, eptitle, lang)
-
-                            if data:
-                                detailInfo['season'] = data.get('season')
-                                detailInfo['episode'] = data.get('episode')
-                                detailInfo['episodeName'] = data.get('episodeName', None)
-                                addon_log_notice('found tvdb entry for \'{0}\': \'S{1:02d}E{2:02d} - {3}\' matched to \'S{4:02d}E{5:02d} - {6}\''
-                                                       .format(showtitle, episodeseason, episode, episodetitle,
-                                                       detailInfo['season'], detailInfo['episode'], detailInfo['episodeName']))
-                            else:
-                                detailInfo['season'] = -1
-                                detailInfo['episode'] = -1
-                                addon_log_notice('no tvdb entry found for \'{0}\': \'S{1:02d}E{2:02d} - {3}\''
-                                                       .format(showtitle, episodeseason, episode, episodetitle))
-
                     get_title_with_OV = True
                     if settings.HIDE_TITLE_IN_OV:
                         label = detailInfo.get('label').strip() if detailInfo.get('label', None) else None
@@ -570,8 +543,35 @@ def getTVShowFromList(showList, strm_name, strm_type, name_orig, pDialog, pagesD
                         if re.search('(\WOV\W)', label):
                             get_title_with_OV = False
 
-                    if detailInfo.get('season', -1) > -1 and detailInfo.get('episode', -1) > -1:
-                        if not settings.NO_E0_STRMS_EXPORT or detailInfo.get('episode') > 0 and get_title_with_OV == True:
+                    if get_title_with_OV:
+                        episodetitle = detailInfo.get('title')
+                        episodeseason = detailInfo.get('season', -1)
+                        episode = detailInfo.get('episode', -1)
+                        export_episode = (not settings.NO_E0_STRMS_EXPORT or episode != 0)
+
+                        if (settings.SEARCH_THETVDB == 2 or (settings.SEARCH_THETVDB == 1 and (episodeseason == -1 or episode == -1))) and export_episode:
+                            if showtitle and showtitle != '' and episodetitle and episodetitle != '':
+                                eptitle = episodetitle
+                                eptitle = eptitle.replace('\u201e', '\'')
+                                eptitle = eptitle.replace('\u201c', '\'')
+                                eptitle = eptitle.replace('\u2013', '-')
+                                addon_log_notice('search tvdb for \'{0}\': \'S{1:02d}E{2:02d} - {3}\' (lang={4})'.format(showtitle, episodeseason, episode, eptitle, lang))
+                                data = getEpisodeByName(showtitle, episodeseason, episode, eptitle, lang)
+
+                                if data:
+                                    detailInfo['season'] = data.get('season')
+                                    detailInfo['episode'] = data.get('episode')
+                                    detailInfo['episodeName'] = data.get('episodeName', None)
+                                    addon_log_notice('found tvdb entry for \'{0}\': \'S{1:02d}E{2:02d} - {3}\' matched to \'S{4:02d}E{5:02d} - {6}\''
+                                                           .format(showtitle, episodeseason, episode, episodetitle,
+                                                           detailInfo['season'], detailInfo['episode'], detailInfo['episodeName']))
+                                else:
+                                    detailInfo['season'] = -1
+                                    detailInfo['episode'] = -1
+                                    addon_log_notice('no tvdb entry found for \'{0}\': \'S{1:02d}E{2:02d} - {3}\''
+                                                           .format(showtitle, episodeseason, episode, episodetitle))
+
+                        if detailInfo.get('season', -1) > -1 and detailInfo.get('episode', -1) > -1  and export_episode:
                             if  episodetitle.find('Teil 1 und 2') >= 0 or episodetitle.find('Parts 1 & 2') >= 0 :
                                 addon_log_notice('found tvdb entry for \'{0}\': \'S{1:02d}E{2:02d} - {3}\' (multi) matched to \'S{4:02d}E{5:02d} - {6}\''
                                     .format(showtitle, episodeseason, episode, episodetitle, detailInfo['season'], detailInfo['episode'], detailInfo['episodeName']))
