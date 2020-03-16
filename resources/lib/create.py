@@ -539,7 +539,7 @@ def getTVShowFromList(showList, strm_name, strm_type, name_orig, pDialog, pagesD
                     episodetitle = detailInfo.get('title')
                     episodeseason = detailInfo.get('season', -1)
                     episode = detailInfo.get('episode', -1)
-                    if (settings.SEARCH_THETVDB == 2 or (settings.SEARCH_THETVDB == 1 and (episodeseason == -1 or episode == -1))):
+                    if (settings.SEARCH_THETVDB == 2 or (settings.SEARCH_THETVDB == 1 and (episodeseason == -1 or episode == -1))) and (not settings.NO_E0_STRMS_EXPORT or episode != 0):
 
                         if showtitle and showtitle != '' and episodetitle and episodetitle != '':
 
