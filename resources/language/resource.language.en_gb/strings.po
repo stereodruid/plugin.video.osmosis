@@ -80,6 +80,10 @@ msgctxt "#31103"
 msgid "Save each STRM in its own folder"
 msgstr ""
 
+msgctxt "#31104"
+msgid "Keep year in movie titles"
+msgstr ""
+
 msgctxt "#31200"
 msgid "TV-Shows"
 msgstr ""

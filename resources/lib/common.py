@@ -135,6 +135,7 @@ class Settings(Singleton):
         elif 'DATABASE_SQLLITE_OSMOSIS_SCHEMA_VERSION_FILENAME_AND_PATH' == name: return py2_decode(OSPJoin(self._g.DATA_PATH, 'SchemaVersion.db'))
 
         elif 'FIND_SQLLITE_DB' == name: return self._gs('Find_SQLite_DB') == 'true'
+        elif 'KEEP_MOVIE_YEAR' == name: return self._gs('keep_movie_year') == 'true'
         elif 'FOLDER_MEDIALISTENTRY_MOVIE' == name: return self._gs('folder_medialistentry_movie') == 'true'
         elif 'FOLDER_MOVIE' == name: return self._gs('folder_movie') == 'true'
         elif 'HIDE_TITLE_IN_OV' == name: return self._gs('Hide_title_in_OV') == 'true'

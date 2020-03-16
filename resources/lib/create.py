@@ -144,6 +144,7 @@ def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_n
 
 
 def addToMedialist(params):
+    settings = Settings()
     name = name_orig = params.get('name')
     # A dialog to rename the Change Title for Folder and MediaList entry:
     if params.get('noninteractive', False) == False:
@@ -174,7 +175,7 @@ def addToMedialist(params):
     if choice != -1:
         cType = params.get('cType', None)
         if name:
-            name = cleanLabels(name)
+            name = cleanLabels(name,keep_year=(settings.KEEP_MOVIE_YEAR and params.get('type', None) == 'movie'))
 
         if choice == 1 or name == None or name == '':
             name = editDialog(name).strip()

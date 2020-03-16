@@ -39,7 +39,7 @@ def uncleanString(string):
     return newstr
 
 
-def cleanLabels(text, formater=''):
+def cleanLabels(text, formater='',keep_year=False):
     dictresub = {'\[COLOR (.+?)\]' : '', '\[/COLOR\]' : '', '\[COLOR=(.+?)\]' : '', '\[color (.+?)\]': '',
                  '\[/color\]': '', '\[Color=(.+?)\]': '', '\[/Color\]': ''}
 
@@ -64,7 +64,8 @@ def cleanLabels(text, formater=''):
     text = multiple_reSub(text, dictresub)
     text = multiple_replace(text, *replacements)
     text = cleanStrmFilesys(text)
-    text = re.sub('\(.\d*\)', '', text)
+    if not keep_year:
+        text = re.sub('\(.\d*\)', '', text)
     if formater == 'title':
         text = text.title().replace('\'S', '\'s')
     elif formater == 'upper':
