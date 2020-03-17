@@ -90,7 +90,7 @@ if __name__ == '__main__':
 
     if settings.UPDATE_AT_STARTUP:
         writeScheduledUpdate(time())
-        xbmc.executebuiltin('XBMC.RunPlugin(plugin://{0}/?url=&mode=666&updateActor=3)'.format(globals.PLUGIN_ID))
+        xbmc.executebuiltin('RunPlugin(plugin://{0}/?url=&mode=666&updateActor=3)'.format(globals.PLUGIN_ID))
 
     monitor = globals.monitor
     while not monitor.abortRequested():
@@ -111,8 +111,8 @@ if __name__ == '__main__':
 
             if (next <= now):
                 next, next_json = writeScheduledUpdate(now)
-                xbmc.executebuiltin('XBMC.RunPlugin(plugin://{0}/?mode=666&updateActor=1)'.format(globals.PLUGIN_ID))
+                xbmc.executebuiltin('RunPlugin(plugin://{0}/?mode=666&updateActor=1)'.format(globals.PLUGIN_ID))
         if settings.SCHEDULED_UPDATE == 2 and strftime('%H:%M') == strftime('%H:%M', settings.SCHEDULED_UPDATE_TIME):
-            xbmc.executebuiltin('XBMC.RunPlugin(plugin://{0}/?mode=666&updateActor=2)'.format(globals.PLUGIN_ID))
+            xbmc.executebuiltin('RunPlugin(plugin://{0}/?mode=666&updateActor=2)'.format(globals.PLUGIN_ID))
             sleep(60)
         sleep(30)

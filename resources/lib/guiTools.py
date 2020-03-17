@@ -67,17 +67,17 @@ def addDir(name, url, mode, art, plot=None, genre=None, date=None, credits=None,
     liz.setInfo(type='Video', infoLabels={'Title': name, 'Plot': plot, 'Genre': genre, 'dateadded': date, 'credits': credits})
     liz.setArt(art)
     if type == 'tvshow':
-        contextMenu.append((getString(39102, globals.addon), 'XBMC.RunPlugin({0}&mode={1})'.format(u, 200)))
-        contextMenu.append((getString(39104, globals.addon), 'XBMC.RunPlugin({0}&mode={1})'.format(u, 202)))
+        contextMenu.append((getString(39102, globals.addon), 'RunPlugin({0}&mode={1})'.format(u, 200)))
+        contextMenu.append((getString(39104, globals.addon), 'RunPlugin({0}&mode={1})'.format(u, 202)))
         xbmcplugin.setContent(int(sys.argv[1]), 'tvshows')
     elif re.findall('( - |, )*([sS](taffel|eason|erie[s]{0,1})|[pP]art|[tT]eil) \d+.*', name):
-        contextMenu.append((getString(39103, globals.addon), 'XBMC.RunPlugin({0}&mode={1})'.format(u, 200)))
+        contextMenu.append((getString(39103, globals.addon), 'RunPlugin({0}&mode={1})'.format(u, 200)))
         xbmcplugin.setContent(int(sys.argv[1]), 'tvshows')
     elif type == 'movie':
-        contextMenu.append((getString(39101, globals.addon), 'XBMC.RunPlugin({0}&mode={1})'.format(u, 200)))
+        contextMenu.append((getString(39101, globals.addon), 'RunPlugin({0}&mode={1})'.format(u, 200)))
         xbmcplugin.setContent(int(sys.argv[1]), 'movies')
     else:
-        contextMenu.append((getString(39100, globals.addon), 'XBMC.RunPlugin({0}&mode={1})'.format(u, 200)))
+        contextMenu.append((getString(39100, globals.addon), 'RunPlugin({0}&mode={1})'.format(u, 200)))
     liz.addContextMenuItems(contextMenu)
 
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url='{0}&mode={1}'.format(u, mode), listitem=liz, isFolder=True)
@@ -92,10 +92,10 @@ def addLink(name, url, mode, art, plot, genre, date, showcontext, playlist, rege
     liz.setArt(art)
     liz.setProperty('IsPlayable', 'true')
     if type == 'movie':
-        contextMenu.append((getString(39101, globals.addon), 'XBMC.RunPlugin({0}&mode={1}&filetype=file)'.format(u, 200)))
+        contextMenu.append((getString(39101, globals.addon), 'RunPlugin({0}&mode={1}&filetype=file)'.format(u, 200)))
         xbmcplugin.setContent(int(sys.argv[1]), 'movies')
     else:
-        contextMenu.append((getString(39100, globals.addon), 'XBMC.RunPlugin({0}&mode={1}&filetype=file)'.format(u, 200)))
+        contextMenu.append((getString(39100, globals.addon), 'RunPlugin({0}&mode={1}&filetype=file)'.format(u, 200)))
 
     liz.addContextMenuItems(contextMenu)
 
