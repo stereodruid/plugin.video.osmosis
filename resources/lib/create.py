@@ -460,7 +460,7 @@ def addMovies(contentList, strm_name, strm_type, name_orig, pDialog, provider='n
                     provider = getProviderId(file)
 
                     pDialog.update(int(j), message='\'{0}\' {1}'.format(label, getString(39138, globals.addon)))
-                    if not filetype and filetype == 'file' and get_title_with_OV:
+                    if filetype and filetype == 'file' and get_title_with_OV:
                         m_path = getMovieStrmPath(strm_type, strm_name, label)
                         m_title = getStrmname(label)
                         movieList.append({'path': m_path, 'title':  m_title, 'url': file, 'provider': provider.get('providerId'), 'imdbnumber': imdbnumber})
