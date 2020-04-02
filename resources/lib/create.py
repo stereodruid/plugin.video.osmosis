@@ -514,10 +514,9 @@ def getTVShowFromList(showList, strm_name, strm_type, name_orig, pDialog, pagesD
     if strm_type.lower().find('other') == -1:
         lang = strm_type[strm_type.find('(') + 1:strm_type.find(')')]
     showtitle = getStrmname(strm_name)
+    strm_type = strm_type.replace('Shows-Collection', 'TV-Shows')
 
     while not globals.monitor.abortRequested() and pagesDone < settings.PAGING_TVSHOWS:
-        strm_type = strm_type.replace('Shows-Collection', 'TV-Shows')
-
         for detailInfo in showList:
             filetype = detailInfo.get('filetype', None)
             file = detailInfo.get('file', None)
@@ -537,6 +536,7 @@ def getTVShowFromList(showList, strm_name, strm_type, name_orig, pDialog, pagesD
                     dirList.append(json_reply)
                     continue
                 elif filetype == 'file':
+                    showtitle = detailInfo.get('showtitle')
                     get_title_with_OV = True
                     if settings.HIDE_TITLE_IN_OV:
                         label = detailInfo.get('label').strip() if detailInfo.get('label', None) else None
@@ -605,39 +605,40 @@ def getTVShowFromList(showList, strm_name, strm_type, name_orig, pDialog, pagesD
                                             detailInfo['season'], episodem[e], episodeNamem[e]))
 
                             episodesList.append(detailInfo)
+            xbmc.log("episodesList = {0}".format(episodesList))
+            step = float(100.0 / len(episodesList) if len(episodesList) > 0 else 1)
+            if pagesDone > 0:
+                pDialog.update(int(step), '\'{0} - Staffel {1}\' {2}'.format(showtitle, episodeseason, getString(39138, globals.addon)))
 
-        step = float(100.0 / len(episodesList) if len(episodesList) > 0 else 1)
-        if pagesDone > 0:
-            pDialog.update(int(step), '\'{0}\' {1}: {2} {3}'.format(getStrmname(strm_name), getString(39138, globals.addon), pagesDone, getString(39139, globals.addon), pagesDone))
-
-        split_episode = 0
-        for index, episode in enumerate(episodesList):
-            if index > 0:
-                if season_prev == episode.get('season') and episode_prev == episode.get('episode'):
-                    episodesList[index - 1]['split_episode'] = split_episode + 1
-                    episodesList[index]['split_episode'] = split_episode + 2
-                    split_episode = split_episode + 1
-                else:
-                    if split_episode > 0:
-                        split_episode_names = []
-                        for s in range(0, split_episode + 1):
-                            split_episode_names.insert(0, episodesList[index - s - 1]['title'])
-                        addon_log_notice('Split Episode for {0}: \'{1}\' matched to \'S{2:02d}E{3:02d} - {4}\''
+            split_episode = 0
+            for index, episode in enumerate(episodesList):
+                if index > 0:
+                    if season_prev == episode.get('season') and episode_prev == episode.get('episode'):
+                        episodesList[index - 1]['split_episode'] = split_episode + 1
+                        episodesList[index]['split_episode'] = split_episode + 2
+                        split_episode = split_episode + 1
+                    else:
+                        if split_episode > 0:
+                            split_episode_names = []
+                            for s in range(0, split_episode + 1):
+                                split_episode_names.insert(0, episodesList[index - s - 1]['title'])
+                            addon_log_notice('Split Episode for {0}: \'{1}\' matched to \'S{2:02d}E{3:02d} - {4}\''
                                             .format(showtitle, ', '.join(split_episode_names),
-                                            episodesList[index - split_episode].get('season', None),
-                                            episodesList[index - split_episode].get('episode', None),
-                                            episodesList[index - split_episode].get('episodeName', None)))
-                    split_episode = 0
-            episodesList[index]['showtitle'] = showtitle
-            season_prev = episode.get('season')
-            episode_prev = episode.get('episode')
+                                                    episodesList[index - split_episode].get('season', None),
+                                                    episodesList[index - split_episode].get('episode', None),
+                                                    episodesList[index - split_episode].get('episodeName', None)))
+                        split_episode = 0
+                episodesList[index]['showtitle'] = showtitle
+                season_prev = episode.get('season')
+                episode_prev = episode.get('episode')
 
-        for index, episode in enumerate(episodesList):
-            pagesDone = getEpisode(episode, strm_name, strm_type, pagesDone=pagesDone, name_orig=name_orig)
-            pDialog.update(int(step * (index + 1)))
+            for index, episode in enumerate(episodesList):
+                pagesDone = getEpisode(episode, strm_name, strm_type, pagesDone=pagesDone, name_orig=name_orig)
+                pDialog.update(int(step * (index + 1)))
+
+            episodesList = []
 
         pagesDone += 1
-        episodesList = []
         showList = []
         if pagesDone < settings.PAGING_TVSHOWS and len(dirList) > 0:
             showList = [item for sublist in dirList for item in sublist]
