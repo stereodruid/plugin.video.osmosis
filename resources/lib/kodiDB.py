@@ -173,18 +173,20 @@ def updateDatabase():
                 writeSchemaVersion(os.path.join(dir, subfile), datetime.now(), 1, dbtype)
 
 
-def musicDatabase(strAlbumName, strArtistName, strSongTitle, strPath, strURL, iTrack, iDuration, strArtPath, tFileModTime=None):
+def musicDatabase(strAlbumName, strArtistName, strSongTitle, strPath, strURL, iTrack, iDuration, strArtPath, listGenre, iYear, tFileModTime=None):
     strPath = completePath(os.path.join(settings.STRM_LOC, strPath))
 
     # Write to music db and get id's
     iRoleID = writeRole('Artist')
     iPathID = writePath(strPath)
     iArtistID = writeArtist(strArtistName)
-    iGenreID = writeGenre('osmosis')
     iAlbumID = writeAlbums(strAlbumName, strArtistName)
-    iSongID = writeSong(iPathID, iAlbumID, strArtistName, strSongTitle, iDuration, iTrack, tFileModTime)
+    iSongID = writeSong(iPathID, iAlbumID, strArtistName, strSongTitle, iDuration, iTrack, listGenre, iYear, tFileModTime)
     iSongArtistID = writeSongArtist(iArtistID, iSongID, 1, strArtistName, 0)
-    writeSongGenre(iGenreID, iSongID)
+    if listGenre:
+        for strGenre in listGenre:
+            iGenreID = writeGenre(strGenre)
+            writeSongGenre(iGenreID, iSongID)
     writeAlbumArtist(iArtistID, iAlbumID, strArtistName)
     writeThump(iArtistID, 'artist', 'thumb', strArtPath)
     writeThump(iAlbumID, 'album', 'thumb', strArtPath)
@@ -269,10 +271,10 @@ def writeAlbums(strAlbum, strArtist, strReleaseType='album'):
     return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
 
 
-def writeSong(iPathID, iAlbumID, strArtist, strTitle, iDuration, iTrack, tFileModTime):
+def writeSong(iPathID, iAlbumID, strArtist, strTitle, iDuration, iTrack, listGenre, iYear, tFileModTime):
     tDateAdded = datetime.fromtimestamp(tFileModTime) if tFileModTime else datetime.now()
     strDateAdded = tDateAdded.strftime('%Y-%m-%d %H:%M:%S')
-    iYear = int(datetime.now().strftime('%Y'))
+    strGenres = ', '.join(genre.strip() for genre in listGenre)
     artistCol = 'strArtistDisp' if globals.KODI_VERSION >= 18 else 'strArtists'
     strTitle = invCommas(strTitle)
     strFileName = cleanStrmFilesys(strTitle)
@@ -280,11 +282,15 @@ def writeSong(iPathID, iAlbumID, strArtist, strTitle, iDuration, iTrack, tFileMo
 
     selectQuery = 'SELECT idSong FROM song WHERE {} LIKE \'{}\' AND strTitle LIKE \'{}\';'
     selectArgs = (artistCol, strArtist, strTitle)
-    insertQuery = 'INSERT INTO song (iYear, dateAdded, idAlbum, idPath, ' + artistCol + ', strTitle, strFileName, iTrack, strGenres, iDuration, iTimesPlayed, iStartOffset, iEndOffset, userrating, comment, mood, votes)'
-    insertQuery += ' VALUES ({}, \'{}\', {}, {}, \'{}\', \'{}\', \'{}\', {}, \'{}\', {}, {}, {}, {}, {}, \'{}\', \'{}\', {});'
-    insertArgs = (iYear, strDateAdded, iAlbumID, iPathID, strArtist, strTitle, strFileName, iTrack, 'osmosis', iDuration, 0, 0, 0, 0, 'osmosis', 'osmosis', 0)
+    insertQuery = 'INSERT INTO song (dateAdded, idAlbum, idPath, ' + artistCol + ', strTitle, strFileName, iTrack, strGenres, iDuration, iTimesPlayed, iStartOffset, iEndOffset, userrating, comment, mood, votes)'
+    insertQueryValue = ' VALUES (\'{}\', {}, {}, \'{}\', \'{}\', \'{}\', {}, \'{}\', {}, {}, {}, {}, {}, \'{}\', \'{}\', {});'
+    insertArgs = (strDateAdded, iAlbumID, iPathID, strArtist, strTitle, strFileName, iTrack, strGenres, iDuration, 0, 0, 0, 0, 'osmosis', 'osmosis', 0)
+    if iYear:
+        insertQuery = insertQuery[:len(insertQuery)-1] + ', iYear)'
+        insertQueryValue = insertQueryValue[:len(insertQueryValue)-2] + ', {});'
+        insertArgs = insertArgs + (iYear,)
 
-    return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs)
+    return manageDbRecord(selectQuery, selectArgs, insertQuery + insertQueryValue, insertArgs)
 
 
 def writeSongArtist(iArtistID, iSongID, iRoleID, strArtist, iOrderID):

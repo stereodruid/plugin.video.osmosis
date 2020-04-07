@@ -361,43 +361,65 @@ def addAlbum(contentList, strm_name, strm_type, pDialog, PAGINGalbums='1'):
         if not contentList[0].get('playableSingleMedia'):
             for index, detailInfo in enumerate(contentList):
                 art = detailInfo.get('art', {})
-                file = detailInfo['file'].replace('\\\\', '\\')
+                file = detailInfo.get('file').replace('\\\\', '\\')
                 filetype = detailInfo['filetype']
-                label = detailInfo['label'].strip()
+                label = detailInfo.get('label').strip()
                 thumb = art.get('thumb', '')
                 fanart = art.get('fanart', '')
                 track = detailInfo.get('track', 0) if detailInfo.get('track', 0) > 0 else index + 1
-                album = detailInfo['album'].strip()
+                album = detailInfo.get('album')
                 duration = detailInfo.get('duration', 0)
+                genre = detailInfo.get('genre') if len(detailInfo.get('genre')) > 0 else None
+                year = detailInfo.get('year') if detailInfo.get('year') > 0 else None
 
                 if filetype == 'directory':
-                    dirList.append(requestList(file, 'music').get('files', []))
+                    retry_count = 1
+                    json_reply = requestList(file, 'video').get('files', [])
+                    while not globals.monitor.abortRequested() and len(json_reply) == 0 and retry_count <= 3:
+                        addon_log('requestList: try={0} data = {1})'.format(retry_count, json_reply))
+                        json_reply = requestList(file, 'video').get('files', [])
+                        retry_count = retry_count + 1
+
+                    if globals.monitor.abortRequested():
+                        exit()
+
+                    dirList.append(json_reply)
                     continue
 
                 if duration == 0:
                     duration = 200
 
                 if settings.LINK_TYPE == 0:
-                    link = '{0}?{1}'.format(sys.argv[0], urllib.urlencode({'url': file, 'mode': 10, 'mediaType': 'audio', 'name': label, 'fanart': fanart}))
+                    link = '{0}?{1}'.format(sys.argv[0], urllib.urlencode({'url': file, 'mode': 10, 'mediaType': 'audio', 'name': py2_encode(label), 'fanart': fanart}))
                 else:
                     link = file
 
                 # Check for Various Artists
-                artistList = []
+                dict_artists = dict(artists=dict(), counter=0.)
                 for i, sArtist in enumerate(contentList):
                     for artist in sArtist.get('artist'):
-                        if artist not in artistList:
-                            artistList.append(artist)
+                        if not dict_artists.get('artists').get(artist):
+                            artists = dict_artists.get('artists')
+                            artists.update({artist: 1})
+                            counter = dict_artists.get('counter') + 1
+                            dict_artists.update({'artists': artists, 'counter': counter})
+                        else:
+                            artists = dict_artists.get('artists')
+                            artistcount = dict_artists.get('artists').get(artist) + 1
+                            artists.update({artist: artistcount})
+                            counter = dict_artists.get('counter') + 1
+                            dict_artists.update({'artists': artists, 'counter': counter})
 
-                if len(artistList) == 1:
-                    artist = artistList[0]
-                else:
-                    artist = 'Various Artists'
+                artist = 'Various Artists'
+                for sArtist in dict_artists.get('artists').keys():
+                    if (dict_artists.get('artists').get(sArtist) / dict_artists.get('counter')) > 0.5:
+                        artist = sArtist
+                        break     
 
                 pDialog.update(int(j), message='\'{0}\' {1}'.format(label, getString(39138, globals.addon)))
                 path = os.path.join(strm_type, cleanStrmFilesys(artist), cleanStrmFilesys(strm_name))
                 if album and artist and label and path and link and track:
-                    albumList.append({'path': path, 'label': label, 'link': link, 'album': album, 'artist': artist, 'track': track, 'duration': duration, 'thumb': thumb})
+                    albumList.append({'path': path, 'label': label, 'link': link, 'album': album, 'artist': artist, 'track': track, 'duration': duration, 'thumb': thumb, 'genre': genre, 'year': year})
                 j = j + 100 / (len(contentList) * int(PAGINGalbums))
 
             pagesDone += 1
@@ -425,7 +447,7 @@ def addAlbum(contentList, strm_name, strm_type, pDialog, PAGINGalbums='1'):
     for album in albumList:
         strm_link = '{0}|{1}'.format(album.get('link'), album.get('label')) if settings.LINK_TYPE == 0 else album.get('link')
         fullpath, fileModTime = writeSTRM(album.get('path'), cleanStrms(album.get('label').rstrip('.')) , strm_link)
-        musicDatabase(album.get('album'), album.get('artist'), album.get('label'), album.get('path'), album.get('link'), album.get('track'), album.get('duration'), album.get('thumb'), fileModTime)
+        musicDatabase(album.get('album'), album.get('artist'), album.get('label'), album.get('path'), album.get('link'), album.get('track'), album.get('duration'), album.get('thumb'), album.get('genre'), album.get('year'), fileModTime)
 
     return albumList
 
@@ -605,7 +627,7 @@ def getTVShowFromList(showList, strm_name, strm_type, name_orig, pDialog, pagesD
                                             detailInfo['season'], episodem[e], episodeNamem[e]))
 
                             episodesList.append(detailInfo)
-            xbmc.log("episodesList = {0}".format(episodesList))
+
             step = float(100.0 / len(episodesList) if len(episodesList) > 0 else 1)
             if pagesDone > 0:
                 pDialog.update(int(step), '\'{0} - Staffel {1}\' {2}'.format(showtitle, episodeseason, getString(39138, globals.addon)))
