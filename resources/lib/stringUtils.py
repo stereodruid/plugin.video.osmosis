@@ -72,8 +72,8 @@ def cleanLabels(text, formater='',keep_year=False):
         text = text.upper()
     elif formater == 'lower':
         text = text.lower()
-    else:
-        text = text
+
+    text = re.sub('\s\s+', ' ', text)
 
     return text.strip()
 
