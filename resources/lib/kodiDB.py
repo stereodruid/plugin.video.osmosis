@@ -274,7 +274,6 @@ def writeAlbums(strAlbum, strArtist, strReleaseType='album'):
 def writeSong(iPathID, iAlbumID, strArtist, strTitle, iDuration, iTrack, listGenre, iYear, tFileModTime):
     tDateAdded = datetime.fromtimestamp(tFileModTime) if tFileModTime else datetime.now()
     strDateAdded = tDateAdded.strftime('%Y-%m-%d %H:%M:%S')
-    strGenres = ', '.join(genre.strip() for genre in listGenre)
     artistCol = 'strArtistDisp' if globals.KODI_VERSION >= 18 else 'strArtists'
     strTitle = invCommas(strTitle)
     strFileName = cleanStrmFilesys(strTitle)
@@ -282,13 +281,21 @@ def writeSong(iPathID, iAlbumID, strArtist, strTitle, iDuration, iTrack, listGen
 
     selectQuery = 'SELECT idSong FROM song WHERE {} LIKE \'{}\' AND strTitle LIKE \'{}\';'
     selectArgs = (artistCol, strArtist, strTitle)
-    insertQuery = 'INSERT INTO song (dateAdded, idAlbum, idPath, ' + artistCol + ', strTitle, strFileName, iTrack, strGenres, iDuration, iTimesPlayed, iStartOffset, iEndOffset, userrating, comment, mood, votes)'
-    insertQueryValue = ' VALUES (\'{}\', {}, {}, \'{}\', \'{}\', \'{}\', {}, \'{}\', {}, {}, {}, {}, {}, \'{}\', \'{}\', {});'
-    insertArgs = (strDateAdded, iAlbumID, iPathID, strArtist, strTitle, strFileName, iTrack, strGenres, iDuration, 0, 0, 0, 0, 'osmosis', 'osmosis', 0)
+    insertQuery = 'INSERT INTO song (dateAdded, idAlbum, idPath, ' + artistCol + ', strTitle, strFileName, iTrack, iDuration, iTimesPlayed, iStartOffset, iEndOffset, userrating, comment, mood, votes'
+    insertQueryValue = ' VALUES (\'{}\', {}, {}, \'{}\', \'{}\', \'{}\', {}, {}, {}, {}, {}, {}, \'{}\', \'{}\', {}'
+    insertArgs = (strDateAdded, iAlbumID, iPathID, strArtist, strTitle, strFileName, iTrack, iDuration, 0, 0, 0, 0, 'osmosis', 'osmosis', 0)
+    if listGenre:
+        strGenres = ', '.join(genre.strip() for genre in listGenre)
+        insertQuery += ', strGenres'
+        insertQueryValue += ', \'{}\''
+        insertArgs += (strGenres,)
     if iYear:
-        insertQuery = insertQuery[:len(insertQuery)-1] + ', iYear)'
-        insertQueryValue = insertQueryValue[:len(insertQueryValue)-2] + ', {});'
-        insertArgs = insertArgs + (iYear,)
+        insertQuery += ', iYear'
+        insertQueryValue += ', {}'
+        insertArgs += (iYear,)
+    
+    insertQuery += ')'
+    insertQueryValue += ');'
 
     return manageDbRecord(selectQuery, selectArgs, insertQuery + insertQueryValue, insertArgs)
 
