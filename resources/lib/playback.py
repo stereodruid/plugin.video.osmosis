@@ -106,7 +106,11 @@ def play(argv, params):
             player.finished()
             del player
         elif mediaType == 'audio' and params.get('url', '').startswith('plugin://'):
-            xbmcplugin.setResolvedUrl(int(argv[1]), True, xbmcgui.ListItem(path=params.get('url')))
+            item = xbmcgui.ListItem(path=params.get('url'))
+            infoLabels = dict(title=params.get('title'), tracknumber=params.get('track'), artist=params.get('artist'), album=params.get('album'))
+            item.setInfo('music', infoLabels)
+            item.setArt(params.get('art'))
+            xbmcplugin.setResolvedUrl(int(argv[1]), True, item)
         else:
             xbmcplugin.setResolvedUrl(int(argv[1]), False, xbmcgui.ListItem())
     else:

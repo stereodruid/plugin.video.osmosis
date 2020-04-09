@@ -8,7 +8,7 @@
            Fixed creating STRMs for multiple shows
            Removed 'XBMC.' prefixed in built-in commands
            Fixed update via parent node
-  
+           Infolabels and art set for music
   lars-a   Added option to keep the year in movie titles
            Fixed ignoring of E0 when tvbd search is used
            Fixed setting for folder_medialistentry_movie and folder_movie

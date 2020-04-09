@@ -17,6 +17,7 @@
 
 from __future__ import unicode_literals
 from kodi_six.utils import PY2, py2_decode
+from ast import literal_eval
 import os
 import sys
 import time
@@ -41,13 +42,25 @@ try:
 except:
     from urlparse import parse_qsl
 
+
+def reassign(d):
+    for k, v in d.items():
+        try:
+            evald = literal_eval(v)
+            if isinstance(evald, dict):
+                d[k] = evald
+        except (ValueError, SyntaxError):
+            pass
+
+
 if __name__ == '__main__':
     globals = Globals()
     params = dict(parse_qsl(sys.argv[2][1:]))
+    reassign(params)
     if PY2:
         sys.argv[0] = py2_decode(sys.argv[0])
-        for paramKey in params.keys():
-            params[paramKey] = py2_decode(params.get(paramKey))
+        for k, v in params.items():
+            params[k] = py2_decode(v)
     addon_log('params = {0}'.format(params))
 
     mode = int(params.get('mode')) if params.get('mode') else None
