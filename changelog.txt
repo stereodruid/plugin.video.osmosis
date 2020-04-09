@@ -1,3 +1,30 @@
+1.3.13
+  Maven85  Added table 'schema_version' to each database
+           Fixed wrong folder names if the name for the media list entry was entered manually
+           Playback: fixed error when episode metadata doesn't exist
+           Write episode metadata when updating
+           Playback: Fixed error when the runtime was set and the last episode was reached
+           Fixed exporting music albums
+           Fixed creating STRMs for multiple shows
+           Removed 'XBMC.' prefixed in built-in commands
+           Fixed update via parent node
+  
+  lars-a   Added option to keep the year in movie titles
+           Fixed ignoring of E0 when tvbd search is used
+           Fixed setting for folder_medialistentry_movie and folder_movie
+1.3.12
+  Maven85  Refactoring
+           Option to select the playback dialog
+           Option to ignore addons by the playback dialog
+           Resume dialog depending on the setting 'myvideos.selectaction'
+           Fixed problem where the medialist not be written correctly
+           Started to translate the GUI
+           Rework of automatic library update
+           Automatic library update: Do not display a selection dialog when starting Kodi
+           Init databases at start
+           Mechanism to update the database schema
+           Save addon metadata for episodes
+           Playback: write the runtime for the next episode in Kodi's database
 1.3.11
   Maven85  Fixed creating movie streams when streamref is original plugin
 1.3.10
