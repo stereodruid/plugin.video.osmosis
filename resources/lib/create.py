@@ -363,7 +363,7 @@ def addAlbum(contentList, strm_name, strm_type, pDialog, PAGINGalbums='1'):
                 art = detailInfo.get('art', {})
                 file = detailInfo.get('file').replace('\\\\', '\\')
                 filetype = detailInfo['filetype']
-                label = detailInfo.get('label').strip()
+                title = detailInfo.get('title').strip()
                 thumb = art.get('thumb', '')
                 track = detailInfo.get('track', 0) if detailInfo.get('track', 0) > 0 else index + 1
                 album = detailInfo.get('album')
@@ -408,15 +408,15 @@ def addAlbum(contentList, strm_name, strm_type, pDialog, PAGINGalbums='1'):
                         break
 
                 if settings.LINK_TYPE == 0:
-                    link = '{0}?{1}'.format(sys.argv[0], urllib.urlencode({'url': file, 'mode': 10, 'mediaType': 'audio', 'title': py2_encode(label),
+                    link = '{0}?{1}'.format(sys.argv[0], urllib.urlencode({'url': file, 'mode': 10, 'mediaType': 'audio', 'title': py2_encode(title),
                                                                            'artist': py2_encode(artist), 'album': py2_encode(album), 'track': track, 'art': art}))
                 else:
                     link = file
 
-                pDialog.update(int(j), message='\'{0}\' {1}'.format(label, getString(39138, globals.addon)))
+                pDialog.update(int(j), message='\'{0}\' {1}'.format(title, getString(39138, globals.addon)))
                 path = os.path.join(strm_type, cleanStrmFilesys(artist), cleanStrmFilesys(strm_name))
-                if album and artist and label and path and link and track:
-                    albumList.append({'path': path, 'label': label, 'link': link, 'album': album, 'artist': artist, 'track': track, 'duration': duration,
+                if album and artist and title and path and link and track:
+                    albumList.append({'path': path, 'title': title, 'link': link, 'album': album, 'artist': artist, 'track': track, 'duration': duration,
                                       'thumb': thumb, 'genre': genre, 'year': year})
                 j = j + 100 / (len(contentList) * int(PAGINGalbums))
 
@@ -426,7 +426,7 @@ def addAlbum(contentList, strm_name, strm_type, pDialog, PAGINGalbums='1'):
                 contentList = [item for sublist in dirList for item in sublist]
                 dirList = []
         else:
-            albumList.append({'path': os.path.join(strm_type, strm_name, label), 'label': cleanByDictReplacements(label), 'link': link})
+            albumList.append({'path': os.path.join(strm_type, strm_name, title), 'title': cleanByDictReplacements(title), 'link': link})
             pagesDone = int(PAGINGalbums)
 
     if globals.monitor.abortRequested():
@@ -443,9 +443,9 @@ def addAlbum(contentList, strm_name, strm_type, pDialog, PAGINGalbums='1'):
             cType = splits[0]
             writeMediaList(url, strm_name, cType, albumartist=artist)
     for album in albumList:
-        strm_link = '{0}|{1}'.format(album.get('link'), album.get('label')) if settings.LINK_TYPE == 0 else album.get('link')
-        fullpath, fileModTime = writeSTRM(album.get('path'), cleanStrms(album.get('label').rstrip('.')), strm_link)
-        musicDatabase(album.get('album'), album.get('artist'), album.get('label'), album.get('path'), album.get('link'), album.get('track'), album.get('duration'), album.get('thumb'), album.get('genre'), album.get('year'), fileModTime)
+        strm_link = '{0}|{1}'.format(album.get('link'), album.get('title')) if settings.LINK_TYPE == 0 else album.get('link')
+        fullpath, fileModTime = writeSTRM(album.get('path'), cleanStrms(album.get('title').rstrip('.')), strm_link)
+        musicDatabase(album.get('album'), album.get('artist'), album.get('title'), album.get('path'), album.get('link'), album.get('track'), album.get('duration'), album.get('thumb'), album.get('genre'), album.get('year'), fileModTime)
 
     return albumList
 
