@@ -9,6 +9,8 @@
            Removed 'XBMC.' prefixed in built-in commands
            Fixed update via parent node
            Infolabels and art set for music
+           Dialog: fixed modi matrix error
+           Fixed the "keep year" option when exporting multiple movies
   lars-a   Added option to keep the year in movie titles
            Fixed ignoring of E0 when tvbd search is used
            Fixed setting for folder_medialistentry_movie and folder_movie

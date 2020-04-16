@@ -39,7 +39,7 @@ def uncleanString(string):
     return newstr
 
 
-def cleanLabels(text, formater='',keep_year=False):
+def cleanLabels(text, formater='', keep_year=False):
     dictresub = {'\[COLOR (.+?)\]' : '', '\[/COLOR\]' : '', '\[COLOR=(.+?)\]' : '', '\[color (.+?)\]': '',
                  '\[/color\]': '', '\[Color=(.+?)\]': '', '\[/Color\]': ''}
 

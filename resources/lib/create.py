@@ -157,7 +157,7 @@ def addToMedialist(params):
         if name == '':
             name = params.get('name_parent')
             name_orig = '{0} - {1}'.format(name, name_orig)
-        if params.get('type') == 'movie' and params.get('year'):
+        if params.get('type') == 'movie' and settings.KEEP_MOVIE_YEAR and params.get('year'):
             name = '{0} ({1})'.format(name, params.get('year'))
         selectAction = ['{0}: \'{1}\''.format(getString(39106, globals.addon), name), getString(39107, globals.addon), getString(39108, globals.addon)]
         if not writeTutList('select:Rename'):
@@ -471,7 +471,7 @@ def addMovies(contentList, strm_name, strm_type, name_orig, pDialog, provider='n
                 imdbnumber = detailInfo.get('imdbnumber').strip() if detailInfo.get('imdbnumber', None) else None
 
                 if label and strm_name:
-                    label = cleanLabels(label)
+                    label = cleanLabels(label, keep_year=settings.KEEP_MOVIE_YEAR)
                     get_title_with_OV = True
                     if settings.HIDE_TITLE_IN_OV:
                         if re.search('(\WOV\W)', label):
