@@ -71,20 +71,20 @@ if __name__ == '__main__':
 
         if not writeTutList('select:PluginType'):
             tutWin = ['Adding content to your library',
-                      'Welcome, this is your first time using OSMOSIS. Here, you can select the content type you want to add:',
-                      'Video Plugins: Select to add Movies, TV-Shows, YouTube Videos',
-                      'Music Plugins: Select to add Music']
-            globals.dialog.ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
+                      'Welcome, this is your first time using OSMOSIS. Here, you can select the content type you want to add:\n'
+                      +'Video Plugins: Select to add Movies, TV-Shows, YouTube Videos\n'
+                      +'Music Plugins: Select to add Music']
+            globals.dialog.ok(tutWin[0], tutWin[1])
     elif mode == 1:
         fillPlugins(params.get('url'))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
         if not writeTutList('select:Addon'):
             tutWin = ['Adding content to your library',
-                      'Here, you can select the Add-on:',
-                      'The selected Add-on should provide Video/Music content in the right structure.',
-                      'Take a look at ++ Naming video files/TV shows ++ http://kodi.wiki/view/naming_video_files/TV_shows.']
-            globals.dialog.ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
+                      'Here, you can select the Add-on:\n'
+                      +'The selected Add-on should provide Video/Music content in the right structure.\n'
+                      +'Take a look at ++ Naming video files/TV shows ++ http://kodi.wiki/view/naming_video_files/TV_shows.']
+            globals.dialog.ok(tutWin[0], tutWin[1])
     elif mode == 2:
         fillPluginItems(params.get('url'))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -127,10 +127,10 @@ if __name__ == '__main__':
 
         if not writeTutList('select:AddonNavi'):
             tutWin = ['Adding content to your library',
-                      'Search for your Movie, TV-Show or Music.',
-                      'Mark/select content, do not play a Movie or enter a TV-Show.',
-                      'Open context menu on the selected and select *create strms*.']
-            globals.dialog.ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
+                      'Search for your Movie, TV-Show or Music.\n'
+                      +'Mark/select content, do not play a Movie or enter a TV-Show.\n'
+                      +'Open context menu on the selected and select *create strms*.']
+            globals.dialog.ok(tutWin[0], tutWin[1])
     elif mode == 102:
         favs = jsonrpc('Favourites.GetFavourites', dict(properties=['path', 'window', 'windowparameter', 'thumbnail'])).get('favourites', {})
         if favs:

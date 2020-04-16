@@ -162,10 +162,10 @@ def addToMedialist(params):
         selectAction = ['{0}: \'{1}\''.format(getString(39106, globals.addon), name), getString(39107, globals.addon), getString(39108, globals.addon)]
         if not writeTutList('select:Rename'):
             tutWin = ['Adding content to your library',
-                      'You can rename your Movie, TV-Show or Music title.',
-                      'To make your scraper recognize the content, some times it is necessary to rename the title.',
-                      'Be careful, wrong title can also cause that your scraper can\'t recognize your content.']
-            globals.dialog.ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
+                      'You can rename your Movie, TV-Show or Music title.\n'
+                      +'To make your scraper recognize the content, some times it is necessary to rename the title.\n'
+                      +'Be careful, wrong title can also cause that your scraper can\'t recognize your content.']
+            globals.dialog.ok(tutWin[0], tutWin[1])
         choice = selectDialog('{0}: \'{1}\''.format(getString(39105, globals.addon), name_orig), selectAction)
     else:
         choice = params.get('choice', 0)
@@ -197,10 +197,10 @@ def addToMedialist(params):
             if not cType:
                 if not writeTutList('select:ContentTypeLang'):
                     tutWin = ['Adding content to your library',
-                              'Now select your content type.',
-                              'Select language or YouTube type.',
-                              'Wait for done message.']
-                    globals.dialog.ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
+                              'Now select your content type.\n'
+                              +'Select language or YouTube type.\n'
+                              +'Wait for done message.']
+                    globals.dialog.ok(tutWin[0], tutWin[1])
 
                 if tvshow_detected or params.get('type', None) == 'tvshow':
                     cType = getTypeLangOnly('TV-Shows')
@@ -240,10 +240,10 @@ def addMultipleSeasonToMediaList(params):
     selectAction = ['{0}: \'{1}\''.format(getString(39106, globals.addon), name), getString(39107, globals.addon), getString(39108, globals.addon)]
     if not writeTutList('select:Rename'):
         tutWin = ['Adding content to your library',
-                  'You can rename your Movie, TV-Show or Music title.',
-                  'To make your scraper recognize the content, some times it is necessary to rename the title.',
+                  'You can rename your Movie, TV-Show or Music title.\n'
+                  'To make your scraper recognize the content, some times it is necessary to rename the title.\n'
                   'Be careful, wrong title can also cause that your scraper can\'t recognize your content.']
-        globals.dialog.ok(tutWin[0], tutWin[1], tutWin[2], tutWin[3])
+        globals.dialog.ok(tutWin[0], tutWin[1])
     choice = selectDialog('{0}: \'{1}\''.format(getString(39105, globals.addon), name_orig), selectAction)
     if choice != -1:
         cType = None
