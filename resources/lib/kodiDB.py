@@ -34,9 +34,9 @@ settings = Settings()
 
 class Config(object):
     '''Configure me so examples work
-    
+
     Use me like this:
-    
+
         mysql.connector.Connect(**Config.dbinfo())
     '''
 
@@ -290,10 +290,14 @@ def writeSong(iPathID, iAlbumID, strArtist, strTitle, iDuration, iTrack, listGen
         insertQueryValue += ', \'{}\''
         insertArgs += (strGenres,)
     if iYear:
-        insertQuery += ', iYear'
-        insertQueryValue += ', {}'
+        if globals.KODI_VERSION <= 18:
+            insertQuery += ', iYear'
+            insertQueryValue += ', {}'
+        else:
+            insertQuery += ', strReleaseDate'
+            insertQueryValue += ', \'{}\''
         insertArgs += (iYear,)
-    
+
     insertQuery += ')'
     insertQueryValue += ');'
 

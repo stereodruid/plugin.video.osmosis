@@ -11,6 +11,8 @@
            Infolabels and art set for music
            Dialog: fixed modi matrix error
            Fixed the "keep year" option when exporting multiple movies
+           Option to add infolabels for addons when playing STRMs
+           Fixed matrix error when exporting music
   lars-a   Added option to keep the year in movie titles
            Fixed ignoring of E0 when tvbd search is used
            Fixed setting for folder_medialistentry_movie and folder_movie
