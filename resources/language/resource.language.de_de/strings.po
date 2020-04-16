@@ -64,6 +64,10 @@ msgctxt "#31001"
 msgid "Write NFOs (ComingSoon)"
 msgstr "Videos fortsetzen"
 
+msgctxt "#31002"
+msgid "Addons for which infolabels are to be added"
+msgstr "Addons, für die Infolabels hinzugefügt werden sollen"
+
 msgctxt "#31100"
 msgid "Movies"
 msgstr "Filme"

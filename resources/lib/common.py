@@ -139,6 +139,7 @@ class Settings(Singleton):
         elif 'FOLDER_MEDIALISTENTRY_MOVIE' == name: return self._gs('folder_medialistentry_movie') == 'true'
         elif 'FOLDER_MOVIE' == name: return self._gs('folder_movie') == 'true'
         elif 'HIDE_TITLE_IN_OV' == name: return self._gs('Hide_title_in_OV') == 'true'
+        elif 'INFOLABELS_ADD_ADDON_STRING' == name: return self._gs('infolabels_add_addon_string')
         elif 'LINK_TYPE' == name: return int(self._gs('Link_Type'))
         elif 'MEDIALIST_PATH' == name: return py2_decode(xbmc.translatePath(self._gs('MediaList_LOC')))
         elif 'MEDIALIST_FILENNAME_AND_PATH' == name: return py2_decode(OSPJoin(self.MEDIALIST_PATH, 'MediaList.xml'))

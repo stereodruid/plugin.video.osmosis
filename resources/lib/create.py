@@ -45,26 +45,27 @@ settings = Settings()
 
 
 def fillPlugins(cType='video'):
-    addons = searchAddons(cType)
+    addons = searchAddons([cType])
     for addon in addons:
         art = dict(thumb=addon.get('thumbnail'), fanart=addon.get('fanart'))
         addDir(addon['name'], 'plugin://{0}'.format(addon['addonid']), 101, art, addon['description'], type=cType)
 
 
-def searchAddons(cType):
+def searchAddons(cTypes):
     addons = []
-    json_details = jsonrpc('Addons.GetAddons', dict(type='xbmc.addon.{0}'.format(cType), properties=['name', 'thumbnail', 'description', 'fanart', 'extrainfo', 'enabled']))
-    for addon in sorted([addon for addon in json_details.get('addons') if addon.get('enabled')], key=lambda json: json.get('name').lower()):
-        addontypes = []
-        for info in addon.get('extrainfo'):
-            if info.get('key') == 'provides':
-                addontypes = info.get('value').split(' ')
-                break
+    for cType in cTypes:
+        json_details = jsonrpc('Addons.GetAddons', dict(type='xbmc.addon.{0}'.format(cType), enabled=True, properties=['name', 'thumbnail', 'description', 'fanart', 'extrainfo', 'enabled']))
+        for addon in [addon for addon in json_details.get('addons')]:
+            for info in addon.get('extrainfo'):
+                if info.get('key') == 'provides':
+                    addontypes = info.get('value').split(' ')
+                    addon.update({'provides': ', '.join(addontypes)})
+                    break
 
-        if cType in addontypes and not addon.get('addonid') == globals.PLUGIN_ID:
-            addons.append(addon)
+            if addon not in addons and not addon.get('addonid') == globals.PLUGIN_ID:
+                addons.append(addon)
 
-    return addons
+    return sorted(addons, key=lambda json: json.get('name').lower())
 
 
 def fillPluginItems(url, media_type='video', file_type=False, strm=False, strm_name='', strm_type='Other', showtitle='None', name_parent='', name_orig=None, pDialog=None):

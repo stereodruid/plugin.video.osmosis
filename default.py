@@ -139,13 +139,21 @@ if __name__ == '__main__':
                     addDir(fav.get('title'), fav.get('windowparameter'), 101, {'thumb': fav.get('thumbnail')}, type=type)
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
     elif mode == 103:
-        addons = searchAddons('video')
+        addons = searchAddons(['video'])
         list = [addon.get('name') for addon in addons]
         ignore_addons = Settings().PLAYBACK_IGNORE_ADDON_STRING.split('|')
         preselects = [i for i, addon in enumerate(addons) if addon.get('addonid') in ignore_addons]
-        selects = selectDialog('Addons that should be ignored by the playback dialog', list, multiselect=True, preselect=preselects)
+        selects = selectDialog(getString(33005, globals.addon), list, multiselect=True, preselect=preselects)
         if selects:
             globals.addon.setSetting('playback_ignore_addon_string', '|'.join([addons[select].get('addonid') for select in selects]))
+    elif mode == 104:
+        addons = searchAddons(['video', 'audio'])
+        list = ['{0} ({1})'.format(addon.get('name'), addon.get('provides')) for addon in addons]
+        infolabel_addons = Settings().INFOLABELS_ADD_ADDON_STRING.split('|')
+        preselects = [i for i, addon in enumerate(addons) if addon.get('addonid') in infolabel_addons]
+        selects = selectDialog(getString(31002, globals.addon), list, multiselect=True, preselect=preselects)
+        if selects:
+            globals.addon.setSetting('infolabels_add_addon_string', '|'.join([addons[select].get('addonid') for select in selects]))
     elif mode == 200:
         addon_log('write multi strms')
         addToMedialist(params)

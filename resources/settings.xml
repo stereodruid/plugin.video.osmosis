@@ -16,6 +16,9 @@
 	 </category>
 	<category label="31000">
 		<!-- <setting label="31001" type="bool" id="Write_NFOS" default="false" /> -->
+		<setting label="31002" type="action" id="infolabels_add_addon" action="RunPlugin(plugin://plugin.video.osmosis/?mode=104)" option="close"/>
+		<setting label="31003" type="text" id="infolabels_add_addon_string" visible="false"/>
+		
 		<setting label="31100" type="lsep"/>
 		<setting label="31101" type="slider" id="paging_movies" default="2" range="1,100" option="int"/>
 		<setting label="31102" type="bool" id="folder_medialistentry_movie" default="true"/>

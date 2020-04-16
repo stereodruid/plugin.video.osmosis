@@ -64,6 +64,10 @@ msgctxt "#31001"
 msgid "Write NFOs (ComingSoon)"
 msgstr ""
 
+msgctxt "#31002"
+msgid "Addons for which infolabels are to be added"
+msgstr ""
+
 msgctxt "#31100"
 msgid "Movies"
 msgstr ""

@@ -18,11 +18,21 @@ from .stringUtils import cleanStrmFilesys, getProvidername, parseMediaListURL
 from .utils import addon_log
 
 
+def addInfolabels(url, settings):
+    infolabel_addons = settings.INFOLABELS_ADD_ADDON_STRING.replace('.', '\.').split('|')
+    pattern = '{0}[\/?]+'.format('[\/?]+|'.join(infolabel_addons))
+    if re.search(pattern, url):
+        return True
+
+    return False
+
+
 def play(argv, params):
     selectedEntry = None
     mediaType = params.get('mediaType')
     if mediaType:
         globals = Globals()
+        settings = Settings()
         if params.get('id') or params.get('showid'):
             providers = getVideo(params.get('id')) if params.get('id') else getVideo(params.get('showid'), params.get('episode'))
             if PY2:
@@ -62,7 +72,7 @@ def play(argv, params):
                 if props:
                     infoLabels.update({'premiered': props.get('premiered'), 'genre': props.get('genre')})
 
-            if len(infoLabels) > 0:
+            if addInfolabels(url, settings) and len(infoLabels) > 0:
                 item.setInfo('video', infoLabels)
 
             if not props:
@@ -78,7 +88,6 @@ def play(argv, params):
                 player.next_episode = dict(showid=params.get('showid'), season=infoLabels.get('season'), episode=(infoLabels.get('episode') + 1))
 
             position = 0
-            settings = Settings()
             dialog = settings.PLAYBACK_DIALOG
             playback_rewind = settings.PLAYBACK_REWIND
             if dialog == 0 or settings.MYVIDEOS_SELECTACTION == 2:
@@ -106,9 +115,11 @@ def play(argv, params):
             player.finished()
             del player
         elif mediaType == 'audio' and params.get('url', '').startswith('plugin://'):
-            item = xbmcgui.ListItem(path=params.get('url'))
-            infoLabels = dict(title=params.get('title'), tracknumber=params.get('track'), artist=params.get('artist'), album=params.get('album'))
-            item.setInfo('music', infoLabels)
+            url = params.get('url')
+            item = xbmcgui.ListItem(path=url)
+            if addInfolabels(url, settings):
+                infoLabels = dict(title=params.get('title'), tracknumber=params.get('track'), artist=params.get('artist'), album=params.get('album'))
+                item.setInfo('music', infoLabels)
             item.setArt(params.get('art'))
             xbmcplugin.setResolvedUrl(int(argv[1]), True, item)
         else:
