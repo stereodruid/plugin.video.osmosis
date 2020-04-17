@@ -119,6 +119,8 @@ def play(argv, params):
             item = xbmcgui.ListItem(path=url)
             if addInfolabels(url, settings):
                 infoLabels = dict(title=params.get('title'), tracknumber=params.get('track'), artist=params.get('artist'), album=params.get('album'))
+                if params.get('year'):
+                    infoLabels.update(dict(year=params.get('year')))
                 item.setInfo('music', infoLabels)
             item.setArt(params.get('art'))
             xbmcplugin.setResolvedUrl(int(argv[1]), True, item)

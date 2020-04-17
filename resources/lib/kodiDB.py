@@ -188,8 +188,9 @@ def musicDatabase(strAlbumName, strArtistName, strSongTitle, strPath, strURL, iT
             iGenreID = writeGenre(strGenre)
             writeSongGenre(iGenreID, iSongID)
     writeAlbumArtist(iArtistID, iAlbumID, strArtistName)
-    writeThump(iArtistID, 'artist', 'thumb', strArtPath)
-    writeThump(iAlbumID, 'album', 'thumb', strArtPath)
+    if strArtPath and strArtPath != '':
+        writeThump(iArtistID, 'artist', 'thumb', strArtPath)
+        writeThump(iAlbumID, 'album', 'thumb', strArtPath)
 
     writeIntoSongTable(strSongTitle, iSongID, strArtistName, strAlbumName, iAlbumID, strPath, iPathID, strURL, iRoleID, iArtistID, iSongArtistID, 'F')
 
@@ -274,23 +275,24 @@ def writeAlbums(strAlbum, strArtist, strReleaseType='album'):
 def writeSong(iPathID, iAlbumID, strArtist, strTitle, iDuration, iTrack, listGenre, iYear, tFileModTime):
     tDateAdded = datetime.fromtimestamp(tFileModTime) if tFileModTime else datetime.now()
     strDateAdded = tDateAdded.strftime('%Y-%m-%d %H:%M:%S')
-    artistCol = 'strArtistDisp' if globals.KODI_VERSION >= 18 else 'strArtists'
     strTitle = invCommas(strTitle)
     strFileName = cleanStrmFilesys(strTitle)
     strFileName = '{0}.strm'.format(strFileName)
 
-    selectQuery = 'SELECT idSong FROM song WHERE {} LIKE \'{}\' AND strTitle LIKE \'{}\';'
-    selectArgs = (artistCol, strArtist, strTitle)
-    insertQuery = 'INSERT INTO song (dateAdded, idAlbum, idPath, ' + artistCol + ', strTitle, strFileName, iTrack, iDuration, iTimesPlayed, iStartOffset, iEndOffset, userrating, comment, mood, votes'
+    selectQuery = 'SELECT idSong FROM song WHERE strArtistDisp LIKE \'{}\' AND strTitle LIKE \'{}\';'
+    selectArgs = (strArtist, strTitle)
+    insertQuery = 'INSERT INTO song (dateAdded, idAlbum, idPath, strArtistDisp, strTitle, strFileName, iTrack, iDuration, iTimesPlayed, iStartOffset, iEndOffset, userrating, comment, mood, votes'
     insertQueryValue = ' VALUES (\'{}\', {}, {}, \'{}\', \'{}\', \'{}\', {}, {}, {}, {}, {}, {}, \'{}\', \'{}\', {}'
     insertArgs = (strDateAdded, iAlbumID, iPathID, strArtist, strTitle, strFileName, iTrack, iDuration, 0, 0, 0, 0, 'osmosis', 'osmosis', 0)
+    updateQuery = 'UPDATE song SET idAlbum = {}, idPath = {}, strFileName = \'{}\', iTrack = {}, iDuration = {} WHERE strArtistDisp LIKE \'{}\' AND strTitle LIKE \'{}\';'
+    updateArgs = (iAlbumID, iPathID, strFileName, iTrack, iDuration, strArtist, strTitle)
     if listGenre:
         strGenres = ', '.join(genre.strip() for genre in listGenre)
         insertQuery += ', strGenres'
         insertQueryValue += ', \'{}\''
         insertArgs += (strGenres,)
     if iYear:
-        if globals.KODI_VERSION <= 18:
+        if globals.KODI_VERSION == 18:
             insertQuery += ', iYear'
             insertQueryValue += ', {}'
         else:
@@ -301,7 +303,7 @@ def writeSong(iPathID, iAlbumID, strArtist, strTitle, iDuration, iTrack, listGen
     insertQuery += ')'
     insertQueryValue += ');'
 
-    return manageDbRecord(selectQuery, selectArgs, insertQuery + insertQueryValue, insertArgs)
+    return manageDbRecord(selectQuery, selectArgs, '{0}{1}'.format(insertQuery, insertQueryValue), insertArgs, updateQuery, updateArgs)
 
 
 def writeSongArtist(iArtistID, iSongID, iRoleID, strArtist, iOrderID):
@@ -349,10 +351,10 @@ def writeIntoSongTable (strSongTitle, iSongID, strArtistName, strAlbumName, iAlb
     insertQuery = 'INSERT INTO songs (strSongTitle, songID, strArtistName, strAlbumName, albumID, strPath, pathID, strURL, roleID, artistID, songArtistRel, delSong) VALUES (\'{}\', {}, \'{}\', \'{}\', {}, \'{}\', {}, \'{}\', {}, {}, \'{}\', \'{}\');'
     insertArgs = (strSongTitle, iSongID, strArtistName, strAlbumName, iAlbumID, strPath, iPathID, strURL, iRoleID, iArtistID, iSongArtistID, strDelSong)
 
-    return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, settings.DATABASE_SQLLITE_OSMOSIS_MUSIC_FILENAME_AND_PATH)
+    return manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, database=settings.DATABASE_SQLLITE_OSMOSIS_MUSIC_FILENAME_AND_PATH)
 
 
-def manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, database=settings.DATABASE_SQLLITE_KODI_MUSIC_FILENAME_AND_PATH):
+def manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, updateQuery=None, updateArgs=None, database=settings.DATABASE_SQLLITE_KODI_MUSIC_FILENAME_AND_PATH):
     dID = None
     try:
         con, cursor = openDB(database, 'KMusic' if database == settings.DATABASE_SQLLITE_KODI_MUSIC_FILENAME_AND_PATH else 'Music')
@@ -371,6 +373,13 @@ def manageDbRecord(selectQuery, selectArgs, insertQuery, insertArgs, database=se
             con.commit()
             dID = cursor.lastrowid
         else:
+            if updateQuery:
+                if updateArgs:
+                    updateQuery = updateQuery.format(*updateArgs)
+                    cursor.execute(updateQuery)
+                else:
+                    cursor.execute(updateQuery)
+                con.commit()
             dID = searchResult[0]
     finally:
         cursor.close()
