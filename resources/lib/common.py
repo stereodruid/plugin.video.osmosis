@@ -64,7 +64,9 @@ class Globals(Singleton):
 
         bv = xbmc.getInfoLabel('System.BuildVersion')
         self._globals['KODI_VERSION'] = int(bv.split('.')[0])
-        cdate = search('Git:(\d+)', bv)
+        cdate = None
+        if search('Git:(\d+-.*)', bv):
+            cdate = search('Git:(\d+)', bv)
         cdate = date.fromtimestamp(mktime(strptime(cdate.group(1), '%Y%m%d'))) if cdate else None
         self._globals['KODI_COMPILE_DATE'] = cdate
         self._globals['FEATURE_PLUGIN_RESUME_SYNC'] = self.KODI_VERSION >= 18 and self.KODI_COMPILE_DATE and self.KODI_COMPILE_DATE >= date(2020, 1, 28)
