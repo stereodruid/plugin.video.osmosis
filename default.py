@@ -144,8 +144,8 @@ if __name__ == '__main__':
         ignore_addons = Settings().PLAYBACK_IGNORE_ADDON_STRING.split('|')
         preselects = [i for i, addon in enumerate(addons) if addon.get('addonid') in ignore_addons]
         selects = selectDialog(getString(33005, globals.addon), list, multiselect=True, preselect=preselects)
-        if selects:
-            globals.addon.setSetting('playback_ignore_addon_string', '|'.join([addons[select].get('addonid') for select in selects]))
+        playback_ignore_addon_string = '|'.join([addons[select].get('addonid') for select in selects]) if selects else ''
+        globals.addon.setSetting('playback_ignore_addon_string', playback_ignore_addon_string)
     elif mode == 104:
         addons = searchAddons(['video', 'audio'])
         list = ['{0} ({1})'.format(addon.get('name'), addon.get('provides')) for addon in addons]

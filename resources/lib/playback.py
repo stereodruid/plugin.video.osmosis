@@ -180,7 +180,7 @@ class Player(xbmc.Player):
         resume = None
         ignore_addons = self.settings.PLAYBACK_IGNORE_ADDON_STRING.replace('.', '\.').split('|')
         pattern = '{0}[\/?]+'.format('[\/?]+|'.join(ignore_addons))
-        if not re.search(pattern, self.url) and self.filepath:
+        if (ignore_addons == '' or not re.search(pattern, self.url)) and self.filepath:
             resume = jsonrpc('Files.GetFileDetails', {'file': self.filepath, 'media': 'video', 'properties': ['resume']}).get('filedetails', {}).get('resume', {})
         return resume.get('position') if self.settings.MYVIDEOS_SELECTACTION == 2 else resumePointDialog(resume, dialog, playback_rewind)
 
