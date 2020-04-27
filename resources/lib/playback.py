@@ -196,9 +196,16 @@ class Player(xbmc.Player):
         if self.running:
             self.running = False
             if self.globals.FEATURE_PLUGIN_RESUME_SYNC:
-                resume = jsonrpc('Files.GetFileDetails', {'file': self.filepath, 'media': 'video', 'properties': ['resume']}).get('filedetails', {}).get('resume', {})
-                if resume:
-                    jsonrpc('Files.SetFileDetails', {'file': self.url, 'media': 'video', 'resume': {'position': resume.get('position'), 'total': resume.get('total')}})
+                res = jsonrpc('Files.GetFileDetails', {'file': self.filepath, 'media': 'video', 'properties': ['resume', 'playcount']}).get('filedetails', {})
+                resume = res.get('resume', {})
+                playcount = res.get('playcount')
+                if resume or playcount:
+                    args = dict(file=self.url, media='video')
+                    if resume:
+                        args.update(resume=dict(position=resume.get('position'), total=resume.get('total')))
+                    if playcount:
+                        args.update(playcount=playcount)
+                    jsonrpc('Files.SetFileDetails', args)
 
 
     def getTimes(self):
