@@ -21,7 +21,7 @@ from .utils import addon_log
 def addInfolabels(url, settings):
     infolabel_addons = settings.INFOLABELS_ADD_ADDON_STRING.replace('.', '\.').split('|')
     pattern = '{0}[\/?]+'.format('[\/?]+|'.join(infolabel_addons))
-    if re.search(pattern, url):
+    if infolabel_addons != '' and re.search(pattern, url):
         return True
 
     return False

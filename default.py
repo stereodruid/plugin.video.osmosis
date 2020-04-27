@@ -152,8 +152,8 @@ if __name__ == '__main__':
         infolabel_addons = Settings().INFOLABELS_ADD_ADDON_STRING.split('|')
         preselects = [i for i, addon in enumerate(addons) if addon.get('addonid') in infolabel_addons]
         selects = selectDialog(getString(31002, globals.addon), list, multiselect=True, preselect=preselects)
-        if selects:
-            globals.addon.setSetting('infolabels_add_addon_string', '|'.join([addons[select].get('addonid') for select in selects]))
+        infolabels_add_addon_string = '|'.join([addons[select].get('addonid') for select in selects]) if selects else ''
+        globals.addon.setSetting('infolabels_add_addon_string', infolabels_add_addon_string)
     elif mode == 200:
         addon_log('write multi strms')
         addToMedialist(params)
