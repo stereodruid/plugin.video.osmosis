@@ -151,7 +151,7 @@ if __name__ == '__main__':
         list = ['{0} ({1})'.format(addon.get('name'), addon.get('provides')) for addon in addons]
         infolabel_addons = Settings().INFOLABELS_ADD_ADDON_STRING.split('|')
         preselects = [i for i, addon in enumerate(addons) if addon.get('addonid') in infolabel_addons]
-        selects = selectDialog(getString(31002, globals.addon), list, multiselect=True, preselect=preselects)
+        selects = selectDialog(getString(33006, globals.addon), list, multiselect=True, preselect=preselects)
         infolabels_add_addon_string = '|'.join([addons[select].get('addonid') for select in selects]) if selects else ''
         globals.addon.setSetting('infolabels_add_addon_string', infolabels_add_addon_string)
     elif mode == 200:

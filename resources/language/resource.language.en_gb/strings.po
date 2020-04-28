@@ -64,10 +64,6 @@ msgctxt "#31001"
 msgid "Write NFOs (ComingSoon)"
 msgstr ""
 
-msgctxt "#31002"
-msgid "Addons for which infolabels are to be added"
-msgstr ""
-
 msgctxt "#31100"
 msgid "Movies"
 msgstr ""
@@ -322,6 +318,10 @@ msgstr ""
 
 msgctxt "#33005"
 msgid "Addons that should be ignored by the playback dialog"
+msgstr ""
+
+msgctxt "#31006"
+msgid "Addons for which infolabels are to be added"
 msgstr ""
 
 # Main menu
