@@ -16,8 +16,6 @@
 	 </category>
 	<category label="31000">
 		<!-- <setting label="31001" type="bool" id="Write_NFOS" default="false" /> -->
-		<setting label="31002" type="action" id="infolabels_add_addon" action="RunPlugin(plugin://plugin.video.osmosis/?mode=104)" option="close"/>
-		<setting label="31003" type="text" id="infolabels_add_addon_string" visible="false"/>
 		
 		<setting label="31100" type="lsep"/>
 		<setting label="31101" type="slider" id="paging_movies" default="2" range="1,100" option="int"/>
@@ -87,6 +85,8 @@
 		<setting label="33001" type="enum" id="playback_dialog" lvalues='33002|33003' default="0"/>
 		<setting label="33004" type="slider" id="playback_rewind" default="5" range="0,10" option="int"/>
 		<setting label="33005" type="action" id="playback_ignore_addon" action="RunPlugin(plugin://plugin.video.osmosis/?mode=103)" option="close"/>
-		<setting label="33006" type="text" id="playback_ignore_addon_string" visible="false"/>
+		<setting type="text" id="playback_ignore_addon_string" visible="false"/>
+		<setting label="33006" type="action" id="infolabels_add_addon" action="RunPlugin(plugin://plugin.video.osmosis/?mode=104)" option="close"/>
+		<setting type="text" id="infolabels_add_addon_string" visible="false"/>
 	</category>
 </settings>

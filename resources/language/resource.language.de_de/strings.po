@@ -64,10 +64,6 @@ msgctxt "#31001"
 msgid "Write NFOs (ComingSoon)"
 msgstr "Videos fortsetzen"
 
-msgctxt "#31002"
-msgid "Addons for which infolabels are to be added"
-msgstr "Addons, für die Infolabels hinzugefügt werden sollen"
-
 msgctxt "#31100"
 msgid "Movies"
 msgstr "Filme"
@@ -323,6 +319,10 @@ msgstr "Video vor Wiedergabepunkt fortsetzen (Sekunden)"
 msgctxt "#33005"
 msgid "Addons that should be ignored by the playback dialog"
 msgstr "Addons, die vom  Wiedergabedialog ignoriert werden sollen"
+
+msgctxt "#33006"
+msgid "Addons for which infolabels are to be added"
+msgstr "Addons, für die Infolabels hinzugefügt werden sollen"
 
 # Main menu
 msgctxt "#39000"
