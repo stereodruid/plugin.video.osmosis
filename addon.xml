@@ -14,10 +14,10 @@
 	<extension point="xbmc.service" library="service.py" start="startup" />
 	<extension point="xbmc.addon.metadata">
 		<summary lang="en_GB">Generates Strm files form streams that can be scraped to the library</summary>
-		<description lang="en_GB">Generate Strm files from Kodi Plugins,that can be scraped to the library. Supported content: Movies, TV-Shows, Music.[CR]Special thanks goes to Kodinerds.net users: @breaksrmine, @Casablanca89, @Construktor, @ecazo, @Eigen, @Elux, @haltandcatchfire, @krani83, @Sagorian, @SirusX, @stereodruid, @willriker88, @XsupergurkeX[CR][CR]Attention: This addon uses the TVDb API (https://api.thetvdb.com) to search for episode data, if necessary.</description>
+		<description lang="en_GB">Generate Strm files from Kodi Plugins,that can be scraped to the library. Supported content: Movies, TV-Shows, Music.[CR][CR]Attention: This addon uses the TVDb API (https://api.thetvdb.com) to search for episode data, if necessary.</description>
 		<disclaimer lang="en_GB"></disclaimer>
 		<summary lang="de_DE">Erstellt Strm-Dateien die mit einem Scraper zur Datenbank hinzugefügt werden können.</summary>
-		<description lang="de_DE">Erstellt Strm-Dateien die von Kodi-Plugins bereitgestellt werden wie zB Youtube, die mit einem Scraper zur Datenbank hinzugefügt werden können. Unterstützte Formate: Serien, Filme und Musik.[CR]Vielen Dank an Kodinerds.net und speziell an die Mitglieder: @breaksrmine, @Casablanca89, @Construktor, @ecazo, @Eigen, @Elux, @haltandcatchfire, @krani83, @Sagorian, @SirusX, @stereodruid, @willriker88, @XsupergurkeX[CR][CR]Hinweis: Dieses Addon verwendet die TVDb API (https://api.thetvdb.com), um nach Episodendaten zu suchen, wenn nötig.</description>
+		<description lang="de_DE">Erstellt Strm-Dateien die von Kodi-Plugins bereitgestellt werden wie zB Youtube, die mit einem Scraper zur Datenbank hinzugefügt werden können. Unterstützte Formate: Serien, Filme und Musik.[CR][CR]Hinweis: Dieses Addon verwendet die TVDb API (https://api.thetvdb.com), um nach Episodendaten zu suchen, wenn nötig.</description>
 		<disclaimer lang="de_DE"></disclaimer>
 		<platform>all</platform>
 		<license>GNU GENERAL PUBLIC LICENSE. Version 3</license>
