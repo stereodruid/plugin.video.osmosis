@@ -1,3 +1,5 @@
+1.3.16
+  Maven    Fixed startup error when the addon data folder is missing
 1.3.15
   Maven    Moved option to add infolabels for addons when playing STRMs to category 'playback'
 1.3.14

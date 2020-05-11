@@ -131,10 +131,12 @@ class Settings(Singleton):
 
         elif 'DATABASE_SQLLITE_KODI_MUSIC_FILENAME_AND_PATH' == name: return py2_decode(xbmc.translatePath(self._gs('KMusic-DB path')))
         elif 'DATABASE_SQLLITE_KODI_VIDEO_FILENAME_AND_PATH' == name: return py2_decode(xbmc.translatePath(self._gs('KMovie-DB path')))
-        elif 'DATABASE_SQLLITE_OSMOSIS_MOVIE_FILENAME_AND_PATH' == name: return py2_decode(OSPJoin(self._g.DATA_PATH, 'Movies.db'))
-        elif 'DATABASE_SQLLITE_OSMOSIS_MUSIC_FILENAME_AND_PATH' == name: return py2_decode(OSPJoin(self._g.DATA_PATH, 'Musik.db'))
-        elif 'DATABASE_SQLLITE_OSMOSIS_TVSHOW_FILENAME_AND_PATH' == name: return py2_decode(OSPJoin(self._g.DATA_PATH, 'Shows.db'))
-        elif 'DATABASE_SQLLITE_OSMOSIS_SCHEMA_VERSION_FILENAME_AND_PATH' == name: return py2_decode(OSPJoin(self._g.DATA_PATH, 'SchemaVersion.db'))
+        elif 'DATABASE_SQLLITE_OSMOSIS_MOVIE_PATH' == name: return py2_decode(xbmc.translatePath(self._gs('Movies-DB path')))
+        elif 'DATABASE_SQLLITE_OSMOSIS_MOVIE_FILENAME_AND_PATH' == name: return py2_decode(xbmc.translatePath(OSPJoin(self._gs('Movies-DB path'), 'Movies.db')))
+        elif 'DATABASE_SQLLITE_OSMOSIS_MUSIC_PATH' == name: return py2_decode(xbmc.translatePath(self._gs('Music-DB path')))
+        elif 'DATABASE_SQLLITE_OSMOSIS_MUSIC_FILENAME_AND_PATH' == name: return py2_decode(xbmc.translatePath(OSPJoin(self._gs('Music-DB path'), 'Musik.db')))
+        elif 'DATABASE_SQLLITE_OSMOSIS_TVSHOW_PATH' == name: return py2_decode(xbmc.translatePath(self._gs('TV-Show-DB path')))
+        elif 'DATABASE_SQLLITE_OSMOSIS_TVSHOW_FILENAME_AND_PATH' == name: return py2_decode(xbmc.translatePath(OSPJoin(self._gs('TV-Show-DB path'), 'Shows.db')))
 
         elif 'FIND_SQLLITE_DB' == name: return self._gs('Find_SQLite_DB') == 'true'
         elif 'KEEP_MOVIE_YEAR' == name: return self._gs('keep_movie_year') == 'true'
