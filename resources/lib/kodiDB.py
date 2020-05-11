@@ -116,18 +116,24 @@ def initDatabase():
 
     if not settings.USE_MYSQL:
         if not xbmcvfs.exists(settings.DATABASE_SQLLITE_OSMOSIS_MOVIE_FILENAME_AND_PATH):
+            if not xbmcvfs.exists(settings.DATABASE_SQLLITE_OSMOSIS_MOVIE_PATH):
+                xbmcvfs.mkdirs(settings.DATABASE_SQLLITE_OSMOSIS_MOVIE_PATH)
             createMovDB()
         elif not valDB(settings.DATABASE_SQLLITE_OSMOSIS_MOVIE_FILENAME_AND_PATH, 'Movies'):
             xbmcvfs.delete(settings.DATABASE_SQLLITE_OSMOSIS_MOVIE_FILENAME_AND_PATH)
             createMovDB()
 
         if not xbmcvfs.exists(settings.DATABASE_SQLLITE_OSMOSIS_TVSHOW_FILENAME_AND_PATH):
+            if not xbmcvfs.exists(settings.DATABASE_SQLLITE_OSMOSIS_TVSHOW_PATH):
+                xbmcvfs.mkdirs(settings.DATABASE_SQLLITE_OSMOSIS_TVSHOW_PATH)
             createShowDB()
         elif not valDB(settings.DATABASE_SQLLITE_OSMOSIS_TVSHOW_FILENAME_AND_PATH, 'TVShows'):
             xbmcvfs.delete(settings.DATABASE_SQLLITE_OSMOSIS_TVSHOW_FILENAME_AND_PATH)
             createShowDB()
 
         if not xbmcvfs.exists(settings.DATABASE_SQLLITE_OSMOSIS_MUSIC_FILENAME_AND_PATH):
+            if not xbmcvfs.exists(settings.DATABASE_SQLLITE_OSMOSIS_MUSIC_PATH):
+                xbmcvfs.mkdirs(settings.DATABASE_SQLLITE_OSMOSIS_MUSIC_PATH)
             createMusicDB()
         elif not valDB(settings.DATABASE_SQLLITE_OSMOSIS_MUSIC_FILENAME_AND_PATH, 'Music'):
             xbmcvfs.delete(settings.DATABASE_SQLLITE_OSMOSIS_MUSIC_FILENAME_AND_PATH)
