@@ -178,11 +178,12 @@ class Player(xbmc.Player):
 
     def checkResume(self, dialog, playback_rewind):
         resume = None
-        ignore_addons = self.settings.PLAYBACK_IGNORE_ADDON_STRING.replace('.', '\.').split('|')
-        pattern = '{0}[\/?]+'.format('[\/?]+|'.join(ignore_addons))
-        if (ignore_addons == '' or not re.search(pattern, self.url)) and self.filepath:
+        ignore_addons = self.settings.PLAYBACK_IGNORE_ADDON_STRING
+        ignore_addons = ignore_addons.replace('.', '\.').split('|') if ignore_addons and ignore_addons != '' else None
+        pattern = '{0}[\/?]+'.format('[\/?]+|'.join(ignore_addons)) if ignore_addons else None
+        if (not ignore_addons or (pattern and not re.search(pattern, self.url))) and self.filepath:
             resume = jsonrpc('Files.GetFileDetails', {'file': self.filepath, 'media': 'video', 'properties': ['resume']}).get('filedetails', {}).get('resume', {})
-        return resume.get('position') if self.settings.MYVIDEOS_SELECTACTION == 2 else resumePointDialog(resume, dialog, playback_rewind)
+        return resume.get('position') if resume and self.settings.MYVIDEOS_SELECTACTION == 2 else resumePointDialog(resume, dialog, playback_rewind) if resume else None
 
 
     def resume(self, position):
